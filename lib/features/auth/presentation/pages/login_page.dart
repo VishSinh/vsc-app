@@ -28,11 +28,8 @@ class _LoginPageState extends State<LoginPage> {
     if (!_formKey.currentState!.validate()) return;
 
     final authProvider = context.read<AuthProvider>();
-    
-    final success = await authProvider.login(
-      phone: _phoneController.text.trim(),
-      password: _passwordController.text,
-    );
+
+    final success = await authProvider.login(phone: _phoneController.text.trim(), password: _passwordController.text);
 
     if (success && mounted) {
       // Navigate to dashboard
@@ -45,14 +42,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppConfig.primaryColor.withOpacity(0.1),
-              AppConfig.accentColor.withOpacity(0.1),
-            ],
-          ),
+          gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [AppConfig.primaryColor.withOpacity(0.1), AppConfig.accentColor.withOpacity(0.1)]),
         ),
         child: Center(
           child: SingleChildScrollView(
@@ -69,37 +59,21 @@ class _LoginPageState extends State<LoginPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // App Logo/Title
-                        Icon(
-                          Icons.inventory,
-                          size: 64,
-                          color: AppConfig.primaryColor,
-                        ),
+                        Icon(Icons.inventory, size: 64, color: AppConfig.primaryColor),
                         const SizedBox(height: AppConfig.defaultPadding),
                         Text(
                           AppConfig.appName,
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppConfig.primaryColor,
-                          ),
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: AppConfig.primaryColor),
                         ),
                         const SizedBox(height: AppConfig.smallPadding),
-                        Text(
-                          'Sign in to your account',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                        ),
+                        Text('Sign in to your account', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey[600])),
                         const SizedBox(height: AppConfig.largePadding),
 
                         // Phone Field
                         TextFormField(
                           controller: _phoneController,
                           keyboardType: TextInputType.phone,
-                          decoration: const InputDecoration(
-                            labelText: 'Phone Number',
-                            prefixIcon: Icon(Icons.phone),
-                            hintText: '9876543210',
-                          ),
+                          decoration: const InputDecoration(labelText: 'Phone Number', prefixIcon: Icon(Icons.phone), hintText: '9876543210'),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please enter your phone number';
@@ -120,9 +94,7 @@ class _LoginPageState extends State<LoginPage> {
                             labelText: 'Password',
                             prefixIcon: const Icon(Icons.lock_outline),
                             suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                              ),
+                              icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
                               onPressed: () {
                                 setState(() {
                                   _obscurePassword = !_obscurePassword;
@@ -155,10 +127,7 @@ class _LoginPageState extends State<LoginPage> {
                                   borderRadius: BorderRadius.circular(AppConfig.smallRadius),
                                   border: Border.all(color: AppConfig.errorColor),
                                 ),
-                                child: Text(
-                                  authProvider.errorMessage!,
-                                  style: TextStyle(color: AppConfig.errorColor),
-                                ),
+                                child: Text(authProvider.errorMessage!, style: TextStyle(color: AppConfig.errorColor)),
                               );
                             }
                             return const SizedBox.shrink();
@@ -172,13 +141,7 @@ class _LoginPageState extends State<LoginPage> {
                             builder: (context, authProvider, child) {
                               return ElevatedButton(
                                 onPressed: authProvider.isLoading ? null : _handleLogin,
-                                child: authProvider.isLoading
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(strokeWidth: 2),
-                                      )
-                                    : const Text('Sign In'),
+                                child: authProvider.isLoading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Sign In'),
                               );
                             },
                           ),
@@ -194,4 +157,4 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
-} 
+}

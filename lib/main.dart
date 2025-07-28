@@ -20,29 +20,15 @@ class VSCApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (context) => PermissionProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => VendorProvider(),
-        ),
+        ChangeNotifierProvider(create: (context) => PermissionProvider()),
+        ChangeNotifierProvider(create: (context) => VendorProvider()),
         ChangeNotifierProxyProvider<PermissionProvider, AuthProvider>(
-          create: (context) => AuthProvider(
-            permissionProvider: context.read<PermissionProvider>(),
-          ),
-          update: (context, permissionProvider, previous) => 
-            previous ?? AuthProvider(permissionProvider: permissionProvider),
+          create: (context) => AuthProvider(permissionProvider: context.read<PermissionProvider>()),
+          update: (context, permissionProvider, previous) => previous ?? AuthProvider(permissionProvider: permissionProvider),
         ),
       ],
       child: AuthInitializer(
-        child: MaterialApp.router(
-          title: AppConfig.appName,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: ThemeMode.system,
-          routerConfig: AppRouter.router,
-          debugShowCheckedModeBanner: false,
-        ),
+        child: MaterialApp.router(title: AppConfig.appName, theme: AppTheme.lightTheme, darkTheme: AppTheme.darkTheme, themeMode: ThemeMode.system, routerConfig: AppRouter.router, debugShowCheckedModeBanner: false),
       ),
     );
   }
@@ -50,7 +36,7 @@ class VSCApp extends StatelessWidget {
 
 class AuthInitializer extends StatefulWidget {
   final Widget child;
-  
+
   const AuthInitializer({super.key, required this.child});
 
   @override

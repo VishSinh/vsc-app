@@ -7,9 +7,6 @@ enum UserRole {
   final String value;
 
   static UserRole fromString(String value) {
-    return UserRole.values.firstWhere(
-      (role) => role.value == value,
-      orElse: () => UserRole.sales,
-    );
+    return UserRole.values.firstWhere((role) => role.value == value, orElse: () => UserRole.sales);
   }
-} 
+}

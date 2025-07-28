@@ -17,33 +17,9 @@ class _InventoryPageState extends State<InventoryPage> {
 
   // Mock inventory data
   final List<Map<String, dynamic>> _inventory = [
-    {
-      'id': 'CARD-001',
-      'name': 'Business Card Premium',
-      'category': 'Business Cards',
-      'stock': 1500,
-      'minStock': 100,
-      'price': 0.15,
-      'vendor': 'Premium Paper Co.',
-    },
-    {
-      'id': 'CARD-002',
-      'name': 'Flyer Glossy A4',
-      'category': 'Flyers',
-      'stock': 500,
-      'minStock': 200,
-      'price': 0.25,
-      'vendor': 'Quality Print Supplies',
-    },
-    {
-      'id': 'CARD-003',
-      'name': 'Brochure Tri-Fold',
-      'category': 'Brochures',
-      'stock': 75,
-      'minStock': 50,
-      'price': 0.45,
-      'vendor': 'Premium Paper Co.',
-    },
+    {'id': 'CARD-001', 'name': 'Business Card Premium', 'category': 'Business Cards', 'stock': 1500, 'minStock': 100, 'price': 0.15, 'vendor': 'Premium Paper Co.'},
+    {'id': 'CARD-002', 'name': 'Flyer Glossy A4', 'category': 'Flyers', 'stock': 500, 'minStock': 200, 'price': 0.25, 'vendor': 'Quality Print Supplies'},
+    {'id': 'CARD-003', 'name': 'Brochure Tri-Fold', 'category': 'Brochures', 'stock': 75, 'minStock': 50, 'price': 0.45, 'vendor': 'Premium Paper Co.'},
   ];
 
   final List<NavigationDestination> _destinations = [
@@ -59,18 +35,26 @@ class _InventoryPageState extends State<InventoryPage> {
       _selectedIndex = index;
     });
     switch (index) {
-      case 0: context.go('/'); break;
-      case 1: context.go('/orders'); break;
-      case 2: break; // Already on inventory
-      case 3: context.go('/production'); break;
-      case 4: context.go('/administration'); break;
+      case 0:
+        context.go('/');
+        break;
+      case 1:
+        context.go('/orders');
+        break;
+      case 2:
+        break; // Already on inventory
+      case 3:
+        context.go('/production');
+        break;
+      case 4:
+        context.go('/administration');
+        break;
     }
   }
 
   List<Map<String, dynamic>> get _filteredInventory {
     return _inventory.where((item) {
-      final matchesSearch = item['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          item['id'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
+      final matchesSearch = item['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) || item['id'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
       final matchesCategory = _categoryFilter == 'All' || item['category'] == _categoryFilter;
       return matchesSearch && matchesCategory;
     }).toList();
@@ -100,19 +84,9 @@ class _InventoryPageState extends State<InventoryPage> {
         children: [
           Row(
             children: [
-              Text(
-                'Inventory',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Text('Inventory', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
               const Spacer(),
-              Text(
-                '${_filteredInventory.length} items',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-              ),
+              Text('${_filteredInventory.length} items', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600])),
             ],
           ),
           const SizedBox(height: AppConfig.largePadding),
@@ -130,10 +104,7 @@ class _InventoryPageState extends State<InventoryPage> {
         Expanded(
           flex: 2,
           child: TextField(
-            decoration: const InputDecoration(
-              hintText: 'Search inventory...',
-              prefixIcon: Icon(Icons.search),
-            ),
+            decoration: const InputDecoration(hintText: 'Search inventory...', prefixIcon: Icon(Icons.search)),
             onChanged: (value) {
               setState(() {
                 _searchQuery = value;
@@ -147,9 +118,7 @@ class _InventoryPageState extends State<InventoryPage> {
           child: DropdownButtonFormField<String>(
             value: _categoryFilter,
             decoration: const InputDecoration(labelText: 'Category'),
-            items: ['All', 'Business Cards', 'Flyers', 'Brochures', 'Posters']
-                .map((category) => DropdownMenuItem(value: category, child: Text(category)))
-                .toList(),
+            items: ['All', 'Business Cards', 'Flyers', 'Brochures', 'Posters'].map((category) => DropdownMenuItem(value: category, child: Text(category))).toList(),
             onChanged: (value) {
               if (value != null) {
                 setState(() {
@@ -165,9 +134,7 @@ class _InventoryPageState extends State<InventoryPage> {
 
   Widget _buildInventoryList() {
     final screenWidth = MediaQuery.of(context).size.width;
-    return screenWidth < AppConfig.mobileBreakpoint
-        ? _buildMobileList()
-        : _buildDesktopTable();
+    return screenWidth < AppConfig.mobileBreakpoint ? _buildMobileList() : _buildDesktopTable();
   }
 
   Widget _buildMobileList() {
@@ -176,14 +143,11 @@ class _InventoryPageState extends State<InventoryPage> {
       itemBuilder: (context, index) {
         final item = _filteredInventory[index];
         final isLowStock = item['stock'] <= item['minStock'];
-        
+
         return Card(
           margin: const EdgeInsets.only(bottom: AppConfig.smallPadding),
           child: ListTile(
-            title: Text(
-              item['name'],
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
+            title: Text(item['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -274,4 +238,4 @@ class _InventoryPageState extends State<InventoryPage> {
       ),
     );
   }
-} 
+}

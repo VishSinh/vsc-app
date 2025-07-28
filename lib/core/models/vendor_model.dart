@@ -11,12 +11,7 @@ class Vendor {
   @JsonKey(name: 'is_active')
   final bool isActive;
 
-  const Vendor({
-    required this.id,
-    required this.name,
-    required this.phone,
-    required this.isActive,
-  });
+  const Vendor({required this.id, required this.name, required this.phone, required this.isActive});
 
   factory Vendor.fromJson(Map<String, dynamic> json) => _$VendorFromJson(json);
   Map<String, dynamic> toJson() => _$VendorToJson(this);
@@ -27,10 +22,7 @@ class CreateVendorRequest {
   final String name;
   final String phone;
 
-  const CreateVendorRequest({
-    required this.name,
-    required this.phone,
-  });
+  const CreateVendorRequest({required this.name, required this.phone});
 
   factory CreateVendorRequest.fromJson(Map<String, dynamic> json) => _$CreateVendorRequestFromJson(json);
   Map<String, dynamic> toJson() => _$CreateVendorRequestToJson(this);
@@ -38,4 +30,4 @@ class CreateVendorRequest {
 
 // Type aliases for better readability
 typedef VendorListResponse = ApiResponse<List<Vendor>>;
-typedef CreateVendorResponse = ApiResponse<MessageData>; 
+typedef CreateVendorResponse = ApiResponse<MessageData>;

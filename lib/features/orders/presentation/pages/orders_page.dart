@@ -17,53 +17,17 @@ class _OrdersPageState extends State<OrdersPage> {
 
   // Mock data - will be replaced with real API data
   final List<Map<String, dynamic>> _orders = [
-    {
-      'id': 'ORD-001',
-      'customer': 'John Doe',
-      'date': '2024-01-15',
-      'status': 'Pending',
-      'total': 1250.00,
-      'items': 5,
-    },
-    {
-      'id': 'ORD-002',
-      'customer': 'Jane Smith',
-      'date': '2024-01-14',
-      'status': 'In Production',
-      'total': 890.00,
-      'items': 3,
-    },
-    {
-      'id': 'ORD-003',
-      'customer': 'Bob Johnson',
-      'date': '2024-01-13',
-      'status': 'Completed',
-      'total': 2100.00,
-      'items': 8,
-    },
+    {'id': 'ORD-001', 'customer': 'John Doe', 'date': '2024-01-15', 'status': 'Pending', 'total': 1250.00, 'items': 5},
+    {'id': 'ORD-002', 'customer': 'Jane Smith', 'date': '2024-01-14', 'status': 'In Production', 'total': 890.00, 'items': 3},
+    {'id': 'ORD-003', 'customer': 'Bob Johnson', 'date': '2024-01-13', 'status': 'Completed', 'total': 2100.00, 'items': 8},
   ];
 
   final List<NavigationDestination> _destinations = [
-    const NavigationDestination(
-      icon: Icon(Icons.dashboard),
-      label: 'Dashboard',
-    ),
-    const NavigationDestination(
-      icon: Icon(Icons.shopping_cart),
-      label: 'Orders',
-    ),
-    const NavigationDestination(
-      icon: Icon(Icons.inventory),
-      label: 'Inventory',
-    ),
-    const NavigationDestination(
-      icon: Icon(Icons.print),
-      label: 'Production',
-    ),
-    const NavigationDestination(
-      icon: Icon(Icons.admin_panel_settings),
-      label: 'Administration',
-    ),
+    const NavigationDestination(icon: Icon(Icons.dashboard), label: 'Dashboard'),
+    const NavigationDestination(icon: Icon(Icons.shopping_cart), label: 'Orders'),
+    const NavigationDestination(icon: Icon(Icons.inventory), label: 'Inventory'),
+    const NavigationDestination(icon: Icon(Icons.print), label: 'Production'),
+    const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: 'Administration'),
   ];
 
   void _onDestinationSelected(int index) {
@@ -92,8 +56,7 @@ class _OrdersPageState extends State<OrdersPage> {
 
   List<Map<String, dynamic>> get _filteredOrders {
     return _orders.where((order) {
-      final matchesSearch = order['id'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          order['customer'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
+      final matchesSearch = order['id'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) || order['customer'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
       final matchesStatus = _statusFilter == 'All' || order['status'] == _statusFilter;
       return matchesSearch && matchesStatus;
     }).toList();
@@ -105,10 +68,7 @@ class _OrdersPageState extends State<OrdersPage> {
       selectedIndex: _selectedIndex,
       destinations: _destinations,
       onDestinationSelected: _onDestinationSelected,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/orders/new'),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: FloatingActionButton(onPressed: () => context.go('/orders/new'), child: const Icon(Icons.add)),
       child: _buildOrdersContent(),
     );
   }
@@ -122,19 +82,9 @@ class _OrdersPageState extends State<OrdersPage> {
           // Header
           Row(
             children: [
-              Text(
-                'Orders',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Text('Orders', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
               const Spacer(),
-              Text(
-                '${_filteredOrders.length} orders',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-              ),
+              Text('${_filteredOrders.length} orders', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600])),
             ],
           ),
           const SizedBox(height: AppConfig.largePadding),
@@ -144,9 +94,7 @@ class _OrdersPageState extends State<OrdersPage> {
           const SizedBox(height: AppConfig.defaultPadding),
 
           // Orders List
-          Expanded(
-            child: _buildOrdersList(),
-          ),
+          Expanded(child: _buildOrdersList()),
         ],
       ),
     );
@@ -159,10 +107,7 @@ class _OrdersPageState extends State<OrdersPage> {
         Expanded(
           flex: 2,
           child: TextField(
-            decoration: const InputDecoration(
-              hintText: 'Search orders...',
-              prefixIcon: Icon(Icons.search),
-            ),
+            decoration: const InputDecoration(hintText: 'Search orders...', prefixIcon: Icon(Icons.search)),
             onChanged: (value) {
               setState(() {
                 _searchQuery = value;
@@ -176,12 +121,8 @@ class _OrdersPageState extends State<OrdersPage> {
           flex: 1,
           child: DropdownButtonFormField<String>(
             value: _statusFilter,
-            decoration: const InputDecoration(
-              labelText: 'Status',
-            ),
-            items: ['All', 'Pending', 'In Production', 'Completed', 'Cancelled']
-                .map((status) => DropdownMenuItem(value: status, child: Text(status)))
-                .toList(),
+            decoration: const InputDecoration(labelText: 'Status'),
+            items: ['All', 'Pending', 'In Production', 'Completed', 'Cancelled'].map((status) => DropdownMenuItem(value: status, child: Text(status))).toList(),
             onChanged: (value) {
               if (value != null) {
                 setState(() {
@@ -197,7 +138,7 @@ class _OrdersPageState extends State<OrdersPage> {
 
   Widget _buildOrdersList() {
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     if (screenWidth < AppConfig.mobileBreakpoint) {
       return _buildMobileList();
     } else {
@@ -213,17 +154,8 @@ class _OrdersPageState extends State<OrdersPage> {
         return Card(
           margin: const EdgeInsets.only(bottom: AppConfig.smallPadding),
           child: ListTile(
-            title: Text(
-              order['id'],
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(order['customer']),
-                Text('${order['items']} items • \$${order['total'].toStringAsFixed(2)}'),
-              ],
-            ),
+            title: Text(order['id'], style: const TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(order['customer']), Text('${order['items']} items • \$${order['total'].toStringAsFixed(2)}')]),
             trailing: Chip(
               label: Text(order['status']),
               backgroundColor: _getStatusColor(order['status']).withOpacity(0.1),
@@ -306,4 +238,4 @@ class _OrdersPageState extends State<OrdersPage> {
         return Colors.grey;
     }
   }
-} 
+}

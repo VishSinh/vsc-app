@@ -9,9 +9,6 @@ enum JobStatus {
   final String value;
 
   static JobStatus fromString(String value) {
-    return JobStatus.values.firstWhere(
-      (status) => status.value == value,
-      orElse: () => JobStatus.pending,
-    );
+    return JobStatus.values.firstWhere((status) => status.value == value, orElse: () => JobStatus.pending);
   }
-} 
+}

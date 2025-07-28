@@ -23,17 +23,12 @@ class _DashboardPageState extends State<DashboardPage> {
       builder: (context, authProvider, permissionProvider, child) {
         final userRole = authProvider.userRole ?? UserRole.sales;
         final destinations = _getAvailableDestinations(permissionProvider);
-        
+
         return ResponsiveLayout(
           selectedIndex: _selectedIndex,
           destinations: destinations,
           onDestinationSelected: (index) => _onDestinationSelected(index, destinations),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: _handleLogout,
-            ),
-          ],
+          actions: [IconButton(icon: const Icon(Icons.logout), onPressed: _handleLogout)],
           child: _buildDashboardContent(userRole, permissionProvider),
         );
       },
@@ -41,43 +36,26 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   List<NavigationDestination> _getAvailableDestinations(PermissionProvider permissionProvider) {
-    final destinations = <NavigationDestination>[
-      const NavigationDestination(
-        icon: Icon(Icons.dashboard),
-        label: 'Dashboard',
-      ),
-    ];
+    final destinations = <NavigationDestination>[const NavigationDestination(icon: Icon(Icons.dashboard), label: 'Dashboard')];
 
     // Orders - show if user can manage orders
     if (permissionProvider.canManageOrders) {
-      destinations.add(const NavigationDestination(
-        icon: Icon(Icons.shopping_cart),
-        label: 'Orders',
-      ));
+      destinations.add(const NavigationDestination(icon: Icon(Icons.shopping_cart), label: 'Orders'));
     }
 
     // Inventory - show if user can manage inventory
     if (permissionProvider.canManageInventory) {
-      destinations.add(const NavigationDestination(
-        icon: Icon(Icons.inventory),
-        label: 'Inventory',
-      ));
+      destinations.add(const NavigationDestination(icon: Icon(Icons.inventory), label: 'Inventory'));
     }
 
     // Production - show if user can manage production
     if (permissionProvider.canManageProduction) {
-      destinations.add(const NavigationDestination(
-        icon: Icon(Icons.print),
-        label: 'Production',
-      ));
+      destinations.add(const NavigationDestination(icon: Icon(Icons.print), label: 'Production'));
     }
 
     // Administration - show if user can manage system or view audit logs
     if (permissionProvider.canManageSystem || permissionProvider.canViewAuditLogs) {
-      destinations.add(const NavigationDestination(
-        icon: Icon(Icons.admin_panel_settings),
-        label: 'Administration',
-      ));
+      destinations.add(const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: 'Administration'));
     }
 
     return destinations;
@@ -153,19 +131,9 @@ class _DashboardPageState extends State<DashboardPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Welcome Header
-          Text(
-            'Welcome back!',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          Text('Welcome back!', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: AppConfig.smallPadding),
-          Text(
-            'Here\'s what\'s happening with your ${userRole.value.toLowerCase()} operations',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: Colors.grey[600],
-            ),
-          ),
+          Text('Here\'s what\'s happening with your ${userRole.value.toLowerCase()} operations', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey[600])),
           const SizedBox(height: AppConfig.largePadding),
 
           // Quick Actions
@@ -173,9 +141,7 @@ class _DashboardPageState extends State<DashboardPage> {
           const SizedBox(height: AppConfig.largePadding),
 
           // Stats Cards
-          Expanded(
-            child: _buildStatsGrid(userRole, permissionProvider),
-          ),
+          Expanded(child: _buildStatsGrid(userRole, permissionProvider)),
         ],
       ),
     );
@@ -191,10 +157,7 @@ class _DashboardPageState extends State<DashboardPage> {
           onPressed: () => context.go('/register'),
           icon: const Icon(Icons.person_add),
           label: const Text('Register Staff'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppConfig.primaryColor,
-            foregroundColor: Colors.white,
-          ),
+          style: ElevatedButton.styleFrom(backgroundColor: AppConfig.primaryColor, foregroundColor: Colors.white),
         ),
       );
     }
@@ -206,10 +169,7 @@ class _DashboardPageState extends State<DashboardPage> {
           onPressed: () => context.go('/orders/new'),
           icon: const Icon(Icons.add_shopping_cart),
           label: const Text('Create Order'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppConfig.accentColor,
-            foregroundColor: Colors.white,
-          ),
+          style: ElevatedButton.styleFrom(backgroundColor: AppConfig.accentColor, foregroundColor: Colors.white),
         ),
       );
     }
@@ -220,16 +180,11 @@ class _DashboardPageState extends State<DashboardPage> {
         ElevatedButton.icon(
           onPressed: () {
             // TODO: Navigate to add inventory page
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Add Inventory feature coming soon!')),
-            );
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Add Inventory feature coming soon!')));
           },
           icon: const Icon(Icons.add_box),
           label: const Text('Add Inventory'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppConfig.successColor,
-            foregroundColor: Colors.white,
-          ),
+          style: ElevatedButton.styleFrom(backgroundColor: AppConfig.successColor, foregroundColor: Colors.white),
         ),
       );
     }
@@ -240,16 +195,11 @@ class _DashboardPageState extends State<DashboardPage> {
         ElevatedButton.icon(
           onPressed: () {
             // TODO: Navigate to create production job page
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Create Production Job feature coming soon!')),
-            );
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Create Production Job feature coming soon!')));
           },
           icon: const Icon(Icons.print),
           label: const Text('Create Job'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppConfig.secondaryColor,
-            foregroundColor: Colors.white,
-          ),
+          style: ElevatedButton.styleFrom(backgroundColor: AppConfig.secondaryColor, foregroundColor: Colors.white),
         ),
       );
     }
@@ -261,10 +211,7 @@ class _DashboardPageState extends State<DashboardPage> {
           onPressed: () => context.go('/vendors'),
           icon: const Icon(Icons.people),
           label: const Text('Manage Vendors'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppConfig.warningColor,
-            foregroundColor: Colors.white,
-          ),
+          style: ElevatedButton.styleFrom(backgroundColor: AppConfig.warningColor, foregroundColor: Colors.white),
         ),
       );
     }
@@ -276,18 +223,9 @@ class _DashboardPageState extends State<DashboardPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Quick Actions',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        Text('Quick Actions', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: AppConfig.defaultPadding),
-        Wrap(
-          spacing: AppConfig.defaultPadding,
-          runSpacing: AppConfig.defaultPadding,
-          children: actions,
-        ),
+        Wrap(spacing: AppConfig.defaultPadding, runSpacing: AppConfig.defaultPadding, children: actions),
       ],
     );
   }
@@ -298,83 +236,35 @@ class _DashboardPageState extends State<DashboardPage> {
     // Orders stats - show if user can manage orders
     if (permissionProvider.canManageOrders) {
       statsCards.addAll([
-        _buildStatCard(
-          title: 'Total Orders',
-          value: '156',
-          icon: Icons.shopping_cart,
-          color: AppConfig.primaryColor,
-          subtitle: '+12% from last month',
-        ),
-        _buildStatCard(
-          title: 'Pending Orders',
-          value: '23',
-          icon: Icons.pending,
-          color: AppConfig.warningColor,
-          subtitle: '5 require attention',
-        ),
+        _buildStatCard(title: 'Total Orders', value: '156', icon: Icons.shopping_cart, color: AppConfig.primaryColor, subtitle: '+12% from last month'),
+        _buildStatCard(title: 'Pending Orders', value: '23', icon: Icons.pending, color: AppConfig.warningColor, subtitle: '5 require attention'),
       ]);
     }
 
     // Production stats - show if user can manage production
     if (permissionProvider.canManageProduction) {
-      statsCards.add(_buildStatCard(
-        title: 'Production Jobs',
-        value: '8',
-        icon: Icons.print,
-        color: AppConfig.accentColor,
-        subtitle: '3 in progress',
-      ));
+      statsCards.add(_buildStatCard(title: 'Production Jobs', value: '8', icon: Icons.print, color: AppConfig.accentColor, subtitle: '3 in progress'));
     }
 
     // Inventory stats - show if user can manage inventory
     if (permissionProvider.canManageInventory) {
-      statsCards.add(_buildStatCard(
-        title: 'Low Stock Items',
-        value: '7',
-        icon: Icons.warning,
-        color: AppConfig.errorColor,
-        subtitle: 'Need reorder',
-      ));
+      statsCards.add(_buildStatCard(title: 'Low Stock Items', value: '7', icon: Icons.warning, color: AppConfig.errorColor, subtitle: 'Need reorder'));
     }
 
     // Revenue stats - show if user can manage billing or payments
     if (permissionProvider.canManageBilling || permissionProvider.canManagePayments) {
-      statsCards.add(_buildStatCard(
-        title: 'Total Revenue',
-        value: '\$45,230',
-        icon: Icons.attach_money,
-        color: AppConfig.successColor,
-        subtitle: '+8% from last month',
-      ));
+      statsCards.add(_buildStatCard(title: 'Total Revenue', value: '\$45,230', icon: Icons.attach_money, color: AppConfig.successColor, subtitle: '+8% from last month'));
     }
 
     // Partners stats - show if user can manage vendors
     if (permissionProvider.canManageVendors) {
-      statsCards.add(_buildStatCard(
-        title: 'Active Partners',
-        value: '12',
-        icon: Icons.people,
-        color: AppConfig.secondaryColor,
-        subtitle: '3 new this month',
-      ));
+      statsCards.add(_buildStatCard(title: 'Active Partners', value: '12', icon: Icons.people, color: AppConfig.secondaryColor, subtitle: '3 new this month'));
     }
 
-    return GridView.count(
-      crossAxisCount: _getGridCrossAxisCount(),
-      crossAxisSpacing: AppConfig.defaultPadding,
-      mainAxisSpacing: AppConfig.defaultPadding,
-      childAspectRatio: 1.5,
-      children: statsCards,
-    );
+    return GridView.count(crossAxisCount: _getGridCrossAxisCount(), crossAxisSpacing: AppConfig.defaultPadding, mainAxisSpacing: AppConfig.defaultPadding, childAspectRatio: 1.5, children: statsCards);
   }
 
-  Widget _buildStatCard({
-    required String title,
-    required String value,
-    required IconData icon,
-    required Color color,
-    required String subtitle,
-  }) {
+  Widget _buildStatCard({required String title, required String value, required IconData icon, required Color color, required String subtitle}) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppConfig.defaultPadding),
@@ -383,41 +273,20 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             Row(
               children: [
-                Icon(
-                  icon,
-                  color: color,
-                  size: 24,
-                ),
+                Icon(icon, color: color, size: 24),
                 const Spacer(),
-                Icon(
-                  Icons.trending_up,
-                  color: color.withOpacity(0.5),
-                  size: 16,
-                ),
+                Icon(Icons.trending_up, color: color.withOpacity(0.5), size: 16),
               ],
             ),
             const Spacer(),
             Text(
               value,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: color),
             ),
             const SizedBox(height: AppConfig.smallPadding),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500)),
             const SizedBox(height: AppConfig.smallPadding),
-            Text(
-              subtitle,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
-            ),
+            Text(subtitle, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600])),
           ],
         ),
       ),
@@ -434,4 +303,4 @@ class _DashboardPageState extends State<DashboardPage> {
       return 3;
     }
   }
-} 
+}

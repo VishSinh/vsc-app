@@ -35,23 +35,13 @@ class _RegisterPageState extends State<RegisterPage> {
     if (!_formKey.currentState!.validate()) return;
 
     final authProvider = context.read<AuthProvider>();
-    
-    final success = await authProvider.register(
-      name: _nameController.text.trim(),
-      phone: _phoneController.text.trim(),
-      password: _passwordController.text,
-      role: _selectedRole.value,
-    );
+
+    final success = await authProvider.register(name: _nameController.text.trim(), phone: _phoneController.text.trim(), password: _passwordController.text, role: _selectedRole.value);
 
     if (success && mounted) {
       // Show success message and clear form
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(authProvider.successMessage ?? 'Registration successful'),
-          backgroundColor: AppConfig.successColor,
-        ),
-      );
-      
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(authProvider.successMessage ?? 'Registration successful'), backgroundColor: AppConfig.successColor));
+
       // Clear form
       _nameController.clear();
       _phoneController.clear();
@@ -68,10 +58,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Register New Staff'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/administration'),
-        ),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go('/administration')),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppConfig.largePadding),
@@ -86,29 +73,15 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Register New Staff Member',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    Text('Register New Staff Member', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
                     const SizedBox(height: AppConfig.smallPadding),
-                    Text(
-                      'Add a new staff member to the system',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.grey[600],
-                      ),
-                    ),
+                    Text('Add a new staff member to the system', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey[600])),
                     const SizedBox(height: AppConfig.largePadding),
 
                     // Name Field
                     TextFormField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Full Name',
-                        prefixIcon: Icon(Icons.person),
-                        hintText: 'John Doe',
-                      ),
+                      decoration: const InputDecoration(labelText: 'Full Name', prefixIcon: Icon(Icons.person), hintText: 'John Doe'),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter the full name';
@@ -125,11 +98,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     TextFormField(
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
-                        labelText: 'Phone Number',
-                        prefixIcon: Icon(Icons.phone),
-                        hintText: '9876543210',
-                      ),
+                      decoration: const InputDecoration(labelText: 'Phone Number', prefixIcon: Icon(Icons.phone), hintText: '9876543210'),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter the phone number';
@@ -145,15 +114,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     // Role Selection
                     DropdownButtonFormField<UserRole>(
                       value: _selectedRole,
-                      decoration: const InputDecoration(
-                        labelText: 'Role',
-                        prefixIcon: Icon(Icons.work),
-                      ),
+                      decoration: const InputDecoration(labelText: 'Role', prefixIcon: Icon(Icons.work)),
                       items: UserRole.values.map((role) {
-                        return DropdownMenuItem(
-                          value: role,
-                          child: Text(role.value),
-                        );
+                        return DropdownMenuItem(value: role, child: Text(role.value));
                       }).toList(),
                       onChanged: (value) {
                         if (value != null) {
@@ -173,9 +136,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         labelText: 'Password',
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                          ),
+                          icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
                           onPressed: () {
                             setState(() {
                               _obscurePassword = !_obscurePassword;
@@ -206,9 +167,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         labelText: 'Confirm Password',
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
-                          ),
+                          icon: Icon(_obscureConfirmPassword ? Icons.visibility : Icons.visibility_off),
                           onPressed: () {
                             setState(() {
                               _obscureConfirmPassword = !_obscureConfirmPassword;
@@ -241,10 +200,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               borderRadius: BorderRadius.circular(AppConfig.smallRadius),
                               border: Border.all(color: AppConfig.errorColor),
                             ),
-                            child: Text(
-                              authProvider.errorMessage!,
-                              style: TextStyle(color: AppConfig.errorColor),
-                            ),
+                            child: Text(authProvider.errorMessage!, style: TextStyle(color: AppConfig.errorColor)),
                           );
                         }
                         return const SizedBox.shrink();
@@ -264,10 +220,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               borderRadius: BorderRadius.circular(AppConfig.smallRadius),
                               border: Border.all(color: AppConfig.successColor),
                             ),
-                            child: Text(
-                              authProvider.successMessage!,
-                              style: TextStyle(color: AppConfig.successColor),
-                            ),
+                            child: Text(authProvider.successMessage!, style: TextStyle(color: AppConfig.successColor)),
                           );
                         }
                         return const SizedBox.shrink();
@@ -281,13 +234,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         builder: (context, authProvider, child) {
                           return ElevatedButton(
                             onPressed: authProvider.isLoading ? null : _handleRegister,
-                            child: authProvider.isLoading
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                  )
-                                : const Text('Register Staff Member'),
+                            child: authProvider.isLoading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Register Staff Member'),
                           );
                         },
                       ),
@@ -301,4 +248,4 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
     );
   }
-} 
+}

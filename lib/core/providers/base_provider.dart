@@ -34,21 +34,18 @@ abstract class BaseProvider extends ChangeNotifier {
   }
 
   /// Execute an async operation with loading state management
-  Future<T?> executeAsync<T>(
-    Future<T> Function() operation, {
-    bool showLoading = true,
-  }) async {
+  Future<T?> executeAsync<T>(Future<T> Function() operation, {bool showLoading = true}) async {
     try {
       if (showLoading) setLoading(true);
       clearMessages();
 
       final result = await operation();
-      
+
       if (showLoading) setLoading(false);
       return result;
     } catch (e) {
       if (showLoading) setLoading(false);
-      
+
       // Handle UnauthorizedException specifically
       if (e is UnauthorizedException) {
         setError(e.message);
@@ -56,32 +53,26 @@ abstract class BaseProvider extends ChangeNotifier {
       } else {
         setError(e.toString());
       }
-      
+
       return null;
     }
   }
 
   /// Execute an API call with standardized error handling
-  Future<bool> executeApiCall<T>(
-    Future<ApiResponse<T>> Function() apiCall, {
-    void Function(T data)? onSuccess,
-    void Function(String error)? onError,
-  }) async {
+  Future<bool> executeApiCall<T>(Future<ApiResponse<T>> Function() apiCall, {void Function(T data)? onSuccess, void Function(String error)? onError}) async {
     final result = await executeAsync(() async {
       final response = await apiCall();
-      
+
       if (response.success) {
         onSuccess?.call(response.data);
         return true;
       } else {
-        final errorMessage = response.error.message.isNotEmpty 
-            ? response.error.message 
-            : 'Operation failed';
+        final errorMessage = response.error.message.isNotEmpty ? response.error.message : 'Operation failed';
         onError?.call(errorMessage);
         throw Exception(errorMessage);
       }
     });
-    
+
     return result ?? false;
   }
 
@@ -97,7 +88,7 @@ abstract class BaseProvider extends ChangeNotifier {
 /// Mixin for pagination functionality
 mixin PaginationMixin on BaseProvider {
   int _currentPage = 1;
-  int _pageSize = 10;
+  final int _pageSize = 10;
   bool _hasMoreData = true;
 
   int get currentPage => _currentPage;
@@ -134,4 +125,4 @@ mixin SearchMixin on BaseProvider {
     _searchQuery = '';
     notifyListeners();
   }
-} 
+}

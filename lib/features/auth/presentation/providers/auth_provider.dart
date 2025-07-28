@@ -1,7 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:vsc_app/core/constants/app_constants.dart';
 import 'package:vsc_app/core/enums/user_role.dart';
-import 'package:vsc_app/core/models/auth_model.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
 import 'package:vsc_app/core/services/auth_service.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
@@ -9,16 +6,12 @@ import 'package:vsc_app/features/auth/presentation/providers/permission_provider
 class AuthProvider extends BaseProvider {
   final AuthService _authService;
   final PermissionProvider _permissionProvider;
-  
+
   bool _isLoggedIn = false;
   UserRole? _userRole;
   String? _token;
 
-  AuthProvider({
-    AuthService? authService,
-    PermissionProvider? permissionProvider,
-  }) : _authService = authService ?? AuthService(),
-       _permissionProvider = permissionProvider ?? PermissionProvider();
+  AuthProvider({AuthService? authService, PermissionProvider? permissionProvider}) : _authService = authService ?? AuthService(), _permissionProvider = permissionProvider ?? PermissionProvider();
 
   // Getters
   bool get isLoggedIn => _isLoggedIn;
@@ -36,10 +29,10 @@ class AuthProvider extends BaseProvider {
       final isLoggedIn = await _authService.isLoggedIn();
       if (isLoggedIn) {
         final roleString = await _authService.getUserRole();
-        
+
         _isLoggedIn = true;
         _userRole = roleString != null ? UserRole.fromString(roleString) : null;
-        
+
         // Only load permissions if we have a valid token
         try {
           await _permissionProvider.initializePermissions();
@@ -52,17 +45,14 @@ class AuthProvider extends BaseProvider {
   }
 
   /// Login with phone and password
-  Future<bool> login({
-    required String phone,
-    required String password,
-  }) async {
+  Future<bool> login({required String phone, required String password}) async {
     return await executeApiCall(
       () => _authService.login(phone: phone, password: password),
       onSuccess: (data) {
         _isLoggedIn = true;
         _userRole = data.userRole;
         _token = data.token;
-        
+
         // Load permissions after successful login
         _permissionProvider.initializePermissions();
       },
@@ -70,20 +60,8 @@ class AuthProvider extends BaseProvider {
   }
 
   /// Register new staff member (Admin only)
-  Future<bool> register({
-    required String name,
-    required String phone,
-    required String password,
-    required String role,
-  }) async {
-    return await executeApiCall(
-      () => _authService.register(
-        name: name,
-        phone: phone,
-        password: password,
-        role: role,
-      ),
-    );
+  Future<bool> register({required String name, required String phone, required String password, required String role}) async {
+    return await executeApiCall(() => _authService.register(name: name, phone: phone, password: password, role: role));
   }
 
   /// Logout user
@@ -93,9 +71,9 @@ class AuthProvider extends BaseProvider {
       _isLoggedIn = false;
       _userRole = null;
       _token = null;
-      
+
       // Clear permissions on logout
       _permissionProvider.clearPermissions();
     }, showLoading: false);
   }
-} 
+}

@@ -6,11 +6,7 @@ class LoadingWidget extends StatelessWidget {
   final String? message;
   final double size;
 
-  const LoadingWidget({
-    super.key,
-    this.message,
-    this.size = 40.0,
-  });
+  const LoadingWidget({super.key, this.message, this.size = 40.0});
 
   @override
   Widget build(BuildContext context) {
@@ -18,19 +14,8 @@ class LoadingWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
-            height: size,
-            width: size,
-            child: const CircularProgressIndicator(),
-          ),
-          if (message != null) ...[
-            const SizedBox(height: AppConfig.defaultPadding),
-            Text(
-              message!,
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-          ],
+          SizedBox(height: size, width: size, child: const CircularProgressIndicator()),
+          if (message != null) ...[const SizedBox(height: AppConfig.defaultPadding), Text(message!, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center)],
         ],
       ),
     );
@@ -43,12 +28,7 @@ class CustomErrorWidget extends StatelessWidget {
   final VoidCallback? onRetry;
   final IconData? icon;
 
-  const CustomErrorWidget({
-    super.key,
-    required this.message,
-    this.onRetry,
-    this.icon,
-  });
+  const CustomErrorWidget({super.key, required this.message, this.onRetry, this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -56,24 +36,14 @@ class CustomErrorWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon ?? Icons.error_outline,
-            size: 64,
-            color: AppConfig.errorColor,
-          ),
+          Icon(icon ?? Icons.error_outline, size: 64, color: AppConfig.errorColor),
           const SizedBox(height: AppConfig.defaultPadding),
           Text(
             message,
             style: TextStyle(color: AppConfig.errorColor),
             textAlign: TextAlign.center,
           ),
-          if (onRetry != null) ...[
-            const SizedBox(height: AppConfig.defaultPadding),
-            ElevatedButton(
-              onPressed: onRetry,
-              child: const Text('Retry'),
-            ),
-          ],
+          if (onRetry != null) ...[const SizedBox(height: AppConfig.defaultPadding), ElevatedButton(onPressed: onRetry, child: const Text('Retry'))],
         ],
       ),
     );
@@ -87,13 +57,7 @@ class EmptyStateWidget extends StatelessWidget {
   final VoidCallback? onAction;
   final String? actionLabel;
 
-  const EmptyStateWidget({
-    super.key,
-    required this.message,
-    this.icon = Icons.inbox_outlined,
-    this.onAction,
-    this.actionLabel,
-  });
+  const EmptyStateWidget({super.key, required this.message, this.icon = Icons.inbox_outlined, this.onAction, this.actionLabel});
 
   @override
   Widget build(BuildContext context) {
@@ -101,24 +65,14 @@ class EmptyStateWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            size: 64,
-            color: Colors.grey[400],
-          ),
+          Icon(icon, size: 64, color: Colors.grey[400]),
           const SizedBox(height: AppConfig.defaultPadding),
           Text(
             message,
             style: TextStyle(color: Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
-          if (onAction != null && actionLabel != null) ...[
-            const SizedBox(height: AppConfig.defaultPadding),
-            ElevatedButton(
-              onPressed: onAction,
-              child: Text(actionLabel!),
-            ),
-          ],
+          if (onAction != null && actionLabel != null) ...[const SizedBox(height: AppConfig.defaultPadding), ElevatedButton(onPressed: onAction, child: Text(actionLabel!))],
         ],
       ),
     );
@@ -132,13 +86,7 @@ class SearchField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final VoidCallback? onClear;
 
-  const SearchField({
-    super.key,
-    required this.controller,
-    required this.hintText,
-    this.onChanged,
-    this.onClear,
-  });
+  const SearchField({super.key, required this.controller, required this.hintText, this.onChanged, this.onClear});
 
   @override
   Widget build(BuildContext context) {
@@ -172,32 +120,15 @@ class ActionButton extends StatelessWidget {
   final Color? foregroundColor;
   final bool isLoading;
 
-  const ActionButton({
-    super.key,
-    required this.label,
-    required this.icon,
-    this.onPressed,
-    this.backgroundColor,
-    this.foregroundColor,
-    this.isLoading = false,
-  });
+  const ActionButton({super.key, required this.label, required this.icon, this.onPressed, this.backgroundColor, this.foregroundColor, this.isLoading = false});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
       onPressed: isLoading ? null : onPressed,
-      icon: isLoading
-          ? const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : Icon(icon),
+      icon: isLoading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : Icon(icon),
       label: Text(label),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor,
-        foregroundColor: foregroundColor,
-      ),
+      style: ElevatedButton.styleFrom(backgroundColor: backgroundColor, foregroundColor: foregroundColor),
     );
   }
 }
@@ -208,12 +139,7 @@ class PageHeader extends StatelessWidget {
   final List<Widget>? actions;
   final Widget? subtitle;
 
-  const PageHeader({
-    super.key,
-    required this.title,
-    this.actions,
-    this.subtitle,
-  });
+  const PageHeader({super.key, required this.title, this.actions, this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -226,23 +152,12 @@ class PageHeader extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: AppConfig.smallPadding),
-                    subtitle!,
-                  ],
+                  Text(title, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  if (subtitle != null) ...[const SizedBox(height: AppConfig.smallPadding), subtitle!],
                 ],
               ),
             ),
-            if (actions != null) ...[
-              const SizedBox(width: AppConfig.defaultPadding),
-              ...actions!,
-            ],
+            if (actions != null) ...[const SizedBox(width: AppConfig.defaultPadding), ...actions!],
           ],
         ),
         const SizedBox(height: AppConfig.largePadding),
@@ -260,27 +175,13 @@ class ListItemCard extends StatelessWidget {
   final VoidCallback? onTap;
   final EdgeInsetsGeometry? margin;
 
-  const ListItemCard({
-    super.key,
-    required this.leading,
-    required this.title,
-    this.subtitle,
-    this.trailing,
-    this.onTap,
-    this.margin,
-  });
+  const ListItemCard({super.key, required this.leading, required this.title, this.subtitle, this.trailing, this.onTap, this.margin});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: margin ?? const EdgeInsets.only(bottom: AppConfig.defaultPadding),
-      child: ListTile(
-        leading: leading,
-        title: title,
-        subtitle: subtitle,
-        trailing: trailing,
-        onTap: onTap,
-      ),
+      child: ListTile(leading: leading, title: title, subtitle: subtitle, trailing: trailing, onTap: onTap),
     );
   }
 }
@@ -292,36 +193,16 @@ class StatusBadge extends StatelessWidget {
   final Color? activeColor;
   final Color? inactiveColor;
 
-  const StatusBadge({
-    super.key,
-    required this.text,
-    required this.isActive,
-    this.activeColor,
-    this.inactiveColor,
-  });
+  const StatusBadge({super.key, required this.text, required this.isActive, this.activeColor, this.inactiveColor});
 
   @override
   Widget build(BuildContext context) {
-    final color = isActive 
-        ? (activeColor ?? AppConfig.successColor)
-        : (inactiveColor ?? Colors.grey);
+    final color = isActive ? (activeColor ?? AppConfig.successColor) : (inactiveColor ?? Colors.grey);
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppConfig.smallPadding,
-        vertical: 4,
-      ),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(AppConfig.smallRadius),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 12,
-        ),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: AppConfig.smallPadding, vertical: 4),
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(AppConfig.smallRadius)),
+      child: Text(text, style: const TextStyle(color: Colors.white, fontSize: 12)),
     );
   }
-} 
+}

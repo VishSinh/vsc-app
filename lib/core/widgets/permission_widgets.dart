@@ -7,21 +7,16 @@ class PermissionWidget extends StatelessWidget {
   final Widget child;
   final Widget? fallback;
 
-  const PermissionWidget({
-    super.key,
-    required this.permission,
-    required this.child,
-    this.fallback,
-  });
+  const PermissionWidget({super.key, required this.permission, required this.child, this.fallback});
 
   @override
   Widget build(BuildContext context) {
     final permissionManager = PermissionManager();
-    
+
     if (permissionManager.hasPermission(permission)) {
       return child;
     }
-    
+
     return fallback ?? const SizedBox.shrink();
   }
 }
@@ -32,21 +27,16 @@ class AnyPermissionWidget extends StatelessWidget {
   final Widget child;
   final Widget? fallback;
 
-  const AnyPermissionWidget({
-    super.key,
-    required this.permissions,
-    required this.child,
-    this.fallback,
-  });
+  const AnyPermissionWidget({super.key, required this.permissions, required this.child, this.fallback});
 
   @override
   Widget build(BuildContext context) {
     final permissionManager = PermissionManager();
-    
+
     if (permissionManager.hasAnyPermission(permissions)) {
       return child;
     }
-    
+
     return fallback ?? const SizedBox.shrink();
   }
 }
@@ -57,21 +47,16 @@ class AllPermissionsWidget extends StatelessWidget {
   final Widget child;
   final Widget? fallback;
 
-  const AllPermissionsWidget({
-    super.key,
-    required this.permissions,
-    required this.child,
-    this.fallback,
-  });
+  const AllPermissionsWidget({super.key, required this.permissions, required this.child, this.fallback});
 
   @override
   Widget build(BuildContext context) {
     final permissionManager = PermissionManager();
-    
+
     if (permissionManager.hasAllPermissions(permissions)) {
       return child;
     }
-    
+
     return fallback ?? const SizedBox.shrink();
   }
 }
@@ -84,27 +69,16 @@ class PermissionButton extends StatelessWidget {
   final ButtonStyle? style;
   final Widget? fallback;
 
-  const PermissionButton({
-    super.key,
-    required this.permission,
-    required this.onPressed,
-    required this.child,
-    this.style,
-    this.fallback,
-  });
+  const PermissionButton({super.key, required this.permission, required this.onPressed, required this.child, this.style, this.fallback});
 
   @override
   Widget build(BuildContext context) {
     final permissionManager = PermissionManager();
-    
+
     if (permissionManager.hasPermission(permission)) {
-      return ElevatedButton(
-        onPressed: onPressed,
-        style: style,
-        child: child,
-      );
+      return ElevatedButton(onPressed: onPressed, style: style, child: child);
     }
-    
+
     return fallback ?? const SizedBox.shrink();
   }
 }
@@ -117,27 +91,16 @@ class PermissionIconButton extends StatelessWidget {
   final String? tooltip;
   final Widget? fallback;
 
-  const PermissionIconButton({
-    super.key,
-    required this.permission,
-    required this.onPressed,
-    required this.icon,
-    this.tooltip,
-    this.fallback,
-  });
+  const PermissionIconButton({super.key, required this.permission, required this.onPressed, required this.icon, this.tooltip, this.fallback});
 
   @override
   Widget build(BuildContext context) {
     final permissionManager = PermissionManager();
-    
+
     if (permissionManager.hasPermission(permission)) {
-      return IconButton(
-        onPressed: onPressed,
-        icon: Icon(icon),
-        tooltip: tooltip,
-      );
+      return IconButton(onPressed: onPressed, icon: Icon(icon), tooltip: tooltip);
     }
-    
+
     return fallback ?? const SizedBox.shrink();
   }
 }
@@ -152,31 +115,16 @@ class PermissionListTile extends StatelessWidget {
   final VoidCallback? onTap;
   final Widget? fallback;
 
-  const PermissionListTile({
-    super.key,
-    required this.permission,
-    this.leading,
-    this.title,
-    this.subtitle,
-    this.trailing,
-    this.onTap,
-    this.fallback,
-  });
+  const PermissionListTile({super.key, required this.permission, this.leading, this.title, this.subtitle, this.trailing, this.onTap, this.fallback});
 
   @override
   Widget build(BuildContext context) {
     final permissionManager = PermissionManager();
-    
+
     if (permissionManager.hasPermission(permission)) {
-      return ListTile(
-        leading: leading,
-        title: title,
-        subtitle: subtitle,
-        trailing: trailing,
-        onTap: onTap,
-      );
+      return ListTile(leading: leading, title: title, subtitle: subtitle, trailing: trailing, onTap: onTap);
     }
-    
+
     return fallback ?? const SizedBox.shrink();
   }
 }
@@ -187,21 +135,23 @@ class PermissionDataRow extends StatelessWidget {
   final List<DataCell> cells;
   final Widget? fallback;
 
-  const PermissionDataRow({
-    super.key,
-    required this.permission,
-    required this.cells,
-    this.fallback,
-  });
+  const PermissionDataRow({super.key, required this.permission, required this.cells, this.fallback});
 
   @override
   Widget build(BuildContext context) {
     final permissionManager = PermissionManager();
-    
     if (permissionManager.hasPermission(permission)) {
-      return DataRow(cells: cells);
+      // DataRow is not a Widget, so we cannot return it directly.
+      // Instead, wrap the DataRow in a DataTable with a single row.
+      return DataTable(
+        columns: List.generate(cells.length, (index) => const DataColumn(label: SizedBox.shrink())),
+        rows: [DataRow(cells: cells)],
+        headingRowHeight: 0, // Hide the header row
+        dataRowMinHeight: 0,
+        dataRowMaxHeight: double.infinity,
+      );
     }
-    
+
     return fallback ?? const SizedBox.shrink();
   }
 }
@@ -218,35 +168,16 @@ class PermissionCard extends StatelessWidget {
   final Clip? clipBehavior;
   final Widget? fallback;
 
-  const PermissionCard({
-    super.key,
-    required this.permission,
-    required this.child,
-    this.color,
-    this.shadowColor,
-    this.elevation,
-    this.shape,
-    this.margin,
-    this.clipBehavior,
-    this.fallback,
-  });
+  const PermissionCard({super.key, required this.permission, required this.child, this.color, this.shadowColor, this.elevation, this.shape, this.margin, this.clipBehavior, this.fallback});
 
   @override
   Widget build(BuildContext context) {
     final permissionManager = PermissionManager();
-    
+
     if (permissionManager.hasPermission(permission)) {
-      return Card(
-        color: color,
-        shadowColor: shadowColor,
-        elevation: elevation,
-        shape: shape,
-        margin: margin,
-        clipBehavior: clipBehavior,
-        child: child,
-      );
+      return Card(color: color, shadowColor: shadowColor, elevation: elevation, shape: shape, margin: margin, clipBehavior: clipBehavior, child: child);
     }
-    
+
     return fallback ?? const SizedBox.shrink();
   }
-} 
+}

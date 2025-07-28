@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:vsc_app/core/constants/app_constants.dart';
 import 'package:vsc_app/core/models/permission_model.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
 import 'package:vsc_app/core/services/permission_service.dart';
@@ -8,16 +6,12 @@ import 'package:vsc_app/core/utils/permission_manager.dart';
 class PermissionProvider extends BaseProvider {
   final PermissionService _permissionService;
   final PermissionManager _permissionManager;
-  
+
   bool _isInitialized = false;
   List<String> _currentPermissions = [];
   List<Permission> _allPermissions = [];
 
-  PermissionProvider({
-    PermissionService? permissionService,
-    PermissionManager? permissionManager,
-  }) : _permissionService = permissionService ?? PermissionService(),
-       _permissionManager = permissionManager ?? PermissionManager();
+  PermissionProvider({PermissionService? permissionService, PermissionManager? permissionManager}) : _permissionService = permissionService ?? PermissionService(), _permissionManager = permissionManager ?? PermissionManager();
 
   // Getters
   bool get isInitialized => _isInitialized;
@@ -27,7 +21,7 @@ class PermissionProvider extends BaseProvider {
   /// Initialize permissions for the current user
   Future<void> initializePermissions() async {
     if (_isInitialized) return;
-    
+
     await executeAsync(() async {
       final cachedPermissions = await _permissionService.getCachedStaffPermissions();
       if (cachedPermissions.isNotEmpty) {
@@ -35,17 +29,15 @@ class PermissionProvider extends BaseProvider {
       }
 
       final response = await _permissionService.getStaffPermissions();
-      
+
       if (response.success) {
         _currentPermissions = response.data.permissions;
         _isInitialized = true;
-        
+
         await _permissionService.cacheStaffPermissions(_currentPermissions);
         _permissionManager.initializePermissions(_currentPermissions);
       } else {
-        throw Exception(response.error.message.isNotEmpty 
-            ? response.error.message 
-            : 'Failed to load permissions');
+        throw Exception(response.error.message.isNotEmpty ? response.error.message : 'Failed to load permissions');
       }
     });
   }
@@ -109,10 +101,13 @@ class PermissionProvider extends BaseProvider {
   }
 
   Set<String> getAvailableDomains() {
-    return _currentPermissions.map((permission) {
-      final parts = permission.split('.');
-      return parts.isNotEmpty ? parts.first : '';
-    }).where((domain) => domain.isNotEmpty).toSet();
+    return _currentPermissions
+        .map((permission) {
+          final parts = permission.split('.');
+          return parts.isNotEmpty ? parts.first : '';
+        })
+        .where((domain) => domain.isNotEmpty)
+        .toSet();
   }
 
   void _initializeWithPermissions(List<String> permissions) {
@@ -120,4 +115,4 @@ class PermissionProvider extends BaseProvider {
     _isInitialized = true;
     _permissionManager.initializePermissions(permissions);
   }
-} 
+}

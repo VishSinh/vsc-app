@@ -9,11 +9,7 @@ class Permission {
   final String value;
   final String description;
 
-  const Permission({
-    required this.name,
-    required this.value,
-    required this.description,
-  });
+  const Permission({required this.name, required this.value, required this.description});
 
   factory Permission.fromJson(Map<String, dynamic> json) => _$PermissionFromJson(json);
   Map<String, dynamic> toJson() => _$PermissionToJson(this);
@@ -24,10 +20,7 @@ class AllPermissionsData {
   final List<Permission> permissions;
   final int totalCount;
 
-  const AllPermissionsData({
-    required this.permissions,
-    required this.totalCount,
-  });
+  const AllPermissionsData({required this.permissions, required this.totalCount});
 
   factory AllPermissionsData.fromJson(Map<String, dynamic> json) => _$AllPermissionsDataFromJson(json);
   Map<String, dynamic> toJson() => _$AllPermissionsDataToJson(this);
@@ -43,12 +36,7 @@ class StaffPermissionsData {
   @JsonKey(name: 'total_count')
   final int totalCount;
 
-  const StaffPermissionsData({
-    required this.staffId,
-    required this.staffRole,
-    required this.permissions,
-    required this.totalCount,
-  });
+  const StaffPermissionsData({required this.staffId, required this.staffRole, required this.permissions, required this.totalCount});
 
   factory StaffPermissionsData.fromJson(Map<String, dynamic> json) => _$StaffPermissionsDataFromJson(json);
   Map<String, dynamic> toJson() => _$StaffPermissionsDataToJson(this);
@@ -56,4 +44,4 @@ class StaffPermissionsData {
 
 // Type aliases for better readability
 typedef AllPermissionsResponse = ApiResponse<AllPermissionsData>;
-typedef StaffPermissionsResponse = ApiResponse<StaffPermissionsData>; 
+typedef StaffPermissionsResponse = ApiResponse<StaffPermissionsData>;

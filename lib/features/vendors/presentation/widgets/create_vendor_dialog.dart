@@ -28,20 +28,12 @@ class _CreateVendorDialogState extends State<CreateVendorDialog> {
     if (!_formKey.currentState!.validate()) return;
 
     final vendorProvider = context.read<VendorProvider>();
-    
-    final success = await vendorProvider.createVendor(
-      name: _nameController.text.trim(),
-      phone: _phoneController.text.trim(),
-    );
+
+    final success = await vendorProvider.createVendor(name: _nameController.text.trim(), phone: _phoneController.text.trim());
 
     if (success && mounted) {
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(vendorProvider.successMessage ?? AppConstants.vendorCreatedMessage),
-          backgroundColor: AppConfig.successColor,
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(vendorProvider.successMessage ?? AppConstants.vendorCreatedMessage), backgroundColor: AppConfig.successColor));
     }
   }
 
@@ -56,11 +48,7 @@ class _CreateVendorDialogState extends State<CreateVendorDialog> {
           children: [
             TextFormField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Vendor Name',
-                prefixIcon: Icon(Icons.business),
-                hintText: 'Enter vendor name',
-              ),
+              decoration: const InputDecoration(labelText: 'Vendor Name', prefixIcon: Icon(Icons.business), hintText: 'Enter vendor name'),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter vendor name';
@@ -75,11 +63,7 @@ class _CreateVendorDialogState extends State<CreateVendorDialog> {
             TextFormField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                labelText: 'Phone Number',
-                prefixIcon: Icon(Icons.phone),
-                hintText: 'Enter phone number',
-              ),
+              decoration: const InputDecoration(labelText: 'Phone Number', prefixIcon: Icon(Icons.phone), hintText: 'Enter phone number'),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter phone number';
@@ -94,21 +78,13 @@ class _CreateVendorDialogState extends State<CreateVendorDialog> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
         Consumer<VendorProvider>(
           builder: (context, vendorProvider, child) {
-            return ActionButton(
-              label: 'Create',
-              icon: Icons.add,
-              onPressed: vendorProvider.isLoading ? null : _handleCreateVendor,
-              isLoading: vendorProvider.isLoading,
-            );
+            return ActionButton(label: 'Create', icon: Icons.add, onPressed: vendorProvider.isLoading ? null : _handleCreateVendor, isLoading: vendorProvider.isLoading);
           },
         ),
       ],
     );
   }
-} 
+}

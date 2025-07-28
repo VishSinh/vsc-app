@@ -38,12 +38,7 @@ class _VendorsPageState extends State<VendorsPage> {
   Widget build(BuildContext context) {
     return ResponsiveLayout(
       selectedIndex: 0,
-      destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.people),
-          label: 'Vendors',
-        ),
-      ],
+      destinations: const [NavigationDestination(icon: Icon(Icons.people), label: 'Vendors')],
       onDestinationSelected: (index) {},
       child: _buildVendorsContent(),
     );
@@ -61,18 +56,14 @@ class _VendorsPageState extends State<VendorsPage> {
               Consumer<PermissionProvider>(
                 builder: (context, permissionProvider, child) {
                   if (permissionProvider.canCreate('vendor')) {
-                    return ActionButton(
-                      label: 'Add Vendor',
-                      icon: Icons.add,
-                      onPressed: _showCreateVendorDialog,
-                    );
+                    return ActionButton(label: 'Add Vendor', icon: Icons.add, onPressed: _showCreateVendorDialog);
                   }
                   return const SizedBox.shrink();
                 },
               ),
             ],
           ),
-          
+
           SearchField(
             controller: _searchController,
             hintText: 'Search vendors...',
@@ -88,7 +79,7 @@ class _VendorsPageState extends State<VendorsPage> {
             },
           ),
           const SizedBox(height: AppConfig.largePadding),
-          
+
           // Vendors List
           Expanded(
             child: Consumer<VendorProvider>(
@@ -98,21 +89,13 @@ class _VendorsPageState extends State<VendorsPage> {
                 }
 
                 if (vendorProvider.errorMessage != null) {
-                  return CustomErrorWidget(
-                    message: vendorProvider.errorMessage!,
-                    onRetry: () => vendorProvider.refreshVendors(),
-                  );
+                  return CustomErrorWidget(message: vendorProvider.errorMessage!, onRetry: () => vendorProvider.refreshVendors());
                 }
 
                 final filteredVendors = vendorProvider.getFilteredVendors(_searchQuery);
 
                 if (filteredVendors.isEmpty) {
-                  return EmptyStateWidget(
-                    message: _searchQuery.isNotEmpty
-                        ? 'No vendors found matching your search'
-                        : 'No vendors found',
-                    icon: Icons.people_outline,
-                  );
+                  return EmptyStateWidget(message: _searchQuery.isNotEmpty ? 'No vendors found matching your search' : 'No vendors found', icon: Icons.people_outline);
                 }
 
                 return RefreshIndicator(
@@ -150,33 +133,19 @@ class _VendorsPageState extends State<VendorsPage> {
     return ListItemCard(
       leading: CircleAvatar(
         backgroundColor: vendor.isActive ? AppConfig.successColor : Colors.grey,
-        child: const Icon(
-          Icons.business,
-          color: Colors.white,
-        ),
+        child: const Icon(Icons.business, color: Colors.white),
       ),
-      title: Text(
-        vendor.name,
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
+      title: Text(vendor.name, style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text(vendor.phone),
-      trailing: StatusBadge(
-        text: vendor.isActive ? 'Active' : 'Inactive',
-        isActive: vendor.isActive,
-      ),
+      trailing: StatusBadge(text: vendor.isActive ? 'Active' : 'Inactive', isActive: vendor.isActive),
       onTap: () {
         // TODO: Navigate to vendor details page
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Vendor details coming soon!')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vendor details coming soon!')));
       },
     );
   }
 
   void _showCreateVendorDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => const CreateVendorDialog(),
-    );
+    showDialog(context: context, builder: (context) => const CreateVendorDialog());
   }
-} 
+}

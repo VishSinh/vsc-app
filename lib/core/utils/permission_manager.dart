@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class PermissionManager {
   static final PermissionManager _instance = PermissionManager._internal();
   factory PermissionManager() => _instance;
@@ -96,47 +94,25 @@ class PermissionManager {
   bool get isInitialized => _isInitialized;
 
   // Domain-specific permission checks
-  bool get canManageAccounts => hasAnyPermission([
-    'account.create', 'account.read', 'account.update', 'account.delete', 'account.list'
-  ]);
+  bool get canManageAccounts => hasAnyPermission(['account.create', 'account.read', 'account.update', 'account.delete', 'account.list']);
 
-  bool get canManageInventory => hasAnyPermission([
-    'inventory.create', 'inventory.read', 'inventory.update', 'inventory.delete', 'inventory.list', 'inventory.transaction'
-  ]);
+  bool get canManageInventory => hasAnyPermission(['inventory.create', 'inventory.read', 'inventory.update', 'inventory.delete', 'inventory.list', 'inventory.transaction']);
 
-  bool get canManageOrders => hasAnyPermission([
-    'order.create', 'order.read', 'order.update', 'order.delete', 'order.list', 'order.approve', 'order.cancel'
-  ]);
+  bool get canManageOrders => hasAnyPermission(['order.create', 'order.read', 'order.update', 'order.delete', 'order.list', 'order.approve', 'order.cancel']);
 
-  bool get canManageProduction => hasAnyPermission([
-    'production.create', 'production.read', 'production.update', 'production.delete', 'production.list'
-  ]);
+  bool get canManageProduction => hasAnyPermission(['production.create', 'production.read', 'production.update', 'production.delete', 'production.list']);
 
-  bool get canManageBilling => hasAnyPermission([
-    'bill.create', 'bill.read', 'bill.update', 'bill.delete', 'bill.list'
-  ]);
+  bool get canManageBilling => hasAnyPermission(['bill.create', 'bill.read', 'bill.update', 'bill.delete', 'bill.list']);
 
-  bool get canManagePayments => hasAnyPermission([
-    'payment.process', 'payment.refund'
-  ]);
+  bool get canManagePayments => hasAnyPermission(['payment.process', 'payment.refund']);
 
-  bool get canManageVendors => hasAnyPermission([
-    'vendor.create', 'vendor.read', 'vendor.update', 'vendor.delete', 'vendor.list'
-  ]);
+  bool get canManageVendors => hasAnyPermission(['vendor.create', 'vendor.read', 'vendor.update', 'vendor.delete', 'vendor.list']);
 
-  bool get canManageCards => hasAnyPermission([
-    'card.create', 'card.read', 'card.update', 'card.delete', 'card.list'
-  ]);
+  bool get canManageCards => hasAnyPermission(['card.create', 'card.read', 'card.update', 'card.delete', 'card.list']);
 
-  bool get canManageCustomers => hasAnyPermission([
-    'customer.create', 'customer.read', 'customer.update', 'customer.delete', 'customer.list'
-  ]);
+  bool get canManageCustomers => hasAnyPermission(['customer.create', 'customer.read', 'customer.update', 'customer.delete', 'customer.list']);
 
-  bool get canManageSystem => hasAnyPermission([
-    'system.config', 'system.backup', 'system.restore'
-  ]);
+  bool get canManageSystem => hasAnyPermission(['system.config', 'system.backup', 'system.restore']);
 
-  bool get canViewAuditLogs => hasAnyPermission([
-    'audit.read', 'audit.export'
-  ]);
-} 
+  bool get canViewAuditLogs => hasAnyPermission(['audit.read', 'audit.export']);
+}

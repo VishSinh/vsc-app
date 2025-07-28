@@ -9,9 +9,6 @@ enum TransactionType {
   final String value;
 
   static TransactionType fromString(String value) {
-    return TransactionType.values.firstWhere(
-      (type) => type.value == value,
-      orElse: () => TransactionType.adjustment,
-    );
+    return TransactionType.values.firstWhere((type) => type.value == value, orElse: () => TransactionType.adjustment);
   }
-} 
+}

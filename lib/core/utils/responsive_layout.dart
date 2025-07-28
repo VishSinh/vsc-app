@@ -9,27 +9,16 @@ class ResponsiveLayout extends StatelessWidget {
   final Widget? floatingActionButton;
   final List<Widget>? actions;
 
-  const ResponsiveLayout({
-    super.key,
-    required this.child,
-    required this.destinations,
-    required this.selectedIndex,
-    required this.onDestinationSelected,
-    this.floatingActionButton,
-    this.actions,
-  });
+  const ResponsiveLayout({super.key, required this.child, required this.destinations, required this.selectedIndex, required this.onDestinationSelected, this.floatingActionButton, this.actions});
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    
+
     if (screenWidth < AppConfig.mobileBreakpoint) {
       // Mobile layout with Drawer
       return Scaffold(
-        appBar: AppBar(
-          title: Text(AppConfig.appName),
-          actions: actions,
-        ),
+        appBar: AppBar(title: Text(AppConfig.appName), actions: actions),
         drawer: _buildDrawer(context),
         body: child,
         floatingActionButton: floatingActionButton,
@@ -61,38 +50,21 @@ class ResponsiveLayout extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-            ),
+            decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  AppConfig.appName,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                  ),
-                ),
+                Text(AppConfig.appName, style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Theme.of(context).colorScheme.onPrimary)),
                 const SizedBox(height: 8),
-                Text(
-                  'Inventory Management',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
-                  ),
-                ),
+                Text('Inventory Management', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8))),
               ],
             ),
           ),
           ...destinations.asMap().entries.map((entry) {
             final index = entry.key;
             final destination = entry.value;
-            return ListTile(
-              leading: destination.icon,
-              title: Text(destination.label),
-              selected: selectedIndex == index,
-              onTap: () => onDestinationSelected(index),
-            );
-          }).toList(),
+            return ListTile(leading: destination.icon, title: Text(destination.label), selected: selectedIndex == index, onTap: () => onDestinationSelected(index));
+          }),
         ],
       ),
     );
@@ -104,11 +76,7 @@ class ResponsiveLayout extends StatelessWidget {
       onDestinationSelected: onDestinationSelected,
       labelType: NavigationRailLabelType.all,
       destinations: destinations.map((destination) {
-        return NavigationRailDestination(
-          icon: destination.icon,
-          selectedIcon: destination.icon,
-          label: Text(destination.label),
-        );
+        return NavigationRailDestination(icon: destination.icon, selectedIcon: destination.icon, label: Text(destination.label));
       }).toList(),
     );
   }
@@ -119,22 +87,15 @@ class ResponsiveLayout extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-          ),
-        ),
+        border: Border(bottom: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.2))),
       ),
       child: Row(
         children: [
-          Text(
-            AppConfig.appName,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
+          Text(AppConfig.appName, style: Theme.of(context).textTheme.headlineSmall),
           const Spacer(),
           if (actions != null) ...actions!,
         ],
       ),
     );
   }
-} 
+}
