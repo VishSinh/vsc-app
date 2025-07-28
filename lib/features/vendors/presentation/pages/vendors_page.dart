@@ -95,7 +95,10 @@ class _VendorsPageState extends State<VendorsPage> {
                 final filteredVendors = vendorProvider.getFilteredVendors(_searchQuery);
 
                 if (filteredVendors.isEmpty) {
-                  return EmptyStateWidget(message: _searchQuery.isNotEmpty ? 'No vendors found matching your search' : 'No vendors found', icon: Icons.people_outline);
+                  return EmptyStateWidget(
+                    message: _searchQuery.isNotEmpty ? 'No vendors found matching your search' : 'No vendors found',
+                    icon: Icons.people_outline,
+                  );
                 }
 
                 return RefreshIndicator(

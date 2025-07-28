@@ -10,7 +10,10 @@ class AuthService extends BaseService {
   Future<LoginResponse> login({required String phone, required String password}) async {
     final request = LoginRequest(phone: phone, password: password);
 
-    final response = await executeRequest(() => post(AppConstants.loginEndpoint, data: request.toJson()), (json) => LoginData.fromJson(json as Map<String, dynamic>));
+    final response = await executeRequest(
+      () => post(AppConstants.loginEndpoint, data: request.toJson()),
+      (json) => LoginData.fromJson(json as Map<String, dynamic>),
+    );
 
     if (response.success) {
       // Store token and role using the new methods
@@ -25,7 +28,10 @@ class AuthService extends BaseService {
   Future<RegisterResponse> register({required String name, required String phone, required String password, required String role}) async {
     final request = RegisterRequest(name: name, phone: phone, password: password, role: role);
 
-    return await executeRequest(() => post(AppConstants.registerEndpoint, data: request.toJson()), (json) => MessageData.fromJson(json as Map<String, dynamic>));
+    return await executeRequest(
+      () => post(AppConstants.registerEndpoint, data: request.toJson()),
+      (json) => MessageData.fromJson(json as Map<String, dynamic>),
+    );
   }
 
   /// Check if user is logged in

@@ -11,7 +11,9 @@ class AuthProvider extends BaseProvider {
   UserRole? _userRole;
   String? _token;
 
-  AuthProvider({AuthService? authService, PermissionProvider? permissionProvider}) : _authService = authService ?? AuthService(), _permissionProvider = permissionProvider ?? PermissionProvider();
+  AuthProvider({AuthService? authService, PermissionProvider? permissionProvider})
+    : _authService = authService ?? AuthService(),
+      _permissionProvider = permissionProvider ?? PermissionProvider();
 
   // Getters
   bool get isLoggedIn => _isLoggedIn;

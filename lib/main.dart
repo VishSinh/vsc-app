@@ -28,7 +28,14 @@ class VSCApp extends StatelessWidget {
         ),
       ],
       child: AuthInitializer(
-        child: MaterialApp.router(title: AppConfig.appName, theme: AppTheme.lightTheme, darkTheme: AppTheme.darkTheme, themeMode: ThemeMode.system, routerConfig: AppRouter.router, debugShowCheckedModeBanner: false),
+        child: MaterialApp.router(
+          title: AppConfig.appName,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.system,
+          routerConfig: AppRouter.router,
+          debugShowCheckedModeBanner: false,
+        ),
       ),
     );
   }

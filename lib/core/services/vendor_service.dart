@@ -24,14 +24,20 @@ class VendorService extends BaseService {
   Future<CreateVendorResponse> createVendor({required String name, required String phone}) async {
     final request = CreateVendorRequest(name: name, phone: phone);
 
-    return await executeRequest(() => post(AppConstants.vendorsEndpoint, data: request.toJson()), (json) => MessageData.fromJson(json as Map<String, dynamic>));
+    return await executeRequest(
+      () => post(AppConstants.vendorsEndpoint, data: request.toJson()),
+      (json) => MessageData.fromJson(json as Map<String, dynamic>),
+    );
   }
 
   /// Update a vendor
   Future<CreateVendorResponse> updateVendor({required String id, required String name, required String phone}) async {
     final request = CreateVendorRequest(name: name, phone: phone);
 
-    return await executeRequest(() => put('${AppConstants.vendorsEndpoint}/$id', data: request.toJson()), (json) => MessageData.fromJson(json as Map<String, dynamic>));
+    return await executeRequest(
+      () => put('${AppConstants.vendorsEndpoint}/$id', data: request.toJson()),
+      (json) => MessageData.fromJson(json as Map<String, dynamic>),
+    );
   }
 
   /// Delete a vendor

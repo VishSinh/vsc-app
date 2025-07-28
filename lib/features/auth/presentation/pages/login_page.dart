@@ -42,7 +42,11 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [AppConfig.primaryColor.withOpacity(0.1), AppConfig.accentColor.withOpacity(0.1)]),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [AppConfig.primaryColor.withOpacity(0.1), AppConfig.accentColor.withOpacity(0.1)],
+          ),
         ),
         child: Center(
           child: SingleChildScrollView(
@@ -141,7 +145,9 @@ class _LoginPageState extends State<LoginPage> {
                             builder: (context, authProvider, child) {
                               return ElevatedButton(
                                 onPressed: authProvider.isLoading ? null : _handleLogin,
-                                child: authProvider.isLoading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Sign In'),
+                                child: authProvider.isLoading
+                                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                                    : const Text('Sign In'),
                               );
                             },
                           ),

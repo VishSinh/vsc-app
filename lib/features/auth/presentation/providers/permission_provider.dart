@@ -11,7 +11,9 @@ class PermissionProvider extends BaseProvider {
   List<String> _currentPermissions = [];
   List<Permission> _allPermissions = [];
 
-  PermissionProvider({PermissionService? permissionService, PermissionManager? permissionManager}) : _permissionService = permissionService ?? PermissionService(), _permissionManager = permissionManager ?? PermissionManager();
+  PermissionProvider({PermissionService? permissionService, PermissionManager? permissionManager})
+    : _permissionService = permissionService ?? PermissionService(),
+      _permissionManager = permissionManager ?? PermissionManager();
 
   // Getters
   bool get isInitialized => _isInitialized;

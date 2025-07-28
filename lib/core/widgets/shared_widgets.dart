@@ -15,7 +15,10 @@ class LoadingWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(height: size, width: size, child: const CircularProgressIndicator()),
-          if (message != null) ...[const SizedBox(height: AppConfig.defaultPadding), Text(message!, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center)],
+          if (message != null) ...[
+            const SizedBox(height: AppConfig.defaultPadding),
+            Text(message!, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
+          ],
         ],
       ),
     );
@@ -72,7 +75,10 @@ class EmptyStateWidget extends StatelessWidget {
             style: TextStyle(color: Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
-          if (onAction != null && actionLabel != null) ...[const SizedBox(height: AppConfig.defaultPadding), ElevatedButton(onPressed: onAction, child: Text(actionLabel!))],
+          if (onAction != null && actionLabel != null) ...[
+            const SizedBox(height: AppConfig.defaultPadding),
+            ElevatedButton(onPressed: onAction, child: Text(actionLabel!)),
+          ],
         ],
       ),
     );
@@ -120,7 +126,15 @@ class ActionButton extends StatelessWidget {
   final Color? foregroundColor;
   final bool isLoading;
 
-  const ActionButton({super.key, required this.label, required this.icon, this.onPressed, this.backgroundColor, this.foregroundColor, this.isLoading = false});
+  const ActionButton({
+    super.key,
+    required this.label,
+    required this.icon,
+    this.onPressed,
+    this.backgroundColor,
+    this.foregroundColor,
+    this.isLoading = false,
+  });
 
   @override
   Widget build(BuildContext context) {

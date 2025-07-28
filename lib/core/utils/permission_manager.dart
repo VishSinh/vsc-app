@@ -96,11 +96,14 @@ class PermissionManager {
   // Domain-specific permission checks
   bool get canManageAccounts => hasAnyPermission(['account.create', 'account.read', 'account.update', 'account.delete', 'account.list']);
 
-  bool get canManageInventory => hasAnyPermission(['inventory.create', 'inventory.read', 'inventory.update', 'inventory.delete', 'inventory.list', 'inventory.transaction']);
+  bool get canManageInventory =>
+      hasAnyPermission(['inventory.create', 'inventory.read', 'inventory.update', 'inventory.delete', 'inventory.list', 'inventory.transaction']);
 
-  bool get canManageOrders => hasAnyPermission(['order.create', 'order.read', 'order.update', 'order.delete', 'order.list', 'order.approve', 'order.cancel']);
+  bool get canManageOrders =>
+      hasAnyPermission(['order.create', 'order.read', 'order.update', 'order.delete', 'order.list', 'order.approve', 'order.cancel']);
 
-  bool get canManageProduction => hasAnyPermission(['production.create', 'production.read', 'production.update', 'production.delete', 'production.list']);
+  bool get canManageProduction =>
+      hasAnyPermission(['production.create', 'production.read', 'production.update', 'production.delete', 'production.list']);
 
   bool get canManageBilling => hasAnyPermission(['bill.create', 'bill.read', 'bill.update', 'bill.delete', 'bill.list']);
 

@@ -133,7 +133,10 @@ class _DashboardPageState extends State<DashboardPage> {
           // Welcome Header
           Text('Welcome back!', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: AppConfig.smallPadding),
-          Text('Here\'s what\'s happening with your ${userRole.value.toLowerCase()} operations', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey[600])),
+          Text(
+            'Here\'s what\'s happening with your ${userRole.value.toLowerCase()} operations',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+          ),
           const SizedBox(height: AppConfig.largePadding),
 
           // Quick Actions
@@ -236,32 +239,58 @@ class _DashboardPageState extends State<DashboardPage> {
     // Orders stats - show if user can manage orders
     if (permissionProvider.canManageOrders) {
       statsCards.addAll([
-        _buildStatCard(title: 'Total Orders', value: '156', icon: Icons.shopping_cart, color: AppConfig.primaryColor, subtitle: '+12% from last month'),
+        _buildStatCard(
+          title: 'Total Orders',
+          value: '156',
+          icon: Icons.shopping_cart,
+          color: AppConfig.primaryColor,
+          subtitle: '+12% from last month',
+        ),
         _buildStatCard(title: 'Pending Orders', value: '23', icon: Icons.pending, color: AppConfig.warningColor, subtitle: '5 require attention'),
       ]);
     }
 
     // Production stats - show if user can manage production
     if (permissionProvider.canManageProduction) {
-      statsCards.add(_buildStatCard(title: 'Production Jobs', value: '8', icon: Icons.print, color: AppConfig.accentColor, subtitle: '3 in progress'));
+      statsCards.add(
+        _buildStatCard(title: 'Production Jobs', value: '8', icon: Icons.print, color: AppConfig.accentColor, subtitle: '3 in progress'),
+      );
     }
 
     // Inventory stats - show if user can manage inventory
     if (permissionProvider.canManageInventory) {
-      statsCards.add(_buildStatCard(title: 'Low Stock Items', value: '7', icon: Icons.warning, color: AppConfig.errorColor, subtitle: 'Need reorder'));
+      statsCards.add(
+        _buildStatCard(title: 'Low Stock Items', value: '7', icon: Icons.warning, color: AppConfig.errorColor, subtitle: 'Need reorder'),
+      );
     }
 
     // Revenue stats - show if user can manage billing or payments
     if (permissionProvider.canManageBilling || permissionProvider.canManagePayments) {
-      statsCards.add(_buildStatCard(title: 'Total Revenue', value: '\$45,230', icon: Icons.attach_money, color: AppConfig.successColor, subtitle: '+8% from last month'));
+      statsCards.add(
+        _buildStatCard(
+          title: 'Total Revenue',
+          value: '\$45,230',
+          icon: Icons.attach_money,
+          color: AppConfig.successColor,
+          subtitle: '+8% from last month',
+        ),
+      );
     }
 
     // Partners stats - show if user can manage vendors
     if (permissionProvider.canManageVendors) {
-      statsCards.add(_buildStatCard(title: 'Active Partners', value: '12', icon: Icons.people, color: AppConfig.secondaryColor, subtitle: '3 new this month'));
+      statsCards.add(
+        _buildStatCard(title: 'Active Partners', value: '12', icon: Icons.people, color: AppConfig.secondaryColor, subtitle: '3 new this month'),
+      );
     }
 
-    return GridView.count(crossAxisCount: _getGridCrossAxisCount(), crossAxisSpacing: AppConfig.defaultPadding, mainAxisSpacing: AppConfig.defaultPadding, childAspectRatio: 1.5, children: statsCards);
+    return GridView.count(
+      crossAxisCount: _getGridCrossAxisCount(),
+      crossAxisSpacing: AppConfig.defaultPadding,
+      mainAxisSpacing: AppConfig.defaultPadding,
+      childAspectRatio: 1.5,
+      children: statsCards,
+    );
   }
 
   Widget _buildStatCard({required String title, required String value, required IconData icon, required Color color, required String subtitle}) {

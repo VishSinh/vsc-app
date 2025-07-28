@@ -20,18 +20,60 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
 
   // Mock admin data
   final List<Map<String, dynamic>> _staff = [
-    {'id': 'STAFF-001', 'name': 'John Admin', 'email': 'john@company.com', 'role': UserRole.admin, 'status': 'Active', 'lastLogin': '2024-01-15 10:30'},
-    {'id': 'STAFF-002', 'name': 'Sarah Manager', 'email': 'sarah@company.com', 'role': UserRole.manager, 'status': 'Active', 'lastLogin': '2024-01-15 09:15'},
+    {
+      'id': 'STAFF-001',
+      'name': 'John Admin',
+      'email': 'john@company.com',
+      'role': UserRole.admin,
+      'status': 'Active',
+      'lastLogin': '2024-01-15 10:30',
+    },
+    {
+      'id': 'STAFF-002',
+      'name': 'Sarah Manager',
+      'email': 'sarah@company.com',
+      'role': UserRole.manager,
+      'status': 'Active',
+      'lastLogin': '2024-01-15 09:15',
+    },
   ];
 
   final List<Map<String, dynamic>> _partners = [
-    {'id': 'PARTNER-001', 'name': 'Premium Paper Co.', 'type': 'Vendor', 'contact': 'Mike Johnson', 'email': 'mike@premiumpaper.com', 'status': 'Active'},
-    {'id': 'PARTNER-002', 'name': 'Quality Print Supplies', 'type': 'Vendor', 'contact': 'Lisa Chen', 'email': 'lisa@qualityprint.com', 'status': 'Active'},
+    {
+      'id': 'PARTNER-001',
+      'name': 'Premium Paper Co.',
+      'type': 'Vendor',
+      'contact': 'Mike Johnson',
+      'email': 'mike@premiumpaper.com',
+      'status': 'Active',
+    },
+    {
+      'id': 'PARTNER-002',
+      'name': 'Quality Print Supplies',
+      'type': 'Vendor',
+      'contact': 'Lisa Chen',
+      'email': 'lisa@qualityprint.com',
+      'status': 'Active',
+    },
   ];
 
   final List<Map<String, dynamic>> _auditLogs = [
-    {'id': 'AUDIT-001', 'action': 'Order Created', 'user': 'John Admin', 'timestamp': '2024-01-15 14:30', 'details': 'Created order ORD-001 for John Doe', 'ip': '192.168.1.100'},
-    {'id': 'AUDIT-002', 'action': 'Stock Updated', 'user': 'Sarah Manager', 'timestamp': '2024-01-15 13:45', 'details': 'Updated stock for CARD-001: +500 units', 'ip': '192.168.1.101'},
+    {
+      'id': 'AUDIT-001',
+      'action': 'Order Created',
+      'user': 'John Admin',
+      'timestamp': '2024-01-15 14:30',
+      'details': 'Created order ORD-001 for John Doe',
+      'ip': '192.168.1.100',
+    },
+    {
+      'id': 'AUDIT-002',
+      'action': 'Stock Updated',
+      'user': 'Sarah Manager',
+      'timestamp': '2024-01-15 13:45',
+      'details': 'Updated stock for CARD-001: +500 units',
+      'ip': '192.168.1.101',
+    },
   ];
 
   final List<NavigationDestination> _destinations = [
@@ -78,25 +120,33 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
 
   List<Map<String, dynamic>> get _filteredStaff {
     return _staff.where((staff) {
-      return staff['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) || staff['email'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
+      return staff['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          staff['email'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
   }
 
   List<Map<String, dynamic>> get _filteredPartners {
     return _partners.where((partner) {
-      return partner['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) || partner['contact'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
+      return partner['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          partner['contact'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
   }
 
   List<Map<String, dynamic>> get _filteredAuditLogs {
     return _auditLogs.where((log) {
-      return log['action'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) || log['user'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
+      return log['action'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          log['user'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveLayout(selectedIndex: _selectedIndex, destinations: _destinations, onDestinationSelected: _onDestinationSelected, child: _buildAdministrationContent());
+    return ResponsiveLayout(
+      selectedIndex: _selectedIndex,
+      destinations: _destinations,
+      onDestinationSelected: _onDestinationSelected,
+      child: _buildAdministrationContent(),
+    );
   }
 
   Widget _buildAdministrationContent() {
@@ -113,7 +163,12 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 children: [
                   Text('Administration', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
                   const Spacer(),
-                  if (isAdmin) ElevatedButton.icon(onPressed: () => context.go('/register'), icon: const Icon(Icons.person_add), label: const Text('Register Staff')),
+                  if (isAdmin)
+                    ElevatedButton.icon(
+                      onPressed: () => context.go('/register'),
+                      icon: const Icon(Icons.person_add),
+                      label: const Text('Register Staff'),
+                    ),
                 ],
               ),
               const SizedBox(height: AppConfig.largePadding),
@@ -169,7 +224,10 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
           margin: const EdgeInsets.only(bottom: AppConfig.smallPadding),
           child: ListTile(
             title: Text(staff['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(staff['email']), Text('Role: ${staff['role'].value}'), Text('Last login: ${staff['lastLogin']}')]),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [Text(staff['email']), Text('Role: ${staff['role'].value}'), Text('Last login: ${staff['lastLogin']}')],
+            ),
             trailing: Chip(
               label: Text(staff['status']),
               backgroundColor: staff['status'] == 'Active' ? AppConfig.successColor.withOpacity(0.1) : AppConfig.errorColor.withOpacity(0.1),
@@ -249,7 +307,10 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
           margin: const EdgeInsets.only(bottom: AppConfig.smallPadding),
           child: ListTile(
             title: Text(partner['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('${partner['type']} • ${partner['contact']}'), Text(partner['email'])]),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [Text('${partner['type']} • ${partner['contact']}'), Text(partner['email'])],
+            ),
             trailing: Chip(
               label: Text(partner['status']),
               backgroundColor: partner['status'] == 'Active' ? AppConfig.successColor.withOpacity(0.1) : AppConfig.errorColor.withOpacity(0.1),
@@ -329,7 +390,10 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
           margin: const EdgeInsets.only(bottom: AppConfig.smallPadding),
           child: ListTile(
             title: Text(log['action'], style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('${log['user']} • ${log['timestamp']}'), Text(log['details']), Text('IP: ${log['ip']}')]),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [Text('${log['user']} • ${log['timestamp']}'), Text(log['details']), Text('IP: ${log['ip']}')],
+            ),
           ),
         );
       },
@@ -349,7 +413,16 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
           DataColumn(label: Text('IP Address')),
         ],
         rows: _filteredAuditLogs.map((log) {
-          return DataRow(cells: [DataCell(Text(log['id'])), DataCell(Text(log['action'])), DataCell(Text(log['user'])), DataCell(Text(log['timestamp'])), DataCell(Text(log['details'])), DataCell(Text(log['ip']))]);
+          return DataRow(
+            cells: [
+              DataCell(Text(log['id'])),
+              DataCell(Text(log['action'])),
+              DataCell(Text(log['user'])),
+              DataCell(Text(log['timestamp'])),
+              DataCell(Text(log['details'])),
+              DataCell(Text(log['ip'])),
+            ],
+          );
         }).toList(),
       ),
     );

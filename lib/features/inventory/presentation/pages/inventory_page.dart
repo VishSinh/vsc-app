@@ -17,9 +17,33 @@ class _InventoryPageState extends State<InventoryPage> {
 
   // Mock inventory data
   final List<Map<String, dynamic>> _inventory = [
-    {'id': 'CARD-001', 'name': 'Business Card Premium', 'category': 'Business Cards', 'stock': 1500, 'minStock': 100, 'price': 0.15, 'vendor': 'Premium Paper Co.'},
-    {'id': 'CARD-002', 'name': 'Flyer Glossy A4', 'category': 'Flyers', 'stock': 500, 'minStock': 200, 'price': 0.25, 'vendor': 'Quality Print Supplies'},
-    {'id': 'CARD-003', 'name': 'Brochure Tri-Fold', 'category': 'Brochures', 'stock': 75, 'minStock': 50, 'price': 0.45, 'vendor': 'Premium Paper Co.'},
+    {
+      'id': 'CARD-001',
+      'name': 'Business Card Premium',
+      'category': 'Business Cards',
+      'stock': 1500,
+      'minStock': 100,
+      'price': 0.15,
+      'vendor': 'Premium Paper Co.',
+    },
+    {
+      'id': 'CARD-002',
+      'name': 'Flyer Glossy A4',
+      'category': 'Flyers',
+      'stock': 500,
+      'minStock': 200,
+      'price': 0.25,
+      'vendor': 'Quality Print Supplies',
+    },
+    {
+      'id': 'CARD-003',
+      'name': 'Brochure Tri-Fold',
+      'category': 'Brochures',
+      'stock': 75,
+      'minStock': 50,
+      'price': 0.45,
+      'vendor': 'Premium Paper Co.',
+    },
   ];
 
   final List<NavigationDestination> _destinations = [
@@ -54,7 +78,9 @@ class _InventoryPageState extends State<InventoryPage> {
 
   List<Map<String, dynamic>> get _filteredInventory {
     return _inventory.where((item) {
-      final matchesSearch = item['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) || item['id'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
+      final matchesSearch =
+          item['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          item['id'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
       final matchesCategory = _categoryFilter == 'All' || item['category'] == _categoryFilter;
       return matchesSearch && matchesCategory;
     }).toList();
@@ -118,7 +144,13 @@ class _InventoryPageState extends State<InventoryPage> {
           child: DropdownButtonFormField<String>(
             value: _categoryFilter,
             decoration: const InputDecoration(labelText: 'Category'),
-            items: ['All', 'Business Cards', 'Flyers', 'Brochures', 'Posters'].map((category) => DropdownMenuItem(value: category, child: Text(category))).toList(),
+            items: [
+              'All',
+              'Business Cards',
+              'Flyers',
+              'Brochures',
+              'Posters',
+            ].map((category) => DropdownMenuItem(value: category, child: Text(category))).toList(),
             onChanged: (value) {
               if (value != null) {
                 setState(() {

@@ -9,7 +9,15 @@ class ResponsiveLayout extends StatelessWidget {
   final Widget? floatingActionButton;
   final List<Widget>? actions;
 
-  const ResponsiveLayout({super.key, required this.child, required this.destinations, required this.selectedIndex, required this.onDestinationSelected, this.floatingActionButton, this.actions});
+  const ResponsiveLayout({
+    super.key,
+    required this.child,
+    required this.destinations,
+    required this.selectedIndex,
+    required this.onDestinationSelected,
+    this.floatingActionButton,
+    this.actions,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -56,14 +64,22 @@ class ResponsiveLayout extends StatelessWidget {
               children: [
                 Text(AppConfig.appName, style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Theme.of(context).colorScheme.onPrimary)),
                 const SizedBox(height: 8),
-                Text('Inventory Management', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8))),
+                Text(
+                  'Inventory Management',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8)),
+                ),
               ],
             ),
           ),
           ...destinations.asMap().entries.map((entry) {
             final index = entry.key;
             final destination = entry.value;
-            return ListTile(leading: destination.icon, title: Text(destination.label), selected: selectedIndex == index, onTap: () => onDestinationSelected(index));
+            return ListTile(
+              leading: destination.icon,
+              title: Text(destination.label),
+              selected: selectedIndex == index,
+              onTap: () => onDestinationSelected(index),
+            );
           }),
         ],
       ),

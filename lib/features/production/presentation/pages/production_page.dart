@@ -19,12 +19,39 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
 
   // Mock production data
   final List<Map<String, dynamic>> _printingJobs = [
-    {'id': 'PRINT-001', 'orderId': 'ORD-001', 'customer': 'John Doe', 'type': 'Business Cards', 'quantity': 1000, 'status': JobStatus.pending, 'assignedTo': 'Printer-01', 'dueDate': '2024-01-20'},
-    {'id': 'PRINT-002', 'orderId': 'ORD-002', 'customer': 'Jane Smith', 'type': 'Flyers', 'quantity': 500, 'status': JobStatus.inProgress, 'assignedTo': 'Printer-02', 'dueDate': '2024-01-18'},
+    {
+      'id': 'PRINT-001',
+      'orderId': 'ORD-001',
+      'customer': 'John Doe',
+      'type': 'Business Cards',
+      'quantity': 1000,
+      'status': JobStatus.pending,
+      'assignedTo': 'Printer-01',
+      'dueDate': '2024-01-20',
+    },
+    {
+      'id': 'PRINT-002',
+      'orderId': 'ORD-002',
+      'customer': 'Jane Smith',
+      'type': 'Flyers',
+      'quantity': 500,
+      'status': JobStatus.inProgress,
+      'assignedTo': 'Printer-02',
+      'dueDate': '2024-01-18',
+    },
   ];
 
   final List<Map<String, dynamic>> _boxOrders = [
-    {'id': 'BOX-001', 'orderId': 'ORD-001', 'customer': 'John Doe', 'type': 'Cardboard Box', 'quantity': 5, 'status': JobStatus.completed, 'assignedTo': 'BoxMaker-01', 'dueDate': '2024-01-19'},
+    {
+      'id': 'BOX-001',
+      'orderId': 'ORD-001',
+      'customer': 'John Doe',
+      'type': 'Cardboard Box',
+      'quantity': 5,
+      'status': JobStatus.completed,
+      'assignedTo': 'BoxMaker-01',
+      'dueDate': '2024-01-19',
+    },
   ];
 
   final List<NavigationDestination> _destinations = [
@@ -71,7 +98,9 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
 
   List<Map<String, dynamic>> get _filteredPrintingJobs {
     return _printingJobs.where((job) {
-      final matchesSearch = job['id'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) || job['customer'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
+      final matchesSearch =
+          job['id'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          job['customer'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
       final matchesStatus = _statusFilter == 'All' || job['status'].value == _statusFilter;
       return matchesSearch && matchesStatus;
     }).toList();
@@ -79,7 +108,9 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
 
   List<Map<String, dynamic>> get _filteredBoxOrders {
     return _boxOrders.where((job) {
-      final matchesSearch = job['id'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) || job['customer'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
+      final matchesSearch =
+          job['id'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          job['customer'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
       final matchesStatus = _statusFilter == 'All' || job['status'].value == _statusFilter;
       return matchesSearch && matchesStatus;
     }).toList();
@@ -87,7 +118,12 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveLayout(selectedIndex: _selectedIndex, destinations: _destinations, onDestinationSelected: _onDestinationSelected, child: _buildProductionContent());
+    return ResponsiveLayout(
+      selectedIndex: _selectedIndex,
+      destinations: _destinations,
+      onDestinationSelected: _onDestinationSelected,
+      child: _buildProductionContent(),
+    );
   }
 
   Widget _buildProductionContent() {
@@ -112,7 +148,10 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
                 ),
                 const SizedBox(height: AppConfig.defaultPadding),
                 Expanded(
-                  child: TabBarView(controller: _tabController, children: [_buildJobsList(_filteredPrintingJobs, 'Printing'), _buildJobsList(_filteredBoxOrders, 'Box')]),
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [_buildJobsList(_filteredPrintingJobs, 'Printing'), _buildJobsList(_filteredBoxOrders, 'Box')],
+                  ),
                 ),
               ],
             ),
@@ -172,7 +211,11 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
             title: Text(job['id'], style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [Text('${job['customer']} • ${job['type']}'), Text('Qty: ${job['quantity']} • Due: ${job['dueDate']}'), if (job['assignedTo'] != null) Text('Assigned to: ${job['assignedTo']}')],
+              children: [
+                Text('${job['customer']} • ${job['type']}'),
+                Text('Qty: ${job['quantity']} • Due: ${job['dueDate']}'),
+                if (job['assignedTo'] != null) Text('Assigned to: ${job['assignedTo']}'),
+              ],
             ),
             trailing: Column(
               mainAxisAlignment: MainAxisAlignment.center,

@@ -33,7 +33,9 @@ class _CreateVendorDialogState extends State<CreateVendorDialog> {
 
     if (success && mounted) {
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(vendorProvider.successMessage ?? AppConstants.vendorCreatedMessage), backgroundColor: AppConfig.successColor));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(vendorProvider.successMessage ?? AppConstants.vendorCreatedMessage), backgroundColor: AppConfig.successColor),
+      );
     }
   }
 
@@ -81,7 +83,12 @@ class _CreateVendorDialogState extends State<CreateVendorDialog> {
         TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
         Consumer<VendorProvider>(
           builder: (context, vendorProvider, child) {
-            return ActionButton(label: 'Create', icon: Icons.add, onPressed: vendorProvider.isLoading ? null : _handleCreateVendor, isLoading: vendorProvider.isLoading);
+            return ActionButton(
+              label: 'Create',
+              icon: Icons.add,
+              onPressed: vendorProvider.isLoading ? null : _handleCreateVendor,
+              isLoading: vendorProvider.isLoading,
+            );
           },
         ),
       ],

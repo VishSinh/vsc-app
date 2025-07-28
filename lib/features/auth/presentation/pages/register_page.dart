@@ -36,11 +36,18 @@ class _RegisterPageState extends State<RegisterPage> {
 
     final authProvider = context.read<AuthProvider>();
 
-    final success = await authProvider.register(name: _nameController.text.trim(), phone: _phoneController.text.trim(), password: _passwordController.text, role: _selectedRole.value);
+    final success = await authProvider.register(
+      name: _nameController.text.trim(),
+      phone: _phoneController.text.trim(),
+      password: _passwordController.text,
+      role: _selectedRole.value,
+    );
 
     if (success && mounted) {
       // Show success message and clear form
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(authProvider.successMessage ?? 'Registration successful'), backgroundColor: AppConfig.successColor));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(authProvider.successMessage ?? 'Registration successful'), backgroundColor: AppConfig.successColor));
 
       // Clear form
       _nameController.clear();
@@ -234,7 +241,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         builder: (context, authProvider, child) {
                           return ElevatedButton(
                             onPressed: authProvider.isLoading ? null : _handleRegister,
-                            child: authProvider.isLoading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Register Staff Member'),
+                            child: authProvider.isLoading
+                                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                                : const Text('Register Staff Member'),
                           );
                         },
                       ),

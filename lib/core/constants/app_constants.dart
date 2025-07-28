@@ -100,7 +100,15 @@ class AppConstants {
     'customer.list',
   ];
 
-  static const List<String> salesPermissions = ['order.create', 'order.read', 'order.list', 'customer.read', 'customer.list', 'inventory.read', 'inventory.list'];
+  static const List<String> salesPermissions = [
+    'order.create',
+    'order.read',
+    'order.list',
+    'customer.read',
+    'customer.list',
+    'inventory.read',
+    'inventory.list',
+  ];
 
   // Feature Flags
   static const bool enableVendorManagement = true;
@@ -117,7 +125,21 @@ class AppConstants {
   static const int maxRetryAttempts = 3;
 
   // UI Configuration
-  static const Map<String, String> featureLabels = {'vendors': 'Vendors', 'customers': 'Customers', 'orders': 'Orders', 'inventory': 'Inventory', 'production': 'Production', 'administration': 'Administration'};
+  static const Map<String, String> featureLabels = {
+    'vendors': 'Vendors',
+    'customers': 'Customers',
+    'orders': 'Orders',
+    'inventory': 'Inventory',
+    'production': 'Production',
+    'administration': 'Administration',
+  };
 
-  static const Map<String, IconData> featureIcons = {'vendors': Icons.people, 'customers': Icons.person, 'orders': Icons.shopping_cart, 'inventory': Icons.inventory, 'production': Icons.print, 'administration': Icons.admin_panel_settings};
+  static const Map<String, IconData> featureIcons = {
+    'vendors': Icons.people,
+    'customers': Icons.person,
+    'orders': Icons.shopping_cart,
+    'inventory': Icons.inventory,
+    'production': Icons.print,
+    'administration': Icons.admin_panel_settings,
+  };
 }

@@ -168,14 +168,33 @@ class PermissionCard extends StatelessWidget {
   final Clip? clipBehavior;
   final Widget? fallback;
 
-  const PermissionCard({super.key, required this.permission, required this.child, this.color, this.shadowColor, this.elevation, this.shape, this.margin, this.clipBehavior, this.fallback});
+  const PermissionCard({
+    super.key,
+    required this.permission,
+    required this.child,
+    this.color,
+    this.shadowColor,
+    this.elevation,
+    this.shape,
+    this.margin,
+    this.clipBehavior,
+    this.fallback,
+  });
 
   @override
   Widget build(BuildContext context) {
     final permissionManager = PermissionManager();
 
     if (permissionManager.hasPermission(permission)) {
-      return Card(color: color, shadowColor: shadowColor, elevation: elevation, shape: shape, margin: margin, clipBehavior: clipBehavior, child: child);
+      return Card(
+        color: color,
+        shadowColor: shadowColor,
+        elevation: elevation,
+        shape: shape,
+        margin: margin,
+        clipBehavior: clipBehavior,
+        child: child,
+      );
     }
 
     return fallback ?? const SizedBox.shrink();

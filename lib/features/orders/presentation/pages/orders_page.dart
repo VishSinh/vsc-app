@@ -56,7 +56,9 @@ class _OrdersPageState extends State<OrdersPage> {
 
   List<Map<String, dynamic>> get _filteredOrders {
     return _orders.where((order) {
-      final matchesSearch = order['id'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) || order['customer'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
+      final matchesSearch =
+          order['id'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          order['customer'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
       final matchesStatus = _statusFilter == 'All' || order['status'] == _statusFilter;
       return matchesSearch && matchesStatus;
     }).toList();
@@ -122,7 +124,13 @@ class _OrdersPageState extends State<OrdersPage> {
           child: DropdownButtonFormField<String>(
             value: _statusFilter,
             decoration: const InputDecoration(labelText: 'Status'),
-            items: ['All', 'Pending', 'In Production', 'Completed', 'Cancelled'].map((status) => DropdownMenuItem(value: status, child: Text(status))).toList(),
+            items: [
+              'All',
+              'Pending',
+              'In Production',
+              'Completed',
+              'Cancelled',
+            ].map((status) => DropdownMenuItem(value: status, child: Text(status))).toList(),
             onChanged: (value) {
               if (value != null) {
                 setState(() {
@@ -155,7 +163,10 @@ class _OrdersPageState extends State<OrdersPage> {
           margin: const EdgeInsets.only(bottom: AppConfig.smallPadding),
           child: ListTile(
             title: Text(order['id'], style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(order['customer']), Text('${order['items']} items • \$${order['total'].toStringAsFixed(2)}')]),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [Text(order['customer']), Text('${order['items']} items • \$${order['total'].toStringAsFixed(2)}')],
+            ),
             trailing: Chip(
               label: Text(order['status']),
               backgroundColor: _getStatusColor(order['status']).withOpacity(0.1),

@@ -59,7 +59,11 @@ abstract class BaseProvider extends ChangeNotifier {
   }
 
   /// Execute an API call with standardized error handling
-  Future<bool> executeApiCall<T>(Future<ApiResponse<T>> Function() apiCall, {void Function(T data)? onSuccess, void Function(String error)? onError}) async {
+  Future<bool> executeApiCall<T>(
+    Future<ApiResponse<T>> Function() apiCall, {
+    void Function(T data)? onSuccess,
+    void Function(String error)? onError,
+  }) async {
     final result = await executeAsync(() async {
       final response = await apiCall();
 

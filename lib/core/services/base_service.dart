@@ -27,7 +27,9 @@ abstract class BaseService {
     );
 
     // Add pretty logger interceptor
-    dio.interceptors.add(PrettyDioLogger(requestHeader: true, requestBody: true, responseBody: true, responseHeader: false, error: true, compact: true, maxWidth: 90));
+    dio.interceptors.add(
+      PrettyDioLogger(requestHeader: true, requestBody: true, responseBody: true, responseHeader: false, error: true, compact: true, maxWidth: 90),
+    );
 
     // Add auth token interceptor
     dio.interceptors.add(
