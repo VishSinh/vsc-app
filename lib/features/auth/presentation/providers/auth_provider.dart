@@ -37,13 +37,9 @@ class AuthProvider extends BaseProvider {
         _isLoggedIn = true;
         _userRole = roleString != null ? UserRole.fromString(roleString) : null;
 
-        // Only load permissions if we have a valid token
-        try {
-          await _permissionProvider.initializePermissions();
-        } catch (e) {
-          // If permissions fail, clear auth and redirect to login
-          await logout();
-        }
+        // Only initialize cached permissions, don't call API
+        // Permissions API will be called only after fresh login
+        await _permissionProvider.initializeCachedPermissions();
       }
     });
   }
@@ -53,11 +49,14 @@ class AuthProvider extends BaseProvider {
     return await executeApiCall(
       () => _authService.login(phone: phone, password: password),
       onSuccess: (data) {
+        // Clear previous data first
+        _permissionProvider.clearPermissions();
+
         _isLoggedIn = true;
         _userRole = data.userRole;
         _token = data.token;
 
-        // Load permissions after successful login
+        // Load permissions after successful login (only once per session)
         _permissionProvider.initializePermissions();
         if (context != null) {
           SnackbarUtils.showSuccess(context, 'Login successful!');
@@ -93,13 +92,14 @@ class AuthProvider extends BaseProvider {
   /// Logout user
   Future<void> logout({BuildContext? context}) async {
     await executeAsync(() async {
+      // Clear permissions first
+      _permissionProvider.clearPermissions();
+
       await _authService.logout();
       _isLoggedIn = false;
       _userRole = null;
       _token = null;
 
-      // Clear permissions on logout
-      _permissionProvider.clearPermissions();
       if (context != null) {
         SnackbarUtils.showSuccess(context, 'Logged out successfully!');
       }

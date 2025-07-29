@@ -63,7 +63,7 @@ class ResponsiveLayout extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(AppConfig.appName, style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Theme.of(context).colorScheme.onPrimary)),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppConfig.spacingSmall),
                 Text(
                   'Inventory Management',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8)),

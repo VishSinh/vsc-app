@@ -3,6 +3,7 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:vsc_app/core/constants/app_constants.dart';
 import 'package:vsc_app/core/models/api_response.dart';
+import 'package:vsc_app/app/app_config.dart';
 
 abstract class BaseService {
   static const String _baseUrl = 'http://localhost:8000/api/v1';
@@ -19,16 +20,24 @@ abstract class BaseService {
     final dio = Dio(
       BaseOptions(
         baseUrl: _baseUrl,
-        connectTimeout: const Duration(seconds: 30),
-        receiveTimeout: const Duration(seconds: 30),
-        sendTimeout: const Duration(seconds: 30),
+        connectTimeout: AppConstants.requestTimeout,
+        receiveTimeout: AppConstants.requestTimeout,
+        sendTimeout: AppConstants.requestTimeout,
         headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
       ),
     );
 
     // Add pretty logger interceptor
     dio.interceptors.add(
-      PrettyDioLogger(requestHeader: true, requestBody: true, responseBody: true, responseHeader: false, error: true, compact: true, maxWidth: 90),
+      PrettyDioLogger(
+        requestHeader: true,
+        requestBody: true,
+        responseBody: true,
+        responseHeader: false,
+        error: true,
+        compact: true,
+        maxWidth: AppConfig.fontSize5xl.toInt(),
+      ),
     );
 
     // Add auth token interceptor
@@ -90,6 +99,9 @@ abstract class BaseService {
   /// Execute a request with automatic error handling
   Future<ApiResponse<T>> executeRequest<T>(Future<Response> Function() request, T Function(dynamic json) fromJson) async {
     try {
+      // Simulate network latency for remote server
+      await Future.delayed(const Duration(seconds: 2));
+
       final response = await request();
       return handleResponse(response, fromJson);
     } on DioException catch (e) {

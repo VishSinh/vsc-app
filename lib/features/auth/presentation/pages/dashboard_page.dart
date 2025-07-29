@@ -7,6 +7,7 @@ import 'package:vsc_app/core/utils/responsive_layout.dart';
 import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
+import 'package:vsc_app/core/widgets/shimmer_widgets.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -17,6 +18,45 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
+  bool _isLoading = true; // Show shimmer while permissions load
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if permissions are loaded, if not show shimmer
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final permissionProvider = context.read<PermissionProvider>();
+      if (!permissionProvider.isInitialized) {
+        // Show shimmer while permissions load
+        setState(() {
+          _isLoading = true;
+        });
+
+        // Wait for permissions to load
+        permissionProvider
+            .initializePermissions()
+            .then((_) {
+              if (mounted) {
+                setState(() {
+                  _isLoading = false;
+                });
+              }
+            })
+            .catchError((error) {
+              if (mounted) {
+                setState(() {
+                  _isLoading = false;
+                });
+              }
+            });
+      } else {
+        // Permissions already loaded, hide shimmer
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +185,7 @@ class _DashboardPageState extends State<DashboardPage> {
           const SizedBox(height: AppConfig.largePadding),
 
           // Stats Cards
-          Expanded(child: _buildStatsGrid(userRole, permissionProvider)),
+          Expanded(child: _isLoading ? _buildShimmerSkeleton() : _buildStatsGrid(userRole, permissionProvider)),
         ],
       ),
     );
@@ -315,9 +355,9 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             Row(
               children: [
-                Icon(icon, color: color, size: 24),
+                Icon(icon, color: color, size: AppConfig.iconSizeMedium),
                 const Spacer(),
-                Icon(Icons.trending_up, color: color.withOpacity(0.5), size: 16),
+                Icon(Icons.trending_up, color: color.withOpacity(0.5), size: AppConfig.iconSizeSmall),
               ],
             ),
             const Spacer(),
@@ -344,5 +384,17 @@ class _DashboardPageState extends State<DashboardPage> {
     } else {
       return 3;
     }
+  }
+
+  Widget _buildShimmerSkeleton() {
+    return GridView.count(
+      crossAxisCount: _getGridCrossAxisCount(),
+      crossAxisSpacing: AppConfig.defaultPadding,
+      mainAxisSpacing: AppConfig.defaultPadding,
+      childAspectRatio: 1.5,
+      children: List.generate(6, (index) {
+        return const ShimmerWrapper(child: StatsCardSkeleton());
+      }),
+    );
   }
 }

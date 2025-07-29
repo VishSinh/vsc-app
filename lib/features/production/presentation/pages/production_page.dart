@@ -225,7 +225,7 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
                   backgroundColor: _getStatusColor(job['status']).withOpacity(0.1),
                   labelStyle: TextStyle(color: _getStatusColor(job['status'])),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppConfig.spacingTiny),
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () {

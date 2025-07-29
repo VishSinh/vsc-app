@@ -15,7 +15,7 @@ class SnackbarUtils {
     final screenWidth = MediaQuery.of(context).size.width;
     if (screenWidth > AppConfig.tabletBreakpoint) {
       // For laptop/desktop screens, position at bottom right with smaller width
-      // return const EdgeInsets.only(bottom: 20, right: 20);
+      return AppConfig.snackbarMargin;
     }
     return null; // Default margin for mobile
   }
@@ -25,7 +25,7 @@ class SnackbarUtils {
     final screenWidth = MediaQuery.of(context).size.width;
     if (screenWidth > AppConfig.tabletBreakpoint) {
       // For laptop/desktop screens, limit width to make it smaller
-      // return const BoxConstraints(maxWidth: 400);
+      return BoxConstraints(maxWidth: AppConfig.snackbarMaxWidth);
     }
     return null; // Full width for mobile
   }
@@ -33,7 +33,7 @@ class SnackbarUtils {
   /// Show success snackbar
   static void showSuccess(BuildContext context, String message) {
     final snackBar = SnackBar(
-      elevation: 8,
+      elevation: AppConfig.snackbarElevation,
       behavior: _getSnackBarBehavior(context),
       backgroundColor: Colors.transparent,
       margin: _getSnackBarMargin(context),
@@ -48,7 +48,7 @@ class SnackbarUtils {
   /// Show error snackbar
   static void showError(BuildContext context, String message) {
     final snackBar = SnackBar(
-      elevation: 8,
+      elevation: AppConfig.snackbarElevation,
       behavior: _getSnackBarBehavior(context),
       backgroundColor: Colors.transparent,
       margin: _getSnackBarMargin(context),
@@ -63,7 +63,7 @@ class SnackbarUtils {
   /// Show warning snackbar
   static void showWarning(BuildContext context, String message) {
     final snackBar = SnackBar(
-      elevation: 8,
+      elevation: AppConfig.snackbarElevation,
       behavior: _getSnackBarBehavior(context),
       backgroundColor: Colors.transparent,
       margin: _getSnackBarMargin(context),
@@ -78,7 +78,7 @@ class SnackbarUtils {
   /// Show info snackbar
   static void showInfo(BuildContext context, String message) {
     final snackBar = SnackBar(
-      elevation: 0,
+      elevation: AppConfig.elevationNone,
       behavior: _getSnackBarBehavior(context),
       margin: _getSnackBarMargin(context),
       backgroundColor: Colors.transparent,
@@ -93,7 +93,7 @@ class SnackbarUtils {
   /// Show API error snackbar (for failed API calls only)
   static void showApiError(BuildContext context, String message) {
     final snackBar = SnackBar(
-      elevation: 8,
+      elevation: AppConfig.snackbarElevation,
       behavior: _getSnackBarBehavior(context),
       backgroundColor: Colors.transparent,
       margin: _getSnackBarMargin(context),

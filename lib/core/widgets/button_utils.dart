@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/app/app_config.dart';
 
 /// Centralized button utilities for consistent styling across the app
@@ -105,12 +106,12 @@ class ButtonUtils {
   }) {
     return ElevatedButton.icon(
       onPressed: isLoading ? null : onPressed,
-      icon: isLoading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : Icon(icon),
+      icon: isLoading ? SpinKitDoubleBounce(color: foregroundColor ?? AppConfig.primaryColor, size: AppConfig.loadingIndicatorSize) : Icon(icon),
       label: Text(label, style: AppConfig.buttonStyle),
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
         foregroundColor: foregroundColor,
-        padding: const EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding, vertical: AppConfig.spacingSmall),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
         textStyle: AppConfig.buttonStyle,
       ),

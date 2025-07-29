@@ -5,6 +5,7 @@ import 'package:vsc_app/core/constants/app_constants.dart';
 import 'package:vsc_app/core/models/vendor_model.dart';
 import 'package:vsc_app/core/utils/responsive_layout.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
+import 'package:vsc_app/core/widgets/shimmer_widgets.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
@@ -86,7 +87,7 @@ class _VendorsPageState extends State<VendorsPage> {
             child: Consumer<VendorProvider>(
               builder: (context, vendorProvider, child) {
                 if (vendorProvider.isLoading && vendorProvider.vendors.isEmpty) {
-                  return const LoadingWidget();
+                  return _buildShimmerSkeleton();
                 }
 
                 if (vendorProvider.errorMessage != null) {
@@ -151,5 +152,14 @@ class _VendorsPageState extends State<VendorsPage> {
 
   void _showCreateVendorDialog() {
     showDialog(context: context, builder: (context) => const CreateVendorDialog());
+  }
+
+  Widget _buildShimmerSkeleton() {
+    return ListView.builder(
+      itemCount: 6, // Show 6 skeleton items
+      itemBuilder: (context, index) {
+        return const ShimmerWrapper(child: ListItemSkeleton());
+      },
+    );
   }
 }

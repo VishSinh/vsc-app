@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
@@ -53,7 +54,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
           return SingleChildScrollView(
             padding: const EdgeInsets.all(AppConfig.largePadding),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1200),
+              constraints: const BoxConstraints(maxWidth: AppConfig.maxWidthXLarge),
               child: Card(
                 elevation: 4,
                 child: Padding(
@@ -72,7 +73,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
                         LayoutBuilder(
                           builder: (context, constraints) {
                             // Use row layout for larger screens (width > 800)
-                            if (constraints.maxWidth > 800) {
+                            if (constraints.maxWidth > AppConfig.maxWidthLarge) {
                               return Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -134,7 +135,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
           children: [
             Row(
               children: [
-                Icon(Icons.image, color: AppConfig.primaryColor, size: AppConfig.fontSize3xl),
+                Icon(Icons.image, color: AppConfig.primaryColor, size: AppConfig.iconSizeLarge),
                 const SizedBox(width: AppConfig.smallPadding),
                 Text('Card Image', style: AppConfig.titleStyle),
               ],
@@ -164,7 +165,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
                             color: Colors.grey.shade200,
-                            child: const Icon(Icons.error, color: Colors.red, size: 48),
+                            child: const Icon(Icons.error, color: Colors.red, size: AppConfig.iconSizeXLarge),
                           );
                         },
                       ),
@@ -205,8 +206,8 @@ class _CreateCardPageState extends State<CreateCardPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.add_photo_alternate, size: 48, color: Colors.grey.shade600),
-                          const SizedBox(height: 8),
+                          Icon(Icons.add_photo_alternate, size: AppConfig.iconSizeXLarge, color: Colors.grey.shade600),
+                          const SizedBox(height: AppConfig.spacingSmall),
                           Text('Tap to upload image', style: AppConfig.bodyStyle.copyWith(color: AppConfig.textColorMuted)),
                         ],
                       ),
@@ -231,7 +232,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
           children: [
             Row(
               children: [
-                Icon(Icons.edit_note, color: AppConfig.primaryColor, size: AppConfig.fontSize3xl),
+                Icon(Icons.edit_note, color: AppConfig.primaryColor, size: AppConfig.iconSizeLarge),
                 const SizedBox(width: AppConfig.smallPadding),
                 Text('Card Details', style: AppConfig.titleStyle),
               ],

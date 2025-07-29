@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
 
@@ -52,7 +53,7 @@ class _LoginPageState extends State<LoginPage> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(AppConfig.largePadding),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
+              constraints: const BoxConstraints(maxWidth: AppConfig.maxWidthSmall),
               child: Card(
                 elevation: 8,
                 child: Padding(
@@ -63,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // App Logo/Title
-                        Icon(Icons.inventory, size: 64, color: AppConfig.primaryColor),
+                        Icon(Icons.inventory, size: AppConfig.iconSizeXXLarge, color: AppConfig.primaryColor),
                         const SizedBox(height: AppConfig.defaultPadding),
                         Text(
                           AppConfig.appName,
@@ -146,7 +147,7 @@ class _LoginPageState extends State<LoginPage> {
                               return ElevatedButton(
                                 onPressed: authProvider.isLoading ? null : _handleLogin,
                                 child: authProvider.isLoading
-                                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                                    ? SpinKitDoubleBounce(color: Colors.white, size: AppConfig.loadingIndicatorSize)
                                     : const Text('Sign In'),
                               );
                             },

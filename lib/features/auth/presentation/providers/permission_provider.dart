@@ -20,16 +20,11 @@ class PermissionProvider extends BaseProvider {
   List<String> get currentPermissions => List.unmodifiable(_currentPermissions);
   List<Permission> get allPermissions => List.unmodifiable(_allPermissions);
 
-  /// Initialize permissions for the current user
+  /// Initialize permissions for the current user (with API call)
   Future<void> initializePermissions() async {
     if (_isInitialized) return;
 
     await executeAsync(() async {
-      final cachedPermissions = await _permissionService.getCachedStaffPermissions();
-      if (cachedPermissions.isNotEmpty) {
-        _initializeWithPermissions(cachedPermissions);
-      }
-
       final response = await _permissionService.getStaffPermissions();
 
       if (response.success) {
@@ -42,6 +37,16 @@ class PermissionProvider extends BaseProvider {
         throw Exception(response.error.message.isNotEmpty ? response.error.message : 'Failed to load permissions');
       }
     });
+  }
+
+  /// Initialize permissions from cache only (no API call)
+  Future<void> initializeCachedPermissions() async {
+    if (_isInitialized) return;
+
+    final cachedPermissions = await _permissionService.getCachedStaffPermissions();
+    if (cachedPermissions.isNotEmpty) {
+      _initializeWithPermissions(cachedPermissions);
+    }
   }
 
   /// Load all available permissions (for admin use)
@@ -95,6 +100,7 @@ class PermissionProvider extends BaseProvider {
     _allPermissions.clear();
     _isInitialized = false;
     _permissionManager.clearPermissions();
+    _permissionService.clearCachedPermissions();
     clearMessages();
   }
 

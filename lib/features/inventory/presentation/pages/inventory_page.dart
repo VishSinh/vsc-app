@@ -3,7 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/utils/responsive_layout.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
+import 'package:vsc_app/core/widgets/shimmer_widgets.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
+import 'package:provider/provider.dart';
+import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});
@@ -17,6 +20,7 @@ class _InventoryPageState extends State<InventoryPage> {
   String _searchQuery = '';
   String _categoryFilter = 'All';
   bool _showInventoryTable = false;
+  bool _isLoading = true; // Simulate loading state
 
   // Mock inventory data
   final List<Map<String, dynamic>> _inventory = [
@@ -90,6 +94,44 @@ class _InventoryPageState extends State<InventoryPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Check if permissions are loaded, if not show shimmer
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final permissionProvider = context.read<PermissionProvider>();
+      if (!permissionProvider.isInitialized) {
+        // Show shimmer while permissions load
+        setState(() {
+          _isLoading = true;
+        });
+
+        // Wait for permissions to load
+        permissionProvider
+            .initializePermissions()
+            .then((_) {
+              if (mounted) {
+                setState(() {
+                  _isLoading = false;
+                });
+              }
+            })
+            .catchError((error) {
+              if (mounted) {
+                setState(() {
+                  _isLoading = false;
+                });
+              }
+            });
+      } else {
+        // Permissions already loaded, hide shimmer
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ResponsiveLayout(
       selectedIndex: _selectedIndex,
@@ -114,7 +156,7 @@ class _InventoryPageState extends State<InventoryPage> {
           // Page Header
           Row(
             children: [
-              Icon(Icons.inventory, color: AppConfig.primaryColor, size: AppConfig.fontSize5xl),
+              Icon(Icons.inventory, color: AppConfig.primaryColor, size: AppConfig.iconSizeXXLarge),
               const SizedBox(width: AppConfig.defaultPadding),
               Text('Inventory Management', style: AppConfig.headlineStyle.copyWith(color: AppConfig.primaryColor)),
             ],
@@ -205,7 +247,7 @@ class _InventoryPageState extends State<InventoryPage> {
         const SizedBox(height: AppConfig.defaultPadding),
         _buildFilters(),
         const SizedBox(height: AppConfig.defaultPadding),
-        Expanded(child: _buildInventoryList()),
+        Expanded(child: _isLoading ? _buildShimmerSkeleton() : _buildInventoryList()),
       ],
     );
   }
@@ -363,5 +405,49 @@ class _InventoryPageState extends State<InventoryPage> {
         }).toList(),
       ),
     );
+  }
+
+  Widget _buildShimmerSkeleton() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    if (screenWidth < AppConfig.mobileBreakpoint) {
+      // Mobile shimmer skeleton
+      return ListView.builder(
+        itemCount: 6,
+        itemBuilder: (context, index) {
+          return const ShimmerWrapper(child: ListItemSkeleton());
+        },
+      );
+    } else {
+      // Desktop shimmer skeleton
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: DataTable(
+          columns: [
+            DataColumn(label: Text('Item ID', style: AppConfig.bodyStyle)),
+            DataColumn(label: Text('Name', style: AppConfig.bodyStyle)),
+            DataColumn(label: Text('Category', style: AppConfig.bodyStyle)),
+            DataColumn(label: Text('Stock', style: AppConfig.bodyStyle)),
+            DataColumn(label: Text('Min Stock', style: AppConfig.bodyStyle)),
+            DataColumn(label: Text('Price', style: AppConfig.bodyStyle)),
+            DataColumn(label: Text('Vendor', style: AppConfig.bodyStyle)),
+            DataColumn(label: Text('Actions', style: AppConfig.bodyStyle)),
+          ],
+          rows: List.generate(6, (index) {
+            return DataRow(
+              cells: List.generate(8, (cellIndex) {
+                return DataCell(
+                  ShimmerWrapper(
+                    child: Container(
+                      height: 16,
+                      decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(AppConfig.smallRadius)),
+                    ),
+                  ),
+                );
+              }),
+            );
+          }),
+        ),
+      );
+    }
   }
 }

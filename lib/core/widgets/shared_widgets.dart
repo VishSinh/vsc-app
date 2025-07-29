@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/app/app_config.dart';
 
 /// Standard loading widget
@@ -6,7 +7,7 @@ class LoadingWidget extends StatelessWidget {
   final String? message;
   final double size;
 
-  const LoadingWidget({super.key, this.message, this.size = 40.0});
+  const LoadingWidget({super.key, this.message, this.size = AppConfig.defaultLoadingSize});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +15,7 @@ class LoadingWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(height: size, width: size, child: const CircularProgressIndicator()),
+          SpinKitDoubleBounce(color: AppConfig.primaryColor, size: size),
           if (message != null) ...[
             const SizedBox(height: AppConfig.defaultPadding),
             Text(message!, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
@@ -39,7 +40,7 @@ class CustomErrorWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon ?? Icons.error_outline, size: 64, color: AppConfig.errorColor),
+          Icon(icon ?? Icons.error_outline, size: AppConfig.iconSizeXXLarge, color: AppConfig.errorColor),
           const SizedBox(height: AppConfig.defaultPadding),
           Text(
             message,
@@ -68,7 +69,7 @@ class EmptyStateWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 64, color: Colors.grey[400]),
+          Icon(icon, size: AppConfig.iconSizeXXLarge, color: Colors.grey[400]),
           const SizedBox(height: AppConfig.defaultPadding),
           Text(
             message,
@@ -140,7 +141,7 @@ class ActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
       onPressed: isLoading ? null : onPressed,
-      icon: isLoading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)) : Icon(icon),
+      icon: isLoading ? SpinKitDoubleBounce(color: foregroundColor ?? AppConfig.primaryColor, size: AppConfig.loadingIndicatorSize) : Icon(icon),
       label: Text(label),
       style: ElevatedButton.styleFrom(backgroundColor: backgroundColor, foregroundColor: foregroundColor),
     );
@@ -215,8 +216,11 @@ class StatusBadge extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppConfig.smallPadding, vertical: 4),
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(AppConfig.smallRadius)),
-      child: Text(text, style: const TextStyle(color: Colors.white, fontSize: 12)),
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(AppConfig.borderRadiusSmall)),
+      child: Text(
+        text,
+        style: TextStyle(color: Colors.white, fontSize: AppConfig.fontSizeSm),
+      ),
     );
   }
 }

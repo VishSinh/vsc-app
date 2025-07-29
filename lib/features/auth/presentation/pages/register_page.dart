@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/enums/user_role.dart';
 import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
@@ -71,7 +72,7 @@ class _RegisterPageState extends State<RegisterPage> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppConfig.largePadding),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
+          constraints: const BoxConstraints(maxWidth: AppConfig.maxWidthMedium),
           child: Card(
             elevation: 4,
             child: Padding(
@@ -243,7 +244,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           return ElevatedButton(
                             onPressed: authProvider.isLoading ? null : _handleRegister,
                             child: authProvider.isLoading
-                                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                                ? SpinKitDoubleBounce(color: Colors.white, size: AppConfig.loadingIndicatorSize)
                                 : const Text('Register Staff Member'),
                           );
                         },

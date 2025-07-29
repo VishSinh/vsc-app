@@ -84,4 +84,58 @@ class AppConfig {
   static const TextStyle captionStyle = TextStyle(fontFamily: fontFamily, fontSize: fontSizeSm, fontWeight: fontWeightNormal, color: textColorMuted);
 
   static const TextStyle buttonStyle = TextStyle(fontFamily: fontFamily, fontSize: fontSizeMd, fontWeight: fontWeightMedium, color: textColorPrimary);
+
+  // ================================ UI CONSTANTS ================================
+
+  // Loading Indicators
+  static const double loadingIndicatorSize = 20.0;
+  static const double loadingIndicatorStrokeWidth = 2.0;
+  static const double defaultLoadingSize = 40.0;
+
+  // Icon Sizes
+  static const double iconSizeSmall = 16.0;
+  static const double iconSizeMedium = 24.0;
+  static const double iconSizeLarge = 32.0;
+  static const double iconSizeXLarge = 48.0;
+  static const double iconSizeXXLarge = 64.0;
+
+  // Elevation
+  static const double elevationNone = 0.0;
+  static const double elevationLow = 2.0;
+  static const double elevationMedium = 4.0;
+  static const double elevationHigh = 8.0;
+
+  // Constraints
+  static const double maxWidthSmall = 400.0;
+  static const double maxWidthMedium = 600.0;
+  static const double maxWidthLarge = 800.0;
+  static const double maxWidthXLarge = 1200.0;
+
+  // Animation Durations
+  static const Duration animationDurationFast = Duration(milliseconds: 150);
+  static const Duration animationDurationNormal = Duration(milliseconds: 300);
+  static const Duration animationDurationSlow = Duration(milliseconds: 500);
+
+  // Snackbar Constants
+  static const double snackbarElevation = 8.0;
+  static const double snackbarMaxWidth = 400.0;
+  static const EdgeInsets snackbarMargin = EdgeInsets.only(bottom: 20, right: 20);
+
+  // Shimmer Colors
+  static const Color shimmerBaseColor = Color(0xFF424242); // Colors.grey[700]
+  static const Color shimmerHighlightColor = Color(0xFF616161); // Colors.grey[600]
+
+  // Border Radius (Additional)
+  static const double borderRadiusTiny = 2.0;
+  static const double borderRadiusSmall = 4.0;
+  static const double borderRadiusMedium = 8.0;
+  static const double borderRadiusLarge = 12.0;
+  static const double borderRadiusXLarge = 16.0;
+
+  // Spacing (Additional)
+  static const double spacingTiny = 4.0;
+  static const double spacingSmall = 8.0;
+  static const double spacingMedium = 16.0;
+  static const double spacingLarge = 24.0;
+  static const double spacingXLarge = 32.0;
 }
