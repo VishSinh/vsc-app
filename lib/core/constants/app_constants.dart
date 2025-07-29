@@ -23,6 +23,10 @@ class AppConstants {
   // Cards
   static const String cardsEndpoint = '/cards/';
   static const String similarCardsEndpoint = '/cards/similar';
+  // Customers
+  static const String customersEndpoint = '/customers/';
+  // Orders
+  static const String ordersEndpoint = '/orders/';
   // ==========================================================================
 
   // Pagination

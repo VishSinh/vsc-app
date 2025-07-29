@@ -25,6 +25,11 @@ class UITextConstants {
   static const String createCard = 'Create Card';
   static const String getCard = 'Get Card';
   static const String findSimilarCard = 'Find Similar Card';
+  static const String searchCustomer = 'Search Customer';
+  static const String createCustomer = 'Create Customer';
+  static const String addOrderItem = 'Add Item';
+  static const String reviewOrder = 'Review Order';
+  static const String submitOrder = 'Submit Order';
   static const String viewInventory = 'View Inventory';
   static const String hideTable = 'Hide Table';
   static const String retry = 'Retry';
@@ -48,6 +53,16 @@ class UITextConstants {
   static const String selectVendor = 'Select Vendor';
   static const String cardImage = 'Card Image';
   static const String cardDetails = 'Card Details';
+  static const String customerName = 'Customer Name';
+  static const String customerPhone = 'Customer Phone';
+  static const String barcode = 'Barcode';
+  static const String discountAmount = 'Discount Amount';
+  static const String requiresBox = 'Requires Box';
+  static const String requiresPrinting = 'Requires Printing';
+  static const String boxType = 'Box Type';
+  static const String boxCost = 'Box Cost';
+  static const String printingCost = 'Printing Cost';
+  static const String deliveryDate = 'Delivery Date';
 
   // ================================ FORM HINTS ================================
   static const String phoneHint = '9876543210';
@@ -59,6 +74,12 @@ class UITextConstants {
   static const String chooseVendorHint = 'Choose a vendor';
   static const String searchVendorsHint = 'Search vendors...';
   static const String tapToUploadImage = 'Tap to upload image';
+  static const String customerNameHint = 'Enter customer name';
+  static const String customerPhoneHint = 'Enter phone number';
+  static const String barcodeHint = 'Enter barcode';
+  static const String discountAmountHint = 'Enter discount amount';
+  static const String boxCostHint = 'Enter box cost';
+  static const String printingCostHint = 'Enter printing cost';
 
   // ================================ VALIDATION MESSAGES ================================
   // Login/Register Validation
@@ -81,6 +102,14 @@ class UITextConstants {
   static const String pleaseEnterMaxDiscount = 'Please enter max discount';
   static const String discountRange = 'Discount must be between 0 and 100';
   static const String pleaseSelectVendor = 'Please select a vendor';
+  static const String pleaseEnterCustomerName = 'Please enter customer name';
+  static const String pleaseEnterCustomerPhone = 'Please enter customer phone';
+  static const String pleaseEnterBarcode = 'Please enter barcode';
+  static const String pleaseEnterDiscountAmount = 'Please enter discount amount';
+  static const String pleaseEnterValidDiscount = 'Please enter a valid discount amount';
+  static const String pleaseEnterValidQuantity = 'Please enter a valid quantity';
+  static const String quantityExceedsStock = 'Quantity exceeds available stock';
+  static const String pleaseSelectDeliveryDate = 'Please select delivery date';
 
   // ================================ PAGE TITLES ================================
   static const String signInTitle = 'Sign in to your account';
@@ -90,6 +119,12 @@ class UITextConstants {
   static const String createCardSubtitle = 'Add a new card to the inventory system';
   static const String inventoryManagementTitle = 'Inventory Management';
   static const String inventoryManagementSubtitle = 'Manage your inventory items and cards';
+  static const String customerSearchTitle = 'Customer Search';
+  static const String customerSearchSubtitle = 'Find or create a customer for the order';
+  static const String orderCreationTitle = 'Create Order';
+  static const String orderCreationSubtitle = 'Add items to the order';
+  static const String orderReviewTitle = 'Review Order';
+  static const String orderReviewSubtitle = 'Review and submit the order';
 
   // ================================ DIALOG TITLES ================================
   static const String selectImageTitle = 'Select Image';
@@ -98,6 +133,11 @@ class UITextConstants {
 
   // ================================ STATUS MESSAGES ================================
   static const String noVendorsAvailable = 'No vendors available';
+  static const String customerNotFound = 'Customer not found';
+  static const String customerCreatedSuccessfully = 'Customer created successfully';
+  static const String cardNotFound = 'Card not found';
+  static const String orderCreatedSuccessfully = 'Order created successfully';
+  static const String noOrderItems = 'No items added to order';
   static const String addInventoryComingSoon = 'Add Inventory feature coming soon!';
   static const String createProductionJobComingSoon = 'Create Production Job feature coming soon!';
   static const String getCardComingSoon = 'Get Card feature coming soon!';

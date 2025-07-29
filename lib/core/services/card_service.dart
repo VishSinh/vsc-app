@@ -20,6 +20,11 @@ class CardService extends BaseService {
     return await executeRequest(() => get('${AppConstants.cardsEndpoint}$id/'), (json) => Card.fromJson(json as Map<String, dynamic>));
   }
 
+  /// Get card by barcode
+  Future<ApiResponse<Card>> getCardByBarcode(String barcode) async {
+    return await executeRequest(() => get('${AppConstants.cardsEndpoint}?barcode=$barcode'), (json) => Card.fromJson(json as Map<String, dynamic>));
+  }
+
   /// Create a new card
   Future<ApiResponse<MessageData>> createCard({
     required String image,

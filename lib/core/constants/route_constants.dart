@@ -14,6 +14,9 @@ class RouteConstants {
   static const String cardDetail = '/cards/:id';
   static const String createCard = '/cards/create';
   static const String similarCards = '/cards/similar';
+  static const String customerSearch = '/orders/new/customer';
+  static const String orderItems = '/orders/new/items';
+  static const String orderReview = '/orders/new/review';
   static const String register = '/register';
 
   // ================================ ROUTE NAMES ================================
@@ -29,6 +32,9 @@ class RouteConstants {
   static const String cardsRouteName = 'cards';
   static const String cardDetailRouteName = 'card-detail';
   static const String createCardRouteName = 'create-card';
+  static const String customerSearchRouteName = 'customer-search';
+  static const String orderItemsRouteName = 'order-items';
+  static const String orderReviewRouteName = 'order-review';
   static const String registerRouteName = 'register';
 
   // ================================ ROUTE GROUPS ================================
@@ -44,6 +50,9 @@ class RouteConstants {
     cards,
     cardDetail,
     createCard,
+    customerSearch,
+    orderItems,
+    orderReview,
     register,
   ];
 

@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:vsc_app/core/models/vendor_model.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
 import 'package:vsc_app/core/services/vendor_service.dart';
-import 'package:vsc_app/core/utils/snackbar_utils.dart';
 
 class VendorProvider extends BaseProvider with PaginationMixin {
   final VendorService _vendorService;

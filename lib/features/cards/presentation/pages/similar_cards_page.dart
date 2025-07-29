@@ -49,7 +49,7 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
       if (success) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Successfully purchased ${quantity} units of ${card.barcode}'), backgroundColor: AppConfig.successColor),
+            SnackBar(content: Text('Successfully purchased $quantity units of ${card.barcode}'), backgroundColor: AppConfig.successColor),
           );
           context.go(RouteConstants.cards);
         }

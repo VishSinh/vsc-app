@@ -15,6 +15,9 @@ import 'package:vsc_app/features/cards/presentation/pages/cards_page.dart';
 import 'package:vsc_app/features/cards/presentation/pages/card_detail_page.dart';
 import 'package:vsc_app/features/cards/presentation/pages/create_card_page.dart';
 import 'package:vsc_app/features/cards/presentation/pages/similar_cards_page.dart';
+import 'package:vsc_app/features/orders/presentation/pages/customer_search_page.dart';
+import 'package:vsc_app/features/orders/presentation/pages/order_items_page.dart';
+import 'package:vsc_app/features/orders/presentation/pages/order_review_page.dart';
 
 class AppRouter {
   static late final GoRouter router;
@@ -70,6 +73,13 @@ class AppRouter {
             return CardDetailPage(cardId: cardId);
           },
         ),
+        GoRoute(
+          path: RouteConstants.customerSearch,
+          name: RouteConstants.customerSearchRouteName,
+          builder: (context, state) => const CustomerSearchPage(),
+        ),
+        GoRoute(path: RouteConstants.orderItems, name: RouteConstants.orderItemsRouteName, builder: (context, state) => const OrderItemsPage()),
+        GoRoute(path: RouteConstants.orderReview, name: RouteConstants.orderReviewRouteName, builder: (context, state) => const OrderReviewPage()),
 
         // Register route (Admin only)
         GoRoute(path: RouteConstants.register, name: RouteConstants.registerRouteName, builder: (context, state) => const RegisterPage()),

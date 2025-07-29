@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:vsc_app/core/models/api_response.dart';
 import 'package:vsc_app/core/services/base_service.dart';
 import 'package:vsc_app/core/services/navigation_service.dart';
-import 'package:vsc_app/core/utils/snackbar_utils.dart';
 
 abstract class BaseProvider extends ChangeNotifier {
   bool _isLoading = false;

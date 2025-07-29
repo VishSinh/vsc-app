@@ -72,7 +72,7 @@ class _OrdersPageState extends State<OrdersPage> {
       selectedIndex: _selectedIndex,
       destinations: _destinations,
       onDestinationSelected: _onDestinationSelected,
-      floatingActionButton: FloatingActionButton(onPressed: () => context.go('/orders/new'), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(onPressed: () => context.go(RouteConstants.customerSearch), child: const Icon(Icons.add)),
       child: _buildOrdersContent(),
     );
   }
