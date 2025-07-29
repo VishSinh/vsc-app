@@ -47,7 +47,7 @@ class AuthProvider extends BaseProvider {
   /// Login with phone and password
   Future<bool> login({required String phone, required String password, BuildContext? context}) async {
     return await executeApiCall(
-      () => _authService.login(phone: phone, password: password),
+      () => _authService.login(phone, password),
       onSuccess: (data) {
         // Clear previous data first
         _permissionProvider.clearPermissions();
@@ -64,7 +64,7 @@ class AuthProvider extends BaseProvider {
       },
       onError: (error) {
         if (context != null) {
-          SnackbarUtils.showApiError(context, error);
+          SnackbarUtils.showApiError(context, error.message);
         }
       },
       context: context,
@@ -82,7 +82,7 @@ class AuthProvider extends BaseProvider {
       },
       onError: (error) {
         if (context != null) {
-          SnackbarUtils.showApiError(context, error);
+          SnackbarUtils.showApiError(context, error.message);
         }
       },
       context: context,

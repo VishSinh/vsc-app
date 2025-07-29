@@ -5,14 +5,16 @@ import 'package:vsc_app/core/constants/app_constants.dart';
 import 'package:vsc_app/core/models/api_response.dart';
 import 'package:vsc_app/app/app_config.dart';
 
+/// Base service class that provides common functionality for all API services
 abstract class BaseService {
-  static const String _baseUrl = 'http://localhost:8000/api/v1';
+  static const String _baseUrl = 'http://127.0.0.1:8000/api/v1';
 
   late final Dio _dio;
   final FlutterSecureStorage _secureStorage;
 
   BaseService({Dio? dio, FlutterSecureStorage? secureStorage}) : _secureStorage = secureStorage ?? const FlutterSecureStorage() {
     _dio = dio ?? _createDio();
+    _setupInterceptors();
   }
 
   /// Create and configure Dio instance with interceptors
@@ -65,49 +67,65 @@ abstract class BaseService {
     return dio;
   }
 
+  /// Setup Dio interceptors for authentication and error handling
+  void _setupInterceptors() {
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          // Add authorization header if token exists
+          final token = await _secureStorage.read(key: AppConstants.authTokenKey);
+          if (token != null) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+          handler.next(options);
+        },
+        onError: (error, handler) {
+          // Handle network errors
+          if (error.type == DioExceptionType.connectionError) {
+            handler.reject(DioException(requestOptions: error.requestOptions, error: 'Network error: No internet connection'));
+          } else {
+            handler.next(error);
+          }
+        },
+      ),
+    );
+  }
+
   /// Get the secure storage instance
   FlutterSecureStorage get secureStorage => _secureStorage;
 
   /// Get the Dio instance
   Dio get dio => _dio;
 
-  /// Make a GET request
-  Future<Response> get(String endpoint, {Map<String, dynamic>? queryParameters}) async {
-    return await _dio.get(endpoint, queryParameters: queryParameters);
+  /// HTTP GET request
+  Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) {
+    return _dio.get(path, queryParameters: queryParameters);
   }
 
-  /// Make a POST request
-  Future<Response> post(String endpoint, {dynamic data}) async {
-    return await _dio.post(endpoint, data: data);
+  /// HTTP POST request
+  Future<Response> post(String path, {dynamic data}) {
+    return _dio.post(path, data: data);
   }
 
-  /// Make a PATCH request
-  Future<Response> patch(String endpoint, {dynamic data}) async {
-    return await _dio.patch(endpoint, data: data);
+  /// HTTP PUT request
+  Future<Response> put(String path, {dynamic data}) {
+    return _dio.put(path, data: data);
   }
 
-  /// Make a DELETE request
-  Future<Response> delete(String endpoint) async {
-    return await _dio.delete(endpoint);
+  /// HTTP DELETE request
+  Future<Response> delete(String path) {
+    return _dio.delete(path);
   }
 
-  /// Make a PUT request
-  Future<Response> put(String endpoint, {dynamic data}) async {
-    return await _dio.put(endpoint, data: data);
-  }
-
-  /// Execute a request with automatic error handling
+  /// Execute a request and handle the response
   Future<ApiResponse<T>> executeRequest<T>(Future<Response> Function() request, T Function(dynamic json) fromJson) async {
     try {
-      // Simulate network latency for remote server
-      await Future.delayed(const Duration(seconds: 2));
-
       final response = await request();
       return handleResponse(response, fromJson);
     } on DioException catch (e) {
-      return handleError(e, fromJson);
+      return handleDioError(e);
     } catch (e) {
-      return ApiResponse(success: false, data: null as T, error: ErrorData.networkError(e.toString()));
+      return ApiResponse(success: false, data: null, error: ErrorData.networkError(e.toString()));
     }
   }
 
@@ -116,41 +134,80 @@ abstract class BaseService {
     try {
       // Dio automatically parses JSON, so response.data is already parsed
       final jsonData = response.data as Map<String, dynamic>;
-      return ApiResponse.fromJson(jsonData, (json) => fromJson(json));
+
+      // Check if this is a success or error response
+      final bool success = jsonData['success'] as bool;
+
+      if (success) {
+        // Success response: has data, no error
+        final data = jsonData['data'];
+        T parsedData;
+
+        if (data == null) {
+          // Handle case where data is null but success is true
+          parsedData = fromJson({});
+        } else {
+          parsedData = fromJson(data);
+        }
+
+        // Extract pagination data if present
+        PaginationData? pagination;
+        if (jsonData.containsKey('pagination')) {
+          final paginationJson = jsonData['pagination'] as Map<String, dynamic>;
+          pagination = PaginationData.fromJson(paginationJson);
+        }
+
+        return ApiResponse(success: true, data: parsedData, error: null, pagination: pagination);
+      } else {
+        // Error response: has error, no data
+        final errorJson = jsonData['error'] as Map<String, dynamic>;
+        final error = ErrorData.fromJson(errorJson);
+
+        return ApiResponse(success: false, data: null, error: error);
+      }
     } catch (e) {
-      return ApiResponse(success: false, data: null as T, error: ErrorData.networkError(e.toString()));
+      return ApiResponse(success: false, data: null, error: ErrorData.networkError('Failed to parse response: $e'));
     }
   }
 
-  /// Handle DioError and return a standardized error response
-  ApiResponse<T> handleError<T>(DioException error, T Function(dynamic json) fromJson) {
+  /// Handle Dio errors
+  ApiResponse<T> handleDioError<T>(DioException error) {
     String errorMessage = 'Network error occurred';
 
     if (error.response != null) {
-      // Server responded with error status
       final statusCode = error.response!.statusCode;
       final responseData = error.response!.data;
 
-      if (responseData is Map<String, dynamic>) {
-        errorMessage = responseData['message'] as String? ?? responseData['error']?['message'] as String? ?? 'Server error ($statusCode)';
-      } else {
-        errorMessage = 'Server error ($statusCode)';
+      switch (statusCode) {
+        case 401:
+          errorMessage = 'Unauthorized: Please login again';
+          break;
+        case 403:
+          errorMessage = 'Forbidden: You don\'t have permission to access this resource';
+          break;
+        case 404:
+          errorMessage = 'Resource not found';
+          break;
+        case 500:
+          errorMessage = 'Server error: Please try again later';
+          break;
+        default:
+          if (responseData is Map<String, dynamic> && responseData.containsKey('error')) {
+            final errorData = responseData['error'] as Map<String, dynamic>;
+            errorMessage = errorData['message'] ?? 'Unknown error occurred';
+          } else {
+            errorMessage = 'Request failed with status code: $statusCode';
+          }
       }
+    } else if (error.type == DioExceptionType.connectionError) {
+      errorMessage = 'No internet connection';
     } else if (error.type == DioExceptionType.connectionTimeout) {
       errorMessage = 'Connection timeout';
     } else if (error.type == DioExceptionType.receiveTimeout) {
-      errorMessage = 'Receive timeout';
-    } else if (error.type == DioExceptionType.sendTimeout) {
-      errorMessage = 'Send timeout';
-    } else if (error.type == DioExceptionType.connectionError) {
-      errorMessage = 'No internet connection';
-    } else if (error.type == DioExceptionType.badResponse) {
-      errorMessage = 'Bad response from server';
-    } else if (error.type == DioExceptionType.cancel) {
-      errorMessage = 'Request was cancelled';
+      errorMessage = 'Request timeout';
     }
 
-    return ApiResponse(success: false, data: null as T, error: ErrorData.networkError(errorMessage));
+    return ApiResponse(success: false, data: null, error: ErrorData.networkError(errorMessage));
   }
 
   /// Clear authentication data

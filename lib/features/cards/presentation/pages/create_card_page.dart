@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
-import 'package:vsc_app/core/models/vendor_model.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
@@ -49,7 +47,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(UITextConstants.createCard),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.dashboard)),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.cards)),
       ),
       body: Consumer<CardProvider>(
         builder: (context, cardProvider, child) {
@@ -191,6 +189,8 @@ class _CreateCardPageState extends State<CreateCardPage> {
                   ),
                 ],
               ),
+              const SizedBox(height: AppConfig.defaultPadding),
+              ButtonUtils.secondaryButton(onPressed: () => _checkSimilarCards(cardProvider), label: 'Check Similar Cards', icon: Icons.search),
             ] else ...[
               // Upload image placeholder with 4:3 aspect ratio
               LayoutBuilder(
@@ -396,7 +396,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
 
   Widget _buildSubmitButton(CardProvider cardProvider) {
     return ButtonUtils.fullWidthPrimaryButton(
-      onPressed: _submitForm,
+      onPressed: _handleSubmit,
       label: UITextConstants.addCard,
       icon: Icons.add,
       isLoading: cardProvider.isLoading,
@@ -438,18 +438,76 @@ class _CreateCardPageState extends State<CreateCardPage> {
     cardProvider.uploadImage('dummy_image_file');
   }
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      final cardProvider = context.read<CardProvider>();
+  Future<void> _handleSubmit() async {
+    if (!_formKey.currentState!.validate()) return;
 
-      cardProvider.createCard(
-        costPrice: double.parse(_costPriceController.text),
-        sellPrice: double.parse(_sellPriceController.text),
-        quantity: int.parse(_quantityController.text),
-        maxDiscount: double.parse(_maxDiscountController.text),
-        vendorId: _selectedVendorId!,
-        context: context,
-      );
+    final cardProvider = context.read<CardProvider>();
+
+    // Use selected image URL or a default one
+    final imageUrl = cardProvider.selectedImageUrl ?? 'https://t4.ftcdn.net/jpg/05/08/65/87/360_F_508658796_Np78KNMINjP6CemujX79bJsOWOTRbNCW.jpg';
+
+    // Check for similar cards first
+    final similarCards = await cardProvider.getSimilarCards(imageUrl);
+
+    if (similarCards.isNotEmpty && mounted) {
+      // Show dialog with similar cards found
+      final shouldProceed = await _showSimilarCardsDialog(similarCards.length);
+      if (!shouldProceed) return;
+    }
+
+    final success = await cardProvider.createCard(
+      image: imageUrl,
+      costPrice: double.parse(_costPriceController.text),
+      sellPrice: double.parse(_sellPriceController.text),
+      quantity: int.parse(_quantityController.text),
+      maxDiscount: double.parse(_maxDiscountController.text),
+      vendorId: _selectedVendorId!,
+    );
+
+    if (success && mounted) {
+      // Navigate back to cards page
+      context.go(RouteConstants.cards);
+    }
+  }
+
+  Future<bool> _showSimilarCardsDialog(int count) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Similar Cards Found'),
+            content: Text('$count similar cards found. Would you like to view them or continue creating a new card?'),
+            actions: [
+              TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Continue Creating')),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                  context.go(RouteConstants.similarCards);
+                },
+                child: Text('View $count Similar Cards'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  Future<void> _checkSimilarCards(CardProvider cardProvider) async {
+    if (cardProvider.selectedImageUrl == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please upload an image first'), backgroundColor: AppConfig.errorColor));
+      return;
+    }
+
+    final similarCards = await cardProvider.getSimilarCards(cardProvider.selectedImageUrl!);
+
+    if (similarCards.isNotEmpty && mounted) {
+      final shouldView = await _showSimilarCardsDialog(similarCards.length);
+      if (shouldView) {
+        context.go(RouteConstants.similarCards);
+      }
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No similar cards found'), backgroundColor: AppConfig.successColor));
     }
   }
 }

@@ -208,10 +208,8 @@ class _InventoryPageState extends State<InventoryPage> {
             ),
             ButtonUtils.warningButton(
               onPressed: () {
-                // Show inventory table
-                setState(() {
-                  _showInventoryTable = true;
-                });
+                // Navigate to cards page
+                context.go(RouteConstants.cards);
               },
               label: UITextConstants.viewInventory,
               icon: Icons.table_chart,

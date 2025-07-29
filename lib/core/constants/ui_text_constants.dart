@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 /// UI Text Constants - All user-facing text strings
 class UITextConstants {
   // ================================ NAVIGATION LABELS ================================

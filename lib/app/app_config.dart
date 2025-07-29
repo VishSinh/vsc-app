@@ -62,7 +62,7 @@ class AppConfig {
   static const Color grey400 = Color(0xFFBDBDBD);
   static const Color grey600 = Color(0xFF757575);
   static const Color transparent = Colors.transparent;
-  static const Color black87 = Color(0xFFDD000000);
+  static const Color black87 = Color(0xffdd000000);
   static const Color red = Colors.red;
 
   // Text Styles
@@ -140,7 +140,7 @@ class AppConfig {
   static const Color snackbarInfoColor = Color(0xFF1976D2); // Colors.blue[700]
   static const Color snackbarDefaultColor = Color(0xFF424242); // Colors.grey[700]
   static const Color snackbarTextColor = Colors.white;
-  static const Color snackbarTextSecondaryColor = Color(0xFFB3FFFFFF); // Colors.white70
+  static const Color snackbarTextSecondaryColor = Color(0xffb3ffffff); // Colors.white70
 
   // Snackbar Spacing
   static const EdgeInsets snackbarPadding = EdgeInsets.symmetric(horizontal: 16, vertical: 12);

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/app/app_config.dart';
-import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';

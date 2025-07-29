@@ -59,6 +59,7 @@ dependencies:
   # UI Components
   flutter_svg: ^2.0.9
   cached_network_image: ^3.3.1
+  barcode_widget: ^2.0.4
   
   # Utilities
   intl: ^0.20.2

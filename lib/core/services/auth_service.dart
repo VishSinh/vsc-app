@@ -7,21 +7,23 @@ class AuthService extends BaseService {
   AuthService({super.dio, super.secureStorage});
 
   /// Login with phone and password
-  Future<LoginResponse> login({required String phone, required String password}) async {
-    final request = LoginRequest(phone: phone, password: password);
+  Future<ApiResponse<LoginData>> login(String phone, String password) async {
+    try {
+      final response = await executeRequest(
+        () => post(AppConstants.loginEndpoint, data: {'phone': phone, 'password': password}),
+        (json) => LoginData.fromJson(json as Map<String, dynamic>),
+      );
 
-    final response = await executeRequest(
-      () => post(AppConstants.loginEndpoint, data: request.toJson()),
-      (json) => LoginData.fromJson(json as Map<String, dynamic>),
-    );
+      if (response.success && response.data != null) {
+        // Store token and role
+        await secureStorage.write(key: AppConstants.authTokenKey, value: response.data!.token);
+        await secureStorage.write(key: AppConstants.userRoleKey, value: response.data!.role);
+      }
 
-    if (response.success) {
-      // Store token and role using the new methods
-      await storeToken(response.data.token);
-      await storeUserRole(response.data.role);
+      return response;
+    } catch (e) {
+      return ApiResponse(success: false, data: null, error: ErrorData.networkError(e.toString()));
     }
-
-    return response;
   }
 
   /// Register new staff member (Admin only)

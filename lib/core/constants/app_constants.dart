@@ -20,6 +20,9 @@ class AppConstants {
   static const String allPermissionsEndpoint = '/permissions/all/';
   // Vendors
   static const String vendorsEndpoint = '/vendors/';
+  // Cards
+  static const String cardsEndpoint = '/cards/';
+  static const String similarCardsEndpoint = '/cards/similar';
   // ==========================================================================
 
   // Pagination

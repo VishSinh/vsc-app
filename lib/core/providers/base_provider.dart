@@ -59,33 +59,39 @@ abstract class BaseProvider extends ChangeNotifier {
     }
   }
 
-  /// Execute an API call with standardized error handling
+  /// Execute an API call with automatic error handling
   Future<bool> executeApiCall<T>(
     Future<ApiResponse<T>> Function() apiCall, {
-    void Function(T data)? onSuccess,
-    void Function(String error)? onError,
+    Function(T data)? onSuccess,
+    Function(ErrorData error)? onError,
     BuildContext? context,
   }) async {
-    final result = await executeAsync(() async {
+    try {
+      setLoading(true);
+      clearMessages();
+
       final response = await apiCall();
 
-      if (response.success) {
-        onSuccess?.call(response.data);
-        // if (context != null) {
-        //   SnackbarUtils.showApiSuccess(context, 'Operation completed successfully');
-        // }
+      if (response.success && response.data != null) {
+        if (onSuccess != null) {
+          onSuccess(response.data as T);
+        }
         return true;
       } else {
-        final errorMessage = response.error.message.isNotEmpty ? response.error.message : 'Operation failed';
-        onError?.call(errorMessage);
-        if (context != null) {
-          SnackbarUtils.showApiError(context, errorMessage);
+        final errorMessage = response.error?.message ?? 'Unknown error occurred';
+        setError(errorMessage);
+        if (onError != null && response.error != null) {
+          onError(response.error!);
         }
-        throw Exception(errorMessage);
+        return false;
       }
-    });
-
-    return result ?? false;
+    } catch (e) {
+      final errorMessage = 'Network error: $e';
+      setError(errorMessage);
+      return false;
+    } finally {
+      setLoading(false);
+    }
   }
 
   /// Reset the provider state
@@ -101,7 +107,7 @@ abstract class BaseProvider extends ChangeNotifier {
 mixin PaginationMixin on BaseProvider {
   int _currentPage = 1;
   final int _pageSize = 10;
-  bool _hasMoreData = true;
+  bool _hasMoreData = false; // Changed from true to false
 
   int get currentPage => _currentPage;
   int get pageSize => _pageSize;
@@ -118,7 +124,7 @@ mixin PaginationMixin on BaseProvider {
 
   void resetPagination() {
     _currentPage = 1;
-    _hasMoreData = true;
+    _hasMoreData = false; // Changed from true to false
   }
 }
 

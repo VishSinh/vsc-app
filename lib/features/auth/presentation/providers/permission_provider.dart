@@ -27,14 +27,14 @@ class PermissionProvider extends BaseProvider {
     await executeAsync(() async {
       final response = await _permissionService.getStaffPermissions();
 
-      if (response.success) {
-        _currentPermissions = response.data.permissions;
+      if (response.success && response.data != null) {
+        _currentPermissions = response.data!.permissions;
         _isInitialized = true;
 
         await _permissionService.cacheStaffPermissions(_currentPermissions);
         _permissionManager.initializePermissions(_currentPermissions);
       } else {
-        throw Exception(response.error.message.isNotEmpty ? response.error.message : 'Failed to load permissions');
+        throw Exception(response.error?.message ?? 'Failed to load permissions');
       }
     });
   }

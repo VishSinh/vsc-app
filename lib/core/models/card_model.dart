@@ -5,36 +5,43 @@ part 'card_model.g.dart';
 
 @JsonSerializable()
 class Card {
-  final String? id;
-  final String image;
-  @JsonKey(name: 'cost_price')
-  final double costPrice;
-  @JsonKey(name: 'sell_price')
-  final double sellPrice;
-  final int quantity;
-  @JsonKey(name: 'max_discount')
-  final double maxDiscount;
+  final String id;
   @JsonKey(name: 'vendor_id')
   final String vendorId;
-  @JsonKey(name: 'created_at')
-  final DateTime? createdAt;
-  @JsonKey(name: 'updated_at')
-  final DateTime? updatedAt;
+  final String barcode;
+  @JsonKey(name: 'sell_price')
+  final String sellPrice;
+  @JsonKey(name: 'cost_price')
+  final String costPrice;
+  @JsonKey(name: 'max_discount')
+  final String maxDiscount;
+  final int quantity; // Reverted back to non-nullable
+  final String image;
+  @JsonKey(name: 'perceptual_hash')
+  final String perceptualHash;
+  @JsonKey(name: 'is_active')
+  final bool isActive;
 
   const Card({
-    this.id,
-    required this.image,
-    required this.costPrice,
-    required this.sellPrice,
-    required this.quantity,
-    required this.maxDiscount,
+    required this.id,
     required this.vendorId,
-    this.createdAt,
-    this.updatedAt,
+    required this.barcode,
+    required this.sellPrice,
+    required this.costPrice,
+    required this.maxDiscount,
+    required this.quantity, // Made required again
+    required this.image,
+    required this.perceptualHash,
+    required this.isActive,
   });
 
   factory Card.fromJson(Map<String, dynamic> json) => _$CardFromJson(json);
   Map<String, dynamic> toJson() => _$CardToJson(this);
+
+  // Helper methods to convert string prices to double
+  double get sellPriceAsDouble => double.tryParse(sellPrice) ?? 0.0;
+  double get costPriceAsDouble => double.tryParse(costPrice) ?? 0.0;
+  double get maxDiscountAsDouble => double.tryParse(maxDiscount) ?? 0.0;
 }
 
 @JsonSerializable()
@@ -63,4 +70,6 @@ class CreateCardRequest {
   Map<String, dynamic> toJson() => _$CreateCardRequestToJson(this);
 }
 
+// Type aliases for better readability
+typedef CardListResponse = ApiResponse<List<Card>>;
 typedef CreateCardResponse = ApiResponse<MessageData>;

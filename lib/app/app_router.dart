@@ -10,7 +10,11 @@ import 'package:vsc_app/features/production/presentation/pages/production_page.d
 import 'package:vsc_app/features/administration/presentation/pages/administration_page.dart';
 import 'package:vsc_app/features/auth/presentation/pages/register_page.dart';
 import 'package:vsc_app/features/vendors/presentation/pages/vendors_page.dart';
+import 'package:vsc_app/features/vendors/presentation/pages/vendor_detail_page.dart';
+import 'package:vsc_app/features/cards/presentation/pages/cards_page.dart';
+import 'package:vsc_app/features/cards/presentation/pages/card_detail_page.dart';
 import 'package:vsc_app/features/cards/presentation/pages/create_card_page.dart';
+import 'package:vsc_app/features/cards/presentation/pages/similar_cards_page.dart';
 
 class AppRouter {
   static late final GoRouter router;
@@ -47,7 +51,25 @@ class AppRouter {
           builder: (context, state) => const AdministrationPage(),
         ),
         GoRoute(path: RouteConstants.vendors, name: RouteConstants.vendorsRouteName, builder: (context, state) => const VendorsPage()),
+        GoRoute(
+          path: RouteConstants.vendorDetail,
+          name: RouteConstants.vendorDetailRouteName,
+          builder: (context, state) {
+            final vendorId = state.pathParameters['id']!;
+            return VendorDetailPage(vendorId: vendorId);
+          },
+        ),
+        GoRoute(path: RouteConstants.cards, name: RouteConstants.cardsRouteName, builder: (context, state) => const CardsPage()),
         GoRoute(path: RouteConstants.createCard, name: RouteConstants.createCardRouteName, builder: (context, state) => const CreateCardPage()),
+        GoRoute(path: RouteConstants.similarCards, builder: (context, state) => const SimilarCardsPage()),
+        GoRoute(
+          path: RouteConstants.cardDetail,
+          name: RouteConstants.cardDetailRouteName,
+          builder: (context, state) {
+            final cardId = state.pathParameters['id']!;
+            return CardDetailPage(cardId: cardId);
+          },
+        ),
 
         // Register route (Admin only)
         GoRoute(path: RouteConstants.register, name: RouteConstants.registerRouteName, builder: (context, state) => const RegisterPage()),

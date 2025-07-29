@@ -21,6 +21,8 @@ mvnw.cmd
 # Visual Studio Code
 .vscode/
 *.code-workspace
+.cursor
+
 
 # Flutter/Dart specific
 .dart_tool/

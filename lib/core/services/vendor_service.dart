@@ -35,18 +35,38 @@ class VendorService extends BaseService {
     final request = CreateVendorRequest(name: name, phone: phone);
 
     return await executeRequest(
-      () => put('${AppConstants.vendorsEndpoint}/$id', data: request.toJson()),
+      () => put('${AppConstants.vendorsEndpoint}$id/', data: request.toJson()),
       (json) => MessageData.fromJson(json as Map<String, dynamic>),
     );
   }
 
   /// Delete a vendor
   Future<CreateVendorResponse> deleteVendor({required String id}) async {
-    return await executeRequest(() => delete('${AppConstants.vendorsEndpoint}/$id'), (json) => MessageData.fromJson(json as Map<String, dynamic>));
+    return await executeRequest(() => delete('${AppConstants.vendorsEndpoint}$id/'), (json) => MessageData.fromJson(json as Map<String, dynamic>));
   }
 
   /// Get vendor by ID
   Future<ApiResponse<Vendor>> getVendorById(String id) async {
-    return await executeRequest(() => get('${AppConstants.vendorsEndpoint}/$id'), (json) => Vendor.fromJson(json as Map<String, dynamic>));
+    print('🔍 VendorService: Getting vendor by ID: $id');
+    print('🔍 VendorService: Endpoint: ${AppConstants.vendorsEndpoint}$id/');
+
+    final response = await executeRequest(() => get('${AppConstants.vendorsEndpoint}$id/'), (json) {
+      print('📦 VendorService: Raw JSON received: $json');
+      print('📦 VendorService: JSON type: ${json.runtimeType}');
+
+      if (json is Map<String, dynamic>) {
+        print('📦 VendorService: Creating Vendor from JSON');
+        return Vendor.fromJson(json);
+      } else {
+        print('❌ VendorService: JSON is not a Map, it is: ${json.runtimeType}');
+        throw Exception('Invalid vendor data format');
+      }
+    });
+
+    print('📦 VendorService: Final response: $response');
+    print('📦 VendorService: Response success: ${response.success}');
+    print('📦 VendorService: Response data: ${response.data}');
+
+    return response;
   }
 }

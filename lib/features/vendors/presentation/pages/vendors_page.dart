@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/app_constants.dart';
+import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/models/vendor_model.dart';
 import 'package:vsc_app/core/utils/responsive_layout.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/core/widgets/shimmer_widgets.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
-import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/features/vendors/presentation/widgets/create_vendor_dialog.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 
@@ -28,7 +29,8 @@ class _VendorsPageState extends State<VendorsPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<VendorProvider>().loadVendors(refresh: true);
+      print('🚀 VendorsPage: Loading vendors...');
+      context.read<VendorProvider>().loadVendors();
     });
   }
 
@@ -54,16 +56,25 @@ class _VendorsPageState extends State<VendorsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          PageHeader(
-            title: AppConstants.featureLabels['vendors']!,
-            actions: [
-              Consumer<PermissionProvider>(
-                builder: (context, permissionProvider, child) {
-                  if (permissionProvider.canCreate('vendor')) {
-                    return ActionButton(label: UITextConstants.addVendor, icon: Icons.add, onPressed: _showCreateVendorDialog);
-                  }
-                  return const SizedBox.shrink();
-                },
+          // Header with back button and actions
+          Row(
+            children: [
+              IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.dashboard)),
+              const SizedBox(width: AppConfig.smallPadding),
+              Expanded(
+                child: PageHeader(
+                  title: AppConstants.featureLabels['vendors']!,
+                  actions: [
+                    Consumer<PermissionProvider>(
+                      builder: (context, permissionProvider, child) {
+                        if (permissionProvider.canCreate('vendor')) {
+                          return ActionButton(label: UITextConstants.addVendor, icon: Icons.add, onPressed: _showCreateVendorDialog);
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -148,8 +159,10 @@ class _VendorsPageState extends State<VendorsPage> {
       subtitle: Text(vendor.phone),
       trailing: StatusBadge(text: vendor.isActive ? 'Active' : 'Inactive', isActive: vendor.isActive),
       onTap: () {
-        // TODO: Navigate to vendor details page
-        SnackbarUtils.showInfo(context, 'Vendor details coming soon!');
+        // Navigate to vendor details page
+        print('🖱️ VendorsPage: Tapped vendor card for ID: ${vendor.id}');
+        print('🖱️ VendorsPage: Vendor name: ${vendor.name}');
+        context.go('/vendors/${vendor.id}');
       },
     );
   }
