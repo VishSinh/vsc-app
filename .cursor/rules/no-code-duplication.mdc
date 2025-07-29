@@ -1,4 +1,0 @@
----
-alwaysApply: true
-description: Always avoid code duplication — extract repeated logic into feature-level or core-level utils depending on usage scope.
----

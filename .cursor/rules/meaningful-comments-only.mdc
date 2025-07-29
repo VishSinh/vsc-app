@@ -1,4 +1,0 @@
----
-alwaysApply: true
-description: Only add comments when the logic is non-trivial or difficult to understand; avoid commenting self-explanatory code or restating what the code already makes clear.
----

@@ -1,5 +1,0 @@
----
-alwaysApply: true
-description: Never embed business logic (API calls, data transformation, validation) inside widgets or UI files; delegate all logic to controllers, viewmodels, or services.
-
----

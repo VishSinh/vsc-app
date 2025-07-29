@@ -1,5 +1,0 @@
----
-alwaysApply: true
-description: Always reuse existing models, enums, and services when applicable; avoid redefining shared domain entities.
-
----
