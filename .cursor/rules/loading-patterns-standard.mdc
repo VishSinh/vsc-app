@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+description: Use Spinners for general load states and Shimmer for screen-specific content placeholders while waiting for APIs to resolve.
+
+---

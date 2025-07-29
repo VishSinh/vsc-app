@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/enums/user_role.dart';
 import 'package:vsc_app/core/utils/responsive_layout.dart';
+import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
 
 class AdministrationPage extends StatefulWidget {
@@ -163,12 +164,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 children: [
                   Text('Administration', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
                   const Spacer(),
-                  if (isAdmin)
-                    ElevatedButton.icon(
-                      onPressed: () => context.go('/register'),
-                      icon: const Icon(Icons.person_add),
-                      label: const Text('Register Staff'),
-                    ),
+                  if (isAdmin) ButtonUtils.primaryButton(onPressed: () => context.go('/register'), label: 'Register Staff', icon: Icons.person_add),
                 ],
               ),
               const SizedBox(height: AppConfig.largePadding),

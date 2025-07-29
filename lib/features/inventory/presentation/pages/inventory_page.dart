@@ -7,6 +7,9 @@ import 'package:vsc_app/core/widgets/shimmer_widgets.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
+import 'package:vsc_app/core/constants/ui_text_constants.dart';
+import 'package:vsc_app/core/constants/route_constants.dart';
+import 'package:vsc_app/core/constants/snackbar_constants.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});
@@ -54,11 +57,11 @@ class _InventoryPageState extends State<InventoryPage> {
   ];
 
   final List<NavigationDestination> _destinations = [
-    const NavigationDestination(icon: Icon(Icons.dashboard), label: 'Dashboard'),
-    const NavigationDestination(icon: Icon(Icons.shopping_cart), label: 'Orders'),
-    const NavigationDestination(icon: Icon(Icons.inventory), label: 'Inventory'),
-    const NavigationDestination(icon: Icon(Icons.print), label: 'Production'),
-    const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: 'Administration'),
+    const NavigationDestination(icon: Icon(Icons.dashboard), label: UITextConstants.dashboard),
+    const NavigationDestination(icon: Icon(Icons.shopping_cart), label: UITextConstants.orders),
+    const NavigationDestination(icon: Icon(Icons.inventory), label: UITextConstants.inventory),
+    const NavigationDestination(icon: Icon(Icons.print), label: UITextConstants.production),
+    const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: UITextConstants.administration),
   ];
 
   void _onDestinationSelected(int index) {
@@ -67,18 +70,18 @@ class _InventoryPageState extends State<InventoryPage> {
     });
     switch (index) {
       case 0:
-        context.go('/');
+        context.go(RouteConstants.dashboard);
         break;
       case 1:
-        context.go('/orders');
+        context.go(RouteConstants.orders);
         break;
       case 2:
         break; // Already on inventory
       case 3:
-        context.go('/production');
+        context.go(RouteConstants.production);
         break;
       case 4:
-        context.go('/administration');
+        context.go(RouteConstants.administration);
         break;
     }
   }
@@ -88,7 +91,7 @@ class _InventoryPageState extends State<InventoryPage> {
       final matchesSearch =
           item['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
           item['id'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
-      final matchesCategory = _categoryFilter == 'All' || item['category'] == _categoryFilter;
+      final matchesCategory = _categoryFilter == UITextConstants.categoryAll || item['category'] == _categoryFilter;
       return matchesSearch && matchesCategory;
     }).toList();
   }
@@ -158,11 +161,11 @@ class _InventoryPageState extends State<InventoryPage> {
             children: [
               Icon(Icons.inventory, color: AppConfig.primaryColor, size: AppConfig.iconSizeXXLarge),
               const SizedBox(width: AppConfig.defaultPadding),
-              Text('Inventory Management', style: AppConfig.headlineStyle.copyWith(color: AppConfig.primaryColor)),
+              Text(UITextConstants.inventoryManagementTitle, style: AppConfig.headlineStyle.copyWith(color: AppConfig.primaryColor)),
             ],
           ),
           const SizedBox(height: AppConfig.smallPadding),
-          Text('Manage your inventory items and cards', style: AppConfig.subtitleStyle),
+          Text(UITextConstants.inventoryManagementSubtitle, style: AppConfig.subtitleStyle),
           const SizedBox(height: AppConfig.largePadding),
 
           // Quick Actions Section
@@ -180,27 +183,27 @@ class _InventoryPageState extends State<InventoryPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Quick Actions', style: AppConfig.titleStyle),
+        Text(UITextConstants.quickActions, style: AppConfig.titleStyle),
         const SizedBox(height: AppConfig.defaultPadding),
         Wrap(
           spacing: AppConfig.defaultPadding,
           runSpacing: AppConfig.defaultPadding,
           children: [
-            ButtonUtils.primaryButton(onPressed: () => context.go('/create-card'), label: 'Add Cards', icon: Icons.add_card),
+            ButtonUtils.primaryButton(onPressed: () => context.go(RouteConstants.createCard), label: UITextConstants.addCards, icon: Icons.add_card),
             ButtonUtils.accentButton(
               onPressed: () {
                 // TODO: Navigate to get card page
-                SnackbarUtils.showInfo(context, 'Get Card feature coming soon!');
+                SnackbarUtils.showInfo(context, SnackbarConstants.getCardComingSoon);
               },
-              label: 'Get Card',
+              label: UITextConstants.getCard,
               icon: Icons.search,
             ),
             ButtonUtils.secondaryButton(
               onPressed: () {
                 // TODO: Navigate to find similar card page
-                SnackbarUtils.showInfo(context, 'Find Similar Card feature coming soon!');
+                SnackbarUtils.showInfo(context, SnackbarConstants.findSimilarCardComingSoon);
               },
-              label: 'Find Similar Card',
+              label: UITextConstants.findSimilarCard,
               icon: Icons.compare_arrows,
             ),
             ButtonUtils.warningButton(
@@ -210,7 +213,7 @@ class _InventoryPageState extends State<InventoryPage> {
                   _showInventoryTable = true;
                 });
               },
-              label: 'View Inventory',
+              label: UITextConstants.viewInventory,
               icon: Icons.table_chart,
             ),
           ],
@@ -239,7 +242,7 @@ class _InventoryPageState extends State<InventoryPage> {
                   _showInventoryTable = false;
                 });
               },
-              label: 'Hide Table',
+              label: UITextConstants.hideTable,
               icon: Icons.close,
             ),
           ],
@@ -439,7 +442,7 @@ class _InventoryPageState extends State<InventoryPage> {
                   ShimmerWrapper(
                     child: Container(
                       height: 16,
-                      decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(AppConfig.smallRadius)),
+                      decoration: BoxDecoration(color: AppConfig.grey300, borderRadius: BorderRadius.circular(AppConfig.smallRadius)),
                     ),
                   ),
                 );

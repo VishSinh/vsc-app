@@ -4,6 +4,7 @@ import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/app_constants.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
+import 'package:vsc_app/core/constants/ui_text_constants.dart';
 
 class CreateVendorDialog extends StatefulWidget {
   const CreateVendorDialog({super.key});
@@ -81,7 +82,7 @@ class _CreateVendorDialogState extends State<CreateVendorDialog> {
         Consumer<VendorProvider>(
           builder: (context, vendorProvider, child) {
             return ActionButton(
-              label: 'Create',
+              label: UITextConstants.create,
               icon: Icons.add,
               onPressed: vendorProvider.isLoading ? null : _handleCreateVendor,
               isLoading: vendorProvider.isLoading,

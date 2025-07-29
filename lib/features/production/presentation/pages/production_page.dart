@@ -309,7 +309,7 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
       case JobStatus.failed:
         return AppConfig.errorColor;
       case JobStatus.cancelled:
-        return Colors.grey;
+        return AppConfig.grey400;
     }
   }
 }

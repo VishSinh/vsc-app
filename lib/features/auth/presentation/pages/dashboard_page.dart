@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/enums/user_role.dart';
 import 'package:vsc_app/core/utils/responsive_layout.dart';
-import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
+import 'package:vsc_app/core/widgets/shared_widgets.dart';
+import 'package:vsc_app/core/widgets/shimmer_widgets.dart';
+import 'package:vsc_app/core/widgets/button_utils.dart';
+import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/core/widgets/shimmer_widgets.dart';
+import 'package:vsc_app/core/constants/ui_text_constants.dart';
+import 'package:vsc_app/core/constants/route_constants.dart';
+import 'package:vsc_app/core/constants/snackbar_constants.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -77,26 +84,26 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   List<NavigationDestination> _getAvailableDestinations(PermissionProvider permissionProvider) {
-    final destinations = <NavigationDestination>[const NavigationDestination(icon: Icon(Icons.dashboard), label: 'Dashboard')];
+    final destinations = <NavigationDestination>[const NavigationDestination(icon: Icon(Icons.dashboard), label: UITextConstants.dashboard)];
 
     // Orders - show if user can manage orders
     if (permissionProvider.canManageOrders) {
-      destinations.add(const NavigationDestination(icon: Icon(Icons.shopping_cart), label: 'Orders'));
+      destinations.add(const NavigationDestination(icon: Icon(Icons.shopping_cart), label: UITextConstants.orders));
     }
 
     // Inventory - show if user can manage inventory
     if (permissionProvider.canManageInventory) {
-      destinations.add(const NavigationDestination(icon: Icon(Icons.inventory), label: 'Inventory'));
+      destinations.add(const NavigationDestination(icon: Icon(Icons.inventory), label: UITextConstants.inventory));
     }
 
     // Production - show if user can manage production
     if (permissionProvider.canManageProduction) {
-      destinations.add(const NavigationDestination(icon: Icon(Icons.print), label: 'Production'));
+      destinations.add(const NavigationDestination(icon: Icon(Icons.print), label: UITextConstants.production));
     }
 
     // Administration - show if user can manage system or view audit logs
     if (permissionProvider.canManageSystem || permissionProvider.canViewAuditLogs) {
-      destinations.add(const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: 'Administration'));
+      destinations.add(const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: UITextConstants.administration));
     }
 
     return destinations;
@@ -116,42 +123,42 @@ class _DashboardPageState extends State<DashboardPage> {
       case 1:
         if (destinations.length > 1) {
           final secondDestination = destinations[1];
-          if (secondDestination.label == 'Orders') {
-            context.go('/orders');
-          } else if (secondDestination.label == 'Inventory') {
-            context.go('/inventory');
-          } else if (secondDestination.label == 'Production') {
-            context.go('/production');
-          } else if (secondDestination.label == 'Administration') {
-            context.go('/administration');
+          if (secondDestination.label == UITextConstants.orders) {
+            context.go(RouteConstants.orders);
+          } else if (secondDestination.label == UITextConstants.inventory) {
+            context.go(RouteConstants.inventory);
+          } else if (secondDestination.label == UITextConstants.production) {
+            context.go(RouteConstants.production);
+          } else if (secondDestination.label == UITextConstants.administration) {
+            context.go(RouteConstants.administration);
           }
         }
         break;
       case 2:
         if (destinations.length > 2) {
           final thirdDestination = destinations[2];
-          if (thirdDestination.label == 'Inventory') {
-            context.go('/inventory');
-          } else if (thirdDestination.label == 'Production') {
-            context.go('/production');
-          } else if (thirdDestination.label == 'Administration') {
-            context.go('/administration');
+          if (thirdDestination.label == UITextConstants.inventory) {
+            context.go(RouteConstants.inventory);
+          } else if (thirdDestination.label == UITextConstants.production) {
+            context.go(RouteConstants.production);
+          } else if (thirdDestination.label == UITextConstants.administration) {
+            context.go(RouteConstants.administration);
           }
         }
         break;
       case 3:
         if (destinations.length > 3) {
           final fourthDestination = destinations[3];
-          if (fourthDestination.label == 'Production') {
-            context.go('/production');
-          } else if (fourthDestination.label == 'Administration') {
-            context.go('/administration');
+          if (fourthDestination.label == UITextConstants.production) {
+            context.go(RouteConstants.production);
+          } else if (fourthDestination.label == UITextConstants.administration) {
+            context.go(RouteConstants.administration);
           }
         }
         break;
       case 4:
         if (destinations.length > 4) {
-          context.go('/administration');
+          context.go(RouteConstants.administration);
         }
         break;
     }
@@ -161,7 +168,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final authProvider = context.read<AuthProvider>();
     await authProvider.logout(context: context);
     if (mounted) {
-      context.go('/login');
+      context.go(RouteConstants.login);
     }
   }
 
@@ -172,11 +179,11 @@ class _DashboardPageState extends State<DashboardPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Welcome Header
-          Text('Welcome back!', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
+          Text(UITextConstants.welcomeBack, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: AppConfig.smallPadding),
           Text(
-            'Here\'s what\'s happening with your ${userRole.value.toLowerCase()} operations',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+            UITextConstants.welcomeSubtitle.replaceAll('{role}', userRole.value.toLowerCase()),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppConfig.grey600),
           ),
           const SizedBox(height: AppConfig.largePadding),
 
@@ -197,23 +204,17 @@ class _DashboardPageState extends State<DashboardPage> {
     // Register Staff - only for users who can create accounts
     if (permissionProvider.canCreate('account')) {
       actions.add(
-        ElevatedButton.icon(
-          onPressed: () => context.go('/register'),
-          icon: const Icon(Icons.person_add),
-          label: const Text('Register Staff'),
-          style: ElevatedButton.styleFrom(backgroundColor: AppConfig.primaryColor, foregroundColor: Colors.white),
-        ),
+        ButtonUtils.primaryButton(onPressed: () => context.go(RouteConstants.register), label: UITextConstants.registerStaff, icon: Icons.person_add),
       );
     }
 
     // Create Order - for users who can create orders
     if (permissionProvider.canCreate('order')) {
       actions.add(
-        ElevatedButton.icon(
-          onPressed: () => context.go('/orders/new'),
-          icon: const Icon(Icons.add_shopping_cart),
-          label: const Text('Create Order'),
-          style: ElevatedButton.styleFrom(backgroundColor: AppConfig.accentColor, foregroundColor: Colors.white),
+        ButtonUtils.accentButton(
+          onPressed: () => context.go(RouteConstants.newOrder),
+          label: UITextConstants.createOrder,
+          icon: Icons.add_shopping_cart,
         ),
       );
     }
@@ -221,14 +222,13 @@ class _DashboardPageState extends State<DashboardPage> {
     // Add Inventory - for users who can create inventory
     if (permissionProvider.canCreate('inventory')) {
       actions.add(
-        ElevatedButton.icon(
+        ButtonUtils.successButton(
           onPressed: () {
             // TODO: Navigate to add inventory page
-            SnackbarUtils.showInfo(context, 'Add Inventory feature coming soon!');
+            SnackbarUtils.showInfo(context, SnackbarConstants.addInventoryComingSoon);
           },
-          icon: const Icon(Icons.add_box),
-          label: const Text('Add Inventory'),
-          style: ElevatedButton.styleFrom(backgroundColor: AppConfig.successColor, foregroundColor: Colors.white),
+          label: UITextConstants.addInventory,
+          icon: Icons.add_box,
         ),
       );
     }
@@ -236,14 +236,13 @@ class _DashboardPageState extends State<DashboardPage> {
     // Create Production Job - for users who can create production
     if (permissionProvider.canCreate('production')) {
       actions.add(
-        ElevatedButton.icon(
+        ButtonUtils.secondaryButton(
           onPressed: () {
             // TODO: Navigate to create production job page
-            SnackbarUtils.showInfo(context, 'Create Production Job feature coming soon!');
+            SnackbarUtils.showInfo(context, SnackbarConstants.createProductionJobComingSoon);
           },
-          icon: const Icon(Icons.print),
-          label: const Text('Create Job'),
-          style: ElevatedButton.styleFrom(backgroundColor: AppConfig.secondaryColor, foregroundColor: Colors.white),
+          label: UITextConstants.createJob,
+          icon: Icons.print,
         ),
       );
     }
@@ -251,24 +250,14 @@ class _DashboardPageState extends State<DashboardPage> {
     // Manage Vendors - for users who can manage vendors
     if (permissionProvider.canManageVendors) {
       actions.add(
-        ElevatedButton.icon(
-          onPressed: () => context.go('/vendors'),
-          icon: const Icon(Icons.people),
-          label: const Text('Manage Vendors'),
-          style: ElevatedButton.styleFrom(backgroundColor: AppConfig.warningColor, foregroundColor: Colors.white),
-        ),
+        ButtonUtils.warningButton(onPressed: () => context.go(RouteConstants.vendors), label: UITextConstants.manageVendors, icon: Icons.people),
       );
     }
 
     // Create Card - for users who can manage inventory
     if (permissionProvider.canManageInventory) {
       actions.add(
-        ElevatedButton.icon(
-          onPressed: () => context.go('/create-card'),
-          icon: const Icon(Icons.credit_card),
-          label: const Text('Create Card'),
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
-        ),
+        ButtonUtils.successButton(onPressed: () => context.go(RouteConstants.createCard), label: UITextConstants.createCard, icon: Icons.credit_card),
       );
     }
 
@@ -279,7 +268,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Quick Actions', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+        Text(UITextConstants.quickActions, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: AppConfig.defaultPadding),
         Wrap(spacing: AppConfig.defaultPadding, runSpacing: AppConfig.defaultPadding, children: actions),
       ],
@@ -293,27 +282,45 @@ class _DashboardPageState extends State<DashboardPage> {
     if (permissionProvider.canManageOrders) {
       statsCards.addAll([
         _buildStatCard(
-          title: 'Total Orders',
+          title: UITextConstants.totalOrders,
           value: '156',
           icon: Icons.shopping_cart,
           color: AppConfig.primaryColor,
-          subtitle: '+12% from last month',
+          subtitle: UITextConstants.ordersFromLastMonth,
         ),
-        _buildStatCard(title: 'Pending Orders', value: '23', icon: Icons.pending, color: AppConfig.warningColor, subtitle: '5 require attention'),
+        _buildStatCard(
+          title: UITextConstants.pendingOrders,
+          value: '23',
+          icon: Icons.pending,
+          color: AppConfig.warningColor,
+          subtitle: UITextConstants.ordersRequireAttention,
+        ),
       ]);
     }
 
     // Production stats - show if user can manage production
     if (permissionProvider.canManageProduction) {
       statsCards.add(
-        _buildStatCard(title: 'Production Jobs', value: '8', icon: Icons.print, color: AppConfig.accentColor, subtitle: '3 in progress'),
+        _buildStatCard(
+          title: UITextConstants.productionJobs,
+          value: '8',
+          icon: Icons.print,
+          color: AppConfig.accentColor,
+          subtitle: UITextConstants.jobsInProgress,
+        ),
       );
     }
 
     // Inventory stats - show if user can manage inventory
     if (permissionProvider.canManageInventory) {
       statsCards.add(
-        _buildStatCard(title: 'Low Stock Items', value: '7', icon: Icons.warning, color: AppConfig.errorColor, subtitle: 'Need reorder'),
+        _buildStatCard(
+          title: UITextConstants.lowStockItems,
+          value: '7',
+          icon: Icons.warning,
+          color: AppConfig.errorColor,
+          subtitle: UITextConstants.needReorder,
+        ),
       );
     }
 
@@ -321,11 +328,11 @@ class _DashboardPageState extends State<DashboardPage> {
     if (permissionProvider.canManageBilling || permissionProvider.canManagePayments) {
       statsCards.add(
         _buildStatCard(
-          title: 'Total Revenue',
+          title: UITextConstants.totalRevenue,
           value: '\$45,230',
           icon: Icons.attach_money,
           color: AppConfig.successColor,
-          subtitle: '+8% from last month',
+          subtitle: UITextConstants.revenueFromLastMonth,
         ),
       );
     }
@@ -333,7 +340,13 @@ class _DashboardPageState extends State<DashboardPage> {
     // Partners stats - show if user can manage vendors
     if (permissionProvider.canManageVendors) {
       statsCards.add(
-        _buildStatCard(title: 'Active Partners', value: '12', icon: Icons.people, color: AppConfig.secondaryColor, subtitle: '3 new this month'),
+        _buildStatCard(
+          title: UITextConstants.activePartners,
+          value: '12',
+          icon: Icons.people,
+          color: AppConfig.secondaryColor,
+          subtitle: UITextConstants.newPartnersThisMonth,
+        ),
       );
     }
 
@@ -368,7 +381,7 @@ class _DashboardPageState extends State<DashboardPage> {
             const SizedBox(height: AppConfig.smallPadding),
             Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500)),
             const SizedBox(height: AppConfig.smallPadding),
-            Text(subtitle, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600])),
+            Text(subtitle, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppConfig.grey600)),
           ],
         ),
       ),

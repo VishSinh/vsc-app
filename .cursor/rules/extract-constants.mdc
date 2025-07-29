@@ -1,0 +1,4 @@
+---
+alwaysApply: true
+description: Never hardcode strings, numbers, durations, or booleans — move them to constants; create a new one if no suitable constant exists.
+---

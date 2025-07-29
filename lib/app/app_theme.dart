@@ -9,8 +9,8 @@ class AppTheme {
       appBarTheme: const AppBarTheme(
         elevation: AppConfig.elevationNone,
         centerTitle: true,
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.black87,
+        backgroundColor: AppConfig.transparent,
+        foregroundColor: AppConfig.black87,
       ),
       cardTheme: CardThemeData(
         elevation: AppConfig.elevationLow,
@@ -18,7 +18,7 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          elevation: 2,
+          elevation: AppConfig.elevationLow,
           padding: const EdgeInsets.symmetric(horizontal: AppConfig.largePadding, vertical: AppConfig.defaultPadding),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
         ),
@@ -40,8 +40,8 @@ class AppTheme {
       appBarTheme: const AppBarTheme(
         elevation: AppConfig.elevationNone,
         centerTitle: true,
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
+        backgroundColor: AppConfig.transparent,
+        foregroundColor: AppConfig.textColorPrimary,
       ),
       cardTheme: CardThemeData(
         elevation: AppConfig.elevationLow,
@@ -58,7 +58,9 @@ class AppTheme {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
         contentPadding: const EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding, vertical: AppConfig.smallPadding),
       ),
-      dataTableTheme: const DataTableThemeData(headingTextStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+      dataTableTheme: const DataTableThemeData(
+        headingTextStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: AppConfig.fontSizeMd),
+      ),
     );
   }
 }

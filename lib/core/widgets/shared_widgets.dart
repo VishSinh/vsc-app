@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/app/app_config.dart';
+import 'package:vsc_app/core/widgets/button_utils.dart';
+import 'package:vsc_app/core/constants/ui_text_constants.dart';
 
 /// Standard loading widget
 class LoadingWidget extends StatelessWidget {
@@ -47,7 +49,10 @@ class CustomErrorWidget extends StatelessWidget {
             style: TextStyle(color: AppConfig.errorColor),
             textAlign: TextAlign.center,
           ),
-          if (onRetry != null) ...[const SizedBox(height: AppConfig.defaultPadding), ElevatedButton(onPressed: onRetry, child: const Text('Retry'))],
+          if (onRetry != null) ...[
+            const SizedBox(height: AppConfig.defaultPadding),
+            ButtonUtils.primaryButton(onPressed: onRetry, label: UITextConstants.retry),
+          ],
         ],
       ),
     );
@@ -69,16 +74,16 @@ class EmptyStateWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: AppConfig.iconSizeXXLarge, color: Colors.grey[400]),
+          Icon(icon, size: AppConfig.iconSizeXXLarge, color: AppConfig.grey400),
           const SizedBox(height: AppConfig.defaultPadding),
           Text(
             message,
-            style: TextStyle(color: Colors.grey[600]),
+            style: TextStyle(color: AppConfig.grey600),
             textAlign: TextAlign.center,
           ),
           if (onAction != null && actionLabel != null) ...[
             const SizedBox(height: AppConfig.defaultPadding),
-            ElevatedButton(onPressed: onAction, child: Text(actionLabel!)),
+            ButtonUtils.primaryButton(onPressed: onAction, label: actionLabel!),
           ],
         ],
       ),
@@ -212,14 +217,14 @@ class StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isActive ? (activeColor ?? AppConfig.successColor) : (inactiveColor ?? Colors.grey);
+    final color = isActive ? (activeColor ?? AppConfig.successColor) : (inactiveColor ?? AppConfig.grey400);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppConfig.smallPadding, vertical: 4),
       decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(AppConfig.borderRadiusSmall)),
       child: Text(
         text,
-        style: TextStyle(color: Colors.white, fontSize: AppConfig.fontSizeSm),
+        style: TextStyle(color: AppConfig.textColorPrimary, fontSize: AppConfig.fontSizeSm),
       ),
     );
   }

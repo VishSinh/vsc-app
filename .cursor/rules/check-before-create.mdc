@@ -1,0 +1,4 @@
+---
+alwaysApply: true
+description: Always check for existing constants, utils, enums, or components before creating new ones to prevent redundancy and improve maintainability.
+---

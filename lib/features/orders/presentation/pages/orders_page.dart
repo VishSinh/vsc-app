@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/utils/responsive_layout.dart';
+import 'package:vsc_app/core/constants/ui_text_constants.dart';
+import 'package:vsc_app/core/constants/route_constants.dart';
 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
@@ -23,11 +25,11 @@ class _OrdersPageState extends State<OrdersPage> {
   ];
 
   final List<NavigationDestination> _destinations = [
-    const NavigationDestination(icon: Icon(Icons.dashboard), label: 'Dashboard'),
-    const NavigationDestination(icon: Icon(Icons.shopping_cart), label: 'Orders'),
-    const NavigationDestination(icon: Icon(Icons.inventory), label: 'Inventory'),
-    const NavigationDestination(icon: Icon(Icons.print), label: 'Production'),
-    const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: 'Administration'),
+    const NavigationDestination(icon: Icon(Icons.dashboard), label: UITextConstants.dashboard),
+    const NavigationDestination(icon: Icon(Icons.shopping_cart), label: UITextConstants.orders),
+    const NavigationDestination(icon: Icon(Icons.inventory), label: UITextConstants.inventory),
+    const NavigationDestination(icon: Icon(Icons.print), label: UITextConstants.production),
+    const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: UITextConstants.administration),
   ];
 
   void _onDestinationSelected(int index) {
@@ -37,19 +39,19 @@ class _OrdersPageState extends State<OrdersPage> {
 
     switch (index) {
       case 0:
-        context.go('/');
+        context.go(RouteConstants.dashboard);
         break;
       case 1:
         // Already on orders
         break;
       case 2:
-        context.go('/inventory');
+        context.go(RouteConstants.inventory);
         break;
       case 3:
-        context.go('/production');
+        context.go(RouteConstants.production);
         break;
       case 4:
-        context.go('/administration');
+        context.go(RouteConstants.administration);
         break;
     }
   }
@@ -86,7 +88,7 @@ class _OrdersPageState extends State<OrdersPage> {
             children: [
               Text('Orders', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
               const Spacer(),
-              Text('${_filteredOrders.length} orders', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600])),
+              Text('${_filteredOrders.length} orders', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppConfig.grey600)),
             ],
           ),
           const SizedBox(height: AppConfig.largePadding),
@@ -246,7 +248,7 @@ class _OrdersPageState extends State<OrdersPage> {
       case 'Cancelled':
         return AppConfig.errorColor;
       default:
-        return Colors.grey;
+        return AppConfig.grey400;
     }
   }
 }

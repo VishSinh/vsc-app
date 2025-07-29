@@ -11,7 +11,7 @@ class ButtonUtils {
       label: label,
       icon: icon,
       backgroundColor: AppConfig.primaryColor,
-      foregroundColor: Colors.white,
+      foregroundColor: AppConfig.textColorPrimary,
       isLoading: isLoading,
     );
   }
@@ -23,7 +23,7 @@ class ButtonUtils {
       label: label,
       icon: icon,
       backgroundColor: AppConfig.successColor,
-      foregroundColor: Colors.white,
+      foregroundColor: AppConfig.textColorPrimary,
       isLoading: isLoading,
     );
   }
@@ -35,7 +35,7 @@ class ButtonUtils {
       label: label,
       icon: icon,
       backgroundColor: AppConfig.warningColor,
-      foregroundColor: Colors.white,
+      foregroundColor: AppConfig.textColorPrimary,
       isLoading: isLoading,
     );
   }
@@ -47,7 +47,7 @@ class ButtonUtils {
       label: label,
       icon: icon,
       backgroundColor: AppConfig.secondaryColor,
-      foregroundColor: Colors.white,
+      foregroundColor: AppConfig.textColorPrimary,
       isLoading: isLoading,
     );
   }
@@ -59,7 +59,7 @@ class ButtonUtils {
       label: label,
       icon: icon,
       backgroundColor: AppConfig.accentColor,
-      foregroundColor: Colors.white,
+      foregroundColor: AppConfig.textColorPrimary,
       isLoading: isLoading,
     );
   }
@@ -71,7 +71,7 @@ class ButtonUtils {
       label: label,
       icon: icon,
       backgroundColor: AppConfig.errorColor,
-      foregroundColor: Colors.white,
+      foregroundColor: AppConfig.textColorPrimary,
       isLoading: isLoading,
     );
   }
@@ -82,7 +82,7 @@ class ButtonUtils {
     required String label,
     IconData? icon,
     required Color backgroundColor,
-    Color foregroundColor = Colors.white,
+    Color foregroundColor = AppConfig.textColorPrimary,
     bool isLoading = false,
   }) {
     return _buildButton(
@@ -131,6 +131,13 @@ class ButtonUtils {
     return SizedBox(
       width: double.infinity,
       child: successButton(onPressed: onPressed, label: label, icon: icon, isLoading: isLoading),
+    );
+  }
+
+  static Widget fullWidthSecondaryButton({required VoidCallback? onPressed, required String label, IconData? icon, bool isLoading = false}) {
+    return SizedBox(
+      width: double.infinity,
+      child: secondaryButton(onPressed: onPressed, label: label, icon: icon, isLoading: isLoading),
     );
   }
 }

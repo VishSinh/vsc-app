@@ -3,7 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/app/app_config.dart';
+import 'package:vsc_app/core/utils/snackbar_utils.dart';
+import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:vsc_app/core/constants/ui_text_constants.dart';
+import 'package:vsc_app/core/constants/route_constants.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -34,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (success && mounted) {
       // Navigate to dashboard
-      context.go('/');
+      context.go(RouteConstants.dashboard);
     }
   }
 
@@ -55,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: AppConfig.maxWidthSmall),
               child: Card(
-                elevation: 8,
+                elevation: AppConfig.elevationHigh,
                 child: Padding(
                   padding: const EdgeInsets.all(AppConfig.largePadding),
                   child: Form(
@@ -71,20 +75,24 @@ class _LoginPageState extends State<LoginPage> {
                           style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: AppConfig.primaryColor),
                         ),
                         const SizedBox(height: AppConfig.smallPadding),
-                        Text('Sign in to your account', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey[600])),
+                        Text(UITextConstants.signInTitle, style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppConfig.grey600)),
                         const SizedBox(height: AppConfig.largePadding),
 
                         // Phone Field
                         TextFormField(
                           controller: _phoneController,
                           keyboardType: TextInputType.phone,
-                          decoration: const InputDecoration(labelText: 'Phone Number', prefixIcon: Icon(Icons.phone), hintText: '9876543210'),
+                          decoration: InputDecoration(
+                            labelText: UITextConstants.phoneNumber,
+                            prefixIcon: const Icon(Icons.phone),
+                            hintText: UITextConstants.phoneHint,
+                          ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your phone number';
+                              return UITextConstants.pleaseEnterPhone;
                             }
                             if (value.length < 10) {
-                              return 'Please enter a valid phone number';
+                              return UITextConstants.pleaseEnterValidPhone;
                             }
                             return null;
                           },
@@ -96,7 +104,7 @@ class _LoginPageState extends State<LoginPage> {
                           controller: _passwordController,
                           obscureText: _obscurePassword,
                           decoration: InputDecoration(
-                            labelText: 'Password',
+                            labelText: UITextConstants.password,
                             prefixIcon: const Icon(Icons.lock_outline),
                             suffixIcon: IconButton(
                               icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
@@ -109,10 +117,10 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
+                              return UITextConstants.pleaseEnterPassword;
                             }
                             if (value.length < 6) {
-                              return 'Password must be at least 6 characters';
+                              return UITextConstants.passwordTooShort;
                             }
                             return null;
                           },
@@ -140,18 +148,14 @@ class _LoginPageState extends State<LoginPage> {
                         ),
 
                         // Login Button
-                        SizedBox(
-                          width: double.infinity,
-                          child: Consumer<AuthProvider>(
-                            builder: (context, authProvider, child) {
-                              return ElevatedButton(
-                                onPressed: authProvider.isLoading ? null : _handleLogin,
-                                child: authProvider.isLoading
-                                    ? SpinKitDoubleBounce(color: Colors.white, size: AppConfig.loadingIndicatorSize)
-                                    : const Text('Sign In'),
-                              );
-                            },
-                          ),
+                        Consumer<AuthProvider>(
+                          builder: (context, authProvider, child) {
+                            return ButtonUtils.fullWidthPrimaryButton(
+                              onPressed: _handleLogin,
+                              label: UITextConstants.signIn,
+                              isLoading: authProvider.isLoading,
+                            );
+                          },
                         ),
                       ],
                     ),

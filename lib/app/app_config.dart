@@ -57,6 +57,14 @@ class AppConfig {
   static const Color textColorWarning = Color(0xFFFF9800);
   static const Color textColorError = Color(0xFFF44336);
 
+  // Additional Colors
+  static const Color grey300 = Color(0xFFE0E0E0);
+  static const Color grey400 = Color(0xFFBDBDBD);
+  static const Color grey600 = Color(0xFF757575);
+  static const Color transparent = Colors.transparent;
+  static const Color black87 = Color(0xFFDD000000);
+  static const Color red = Colors.red;
+
   // Text Styles
   static const TextStyle headlineStyle = TextStyle(
     fontFamily: fontFamily,
@@ -117,13 +125,40 @@ class AppConfig {
   static const Duration animationDurationSlow = Duration(milliseconds: 500);
 
   // Snackbar Constants
-  static const double snackbarElevation = 8.0;
+  static const double snackbarElevation = 2.0; // Small elevation to ensure visibility
   static const double snackbarMaxWidth = 400.0;
   static const EdgeInsets snackbarMargin = EdgeInsets.only(bottom: 20, right: 20);
 
   // Shimmer Colors
   static const Color shimmerBaseColor = Color(0xFF424242); // Colors.grey[700]
   static const Color shimmerHighlightColor = Color(0xFF616161); // Colors.grey[600]
+
+  // Snackbar Colors
+  static const Color snackbarSuccessColor = Color(0xFF388E3C); // Colors.green[700]
+  static const Color snackbarErrorColor = Color(0xFFD32F2F); // Colors.red[700]
+  static const Color snackbarWarningColor = Color(0xFFF57C00); // Colors.orange[700]
+  static const Color snackbarInfoColor = Color(0xFF1976D2); // Colors.blue[700]
+  static const Color snackbarDefaultColor = Color(0xFF424242); // Colors.grey[700]
+  static const Color snackbarTextColor = Colors.white;
+  static const Color snackbarTextSecondaryColor = Color(0xFFB3FFFFFF); // Colors.white70
+
+  // Snackbar Spacing
+  static const EdgeInsets snackbarPadding = EdgeInsets.symmetric(horizontal: 16, vertical: 12);
+  static const double snackbarIconSize = 24.0;
+  static const double snackbarIconSpacing = 12.0;
+  static const double snackbarTextSpacing = 4.0;
+
+  // Snackbar Margins
+  static const double snackbarRightMargin = 20.0;
+  static const double snackbarBottomMargin = 20.0;
+  static const double snackbarLeftMargin = 15.0;
+  static const double snackbarTopMargin = 5.0;
+  static const double snackbarHorizontalMargin = 15.0;
+  static const double snackbarVerticalMargin = 10.0;
+
+  // Snackbar Typography
+  static const double snackbarTitleFontSize = 16.0;
+  static const double snackbarMessageFontSize = 14.0;
 
   // Border Radius (Additional)
   static const double borderRadiusTiny = 2.0;

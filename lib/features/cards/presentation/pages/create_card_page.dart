@@ -8,6 +8,8 @@ import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
 import 'package:vsc_app/core/models/vendor_model.dart';
 import 'package:vsc_app/app/app_config.dart';
+import 'package:vsc_app/core/constants/ui_text_constants.dart';
+import 'package:vsc_app/core/constants/route_constants.dart';
 
 class CreateCardPage extends StatefulWidget {
   const CreateCardPage({super.key});
@@ -46,8 +48,8 @@ class _CreateCardPageState extends State<CreateCardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Card'),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go('/')),
+        title: Text(UITextConstants.createCard),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.dashboard)),
       ),
       body: Consumer<CardProvider>(
         builder: (context, cardProvider, child) {
@@ -64,9 +66,9 @@ class _CreateCardPageState extends State<CreateCardPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Create New Card', style: AppConfig.headlineStyle.copyWith(color: AppConfig.primaryColor)),
+                        Text(UITextConstants.createCardTitle, style: AppConfig.headlineStyle.copyWith(color: AppConfig.primaryColor)),
                         const SizedBox(height: AppConfig.smallPadding),
-                        Text('Add a new card to the inventory system', style: AppConfig.subtitleStyle),
+                        Text(UITextConstants.createCardSubtitle, style: AppConfig.subtitleStyle),
                         const SizedBox(height: AppConfig.largePadding),
 
                         // Content Layout
@@ -137,7 +139,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
               children: [
                 Icon(Icons.image, color: AppConfig.primaryColor, size: AppConfig.iconSizeLarge),
                 const SizedBox(width: AppConfig.smallPadding),
-                Text('Card Image', style: AppConfig.titleStyle),
+                Text(UITextConstants.cardImage, style: AppConfig.titleStyle),
               ],
             ),
             const SizedBox(height: AppConfig.defaultPadding),
@@ -154,8 +156,8 @@ class _CreateCardPageState extends State<CreateCardPage> {
                     width: imageWidth,
                     height: imageHeight,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(AppConfig.borderRadiusMedium),
+                      border: Border.all(color: AppConfig.grey300),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
@@ -164,8 +166,8 @@ class _CreateCardPageState extends State<CreateCardPage> {
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
-                            color: Colors.grey.shade200,
-                            child: const Icon(Icons.error, color: Colors.red, size: AppConfig.iconSizeXLarge),
+                            color: AppConfig.grey300,
+                            child: const Icon(Icons.error, color: AppConfig.red, size: AppConfig.iconSizeXLarge),
                           );
                         },
                       ),
@@ -177,11 +179,15 @@ class _CreateCardPageState extends State<CreateCardPage> {
               Row(
                 children: [
                   Expanded(
-                    child: ButtonUtils.accentButton(onPressed: () => _showImagePickerDialog(cardProvider), label: 'Change Image', icon: Icons.edit),
+                    child: ButtonUtils.accentButton(
+                      onPressed: () => _showImagePickerDialog(cardProvider),
+                      label: UITextConstants.changeImage,
+                      icon: Icons.edit,
+                    ),
                   ),
                   const SizedBox(width: AppConfig.defaultPadding),
                   Expanded(
-                    child: ButtonUtils.dangerButton(onPressed: cardProvider.clearImage, label: 'Remove', icon: Icons.delete),
+                    child: ButtonUtils.dangerButton(onPressed: cardProvider.clearImage, label: UITextConstants.remove, icon: Icons.delete),
                   ),
                 ],
               ),
@@ -197,18 +203,18 @@ class _CreateCardPageState extends State<CreateCardPage> {
                     width: imageWidth,
                     height: imageHeight,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade300, style: BorderStyle.solid),
+                      borderRadius: BorderRadius.circular(AppConfig.borderRadiusMedium),
+                      border: Border.all(color: AppConfig.grey300, style: BorderStyle.solid),
                     ),
                     child: InkWell(
                       onTap: () => _showImagePickerDialog(cardProvider),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppConfig.borderRadiusMedium),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.add_photo_alternate, size: AppConfig.iconSizeXLarge, color: Colors.grey.shade600),
+                          Icon(Icons.add_photo_alternate, size: AppConfig.iconSizeXLarge, color: AppConfig.grey600),
                           const SizedBox(height: AppConfig.spacingSmall),
-                          Text('Tap to upload image', style: AppConfig.bodyStyle.copyWith(color: AppConfig.textColorMuted)),
+                          Text(UITextConstants.tapToUploadImage, style: AppConfig.bodyStyle.copyWith(color: AppConfig.textColorMuted)),
                         ],
                       ),
                     ),
@@ -234,7 +240,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
               children: [
                 Icon(Icons.edit_note, color: AppConfig.primaryColor, size: AppConfig.iconSizeLarge),
                 const SizedBox(width: AppConfig.smallPadding),
-                Text('Card Details', style: AppConfig.titleStyle),
+                Text(UITextConstants.cardDetails, style: AppConfig.titleStyle),
               ],
             ),
             const SizedBox(height: AppConfig.defaultPadding),
@@ -243,8 +249,8 @@ class _CreateCardPageState extends State<CreateCardPage> {
             TextFormField(
               controller: _costPriceController,
               decoration: InputDecoration(
-                labelText: 'Cost Price',
-                hintText: 'Enter cost price',
+                labelText: UITextConstants.costPrice,
+                hintText: UITextConstants.costPriceHint,
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.attach_money),
                 labelStyle: AppConfig.bodyStyle,
@@ -253,10 +259,10 @@ class _CreateCardPageState extends State<CreateCardPage> {
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter cost price';
+                  return UITextConstants.pleaseEnterCostPrice;
                 }
                 if (double.tryParse(value) == null) {
-                  return 'Please enter a valid number';
+                  return UITextConstants.pleaseEnterValidNumber;
                 }
                 return null;
               },
@@ -267,8 +273,8 @@ class _CreateCardPageState extends State<CreateCardPage> {
             TextFormField(
               controller: _sellPriceController,
               decoration: InputDecoration(
-                labelText: 'Sell Price',
-                hintText: 'Enter sell price',
+                labelText: UITextConstants.sellPrice,
+                hintText: UITextConstants.sellPriceHint,
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.sell),
                 labelStyle: AppConfig.bodyStyle,
@@ -277,10 +283,10 @@ class _CreateCardPageState extends State<CreateCardPage> {
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter sell price';
+                  return UITextConstants.pleaseEnterSellPrice;
                 }
                 if (double.tryParse(value) == null) {
-                  return 'Please enter a valid number';
+                  return UITextConstants.pleaseEnterValidNumber;
                 }
                 return null;
               },
@@ -291,8 +297,8 @@ class _CreateCardPageState extends State<CreateCardPage> {
             TextFormField(
               controller: _quantityController,
               decoration: InputDecoration(
-                labelText: 'Quantity',
-                hintText: 'Enter quantity',
+                labelText: UITextConstants.quantity,
+                hintText: UITextConstants.quantityHint,
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.inventory),
                 labelStyle: AppConfig.bodyStyle,
@@ -301,10 +307,10 @@ class _CreateCardPageState extends State<CreateCardPage> {
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter quantity';
+                  return UITextConstants.pleaseEnterQuantity;
                 }
                 if (int.tryParse(value) == null) {
-                  return 'Please enter a valid number';
+                  return UITextConstants.pleaseEnterValidNumber;
                 }
                 return null;
               },
@@ -315,8 +321,8 @@ class _CreateCardPageState extends State<CreateCardPage> {
             TextFormField(
               controller: _maxDiscountController,
               decoration: InputDecoration(
-                labelText: 'Max Discount (%)',
-                hintText: 'Enter max discount percentage',
+                labelText: UITextConstants.maxDiscount,
+                hintText: UITextConstants.maxDiscountHint,
                 border: const OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.discount),
                 labelStyle: AppConfig.bodyStyle,
@@ -325,14 +331,14 @@ class _CreateCardPageState extends State<CreateCardPage> {
               keyboardType: TextInputType.number,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter max discount';
+                  return UITextConstants.pleaseEnterMaxDiscount;
                 }
                 if (double.tryParse(value) == null) {
-                  return 'Please enter a valid number';
+                  return UITextConstants.pleaseEnterValidNumber;
                 }
                 final discount = double.parse(value);
                 if (discount < 0 || discount > 100) {
-                  return 'Discount must be between 0 and 100';
+                  return UITextConstants.discountRange;
                 }
                 return null;
               },
@@ -343,18 +349,20 @@ class _CreateCardPageState extends State<CreateCardPage> {
             Consumer<VendorProvider>(
               builder: (context, vendorProvider, child) {
                 if (vendorProvider.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                    child: SpinKitDoubleBounce(color: AppConfig.primaryColor, size: AppConfig.loadingIndicatorSize),
+                  );
                 }
 
                 if (vendorProvider.vendors.isEmpty) {
-                  return Text('No vendors available', style: AppConfig.captionStyle);
+                  return Text(UITextConstants.noVendorsAvailable, style: AppConfig.captionStyle);
                 }
 
                 return DropdownButtonFormField<String>(
                   value: _selectedVendorId,
                   decoration: InputDecoration(
-                    labelText: 'Select Vendor',
-                    hintText: 'Choose a vendor',
+                    labelText: UITextConstants.selectVendor,
+                    hintText: UITextConstants.chooseVendorHint,
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.people),
                     labelStyle: AppConfig.bodyStyle,
@@ -373,7 +381,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please select a vendor';
+                      return UITextConstants.pleaseSelectVendor;
                     }
                     return null;
                   },
@@ -387,9 +395,9 @@ class _CreateCardPageState extends State<CreateCardPage> {
   }
 
   Widget _buildSubmitButton(CardProvider cardProvider) {
-    return ButtonUtils.fullWidthSuccessButton(
-      onPressed: cardProvider.isLoading ? null : _submitForm,
-      label: cardProvider.isLoading ? 'Creating...' : 'Create Card',
+    return ButtonUtils.fullWidthPrimaryButton(
+      onPressed: _submitForm,
+      label: UITextConstants.addCard,
       icon: Icons.add,
       isLoading: cardProvider.isLoading,
     );
@@ -399,13 +407,13 @@ class _CreateCardPageState extends State<CreateCardPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Image'),
+        title: Text(UITextConstants.selectImageTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Gallery'),
+              title: Text(UITextConstants.galleryTitle),
               onTap: () {
                 Navigator.pop(context);
                 _uploadDummyImage(cardProvider);
@@ -413,7 +421,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
             ),
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Camera'),
+              title: Text(UITextConstants.cameraTitle),
               onTap: () {
                 Navigator.pop(context);
                 _uploadDummyImage(cardProvider);

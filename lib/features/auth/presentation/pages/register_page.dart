@@ -4,7 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/enums/user_role.dart';
+import 'package:vsc_app/core/utils/snackbar_utils.dart';
+import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:vsc_app/core/constants/ui_text_constants.dart';
+import 'package:vsc_app/core/constants/route_constants.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -47,9 +51,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (success && mounted) {
       // Show success message and clear form
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(authProvider.successMessage ?? 'Registration successful'), backgroundColor: AppConfig.successColor));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(authProvider.successMessage ?? UITextConstants.registrationSuccessful), backgroundColor: AppConfig.successColor),
+      );
 
       // Clear form
       _nameController.clear();
@@ -66,15 +70,15 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Register New Staff'),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go('/administration')),
+        title: Text(UITextConstants.registerTitle),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.administration)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppConfig.largePadding),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: AppConfig.maxWidthMedium),
           child: Card(
-            elevation: 4,
+            elevation: AppConfig.elevationMedium,
             child: Padding(
               padding: const EdgeInsets.all(AppConfig.largePadding),
               child: Form(
@@ -82,21 +86,28 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Register New Staff Member', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(
+                      UITextConstants.registerStaffMember,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
                     const SizedBox(height: AppConfig.smallPadding),
-                    Text('Add a new staff member to the system', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey[600])),
+                    Text(UITextConstants.registerSubtitle, style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppConfig.grey600)),
                     const SizedBox(height: AppConfig.largePadding),
 
                     // Name Field
                     TextFormField(
                       controller: _nameController,
-                      decoration: const InputDecoration(labelText: 'Full Name', prefixIcon: Icon(Icons.person), hintText: 'John Doe'),
+                      decoration: InputDecoration(
+                        labelText: UITextConstants.fullName,
+                        prefixIcon: const Icon(Icons.person),
+                        hintText: UITextConstants.nameHint,
+                      ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter the full name';
+                          return UITextConstants.pleaseEnterFullName;
                         }
                         if (value.length < 2) {
-                          return 'Name must be at least 2 characters';
+                          return UITextConstants.nameTooShort;
                         }
                         return null;
                       },
@@ -107,13 +118,17 @@ class _RegisterPageState extends State<RegisterPage> {
                     TextFormField(
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(labelText: 'Phone Number', prefixIcon: Icon(Icons.phone), hintText: '9876543210'),
+                      decoration: InputDecoration(
+                        labelText: UITextConstants.phoneNumber,
+                        prefixIcon: const Icon(Icons.phone),
+                        hintText: UITextConstants.phoneHint,
+                      ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter the phone number';
+                          return UITextConstants.pleaseEnterPhone;
                         }
                         if (value.length < 10) {
-                          return 'Please enter a valid phone number';
+                          return UITextConstants.pleaseEnterValidPhone;
                         }
                         return null;
                       },
@@ -123,7 +138,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     // Role Selection
                     DropdownButtonFormField<UserRole>(
                       value: _selectedRole,
-                      decoration: const InputDecoration(labelText: 'Role', prefixIcon: Icon(Icons.work)),
+                      decoration: InputDecoration(labelText: UITextConstants.role, prefixIcon: const Icon(Icons.work)),
                       items: UserRole.values.map((role) {
                         return DropdownMenuItem(value: role, child: Text(role.value));
                       }).toList(),
@@ -142,7 +157,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       controller: _passwordController,
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
-                        labelText: 'Password',
+                        labelText: UITextConstants.password,
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
@@ -155,13 +170,13 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter a password';
+                          return UITextConstants.pleaseEnterPassword;
                         }
                         if (value.length < 8) {
-                          return 'Password must be at least 8 characters';
+                          return UITextConstants.passwordTooShortRegister;
                         }
                         if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)').hasMatch(value)) {
-                          return 'Password must contain uppercase, lowercase, and number';
+                          return UITextConstants.passwordComplexity;
                         }
                         return null;
                       },
@@ -173,7 +188,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       controller: _confirmPasswordController,
                       obscureText: _obscureConfirmPassword,
                       decoration: InputDecoration(
-                        labelText: 'Confirm Password',
+                        labelText: UITextConstants.confirmPassword,
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           icon: Icon(_obscureConfirmPassword ? Icons.visibility : Icons.visibility_off),
@@ -186,10 +201,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please confirm the password';
+                          return UITextConstants.pleaseEnterConfirmPassword;
                         }
                         if (value != _passwordController.text) {
-                          return 'Passwords do not match';
+                          return UITextConstants.passwordsDoNotMatch;
                         }
                         return null;
                       },
@@ -237,18 +252,14 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
 
                     // Register Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: Consumer<AuthProvider>(
-                        builder: (context, authProvider, child) {
-                          return ElevatedButton(
-                            onPressed: authProvider.isLoading ? null : _handleRegister,
-                            child: authProvider.isLoading
-                                ? SpinKitDoubleBounce(color: Colors.white, size: AppConfig.loadingIndicatorSize)
-                                : const Text('Register Staff Member'),
-                          );
-                        },
-                      ),
+                    Consumer<AuthProvider>(
+                      builder: (context, authProvider, child) {
+                        return ButtonUtils.fullWidthPrimaryButton(
+                          onPressed: _handleRegister,
+                          label: UITextConstants.registerStaffMember,
+                          isLoading: authProvider.isLoading,
+                        );
+                      },
                     ),
                   ],
                 ),

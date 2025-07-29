@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/app_constants.dart';
 import 'package:vsc_app/core/models/vendor_model.dart';
@@ -10,6 +11,7 @@ import 'package:vsc_app/features/auth/presentation/providers/permission_provider
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/features/vendors/presentation/widgets/create_vendor_dialog.dart';
+import 'package:vsc_app/core/constants/ui_text_constants.dart';
 
 class VendorsPage extends StatefulWidget {
   const VendorsPage({super.key});
@@ -40,7 +42,7 @@ class _VendorsPageState extends State<VendorsPage> {
   Widget build(BuildContext context) {
     return ResponsiveLayout(
       selectedIndex: 0,
-      destinations: const [NavigationDestination(icon: Icon(Icons.people), label: 'Vendors')],
+      destinations: const [NavigationDestination(icon: Icon(Icons.people), label: UITextConstants.vendors)],
       onDestinationSelected: (index) {},
       child: _buildVendorsContent(),
     );
@@ -58,7 +60,7 @@ class _VendorsPageState extends State<VendorsPage> {
               Consumer<PermissionProvider>(
                 builder: (context, permissionProvider, child) {
                   if (permissionProvider.canCreate('vendor')) {
-                    return ActionButton(label: 'Add Vendor', icon: Icons.add, onPressed: _showCreateVendorDialog);
+                    return ActionButton(label: UITextConstants.addVendor, icon: Icons.add, onPressed: _showCreateVendorDialog);
                   }
                   return const SizedBox.shrink();
                 },
@@ -116,7 +118,9 @@ class _VendorsPageState extends State<VendorsPage> {
                         return vendorProvider.isLoading
                             ? const Padding(
                                 padding: EdgeInsets.all(AppConfig.defaultPadding),
-                                child: Center(child: CircularProgressIndicator()),
+                                child: Center(
+                                  child: SpinKitDoubleBounce(color: AppConfig.primaryColor, size: AppConfig.loadingIndicatorSize),
+                                ),
                               )
                             : const SizedBox.shrink();
                       }
@@ -137,8 +141,8 @@ class _VendorsPageState extends State<VendorsPage> {
   Widget _buildVendorCard(Vendor vendor) {
     return ListItemCard(
       leading: CircleAvatar(
-        backgroundColor: vendor.isActive ? AppConfig.successColor : Colors.grey,
-        child: const Icon(Icons.business, color: Colors.white),
+        backgroundColor: vendor.isActive ? AppConfig.successColor : AppConfig.grey400,
+        child: const Icon(Icons.business, color: AppConfig.textColorPrimary),
       ),
       title: Text(vendor.name, style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text(vendor.phone),
