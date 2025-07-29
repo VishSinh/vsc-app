@@ -29,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
 
     final authProvider = context.read<AuthProvider>();
 
-    final success = await authProvider.login(phone: _phoneController.text.trim(), password: _passwordController.text);
+    final success = await authProvider.login(phone: _phoneController.text.trim(), password: _passwordController.text, context: context);
 
     if (success && mounted) {
       // Navigate to dashboard

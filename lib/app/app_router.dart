@@ -9,6 +9,7 @@ import 'package:vsc_app/features/production/presentation/pages/production_page.d
 import 'package:vsc_app/features/administration/presentation/pages/administration_page.dart';
 import 'package:vsc_app/features/auth/presentation/pages/register_page.dart';
 import 'package:vsc_app/features/vendors/presentation/pages/vendors_page.dart';
+import 'package:vsc_app/features/cards/presentation/pages/create_card_page.dart';
 
 class AppRouter {
   static late final GoRouter router;
@@ -41,6 +42,7 @@ class AppRouter {
         GoRoute(path: '/production', name: 'production', builder: (context, state) => const ProductionPage()),
         GoRoute(path: '/administration', name: 'administration', builder: (context, state) => const AdministrationPage()),
         GoRoute(path: '/vendors', name: 'vendors', builder: (context, state) => const VendorsPage()),
+        GoRoute(path: '/create-card', name: 'create-card', builder: (context, state) => const CreateCardPage()),
 
         // Register route (Admin only)
         GoRoute(path: '/register', name: 'register', builder: (context, state) => const RegisterPage()),

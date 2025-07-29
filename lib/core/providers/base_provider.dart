@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:vsc_app/core/models/api_response.dart';
 import 'package:vsc_app/core/services/base_service.dart';
 import 'package:vsc_app/core/services/navigation_service.dart';
+import 'package:vsc_app/core/utils/snackbar_utils.dart';
 
 abstract class BaseProvider extends ChangeNotifier {
   bool _isLoading = false;
@@ -63,16 +64,23 @@ abstract class BaseProvider extends ChangeNotifier {
     Future<ApiResponse<T>> Function() apiCall, {
     void Function(T data)? onSuccess,
     void Function(String error)? onError,
+    BuildContext? context,
   }) async {
     final result = await executeAsync(() async {
       final response = await apiCall();
 
       if (response.success) {
         onSuccess?.call(response.data);
+        // if (context != null) {
+        //   SnackbarUtils.showApiSuccess(context, 'Operation completed successfully');
+        // }
         return true;
       } else {
         final errorMessage = response.error.message.isNotEmpty ? response.error.message : 'Operation failed';
         onError?.call(errorMessage);
+        if (context != null) {
+          SnackbarUtils.showApiError(context, errorMessage);
+        }
         throw Exception(errorMessage);
       }
     });

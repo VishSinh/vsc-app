@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/utils/responsive_layout.dart';
+import 'package:vsc_app/core/widgets/button_utils.dart';
+import 'package:vsc_app/core/utils/snackbar_utils.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});
@@ -14,6 +16,7 @@ class _InventoryPageState extends State<InventoryPage> {
   int _selectedIndex = 2; // Inventory tab
   String _searchQuery = '';
   String _categoryFilter = 'All';
+  bool _showInventoryTable = false;
 
   // Mock inventory data
   final List<Map<String, dynamic>> _inventory = [
@@ -108,19 +111,102 @@ class _InventoryPageState extends State<InventoryPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Page Header
           Row(
             children: [
-              Text('Inventory', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
-              const Spacer(),
-              Text('${_filteredInventory.length} items', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600])),
+              Icon(Icons.inventory, color: AppConfig.primaryColor, size: AppConfig.fontSize5xl),
+              const SizedBox(width: AppConfig.defaultPadding),
+              Text('Inventory Management', style: AppConfig.headlineStyle.copyWith(color: AppConfig.primaryColor)),
             ],
           ),
+          const SizedBox(height: AppConfig.smallPadding),
+          Text('Manage your inventory items and cards', style: AppConfig.subtitleStyle),
           const SizedBox(height: AppConfig.largePadding),
-          _buildFilters(),
-          const SizedBox(height: AppConfig.defaultPadding),
-          Expanded(child: _buildInventoryList()),
+
+          // Quick Actions Section
+          _buildQuickActions(),
+          const SizedBox(height: AppConfig.largePadding),
+
+          // Inventory Table Section
+          _buildInventoryTableSection(),
         ],
       ),
+    );
+  }
+
+  Widget _buildQuickActions() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Quick Actions', style: AppConfig.titleStyle),
+        const SizedBox(height: AppConfig.defaultPadding),
+        Wrap(
+          spacing: AppConfig.defaultPadding,
+          runSpacing: AppConfig.defaultPadding,
+          children: [
+            ButtonUtils.primaryButton(onPressed: () => context.go('/create-card'), label: 'Add Cards', icon: Icons.add_card),
+            ButtonUtils.accentButton(
+              onPressed: () {
+                // TODO: Navigate to get card page
+                SnackbarUtils.showInfo(context, 'Get Card feature coming soon!');
+              },
+              label: 'Get Card',
+              icon: Icons.search,
+            ),
+            ButtonUtils.secondaryButton(
+              onPressed: () {
+                // TODO: Navigate to find similar card page
+                SnackbarUtils.showInfo(context, 'Find Similar Card feature coming soon!');
+              },
+              label: 'Find Similar Card',
+              icon: Icons.compare_arrows,
+            ),
+            ButtonUtils.warningButton(
+              onPressed: () {
+                // Show inventory table
+                setState(() {
+                  _showInventoryTable = true;
+                });
+              },
+              label: 'View Inventory',
+              icon: Icons.table_chart,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInventoryTableSection() {
+    if (!_showInventoryTable) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text('Inventory Items', style: AppConfig.titleStyle),
+            const Spacer(),
+            Text('${_filteredInventory.length} items', style: AppConfig.captionStyle),
+            const SizedBox(width: AppConfig.defaultPadding),
+            ButtonUtils.dangerButton(
+              onPressed: () {
+                setState(() {
+                  _showInventoryTable = false;
+                });
+              },
+              label: 'Hide Table',
+              icon: Icons.close,
+            ),
+          ],
+        ),
+        const SizedBox(height: AppConfig.defaultPadding),
+        _buildFilters(),
+        const SizedBox(height: AppConfig.defaultPadding),
+        Expanded(child: _buildInventoryList()),
+      ],
     );
   }
 
@@ -130,7 +216,12 @@ class _InventoryPageState extends State<InventoryPage> {
         Expanded(
           flex: 2,
           child: TextField(
-            decoration: const InputDecoration(hintText: 'Search inventory...', prefixIcon: Icon(Icons.search)),
+            decoration: InputDecoration(
+              hintText: 'Search inventory...',
+              prefixIcon: const Icon(Icons.search),
+              hintStyle: AppConfig.captionStyle,
+              labelStyle: AppConfig.bodyStyle,
+            ),
             onChanged: (value) {
               setState(() {
                 _searchQuery = value;
@@ -143,14 +234,15 @@ class _InventoryPageState extends State<InventoryPage> {
           flex: 1,
           child: DropdownButtonFormField<String>(
             value: _categoryFilter,
-            decoration: const InputDecoration(labelText: 'Category'),
-            items: [
-              'All',
-              'Business Cards',
-              'Flyers',
-              'Brochures',
-              'Posters',
-            ].map((category) => DropdownMenuItem(value: category, child: Text(category))).toList(),
+            decoration: InputDecoration(labelText: 'Category', labelStyle: AppConfig.bodyStyle),
+            items: ['All', 'Business Cards', 'Flyers', 'Brochures', 'Posters']
+                .map(
+                  (category) => DropdownMenuItem(
+                    value: category,
+                    child: Text(category, style: AppConfig.bodyStyle),
+                  ),
+                )
+                .toList(),
             onChanged: (value) {
               if (value != null) {
                 setState(() {
@@ -179,16 +271,16 @@ class _InventoryPageState extends State<InventoryPage> {
         return Card(
           margin: const EdgeInsets.only(bottom: AppConfig.smallPadding),
           child: ListTile(
-            title: Text(item['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(item['name'], style: AppConfig.bodyStyle.copyWith(fontWeight: AppConfig.fontWeightBold)),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item['category']),
-                Text('Stock: ${item['stock']} • \$${item['price'].toStringAsFixed(2)} each'),
+                Text(item['category'], style: AppConfig.bodyStyle),
+                Text('Stock: ${item['stock']} • \$${item['price'].toStringAsFixed(2)} each', style: AppConfig.captionStyle),
                 if (isLowStock)
                   Text(
                     'Low Stock!',
-                    style: TextStyle(color: AppConfig.errorColor, fontWeight: FontWeight.bold),
+                    style: AppConfig.bodyStyle.copyWith(color: AppConfig.errorColor, fontWeight: AppConfig.fontWeightBold),
                   ),
               ],
             ),
@@ -219,32 +311,34 @@ class _InventoryPageState extends State<InventoryPage> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: DataTable(
-        columns: const [
-          DataColumn(label: Text('Item ID')),
-          DataColumn(label: Text('Name')),
-          DataColumn(label: Text('Category')),
-          DataColumn(label: Text('Stock')),
-          DataColumn(label: Text('Min Stock')),
-          DataColumn(label: Text('Price')),
-          DataColumn(label: Text('Vendor')),
-          DataColumn(label: Text('Actions')),
+        columns: [
+          DataColumn(label: Text('Item ID', style: AppConfig.bodyStyle)),
+          DataColumn(label: Text('Name', style: AppConfig.bodyStyle)),
+          DataColumn(label: Text('Category', style: AppConfig.bodyStyle)),
+          DataColumn(label: Text('Stock', style: AppConfig.bodyStyle)),
+          DataColumn(label: Text('Min Stock', style: AppConfig.bodyStyle)),
+          DataColumn(label: Text('Price', style: AppConfig.bodyStyle)),
+          DataColumn(label: Text('Vendor', style: AppConfig.bodyStyle)),
+          DataColumn(label: Text('Actions', style: AppConfig.bodyStyle)),
         ],
         rows: _filteredInventory.map((item) {
           final isLowStock = item['stock'] <= item['minStock'];
           return DataRow(
             cells: [
-              DataCell(Text(item['id'])),
-              DataCell(Text(item['name'])),
-              DataCell(Text(item['category'])),
+              DataCell(Text(item['id'], style: AppConfig.bodyStyle)),
+              DataCell(Text(item['name'], style: AppConfig.bodyStyle)),
+              DataCell(Text(item['category'], style: AppConfig.bodyStyle)),
               DataCell(
                 Text(
                   item['stock'].toString(),
-                  style: isLowStock ? TextStyle(color: AppConfig.errorColor, fontWeight: FontWeight.bold) : null,
+                  style: isLowStock
+                      ? AppConfig.bodyStyle.copyWith(color: AppConfig.errorColor, fontWeight: AppConfig.fontWeightBold)
+                      : AppConfig.bodyStyle,
                 ),
               ),
-              DataCell(Text(item['minStock'].toString())),
-              DataCell(Text('\$${item['price'].toStringAsFixed(2)}')),
-              DataCell(Text(item['vendor'])),
+              DataCell(Text(item['minStock'].toString(), style: AppConfig.bodyStyle)),
+              DataCell(Text('\$${item['price'].toStringAsFixed(2)}', style: AppConfig.bodyStyle)),
+              DataCell(Text(item['vendor'], style: AppConfig.bodyStyle)),
               DataCell(
                 Row(
                   mainAxisSize: MainAxisSize.min,

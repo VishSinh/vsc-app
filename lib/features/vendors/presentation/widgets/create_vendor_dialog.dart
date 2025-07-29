@@ -29,13 +29,10 @@ class _CreateVendorDialogState extends State<CreateVendorDialog> {
 
     final vendorProvider = context.read<VendorProvider>();
 
-    final success = await vendorProvider.createVendor(name: _nameController.text.trim(), phone: _phoneController.text.trim());
+    final success = await vendorProvider.createVendor(name: _nameController.text.trim(), phone: _phoneController.text.trim(), context: context);
 
     if (success && mounted) {
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(vendorProvider.successMessage ?? AppConstants.vendorCreatedMessage), backgroundColor: AppConfig.successColor),
-      );
     }
   }
 

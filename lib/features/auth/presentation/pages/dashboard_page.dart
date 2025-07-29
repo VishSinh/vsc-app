@@ -5,6 +5,7 @@ import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/enums/user_role.dart';
 import 'package:vsc_app/core/utils/responsive_layout.dart';
 import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -118,7 +119,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Future<void> _handleLogout() async {
     final authProvider = context.read<AuthProvider>();
-    await authProvider.logout();
+    await authProvider.logout(context: context);
     if (mounted) {
       context.go('/login');
     }
@@ -183,7 +184,7 @@ class _DashboardPageState extends State<DashboardPage> {
         ElevatedButton.icon(
           onPressed: () {
             // TODO: Navigate to add inventory page
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Add Inventory feature coming soon!')));
+            SnackbarUtils.showInfo(context, 'Add Inventory feature coming soon!');
           },
           icon: const Icon(Icons.add_box),
           label: const Text('Add Inventory'),
@@ -198,7 +199,7 @@ class _DashboardPageState extends State<DashboardPage> {
         ElevatedButton.icon(
           onPressed: () {
             // TODO: Navigate to create production job page
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Create Production Job feature coming soon!')));
+            SnackbarUtils.showInfo(context, 'Create Production Job feature coming soon!');
           },
           icon: const Icon(Icons.print),
           label: const Text('Create Job'),
@@ -215,6 +216,18 @@ class _DashboardPageState extends State<DashboardPage> {
           icon: const Icon(Icons.people),
           label: const Text('Manage Vendors'),
           style: ElevatedButton.styleFrom(backgroundColor: AppConfig.warningColor, foregroundColor: Colors.white),
+        ),
+      );
+    }
+
+    // Create Card - for users who can manage inventory
+    if (permissionProvider.canManageInventory) {
+      actions.add(
+        ElevatedButton.icon(
+          onPressed: () => context.go('/create-card'),
+          icon: const Icon(Icons.credit_card),
+          label: const Text('Create Card'),
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
         ),
       );
     }

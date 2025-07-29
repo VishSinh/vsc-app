@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:vsc_app/core/models/vendor_model.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
 import 'package:vsc_app/core/services/vendor_service.dart';
+import 'package:vsc_app/core/utils/snackbar_utils.dart';
 
 class VendorProvider extends BaseProvider with PaginationMixin {
   final VendorService _vendorService;
@@ -42,13 +44,22 @@ class VendorProvider extends BaseProvider with PaginationMixin {
   }
 
   /// Create a new vendor
-  Future<bool> createVendor({required String name, required String phone}) async {
+  Future<bool> createVendor({required String name, required String phone, BuildContext? context}) async {
     return await executeApiCall(
       () => _vendorService.createVendor(name: name, phone: phone),
       onSuccess: (data) {
         // Refresh the vendor list
         loadVendors(refresh: true);
+        if (context != null) {
+          SnackbarUtils.showSuccess(context, 'Vendor created successfully!');
+        }
       },
+      onError: (error) {
+        if (context != null) {
+          SnackbarUtils.showApiError(context, error);
+        }
+      },
+      context: context,
     );
   }
 

@@ -11,12 +11,16 @@ class AppConstants {
   static const String userRoleKey = 'user_role';
   static const String staffPermissionsKey = 'staff_permissions';
 
-  // API Endpoints
+  // ================================ API ENDPOINTS ================================
+  // Auth
   static const String loginEndpoint = '/auth/login/';
   static const String registerEndpoint = '/auth/register/';
+  // Permissions
   static const String permissionsEndpoint = '/permissions/';
   static const String allPermissionsEndpoint = '/permissions/all/';
+  // Vendors
   static const String vendorsEndpoint = '/vendors/';
+  // ==========================================================================
 
   // Pagination
   static const int defaultPageSize = 10;

@@ -1,7 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:vsc_app/core/enums/user_role.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
 import 'package:vsc_app/core/services/auth_service.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
+import 'package:vsc_app/core/utils/snackbar_utils.dart';
 
 class AuthProvider extends BaseProvider {
   final AuthService _authService;
@@ -47,7 +49,7 @@ class AuthProvider extends BaseProvider {
   }
 
   /// Login with phone and password
-  Future<bool> login({required String phone, required String password}) async {
+  Future<bool> login({required String phone, required String password, BuildContext? context}) async {
     return await executeApiCall(
       () => _authService.login(phone: phone, password: password),
       onSuccess: (data) {
@@ -57,17 +59,39 @@ class AuthProvider extends BaseProvider {
 
         // Load permissions after successful login
         _permissionProvider.initializePermissions();
+        if (context != null) {
+          SnackbarUtils.showSuccess(context, 'Login successful!');
+        }
       },
+      onError: (error) {
+        if (context != null) {
+          SnackbarUtils.showApiError(context, error);
+        }
+      },
+      context: context,
     );
   }
 
   /// Register new staff member (Admin only)
-  Future<bool> register({required String name, required String phone, required String password, required String role}) async {
-    return await executeApiCall(() => _authService.register(name: name, phone: phone, password: password, role: role));
+  Future<bool> register({required String name, required String phone, required String password, required String role, BuildContext? context}) async {
+    return await executeApiCall(
+      () => _authService.register(name: name, phone: phone, password: password, role: role),
+      onSuccess: (data) {
+        if (context != null) {
+          SnackbarUtils.showSuccess(context, 'Staff member registered successfully!');
+        }
+      },
+      onError: (error) {
+        if (context != null) {
+          SnackbarUtils.showApiError(context, error);
+        }
+      },
+      context: context,
+    );
   }
 
   /// Logout user
-  Future<void> logout() async {
+  Future<void> logout({BuildContext? context}) async {
     await executeAsync(() async {
       await _authService.logout();
       _isLoggedIn = false;
@@ -76,6 +100,9 @@ class AuthProvider extends BaseProvider {
 
       // Clear permissions on logout
       _permissionProvider.clearPermissions();
+      if (context != null) {
+        SnackbarUtils.showSuccess(context, 'Logged out successfully!');
+      }
     }, showLoading: false);
   }
 }

@@ -49,29 +49,4 @@ class AuthService extends BaseService {
   Future<void> logout() async {
     await clearAllData();
   }
-
-  /// Refresh authentication token
-  Future<bool> refreshToken() async {
-    try {
-      final response = await executeRequest(() => post('/auth/refresh/'), (json) => LoginData.fromJson(json as Map<String, dynamic>));
-
-      if (response.success) {
-        await storeToken(response.data.token);
-        return true;
-      }
-      return false;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  /// Validate current token
-  Future<bool> validateToken() async {
-    try {
-      final response = await executeRequest(() => get('/auth/validate/'), (json) => MessageData.fromJson(json as Map<String, dynamic>));
-      return response.success;
-    } catch (e) {
-      return false;
-    }
-  }
 }

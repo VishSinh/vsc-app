@@ -41,6 +41,7 @@ class _RegisterPageState extends State<RegisterPage> {
       phone: _phoneController.text.trim(),
       password: _passwordController.text,
       role: _selectedRole.value,
+      context: context,
     );
 
     if (success && mounted) {

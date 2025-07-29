@@ -7,6 +7,7 @@ import 'package:vsc_app/core/utils/responsive_layout.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
+import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/features/vendors/presentation/widgets/create_vendor_dialog.dart';
 
 class VendorsPage extends StatefulWidget {
@@ -143,7 +144,7 @@ class _VendorsPageState extends State<VendorsPage> {
       trailing: StatusBadge(text: vendor.isActive ? 'Active' : 'Inactive', isActive: vendor.isActive),
       onTap: () {
         // TODO: Navigate to vendor details page
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vendor details coming soon!')));
+        SnackbarUtils.showInfo(context, 'Vendor details coming soon!');
       },
     );
   }
