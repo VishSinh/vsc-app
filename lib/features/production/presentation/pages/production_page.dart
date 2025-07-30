@@ -6,6 +6,7 @@ import 'package:vsc_app/core/utils/responsive_layout.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
+import 'package:vsc_app/core/constants/route_constants.dart';
 
 class ProductionPage extends StatefulWidget {
   const ProductionPage({super.key});
@@ -83,18 +84,18 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
     });
     switch (index) {
       case 0:
-        context.go('/');
+        context.go(RouteConstants.dashboard);
         break;
       case 1:
-        context.go('/orders');
+        context.go(RouteConstants.orders);
         break;
       case 2:
-        context.go('/inventory');
+        context.go(RouteConstants.inventory);
         break;
       case 3:
         break; // Already on production
       case 4:
-        context.go('/administration');
+        context.go(RouteConstants.administration);
         break;
     }
   }

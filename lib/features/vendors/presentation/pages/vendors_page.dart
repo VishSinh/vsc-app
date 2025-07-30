@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/app_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
@@ -150,9 +149,7 @@ class _VendorsPageState extends State<VendorsPage> {
                         return vendorProvider.isLoading
                             ? Padding(
                                 padding: EdgeInsets.all(AppConfig.defaultPadding),
-                                child: Center(
-                                  child: SpinKitDoubleBounce(color: AppConfig.primaryColor, size: AppConfig.loadingIndicatorSize),
-                                ),
+                                child: const Center(child: LoadingWidget()),
                               )
                             : const SizedBox.shrink();
                       }
@@ -183,7 +180,7 @@ class _VendorsPageState extends State<VendorsPage> {
         // Navigate to vendor details page
         print('🖱️ VendorsPage: Tapped vendor card for ID: ${vendor.id}');
         print('🖱️ VendorsPage: Vendor name: ${vendor.name}');
-        context.go('/vendors/${vendor.id}');
+        context.go('${RouteConstants.vendorDetail}/${vendor.id}');
       },
     );
   }

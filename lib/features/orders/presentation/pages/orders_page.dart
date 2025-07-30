@@ -86,13 +86,6 @@ class _OrdersPageState extends State<OrdersPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          // Text(
-          //   '${_filteredOrders.length} ${UITextConstants.orders.toLowerCase()}',
-          //   style: ResponsiveText.getCaption(context).copyWith(color: AppConfig.grey600),
-          // ),
-          // SizedBox(height: context.responsiveSpacing),
-
           // Filters
           _buildFilters(),
           SizedBox(height: context.responsiveSpacing),

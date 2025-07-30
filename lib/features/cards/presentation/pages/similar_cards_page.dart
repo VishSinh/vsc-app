@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/models/card_model.dart' as card_model;
+import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
 
 class SimilarCardsPage extends StatefulWidget {
@@ -77,7 +78,7 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
         ),
         actions: [
           TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('Cancel')),
-          ElevatedButton(onPressed: () => Navigator.of(context).pop(quantity), child: Text('Purchase')),
+          ButtonUtils.primaryButton(onPressed: () => Navigator.of(context).pop(quantity), label: 'Purchase'),
         ],
       ),
     );
@@ -156,7 +157,7 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
             Text('Max Discount: ${card.maxDiscount}%'),
           ],
         ),
-        trailing: ElevatedButton(onPressed: () => _purchaseCard(card), child: Text('Purchase')),
+        trailing: ButtonUtils.primaryButton(onPressed: () => _purchaseCard(card), label: 'Purchase'),
       ),
     );
   }

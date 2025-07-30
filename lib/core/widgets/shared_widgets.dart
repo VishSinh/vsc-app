@@ -246,3 +246,69 @@ class StatusBadge extends StatelessWidget {
     );
   }
 }
+
+/// Standard info display card for consistent layout
+class InfoDisplayCard extends StatelessWidget {
+  final String title;
+  final List<InfoRow> infoRows;
+  final Widget? trailing;
+  final EdgeInsetsGeometry? padding;
+
+  const InfoDisplayCard({super.key, required this.title, required this.infoRows, this.trailing, this.padding});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: AppConfig.elevationLow,
+      child: Padding(
+        padding: padding ?? EdgeInsets.all(AppConfig.defaultPadding),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: ResponsiveText.getHeadline(context)),
+                  SizedBox(height: AppConfig.defaultPadding),
+                  ...infoRows.map((row) => _buildInfoRow(context, row)),
+                ],
+              ),
+            ),
+            if (trailing != null) ...[SizedBox(width: AppConfig.defaultPadding), trailing!],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(BuildContext context, InfoRow row) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: AppConfig.smallPadding),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: row.labelWidth ?? 120,
+            child: Text(
+              row.label,
+              style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w500, color: AppConfig.textColorSecondary),
+            ),
+          ),
+          Expanded(
+            child: Text(row.value, style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Data class for info row
+class InfoRow {
+  final String label;
+  final String value;
+  final double? labelWidth;
+
+  const InfoRow({required this.label, required this.value, this.labelWidth});
+}

@@ -195,11 +195,6 @@ class _DashboardPageState extends State<DashboardPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Role-based subtitle
-          // Text(
-          //   UITextConstants.welcomeSubtitle.replaceAll('{role}', userRole.value.toLowerCase()),
-          //   style: ResponsiveText.getBody(context).copyWith(color: AppConfig.grey600),
-          // ),
-          // SizedBox(height: AppConfig.largePadding),
 
           // Quick Actions
           _buildQuickActions(permissionProvider),
@@ -283,7 +278,6 @@ class _DashboardPageState extends State<DashboardPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Text(UITextConstants.quickActions, style: ResponsiveText.getTitle(context)),
-        // SizedBox(height: AppConfig.defaultPadding),
         Wrap(spacing: AppConfig.defaultPadding, runSpacing: AppConfig.defaultPadding, children: actions),
       ],
     );

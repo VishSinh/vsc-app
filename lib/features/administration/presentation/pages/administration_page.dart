@@ -10,6 +10,7 @@ import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
+import 'package:vsc_app/core/constants/route_constants.dart';
 
 class AdministrationPage extends StatefulWidget {
   const AdministrationPage({super.key});
@@ -107,16 +108,16 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     });
     switch (index) {
       case 0:
-        context.go('/');
+        context.go(RouteConstants.dashboard);
         break;
       case 1:
-        context.go('/orders');
+        context.go(RouteConstants.orders);
         break;
       case 2:
-        context.go('/inventory');
+        context.go(RouteConstants.inventory);
         break;
       case 3:
-        context.go('/production');
+        context.go(RouteConstants.production);
         break;
       case 4:
         break; // Already on administration

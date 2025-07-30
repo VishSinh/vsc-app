@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
+import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
 import 'package:vsc_app/app/app_config.dart';
@@ -382,9 +382,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
             Consumer<VendorProvider>(
               builder: (context, vendorProvider, child) {
                 if (vendorProvider.isLoading) {
-                  return const Center(
-                    child: SpinKitDoubleBounce(color: AppConfig.primaryColor, size: AppConfig.loadingIndicatorSize),
-                  );
+                  return const Center(child: LoadingWidget());
                 }
 
                 if (vendorProvider.vendors.isEmpty) {

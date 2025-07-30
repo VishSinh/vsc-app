@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/models/vendor_model.dart';
@@ -132,9 +131,7 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
 
   Widget _buildContent() {
     if (_isLoading) {
-      return const Center(
-        child: SpinKitDoubleBounce(color: AppConfig.primaryColor, size: AppConfig.loadingIndicatorSize),
-      );
+      return const Center(child: LoadingWidget());
     }
 
     if (_errorMessage != null) {

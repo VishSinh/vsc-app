@@ -301,7 +301,7 @@ class _InventoryPageState extends State<InventoryPage> {
             Expanded(
               flex: context.isMobile ? 2 : 2, // Reduced content space to give more to image
               child: Padding(
-                padding: EdgeInsets.all(context.isMobile ? 6 : AppConfig.defaultPadding),
+                padding: EdgeInsets.all(context.isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -357,7 +357,7 @@ class _InventoryPageState extends State<InventoryPage> {
                     Expanded(
                       flex: context.isMobile ? 2 : 2,
                       child: Padding(
-                        padding: EdgeInsets.all(context.isMobile ? 6 : AppConfig.defaultPadding),
+                        padding: EdgeInsets.all(context.isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

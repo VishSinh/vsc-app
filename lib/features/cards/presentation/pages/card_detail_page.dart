@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
@@ -12,6 +11,7 @@ import 'package:vsc_app/features/auth/presentation/providers/permission_provider
 import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
+import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 
 class CardDetailPage extends StatefulWidget {
@@ -133,7 +133,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
 
   Widget _buildContent() {
     if (_card == null) {
-      return const Center(child: SpinKitDoubleBounce(color: AppConfig.primaryColor));
+      return const LoadingWidget();
     }
 
     return SingleChildScrollView(
@@ -177,15 +177,9 @@ class _CardDetailPageState extends State<CardDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Barcode: ${_card!.barcode}',
-                    style: TextStyle(fontSize: AppConfig.fontSizeXl, fontWeight: FontWeight.bold),
-                  ),
+                  Text('Barcode: ${_card!.barcode}', style: ResponsiveText.getHeadline(context)),
                   SizedBox(height: AppConfig.smallPadding),
-                  Text(
-                    'ID: ${_card!.id}',
-                    style: TextStyle(fontSize: AppConfig.fontSizeLg, color: AppConfig.textColorSecondary),
-                  ),
+                  Text('ID: ${_card!.id}', style: ResponsiveText.getSubtitle(context).copyWith(color: AppConfig.textColorSecondary)),
                 ],
               ),
             ),
@@ -209,7 +203,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Card Information', style: AppConfig.headlineStyle),
+                  Text('Card Information', style: ResponsiveText.getHeadline(context)),
                   SizedBox(height: AppConfig.defaultPadding),
 
                   _buildInfoRow('Barcode', _card!.barcode),
@@ -236,12 +230,12 @@ class _CardDetailPageState extends State<CardDetailPage> {
               child: Center(
                 // Added Center widget to vertically center the barcode
                 child: Padding(
-                  padding: EdgeInsets.all(16.0), // More white padding
+                  padding: EdgeInsets.all(AppConfig.defaultPadding), // More white padding
                   child: BarcodeWidget(
                     barcode: Barcode.code128(),
                     data: _card!.barcode,
                     drawText: true,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppConfig.black87),
+                    style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w600, color: AppConfig.black87),
                     color: Colors.black,
                     width: 300, // Increased width for better scanning
                     height: 100, // Adjusted for padding
@@ -326,10 +320,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Statistics',
-              style: TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold),
-            ),
+            Text('Statistics', style: ResponsiveText.getTitle(context)),
             SizedBox(height: AppConfig.defaultPadding),
             Row(
               children: [
