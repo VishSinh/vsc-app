@@ -5,6 +5,7 @@ import 'package:vsc_app/core/enums/job_status.dart';
 import 'package:vsc_app/core/utils/responsive_layout.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
+import 'package:vsc_app/core/constants/ui_text_constants.dart';
 
 class ProductionPage extends StatefulWidget {
   const ProductionPage({super.key});
@@ -57,11 +58,11 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
   ];
 
   final List<NavigationDestination> _destinations = [
-    const NavigationDestination(icon: Icon(Icons.dashboard), label: 'Dashboard'),
-    const NavigationDestination(icon: Icon(Icons.shopping_cart), label: 'Orders'),
-    const NavigationDestination(icon: Icon(Icons.inventory), label: 'Inventory'),
-    const NavigationDestination(icon: Icon(Icons.print), label: 'Production'),
-    const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: 'Administration'),
+    const NavigationDestination(icon: Icon(Icons.dashboard), label: UITextConstants.dashboard),
+    const NavigationDestination(icon: Icon(Icons.shopping_cart), label: UITextConstants.orders),
+    const NavigationDestination(icon: Icon(Icons.inventory), label: UITextConstants.inventory),
+    const NavigationDestination(icon: Icon(Icons.print), label: UITextConstants.production),
+    const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: UITextConstants.administration),
   ];
 
   @override
@@ -124,18 +125,19 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
       selectedIndex: _selectedIndex,
       destinations: _destinations,
       onDestinationSelected: _onDestinationSelected,
+      pageTitle: UITextConstants.production,
       child: _buildProductionContent(),
     );
   }
 
   Widget _buildProductionContent() {
     return Padding(
-      padding: EdgeInsets.all(AppConfig.defaultPadding),
+      padding: context.responsivePadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Production', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
-          SizedBox(height: AppConfig.largePadding),
+          // Text(UITextConstants.production, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
+          // SizedBox(height: AppConfig.largePadding),
           _buildFilters(),
           SizedBox(height: AppConfig.defaultPadding),
           Expanded(

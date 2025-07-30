@@ -8,6 +8,7 @@ class ResponsiveLayout extends StatelessWidget {
   final ValueChanged<int> onDestinationSelected;
   final Widget? floatingActionButton;
   final List<Widget>? actions;
+  final String? pageTitle;
 
   const ResponsiveLayout({
     super.key,
@@ -17,6 +18,7 @@ class ResponsiveLayout extends StatelessWidget {
     required this.onDestinationSelected,
     this.floatingActionButton,
     this.actions,
+    this.pageTitle,
   });
 
   @override
@@ -26,7 +28,7 @@ class ResponsiveLayout extends StatelessWidget {
     if (screenWidth < AppConfig.mobileBreakpoint) {
       // Mobile layout with Drawer
       return Scaffold(
-        appBar: AppBar(title: Text(AppConfig.appName), actions: actions),
+        appBar: AppBar(title: Text(pageTitle ?? AppConfig.appName), actions: actions),
         drawer: _buildDrawer(context),
         body: child,
         floatingActionButton: floatingActionButton,
@@ -62,10 +64,13 @@ class ResponsiveLayout extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(AppConfig.appName, style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Theme.of(context).colorScheme.onPrimary)),
+                Text(
+                  pageTitle ?? AppConfig.appName,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+                ),
                 SizedBox(height: AppConfig.spacingSmall),
                 Text(
-                  'Inventory Management',
+                  destinations[selectedIndex].label,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8)),
                 ),
               ],
@@ -107,7 +112,7 @@ class ResponsiveLayout extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(AppConfig.appName, style: Theme.of(context).textTheme.headlineSmall),
+          Text(pageTitle ?? AppConfig.appName, style: Theme.of(context).textTheme.headlineSmall),
           const Spacer(),
           if (actions != null) ...actions!,
         ],

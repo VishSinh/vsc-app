@@ -9,6 +9,7 @@ import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
+import 'package:vsc_app/core/constants/ui_text_constants.dart';
 
 class AdministrationPage extends StatefulWidget {
   const AdministrationPage({super.key});
@@ -81,11 +82,11 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   ];
 
   final List<NavigationDestination> _destinations = [
-    const NavigationDestination(icon: Icon(Icons.dashboard), label: 'Dashboard'),
-    const NavigationDestination(icon: Icon(Icons.shopping_cart), label: 'Orders'),
-    const NavigationDestination(icon: Icon(Icons.inventory), label: 'Inventory'),
-    const NavigationDestination(icon: Icon(Icons.print), label: 'Production'),
-    const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: 'Administration'),
+    const NavigationDestination(icon: Icon(Icons.dashboard), label: UITextConstants.dashboard),
+    const NavigationDestination(icon: Icon(Icons.shopping_cart), label: UITextConstants.orders),
+    const NavigationDestination(icon: Icon(Icons.inventory), label: UITextConstants.inventory),
+    const NavigationDestination(icon: Icon(Icons.print), label: UITextConstants.production),
+    const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: UITextConstants.administration),
   ];
 
   @override
@@ -149,6 +150,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
       selectedIndex: _selectedIndex,
       destinations: _destinations,
       onDestinationSelected: _onDestinationSelected,
+      pageTitle: UITextConstants.administration,
       child: _buildAdministrationContent(),
     );
   }
@@ -165,9 +167,10 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
             children: [
               Row(
                 children: [
-                  Text('Administration', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(UITextConstants.administration, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
                   const Spacer(),
-                  if (isAdmin) ButtonUtils.primaryButton(onPressed: () => context.go('/register'), label: 'Register Staff', icon: Icons.person_add),
+                  if (isAdmin)
+                    ButtonUtils.primaryButton(onPressed: () => context.go('/register'), label: UITextConstants.registerStaff, icon: Icons.person_add),
                 ],
               ),
               SizedBox(height: AppConfig.largePadding),

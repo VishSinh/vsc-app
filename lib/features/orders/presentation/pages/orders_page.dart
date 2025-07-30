@@ -74,6 +74,7 @@ class _OrdersPageState extends State<OrdersPage> {
       selectedIndex: _selectedIndex,
       destinations: _destinations,
       onDestinationSelected: _onDestinationSelected,
+      pageTitle: UITextConstants.orders,
       floatingActionButton: FloatingActionButton(onPressed: () => context.go(RouteConstants.customerSearch), child: const Icon(Icons.add)),
       child: _buildOrdersContent(),
     );
@@ -86,14 +87,11 @@ class _OrdersPageState extends State<OrdersPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          Row(
-            children: [
-              Text('Orders', style: ResponsiveText.getTitle(context)),
-              const Spacer(),
-              Text('${_filteredOrders.length} orders', style: ResponsiveText.getCaption(context).copyWith(color: AppConfig.grey600)),
-            ],
-          ),
-          SizedBox(height: context.responsiveSpacing),
+          // Text(
+          //   '${_filteredOrders.length} ${UITextConstants.orders.toLowerCase()}',
+          //   style: ResponsiveText.getCaption(context).copyWith(color: AppConfig.grey600),
+          // ),
+          // SizedBox(height: context.responsiveSpacing),
 
           // Filters
           _buildFilters(),
@@ -113,7 +111,7 @@ class _OrdersPageState extends State<OrdersPage> {
         Expanded(
           flex: 2,
           child: TextField(
-            decoration: InputDecoration(hintText: 'Search orders...', prefixIcon: Icon(Icons.search)),
+            decoration: InputDecoration(hintText: 'Search ${UITextConstants.orders.toLowerCase()}...', prefixIcon: Icon(Icons.search)),
             onChanged: (value) {
               setState(() {
                 _searchQuery = value;
@@ -129,10 +127,10 @@ class _OrdersPageState extends State<OrdersPage> {
             value: _statusFilter,
             decoration: InputDecoration(labelText: 'Status'),
             items: [
-              'All',
-              'Pending',
-              'In Production',
-              'Completed',
+              UITextConstants.statusAll,
+              UITextConstants.statusPending,
+              UITextConstants.statusInProduction,
+              UITextConstants.statusCompleted,
               'Cancelled',
             ].map((status) => DropdownMenuItem(value: status, child: Text(status))).toList(),
             onChanged: (value) {

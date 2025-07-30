@@ -44,9 +44,37 @@ class _VendorsPageState extends State<VendorsPage> {
   @override
   Widget build(BuildContext context) {
     return ResponsiveLayout(
-      selectedIndex: 0,
-      destinations: const [NavigationDestination(icon: Icon(Icons.people), label: UITextConstants.vendors)],
-      onDestinationSelected: (index) {},
+      selectedIndex: 4, // Vendors tab (after Administration)
+      destinations: [
+        const NavigationDestination(icon: Icon(Icons.dashboard), label: UITextConstants.dashboard),
+        const NavigationDestination(icon: Icon(Icons.shopping_cart), label: UITextConstants.orders),
+        const NavigationDestination(icon: Icon(Icons.inventory), label: UITextConstants.inventory),
+        const NavigationDestination(icon: Icon(Icons.print), label: UITextConstants.production),
+        const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: UITextConstants.administration),
+        const NavigationDestination(icon: Icon(Icons.people), label: UITextConstants.vendors),
+      ],
+      onDestinationSelected: (index) {
+        switch (index) {
+          case 0:
+            context.go(RouteConstants.dashboard);
+            break;
+          case 1:
+            context.go(RouteConstants.orders);
+            break;
+          case 2:
+            context.go(RouteConstants.inventory);
+            break;
+          case 3:
+            context.go(RouteConstants.production);
+            break;
+          case 4:
+            context.go(RouteConstants.administration);
+            break;
+          case 5:
+            break; // Already on vendors
+        }
+      },
+      pageTitle: UITextConstants.vendors,
       child: _buildVendorsContent(),
     );
   }
@@ -57,25 +85,17 @@ class _VendorsPageState extends State<VendorsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header with back button and actions
-          Row(
-            children: [
-              IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.dashboard)),
-              SizedBox(width: AppConfig.smallPadding),
-              Expanded(
-                child: PageHeader(
-                  title: AppConstants.featureLabels['vendors']!,
-                  actions: [
-                    Consumer<PermissionProvider>(
-                      builder: (context, permissionProvider, child) {
-                        if (permissionProvider.canCreate('vendor')) {
-                          return ActionButton(label: UITextConstants.addVendor, icon: Icons.add, onPressed: _showCreateVendorDialog);
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                  ],
-                ),
+          // Header with actions
+          PageHeader(
+            title: UITextConstants.vendors,
+            actions: [
+              Consumer<PermissionProvider>(
+                builder: (context, permissionProvider, child) {
+                  if (permissionProvider.canCreate('vendor')) {
+                    return ActionButton(label: UITextConstants.addVendor, icon: Icons.add, onPressed: _showCreateVendorDialog);
+                  }
+                  return const SizedBox.shrink();
+                },
               ),
             ],
           ),

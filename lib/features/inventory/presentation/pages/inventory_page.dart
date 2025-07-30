@@ -117,6 +117,7 @@ class _InventoryPageState extends State<InventoryPage> {
       selectedIndex: _selectedIndex,
       destinations: _destinations,
       onDestinationSelected: _onDestinationSelected,
+      pageTitle: UITextConstants.inventory,
       floatingActionButton: Consumer<PermissionProvider>(
         builder: (context, permissionProvider, child) {
           if (permissionProvider.canCreate('card')) {
@@ -135,12 +136,13 @@ class _InventoryPageState extends State<InventoryPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(),
-          // Page Header
-          Text(UITextConstants.inventoryManagementTitle, style: ResponsiveText.getHeadline(context)),
-          SizedBox(height: AppConfig.smallPadding),
+          // Row(),
+          // // Page Header
+          // Text(UITextConstants.inventoryManagementTitle, style: ResponsiveText.getHeadline(context)),
+          // SizedBox(height: AppConfig.smallPadding),
 
           // Quick Actions Section
+          Row(),
           _buildQuickActions(),
           SizedBox(height: context.responsiveSpacing),
 

@@ -49,7 +49,7 @@ class VSCApp extends StatelessWidget {
         splitScreenMode: true,
         builder: (context, child) {
           return MaterialApp.router(
-            title: AppConfig.appName,
+            title: 'Dashboard',
             theme: AppTheme.darkTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: ThemeMode.dark,
@@ -60,7 +60,7 @@ class VSCApp extends StatelessWidget {
       );
     } else {
       return MaterialApp.router(
-        title: AppConfig.appName,
+        title: 'Dashboard',
         theme: AppTheme.darkTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.dark,

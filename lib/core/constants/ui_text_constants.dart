@@ -8,6 +8,7 @@ class UITextConstants {
   static const String administration = 'Administration';
   static const String vendors = 'Vendors';
   static const String customers = 'Customers';
+  static const String cards = 'Cards';
 
   // ================================ BUTTON LABELS ================================
   // Action Buttons

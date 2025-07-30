@@ -77,6 +77,7 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
       selectedIndex: 0,
       destinations: const [NavigationDestination(icon: Icon(Icons.people), label: UITextConstants.vendors)],
       onDestinationSelected: (index) {},
+      pageTitle: 'Vendor Details',
       child: _buildVendorDetailContent(),
     );
   }

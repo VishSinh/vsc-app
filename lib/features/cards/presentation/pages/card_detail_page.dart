@@ -12,6 +12,7 @@ import 'package:vsc_app/features/auth/presentation/providers/permission_provider
 import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
+import 'package:vsc_app/core/constants/ui_text_constants.dart';
 
 class CardDetailPage extends StatefulWidget {
   final String cardId;
@@ -75,8 +76,9 @@ class _CardDetailPageState extends State<CardDetailPage> {
   Widget build(BuildContext context) {
     return ResponsiveLayout(
       selectedIndex: 0,
-      destinations: const [NavigationDestination(icon: Icon(Icons.inventory), label: 'Cards')],
+      destinations: const [NavigationDestination(icon: Icon(Icons.inventory), label: UITextConstants.cards)],
       onDestinationSelected: (index) {},
+      pageTitle: 'Card Details',
       child: _buildCardDetailContent(),
     );
   }

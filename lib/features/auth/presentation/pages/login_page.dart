@@ -70,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
                         // App Logo/Title
                         Icon(Icons.inventory, size: AppConfig.iconSizeXXLarge, color: AppConfig.primaryColor),
                         SizedBox(height: AppConfig.defaultPadding),
-                        Text(AppConfig.appName, style: ResponsiveText.getHeadlineStyle(context)),
+                        Text('Dashboard', style: ResponsiveText.getHeadlineStyle(context)),
                         SizedBox(height: AppConfig.smallPadding),
                         Text(UITextConstants.signInTitle, style: ResponsiveText.getSubtitle(context).copyWith(color: AppConfig.grey600)),
                         SizedBox(height: context.responsiveSpacing),

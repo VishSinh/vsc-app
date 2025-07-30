@@ -76,6 +76,7 @@ class _DashboardPageState extends State<DashboardPage> {
           destinations: destinations,
           onDestinationSelected: (index) => _onDestinationSelected(index, destinations),
           actions: [IconButton(icon: const Icon(Icons.logout), onPressed: _handleLogout)],
+          pageTitle: UITextConstants.dashboard,
           child: _buildDashboardContent(userRole, permissionProvider),
         );
       },
@@ -98,6 +99,11 @@ class _DashboardPageState extends State<DashboardPage> {
     // Production - show if user can manage production
     if (permissionProvider.canManageProduction) {
       destinations.add(const NavigationDestination(icon: Icon(Icons.print), label: UITextConstants.production));
+    }
+
+    // Vendors - show if user can manage vendors
+    if (permissionProvider.canManageVendors) {
+      destinations.add(const NavigationDestination(icon: Icon(Icons.people), label: UITextConstants.vendors));
     }
 
     // Administration - show if user can manage system or view audit logs
@@ -128,6 +134,8 @@ class _DashboardPageState extends State<DashboardPage> {
             context.go(RouteConstants.inventory);
           } else if (secondDestination.label == UITextConstants.production) {
             context.go(RouteConstants.production);
+          } else if (secondDestination.label == UITextConstants.vendors) {
+            context.go(RouteConstants.vendors);
           } else if (secondDestination.label == UITextConstants.administration) {
             context.go(RouteConstants.administration);
           }
@@ -140,6 +148,8 @@ class _DashboardPageState extends State<DashboardPage> {
             context.go(RouteConstants.inventory);
           } else if (thirdDestination.label == UITextConstants.production) {
             context.go(RouteConstants.production);
+          } else if (thirdDestination.label == UITextConstants.vendors) {
+            context.go(RouteConstants.vendors);
           } else if (thirdDestination.label == UITextConstants.administration) {
             context.go(RouteConstants.administration);
           }
@@ -150,6 +160,8 @@ class _DashboardPageState extends State<DashboardPage> {
           final fourthDestination = destinations[3];
           if (fourthDestination.label == UITextConstants.production) {
             context.go(RouteConstants.production);
+          } else if (fourthDestination.label == UITextConstants.vendors) {
+            context.go(RouteConstants.vendors);
           } else if (fourthDestination.label == UITextConstants.administration) {
             context.go(RouteConstants.administration);
           }
@@ -157,7 +169,12 @@ class _DashboardPageState extends State<DashboardPage> {
         break;
       case 4:
         if (destinations.length > 4) {
-          context.go(RouteConstants.administration);
+          final fifthDestination = destinations[4];
+          if (fifthDestination.label == UITextConstants.vendors) {
+            context.go(RouteConstants.vendors);
+          } else if (fifthDestination.label == UITextConstants.administration) {
+            context.go(RouteConstants.administration);
+          }
         }
         break;
     }
@@ -177,14 +194,12 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Welcome Header
-          Text(UITextConstants.welcomeBack, style: ResponsiveText.getHeadline(context)),
-          SizedBox(height: AppConfig.smallPadding),
-          Text(
-            UITextConstants.welcomeSubtitle.replaceAll('{role}', userRole.value.toLowerCase()),
-            style: ResponsiveText.getBody(context).copyWith(color: AppConfig.grey600),
-          ),
-          SizedBox(height: AppConfig.largePadding),
+          // Role-based subtitle
+          // Text(
+          //   UITextConstants.welcomeSubtitle.replaceAll('{role}', userRole.value.toLowerCase()),
+          //   style: ResponsiveText.getBody(context).copyWith(color: AppConfig.grey600),
+          // ),
+          // SizedBox(height: AppConfig.largePadding),
 
           // Quick Actions
           _buildQuickActions(permissionProvider),
@@ -267,8 +282,8 @@ class _DashboardPageState extends State<DashboardPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(UITextConstants.quickActions, style: ResponsiveText.getTitle(context)),
-        SizedBox(height: AppConfig.defaultPadding),
+        // Text(UITextConstants.quickActions, style: ResponsiveText.getTitle(context)),
+        // SizedBox(height: AppConfig.defaultPadding),
         Wrap(spacing: AppConfig.defaultPadding, runSpacing: AppConfig.defaultPadding, children: actions),
       ],
     );
