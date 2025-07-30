@@ -6,6 +6,7 @@ import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
+import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_provider.dart';
 
 class OrderReviewPage extends StatefulWidget {
@@ -163,7 +164,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(UITextConstants.orderReviewTitle, style: AppConfig.headlineStyle.copyWith(color: AppConfig.primaryColor)),
+        Text(UITextConstants.orderReviewTitle, style: ResponsiveText.getHeadline(context).copyWith(color: AppConfig.primaryColor)),
         SizedBox(height: AppConfig.smallPadding),
         Text(UITextConstants.orderReviewSubtitle, style: AppConfig.subtitleStyle),
       ],
@@ -179,7 +180,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Customer Information', style: AppConfig.titleStyle),
+            Text('Customer Information', style: ResponsiveText.getTitle(context)),
             SizedBox(height: AppConfig.smallPadding),
             Text('Name: ${orderProvider.selectedCustomer!.name}'),
             Text('Phone: ${orderProvider.selectedCustomer!.phone}'),
@@ -196,7 +197,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(UITextConstants.deliveryDate, style: AppConfig.titleStyle),
+            Text(UITextConstants.deliveryDate, style: ResponsiveText.getTitle(context)),
             SizedBox(height: AppConfig.defaultPadding),
             Row(
               children: [
@@ -231,7 +232,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Order Items (${orderProvider.orderItems.length})', style: AppConfig.titleStyle),
+            Text('Order Items (${orderProvider.orderItems.length})', style: ResponsiveText.getTitle(context)),
             SizedBox(height: AppConfig.defaultPadding),
             if (orderProvider.orderItems.isEmpty)
               const EmptyStateWidget(message: UITextConstants.noOrderItems, icon: Icons.shopping_cart_outlined)
@@ -249,7 +250,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Item ${index + 1}', style: AppConfig.titleStyle),
+                          Text('Item ${index + 1}', style: ResponsiveText.getTitle(context)),
                           SizedBox(height: AppConfig.smallPadding),
                           Text('Quantity: ${item.quantity}'),
                           Text('Discount: ₹${item.discountAmount}'),

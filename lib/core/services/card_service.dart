@@ -86,4 +86,47 @@ class CardService extends BaseService {
       );
     }
   }
+
+  // ================================ BUSINESS LOGIC METHODS ================================
+
+  /// Calculate profit margin for a card
+  static double calculateProfitMargin(Card card) {
+    if (card.sellPriceAsDouble <= 0) return 0.0;
+    return ((card.sellPriceAsDouble - card.costPriceAsDouble) / card.sellPriceAsDouble) * 100;
+  }
+
+  /// Calculate total value for a card
+  static double calculateTotalValue(Card card) {
+    return card.sellPriceAsDouble * card.quantity;
+  }
+
+  /// Validate card data before operations
+  static bool validateCard(Card card) {
+    return card.id.isNotEmpty && 
+           card.barcode.isNotEmpty && 
+           card.sellPriceAsDouble > 0 && 
+           card.costPriceAsDouble >= 0;
+  }
+
+  /// Format profit margin for display
+  static String formatProfitMargin(Card card) {
+    final margin = calculateProfitMargin(card);
+    return '${margin.toStringAsFixed(1)}%';
+  }
+
+  /// Format total value for display
+  static String formatTotalValue(Card card) {
+    final value = calculateTotalValue(card);
+    return '₹${value.toStringAsFixed(2)}';
+  }
+
+  /// Check if card can be edited
+  static bool canEditCard(Card card) {
+    return validateCard(card) && card.quantity > 0;
+  }
+
+  /// Check if card can be deleted
+  static bool canDeleteCard(Card card) {
+    return validateCard(card) && card.quantity == 0;
+  }
 }

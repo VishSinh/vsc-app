@@ -8,6 +8,7 @@ import 'package:vsc_app/core/models/card_model.dart' as card_model;
 import 'package:vsc_app/core/models/order_model.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
+import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_provider.dart';
 
 class OrderItemsPage extends StatefulWidget {
@@ -196,7 +197,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(UITextConstants.orderCreationTitle, style: AppConfig.headlineStyle.copyWith(color: AppConfig.primaryColor)),
+        Text(UITextConstants.orderCreationTitle, style: ResponsiveText.getHeadline(context).copyWith(color: AppConfig.primaryColor)),
         SizedBox(height: AppConfig.smallPadding),
         Text(UITextConstants.orderCreationSubtitle, style: AppConfig.subtitleStyle),
         if (orderProvider.selectedCustomer != null) ...[
@@ -207,7 +208,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Customer', style: AppConfig.titleStyle),
+                  Text('Customer', style: ResponsiveText.getTitle(context)),
                   SizedBox(height: AppConfig.smallPadding),
                   Text('Name: ${orderProvider.selectedCustomer!.name}'),
                   Text('Phone: ${orderProvider.selectedCustomer!.phone}'),
@@ -229,7 +230,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Search Card', style: AppConfig.titleStyle),
+              Text('Search Card', style: ResponsiveText.getTitle(context)),
               SizedBox(height: AppConfig.defaultPadding),
               TextFormField(
                 controller: _barcodeController,
@@ -269,12 +270,12 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Card Details', style: AppConfig.titleStyle),
+            Text('Card Details', style: ResponsiveText.getTitle(context)),
             SizedBox(height: AppConfig.smallPadding),
-            Text('Barcode: ${card.barcode}', style: AppConfig.bodyStyle),
-            Text('Price: ₹${card.sellPrice}', style: AppConfig.bodyStyle),
-            Text('Stock: ${card.quantity}', style: AppConfig.bodyStyle),
-            Text('Max Discount: ₹${card.maxDiscount}', style: AppConfig.bodyStyle),
+            Text('Barcode: ${card.barcode}', style: ResponsiveText.getBody(context)),
+Text('Price: ₹${card.sellPrice}', style: ResponsiveText.getBody(context)),
+Text('Stock: ${card.quantity}', style: ResponsiveText.getBody(context)),
+Text('Max Discount: ₹${card.maxDiscount}', style: ResponsiveText.getBody(context)),
           ],
         ),
       ),
@@ -285,7 +286,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Item Details', style: AppConfig.titleStyle),
+        Text('Item Details', style: ResponsiveText.getTitle(context)),
         SizedBox(height: AppConfig.defaultPadding),
         Row(
           children: [
@@ -392,7 +393,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Order Items (${orderProvider.orderItems.length})', style: AppConfig.titleStyle),
+            Text('Order Items (${orderProvider.orderItems.length})', style: ResponsiveText.getTitle(context)),
             SizedBox(height: AppConfig.defaultPadding),
             if (orderProvider.orderItems.isEmpty)
               const EmptyStateWidget(message: UITextConstants.noOrderItems, icon: Icons.shopping_cart_outlined)

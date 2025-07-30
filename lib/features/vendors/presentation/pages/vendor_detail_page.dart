@@ -194,46 +194,14 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
   }
 
   Widget _buildVendorInfo() {
-    return Card(
-      elevation: AppConfig.elevationLow,
-      child: Padding(
-        padding: EdgeInsets.all(AppConfig.defaultPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Vendor Information',
-              style: TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: AppConfig.defaultPadding),
-            _buildInfoRow('ID', _vendor!.id),
-            _buildInfoRow('Name', _vendor!.name),
-            _buildInfoRow('Phone', _vendor!.phone),
-            _buildInfoRow('Status', _vendor!.isActive ? 'Active' : 'Inactive'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: AppConfig.smallPadding),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: TextStyle(fontWeight: FontWeight.w500, color: AppConfig.textColorSecondary),
-            ),
-          ),
-          Expanded(
-            child: Text(value, style: TextStyle(fontWeight: FontWeight.w600)),
-          ),
-        ],
-      ),
+    return InfoDisplayCard(
+      title: 'Vendor Information',
+      infoRows: [
+        InfoRow(label: 'ID', value: _vendor!.id, labelWidth: 100),
+        InfoRow(label: 'Name', value: _vendor!.name, labelWidth: 100),
+        InfoRow(label: 'Phone', value: _vendor!.phone, labelWidth: 100),
+        InfoRow(label: 'Status', value: _vendor!.isActive ? 'Active' : 'Inactive', labelWidth: 100),
+      ],
     );
   }
 

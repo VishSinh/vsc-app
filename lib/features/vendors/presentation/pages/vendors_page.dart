@@ -180,7 +180,7 @@ class _VendorsPageState extends State<VendorsPage> {
         // Navigate to vendor details page
         print('🖱️ VendorsPage: Tapped vendor card for ID: ${vendor.id}');
         print('🖱️ VendorsPage: Vendor name: ${vendor.name}');
-        context.go('${RouteConstants.vendorDetail}/${vendor.id}');
+        context.goNamed(RouteConstants.vendorDetailRouteName, pathParameters: {'id': vendor.id});
       },
     );
   }

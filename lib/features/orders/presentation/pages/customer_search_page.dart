@@ -5,6 +5,7 @@ import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
+import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/features/customers/presentation/providers/customer_provider.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_provider.dart';
 
@@ -127,7 +128,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(UITextConstants.customerSearchTitle, style: AppConfig.headlineStyle.copyWith(color: AppConfig.primaryColor)),
+        Text(UITextConstants.customerSearchTitle, style: ResponsiveText.getHeadline(context).copyWith(color: AppConfig.primaryColor)),
         SizedBox(height: AppConfig.smallPadding),
         Text(UITextConstants.customerSearchSubtitle, style: AppConfig.subtitleStyle),
       ],
@@ -143,7 +144,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Search Customer', style: AppConfig.titleStyle),
+              Text('Search Customer', style: ResponsiveText.getTitle(context)),
               SizedBox(height: AppConfig.defaultPadding),
               TextFormField(
                 controller: _phoneController,
@@ -198,7 +199,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Create Customer', style: AppConfig.titleStyle),
+            Text('Create Customer', style: ResponsiveText.getTitle(context)),
             SizedBox(height: AppConfig.defaultPadding),
             TextFormField(
               controller: _nameController,

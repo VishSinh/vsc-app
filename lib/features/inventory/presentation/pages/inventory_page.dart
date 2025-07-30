@@ -274,7 +274,7 @@ class _InventoryPageState extends State<InventoryPage> {
   Widget _buildCardItem(card_model.Card card) {
     return Card(
       child: InkWell(
-        onTap: () => context.go('${RouteConstants.cardDetail}/${card.id}'),
+        onTap: () => context.goNamed(RouteConstants.cardDetailRouteName, pathParameters: {'id': card.id}),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

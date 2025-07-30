@@ -5,6 +5,7 @@ import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/models/card_model.dart' as card_model;
 import 'package:vsc_app/core/widgets/button_utils.dart';
+import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
 
 class SimilarCardsPage extends StatefulWidget {
@@ -100,7 +101,7 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
                 children: [
                   Icon(Icons.search_off, size: AppConfig.iconSizeLarge, color: AppConfig.grey400),
                   SizedBox(height: AppConfig.defaultPadding),
-                  Text('No similar cards found', style: AppConfig.headlineStyle.copyWith(color: AppConfig.grey400)),
+                  Text('No similar cards found', style: ResponsiveText.getHeadline(context).copyWith(color: AppConfig.grey400)),
                 ],
               ),
             )
@@ -109,9 +110,9 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Similar Cards Found', style: AppConfig.headlineStyle),
+                  Text('Similar Cards Found', style: ResponsiveText.getHeadline(context)),
                   SizedBox(height: AppConfig.defaultPadding),
-                  Text('${_similarCards.length} similar cards found. Select one to purchase stock:', style: AppConfig.bodyStyle),
+                  Text('${_similarCards.length} similar cards found. Select one to purchase stock:', style: ResponsiveText.getBody(context)),
                   SizedBox(height: AppConfig.largePadding),
                   Expanded(
                     child: ListView.builder(
@@ -147,7 +148,7 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
             ),
           ),
         ),
-        title: Text(card.barcode, style: AppConfig.titleStyle),
+        title: Text(card.barcode, style: ResponsiveText.getTitle(context)),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

@@ -386,7 +386,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
                 }
 
                 if (vendorProvider.vendors.isEmpty) {
-                  return Text(UITextConstants.noVendorsAvailable, style: AppConfig.captionStyle);
+                  return Text(UITextConstants.noVendorsAvailable, style: ResponsiveText.getCaption(context));
                 }
 
                 return DropdownButtonFormField<String>(
@@ -509,12 +509,12 @@ class _CreateCardPageState extends State<CreateCardPage> {
             content: Text('$count similar cards found. Would you like to view them or continue creating a new card?'),
             actions: [
               TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Continue Creating')),
-              ElevatedButton(
+              ButtonUtils.primaryButton(
                 onPressed: () {
                   Navigator.of(context).pop(true);
                   context.go(RouteConstants.similarCards);
                 },
-                child: Text('View $count Similar Cards'),
+                label: 'View $count Similar Cards',
               ),
             ],
           ),

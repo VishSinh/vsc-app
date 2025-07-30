@@ -13,6 +13,7 @@ import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
+import 'package:vsc_app/core/services/card_service.dart';
 
 class CardDetailPage extends StatefulWidget {
   final String cardId;
@@ -74,37 +75,57 @@ class _CardDetailPageState extends State<CardDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveLayout(
-      selectedIndex: 0,
-      destinations: const [NavigationDestination(icon: Icon(Icons.inventory), label: UITextConstants.cards)],
-      onDestinationSelected: (index) {},
-      pageTitle: 'Card Details',
-      child: _buildCardDetailContent(),
-    );
-  }
-
-  Widget _buildCardDetailContent() {
-    return Padding(
-      padding: EdgeInsets.all(AppConfig.defaultPadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header with back button and actions
-          Row(
-            children: [
-              IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.inventory)),
-              SizedBox(width: AppConfig.smallPadding),
-              Expanded(
-                child: PageHeader(title: 'Card Details', actions: _buildActionButtons()),
-              ),
-            ],
-          ),
-          SizedBox(height: AppConfig.largePadding),
-
-          // Content
-          Expanded(child: _buildContent()),
-        ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(UITextConstants.cardDetails),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.inventory)),
+        actions: _buildActionButtons(),
       ),
+      body: _card == null
+          ? const LoadingWidget()
+          : SingleChildScrollView(
+              padding: context.responsivePadding,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: context.responsiveMaxWidth),
+                  child: Card(
+                    elevation: 4,
+                    child: Padding(
+                      padding: context.responsivePadding,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Card Image
+                          _buildCardImage(),
+                          SizedBox(height: context.responsiveSpacing),
+
+                          // Content Layout
+                          if (context.isDesktop) ...[
+                            // Desktop: Side-by-side layout
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(flex: 1, child: _buildCardInfo()),
+                                Expanded(flex: 1, child: _buildBarcodeSection()),
+                              ],
+                            ),
+                          ] else ...[
+                            // Mobile/Tablet: Stacked layout
+                            _buildCardInfo(),
+                            SizedBox(height: context.responsiveSpacing),
+                            _buildBarcodeSection(),
+                          ],
+                          SizedBox(height: context.responsiveSpacing),
+
+                          // Card Statistics
+                          _buildCardStats(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
     );
   }
 
@@ -120,40 +141,15 @@ class _CardDetailPageState extends State<CardDetailPage> {
           return Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (canEdit) ActionButton(label: 'Edit', icon: Icons.edit, onPressed: _showEditCardDialog),
+              if (canEdit) IconButton(icon: const Icon(Icons.edit), onPressed: _showEditCardDialog, tooltip: 'Edit'),
               if (canEdit && canDelete) SizedBox(width: AppConfig.smallPadding),
               if (canDelete)
-                ActionButton(label: 'Delete', icon: Icons.delete, onPressed: _showDeleteConfirmation, backgroundColor: AppConfig.errorColor),
+                IconButton(icon: const Icon(Icons.delete), onPressed: _showDeleteConfirmation, tooltip: 'Delete', color: AppConfig.errorColor),
             ],
           );
         },
       ),
     ];
-  }
-
-  Widget _buildContent() {
-    if (_card == null) {
-      return const LoadingWidget();
-    }
-
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(AppConfig.defaultPadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Card Image - First thing displayed
-          _buildCardImage(),
-          SizedBox(height: AppConfig.largePadding),
-
-          // Card Information
-          _buildCardInfo(),
-          SizedBox(height: AppConfig.largePadding),
-
-          // Card Statistics
-          _buildCardStats(),
-        ],
-      ),
-    );
   }
 
   Widget _buildCardHeader() {
@@ -195,50 +191,54 @@ class _CardDetailPageState extends State<CardDetailPage> {
     return Card(
       elevation: AppConfig.elevationLow,
       child: Padding(
-        padding: EdgeInsets.all(AppConfig.defaultPadding),
-        child: Row(
+        padding: context.responsivePadding,
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Card Information', style: ResponsiveText.getHeadline(context)),
-                  SizedBox(height: AppConfig.defaultPadding),
+            _buildInfoRow('Barcode', _card!.barcode),
+            SizedBox(height: AppConfig.smallPadding),
+            _buildInfoRow('Vendor ID', _card!.vendorId),
+            _buildInfoRow('Sell Price', '₹${_card!.sellPrice}'),
+            _buildInfoRow('Cost Price', '₹${_card!.costPrice}'),
+            _buildInfoRow('Max Discount', '-₹${_card!.maxDiscount}'),
+            _buildInfoRow('Quantity', _card!.quantity.toString()),
+          ],
+        ),
+      ),
+    );
+  }
 
-                  _buildInfoRow('Barcode', _card!.barcode),
-                  SizedBox(height: AppConfig.smallPadding),
+  Widget _buildBarcodeSection() {
+    if (_card == null) return const SizedBox.shrink();
 
-                  // Small barcode widget for scanner
-                  _buildInfoRow('Vendor ID', _card!.vendorId),
-                  _buildInfoRow('Sell Price', '₹${_card!.sellPrice}'),
-                  _buildInfoRow('Cost Price', '₹${_card!.costPrice}'),
-                  _buildInfoRow('Max Discount', '${_card!.maxDiscount}%'),
-                  _buildInfoRow('Quantity', _card!.quantity.toString()),
-                  if (_card!.perceptualHash.isNotEmpty) _buildInfoRow('Perceptual Hash', _card!.perceptualHash),
-                ],
-              ),
-            ),
-            Container(
-              height: 150,
-              width: 300,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(AppConfig.smallRadius),
-                border: Border.all(color: AppConfig.grey400),
-              ),
-              child: Center(
-                // Added Center widget to vertically center the barcode
-                child: Padding(
-                  padding: EdgeInsets.all(AppConfig.defaultPadding), // More white padding
-                  child: BarcodeWidget(
-                    barcode: Barcode.code128(),
-                    data: _card!.barcode,
-                    drawText: true,
-                    style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w600, color: AppConfig.black87),
-                    color: Colors.black,
-                    width: 300, // Increased width for better scanning
-                    height: 100, // Adjusted for padding
+    return Card(
+      elevation: AppConfig.elevationLow,
+      child: Padding(
+        padding: context.responsivePadding,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: context.isDesktop ? 500 : double.infinity,
+                height: context.isDesktop ? 120 : 100,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(AppConfig.smallRadius),
+                  border: Border.all(color: AppConfig.grey400),
+                ),
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(AppConfig.smallPadding),
+                    child: BarcodeWidget(
+                      barcode: Barcode.code128(),
+                      data: _card!.barcode,
+                      drawText: true,
+                      style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w600, color: AppConfig.black87),
+                      color: Colors.black,
+                      width: context.isDesktop ? 580 : 500,
+                      height: context.isDesktop ? 100 : 100,
+                    ),
                   ),
                 ),
               ),
@@ -256,14 +256,14 @@ class _CardDetailPageState extends State<CardDetailPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 120,
+            width: context.isDesktop ? 140 : 120,
             child: Text(
               label,
-              style: TextStyle(fontWeight: FontWeight.w500, color: AppConfig.textColorSecondary),
+              style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w500, color: AppConfig.textColorSecondary),
             ),
           ),
           Expanded(
-            child: Text(value, style: TextStyle(fontWeight: FontWeight.w600)),
+            child: Text(value, style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -274,33 +274,43 @@ class _CardDetailPageState extends State<CardDetailPage> {
     return Card(
       elevation: AppConfig.elevationLow,
       child: Padding(
-        padding: EdgeInsets.all(AppConfig.defaultPadding),
+        padding: context.responsivePadding,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Card Image', style: AppConfig.headlineStyle),
-            SizedBox(height: AppConfig.defaultPadding),
             Center(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(AppConfig.defaultRadius),
                 child: _card!.image.isNotEmpty
                     ? Image.network(
                         _card!.image,
-                        width: context.getResponsiveImageWidth(desktopFraction: 0.3, mobileFraction: 0.6), // Responsive width
-                        height: context.getResponsiveImageHeight(desktopFraction: 0.3, mobileFraction: 0.6), // Responsive height
-                        fit: BoxFit.contain, // Changed from cover to contain to prevent cropping
+                        width: context.isDesktop
+                            ? context.getResponsiveImageWidth(desktopFraction: 0.4, mobileFraction: 0.8)
+                            : context.getResponsiveImageWidth(desktopFraction: 0.8, mobileFraction: 0.9),
+                        height: context.isDesktop
+                            ? context.getResponsiveImageHeight(desktopFraction: 0.4, mobileFraction: 0.8)
+                            : context.getResponsiveImageHeight(desktopFraction: 0.8, mobileFraction: 0.9),
+                        fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
-                            width: context.getResponsiveImageWidth(desktopFraction: 0.3, mobileFraction: 0.6), // Responsive width
-                            height: context.getResponsiveImageHeight(desktopFraction: 0.3, mobileFraction: 0.6), // Responsive height
+                            width: context.isDesktop
+                                ? context.getResponsiveImageWidth(desktopFraction: 0.4, mobileFraction: 0.8)
+                                : context.getResponsiveImageWidth(desktopFraction: 0.8, mobileFraction: 0.9),
+                            height: context.isDesktop
+                                ? context.getResponsiveImageHeight(desktopFraction: 0.4, mobileFraction: 0.8)
+                                : context.getResponsiveImageHeight(desktopFraction: 0.8, mobileFraction: 0.9),
                             decoration: BoxDecoration(color: AppConfig.grey300, borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
                             child: Icon(Icons.image, color: AppConfig.grey600, size: 50),
                           );
                         },
                       )
                     : Container(
-                        width: context.getResponsiveImageWidth(desktopFraction: 0.3, mobileFraction: 0.6), // Responsive width
-                        height: context.getResponsiveImageHeight(desktopFraction: 0.3, mobileFraction: 0.6), // Responsive height
+                        width: context.isDesktop
+                            ? context.getResponsiveImageWidth(desktopFraction: 0.4, mobileFraction: 0.8)
+                            : context.getResponsiveImageWidth(desktopFraction: 0.8, mobileFraction: 0.9),
+                        height: context.isDesktop
+                            ? context.getResponsiveImageHeight(desktopFraction: 0.4, mobileFraction: 0.8)
+                            : context.getResponsiveImageHeight(desktopFraction: 0.8, mobileFraction: 0.9),
                         decoration: BoxDecoration(color: AppConfig.grey300, borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
                         child: Icon(Icons.image, color: AppConfig.grey600, size: 50),
                       ),
@@ -316,41 +326,45 @@ class _CardDetailPageState extends State<CardDetailPage> {
     return Card(
       elevation: AppConfig.elevationLow,
       child: Padding(
-        padding: EdgeInsets.all(AppConfig.defaultPadding),
+        padding: context.responsivePadding,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Statistics', style: ResponsiveText.getTitle(context)),
-            SizedBox(height: AppConfig.defaultPadding),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatCard(
-                    'Profit Margin',
-                    '${((_card!.sellPriceAsDouble - _card!.costPriceAsDouble) / _card!.sellPriceAsDouble * 100).toStringAsFixed(1)}%',
-                    Icons.trending_up,
-                    AppConfig.successColor,
-                  ),
-                ),
-                SizedBox(width: AppConfig.defaultPadding),
-                Expanded(
-                  child: _buildStatCard(
-                    'Total Value',
-                    '₹${(_card!.sellPriceAsDouble * _card!.quantity).toStringAsFixed(2)}',
-                    Icons.attach_money,
-                    AppConfig.primaryColor,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: AppConfig.defaultPadding),
-            Row(
-              children: [
-                Expanded(child: _buildStatCard('Available', '${_card!.quantity}', Icons.inventory, AppConfig.warningColor)),
-                SizedBox(width: AppConfig.defaultPadding),
-                Expanded(child: _buildStatCard('Max Discount', '₹${_card!.maxDiscount}', Icons.discount, AppConfig.primaryColor)),
-              ],
-            ),
+            if (context.isDesktop) ...[
+              // Desktop: 2x2 grid
+              Row(
+                children: [
+                  Expanded(child: _buildStatCard('Profit Margin', CardService.formatProfitMargin(_card!), Icons.trending_up, AppConfig.successColor)),
+                  SizedBox(width: AppConfig.defaultPadding),
+                  Expanded(child: _buildStatCard('Total Value', CardService.formatTotalValue(_card!), Icons.attach_money, AppConfig.primaryColor)),
+                ],
+              ),
+              SizedBox(height: AppConfig.defaultPadding),
+              Row(
+                children: [
+                  Expanded(child: _buildStatCard('Available', '${_card!.quantity}', Icons.inventory, AppConfig.warningColor)),
+                  SizedBox(width: AppConfig.defaultPadding),
+                  Expanded(child: _buildStatCard('Max Discount', '₹${_card!.maxDiscount}', Icons.discount, AppConfig.primaryColor)),
+                ],
+              ),
+            ] else ...[
+              // Mobile/Tablet: 2x2 grid with smaller spacing
+              Row(
+                children: [
+                  Expanded(child: _buildStatCard('Profit Margin', CardService.formatProfitMargin(_card!), Icons.trending_up, AppConfig.successColor)),
+                  SizedBox(width: AppConfig.smallPadding),
+                  Expanded(child: _buildStatCard('Total Value', CardService.formatTotalValue(_card!), Icons.attach_money, AppConfig.primaryColor)),
+                ],
+              ),
+              SizedBox(height: AppConfig.smallPadding),
+              Row(
+                children: [
+                  Expanded(child: _buildStatCard('Available', '${_card!.quantity}', Icons.inventory, AppConfig.warningColor)),
+                  SizedBox(width: AppConfig.smallPadding),
+                  Expanded(child: _buildStatCard('Max Discount', '₹${_card!.maxDiscount}', Icons.discount, AppConfig.primaryColor)),
+                ],
+              ),
+            ],
           ],
         ),
       ),
@@ -359,7 +373,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
 
   Widget _buildStatCard(String title, String value, IconData icon, Color color) {
     return Container(
-      padding: EdgeInsets.all(AppConfig.defaultPadding),
+      padding: context.responsivePadding,
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(AppConfig.defaultRadius),
@@ -367,16 +381,17 @@ class _CardDetailPageState extends State<CardDetailPage> {
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 24),
+          Icon(icon, color: color, size: context.isDesktop ? 28 : 24),
           SizedBox(height: AppConfig.smallPadding),
           Text(
             value,
-            style: TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold, color: color),
+            style: ResponsiveText.getTitle(context).copyWith(fontWeight: FontWeight.bold, color: color),
+            textAlign: TextAlign.center,
           ),
           SizedBox(height: AppConfig.smallPadding),
           Text(
             title,
-            style: TextStyle(fontSize: AppConfig.fontSizeSm, color: AppConfig.textColorSecondary),
+            style: ResponsiveText.getCaption(context).copyWith(color: AppConfig.textColorSecondary),
             textAlign: TextAlign.center,
           ),
         ],
@@ -385,6 +400,10 @@ class _CardDetailPageState extends State<CardDetailPage> {
   }
 
   void _showEditCardDialog() {
+    if (!CardService.canEditCard(_card!)) {
+      SnackbarUtils.showError(context, 'Card cannot be edited at this time');
+      return;
+    }
     // TODO: Implement edit card dialog
     SnackbarUtils.showInfo(context, 'Edit card functionality coming soon!');
   }
@@ -412,6 +431,10 @@ class _CardDetailPageState extends State<CardDetailPage> {
 
   Future<void> _deleteCard() async {
     try {
+      if (!CardService.canDeleteCard(_card!)) {
+        SnackbarUtils.showError(context, 'Card cannot be deleted at this time');
+        return;
+      }
       // TODO: Implement delete card functionality
       SnackbarUtils.showInfo(context, 'Delete card functionality coming soon!');
     } catch (e) {
