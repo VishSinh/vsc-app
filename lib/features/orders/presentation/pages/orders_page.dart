@@ -6,6 +6,9 @@ import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
+import 'package:vsc_app/core/constants/navigation_items.dart';
+import 'package:provider/provider.dart';
+import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
@@ -15,7 +18,7 @@ class OrdersPage extends StatefulWidget {
 }
 
 class _OrdersPageState extends State<OrdersPage> {
-  int _selectedIndex = 1; // Orders tab
+  int _selectedIndex = 0; // Will be set based on permissions
   String _searchQuery = '';
   String _statusFilter = 'All';
 
@@ -26,36 +29,46 @@ class _OrdersPageState extends State<OrdersPage> {
     {'id': 'ORD-003', 'customer': 'Bob Johnson', 'date': '2024-01-13', 'status': 'Completed', 'total': 2100.00, 'items': 8},
   ];
 
-  final List<NavigationDestination> _destinations = [
-    const NavigationDestination(icon: Icon(Icons.dashboard), label: UITextConstants.dashboard),
-    const NavigationDestination(icon: Icon(Icons.shopping_cart), label: UITextConstants.orders),
-    const NavigationDestination(icon: Icon(Icons.inventory), label: UITextConstants.inventory),
-    const NavigationDestination(icon: Icon(Icons.print), label: UITextConstants.production),
-    const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: UITextConstants.administration),
-  ];
-
   void _onDestinationSelected(int index) {
     setState(() {
       _selectedIndex = index;
     });
 
-    switch (index) {
-      case 0:
-        context.go(RouteConstants.dashboard);
-        break;
-      case 1:
-        // Already on orders
-        break;
-      case 2:
-        context.go(RouteConstants.inventory);
-        break;
-      case 3:
-        context.go(RouteConstants.production);
-        break;
-      case 4:
-        context.go(RouteConstants.administration);
-        break;
+    final destinations = _getDestinations();
+    final route = NavigationItems.getRouteForIndex(index, destinations);
+    if (route != RouteConstants.orders) {
+      context.go(route);
     }
+  }
+
+  List<NavigationDestination> _getDestinations() {
+    final permissionProvider = context.read<PermissionProvider>();
+    final destinations = NavigationItems.getDestinationsForPermissions(
+      canManageOrders: permissionProvider.canManageOrders,
+      canManageInventory: permissionProvider.canManageInventory,
+      canManageProduction: permissionProvider.canManageProduction,
+      canManageVendors: permissionProvider.canManageVendors,
+      canManageSystem: permissionProvider.canManageSystem,
+      canViewAuditLogs: permissionProvider.canViewAuditLogs,
+    );
+
+    print('🔍 OrdersPage: Available destinations: ${destinations.map((d) => d.label).toList()}');
+    print('🔍 OrdersPage: Permissions - Orders: ${permissionProvider.canManageOrders}, Inventory: ${permissionProvider.canManageInventory}');
+
+    return destinations;
+  }
+
+  void _setSelectedIndex() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final destinations = _getDestinations();
+        final index = NavigationItems.getSelectedIndexForPage('orders', destinations);
+        print('🔍 OrdersPage: Setting selected index to $index for destinations: ${destinations.map((d) => d.label).toList()}');
+        setState(() {
+          _selectedIndex = index;
+        });
+      }
+    });
   }
 
   List<Map<String, dynamic>> get _filteredOrders {
@@ -69,10 +82,25 @@ class _OrdersPageState extends State<OrdersPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _setSelectedIndex();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final destinations = _getDestinations();
+
+    // Ensure selectedIndex is valid
+    int validSelectedIndex = _selectedIndex;
+    if (validSelectedIndex < 0 || validSelectedIndex >= destinations.length) {
+      validSelectedIndex = 0; // Default to first destination
+      print('🔍 OrdersPage: Invalid selectedIndex $_selectedIndex, defaulting to 0');
+    }
+
     return ResponsiveLayout(
-      selectedIndex: _selectedIndex,
-      destinations: _destinations,
+      selectedIndex: validSelectedIndex,
+      destinations: destinations,
       onDestinationSelected: _onDestinationSelected,
       pageTitle: UITextConstants.orders,
       floatingActionButton: FloatingActionButton(onPressed: () => context.go(RouteConstants.customerSearch), child: const Icon(Icons.add)),

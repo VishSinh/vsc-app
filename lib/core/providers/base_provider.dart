@@ -77,7 +77,7 @@ abstract class BaseProvider extends ChangeNotifier {
         }
         return true;
       } else {
-        final errorMessage = response.error?.message ?? 'Unknown error occurred';
+        final errorMessage = response.error?.details ?? response.error?.message ?? 'Unknown error occurred';
         setError(errorMessage);
         if (onError != null && response.error != null) {
           onError(response.error!);

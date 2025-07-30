@@ -13,6 +13,7 @@ import 'package:vsc_app/features/auth/presentation/providers/permission_provider
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/widgets/create_vendor_dialog.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
+import 'package:vsc_app/core/constants/navigation_items.dart';
 
 class VendorsPage extends StatefulWidget {
   const VendorsPage({super.key});
@@ -22,6 +23,7 @@ class VendorsPage extends StatefulWidget {
 }
 
 class _VendorsPageState extends State<VendorsPage> {
+  int _selectedIndex = 0; // Will be set based on permissions
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -31,6 +33,7 @@ class _VendorsPageState extends State<VendorsPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       print('🚀 VendorsPage: Loading vendors...');
       context.read<VendorProvider>().loadVendors();
+      _setSelectedIndex();
     });
   }
 
@@ -43,34 +46,17 @@ class _VendorsPageState extends State<VendorsPage> {
   @override
   Widget build(BuildContext context) {
     return ResponsiveLayout(
-      selectedIndex: 4, // Vendors tab (after Administration)
-      destinations: [
-        const NavigationDestination(icon: Icon(Icons.dashboard), label: UITextConstants.dashboard),
-        const NavigationDestination(icon: Icon(Icons.shopping_cart), label: UITextConstants.orders),
-        const NavigationDestination(icon: Icon(Icons.inventory), label: UITextConstants.inventory),
-        const NavigationDestination(icon: Icon(Icons.print), label: UITextConstants.production),
-        const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: UITextConstants.administration),
-        const NavigationDestination(icon: Icon(Icons.people), label: UITextConstants.vendors),
-      ],
+      selectedIndex: _selectedIndex,
+      destinations: _getDestinations(),
       onDestinationSelected: (index) {
-        switch (index) {
-          case 0:
-            context.go(RouteConstants.dashboard);
-            break;
-          case 1:
-            context.go(RouteConstants.orders);
-            break;
-          case 2:
-            context.go(RouteConstants.inventory);
-            break;
-          case 3:
-            context.go(RouteConstants.production);
-            break;
-          case 4:
-            context.go(RouteConstants.administration);
-            break;
-          case 5:
-            break; // Already on vendors
+        setState(() {
+          _selectedIndex = index;
+        });
+
+        final destinations = _getDestinations();
+        final route = NavigationItems.getRouteForIndex(index, destinations);
+        if (route != '/vendors') {
+          context.go(route);
         }
       },
       pageTitle: UITextConstants.vendors,
@@ -196,5 +182,29 @@ class _VendorsPageState extends State<VendorsPage> {
         return const ShimmerWrapper(child: ListItemSkeleton());
       },
     );
+  }
+
+  List<NavigationDestination> _getDestinations() {
+    final permissionProvider = context.read<PermissionProvider>();
+    return NavigationItems.getDestinationsForPermissions(
+      canManageOrders: permissionProvider.canManageOrders,
+      canManageInventory: permissionProvider.canManageInventory,
+      canManageProduction: permissionProvider.canManageProduction,
+      canManageVendors: permissionProvider.canManageVendors,
+      canManageSystem: permissionProvider.canManageSystem,
+      canViewAuditLogs: permissionProvider.canViewAuditLogs,
+    );
+  }
+
+  void _setSelectedIndex() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final destinations = _getDestinations();
+        final index = NavigationItems.getSelectedIndexForPage('vendors', destinations);
+        setState(() {
+          _selectedIndex = index;
+        });
+      }
+    });
   }
 }

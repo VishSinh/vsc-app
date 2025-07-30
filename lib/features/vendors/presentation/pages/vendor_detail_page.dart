@@ -11,6 +11,8 @@ import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/features/vendors/presentation/widgets/create_vendor_dialog.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
+import 'package:vsc_app/core/utils/responsive_utils.dart';
+import 'package:vsc_app/core/utils/responsive_text.dart';
 
 class VendorDetailPage extends StatefulWidget {
   final String vendorId;
@@ -72,37 +74,47 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveLayout(
-      selectedIndex: 0,
-      destinations: const [NavigationDestination(icon: Icon(Icons.people), label: UITextConstants.vendors)],
-      onDestinationSelected: (index) {},
-      pageTitle: 'Vendor Details',
-      child: _buildVendorDetailContent(),
-    );
-  }
-
-  Widget _buildVendorDetailContent() {
-    return Padding(
-      padding: EdgeInsets.all(AppConfig.defaultPadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header with back button and actions
-          Row(
-            children: [
-              IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.vendors)),
-              SizedBox(width: AppConfig.smallPadding),
-              Expanded(
-                child: PageHeader(title: 'Vendor Details', actions: _buildActionButtons()),
-              ),
-            ],
-          ),
-          SizedBox(height: AppConfig.largePadding),
-
-          // Content
-          Expanded(child: _buildContent()),
-        ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(UITextConstants.vendorDetails),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.vendors)),
+        actions: _buildActionButtons(),
       ),
+      body: _isLoading
+          ? const Center(child: LoadingWidget())
+          : _errorMessage != null
+          ? CustomErrorWidget(message: _errorMessage!, onRetry: _loadVendorDetails)
+          : _vendor == null
+          ? const EmptyStateWidget(message: 'Vendor not found', icon: Icons.person_off)
+          : SingleChildScrollView(
+              padding: context.responsivePadding,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: context.responsiveMaxWidth),
+                  child: Card(
+                    elevation: 4,
+                    child: Padding(
+                      padding: context.responsivePadding,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Vendor Card
+                          _buildVendorCard(),
+                          SizedBox(height: context.responsiveSpacing),
+
+                          // Vendor Information
+                          _buildVendorInfo(),
+                          SizedBox(height: context.responsiveSpacing),
+
+                          // Vendor Statistics
+                          _buildVendorStats(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
     );
   }
 
@@ -118,42 +130,20 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
           return Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (canEdit) ActionButton(label: 'Edit', icon: Icons.edit, onPressed: _showEditVendorDialog),
+              if (canEdit) IconButton(icon: const Icon(Icons.edit), onPressed: _showEditVendorDialog, tooltip: UITextConstants.edit),
               if (canEdit && canDelete) SizedBox(width: AppConfig.smallPadding),
               if (canDelete)
-                ActionButton(label: 'Delete', icon: Icons.delete, onPressed: _showDeleteConfirmation, backgroundColor: AppConfig.errorColor),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: _showDeleteConfirmation,
+                  tooltip: UITextConstants.delete,
+                  color: AppConfig.errorColor,
+                ),
             ],
           );
         },
       ),
     ];
-  }
-
-  Widget _buildContent() {
-    if (_isLoading) {
-      return const Center(child: LoadingWidget());
-    }
-
-    if (_errorMessage != null) {
-      return CustomErrorWidget(message: _errorMessage!, onRetry: _loadVendorDetails);
-    }
-
-    if (_vendor == null) {
-      return const EmptyStateWidget(message: 'Vendor not found', icon: Icons.person_off);
-    }
-
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildVendorCard(),
-          SizedBox(height: AppConfig.largePadding),
-          _buildVendorInfo(),
-          SizedBox(height: AppConfig.largePadding),
-          _buildVendorStats(),
-        ],
-      ),
-    );
   }
 
   Widget _buildVendorCard() {
@@ -173,15 +163,9 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    _vendor!.name,
-                    style: TextStyle(fontSize: AppConfig.fontSizeXl, fontWeight: FontWeight.bold),
-                  ),
+                  Text(_vendor!.name, style: ResponsiveText.getHeadline(context)),
                   SizedBox(height: AppConfig.smallPadding),
-                  Text(
-                    _vendor!.phone,
-                    style: TextStyle(fontSize: AppConfig.fontSizeLg, color: AppConfig.textColorSecondary),
-                  ),
+                  Text(_vendor!.phone, style: ResponsiveText.getSubtitle(context)),
                   SizedBox(height: AppConfig.smallPadding),
                   StatusBadge(text: _vendor!.isActive ? 'Active' : 'Inactive', isActive: _vendor!.isActive),
                 ],
@@ -213,26 +197,41 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Statistics',
-              style: TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: AppConfig.defaultPadding),
-            Row(
-              children: [
-                Expanded(child: _buildStatCard('Total Orders', '0', Icons.shopping_cart, AppConfig.primaryColor)),
-                SizedBox(width: AppConfig.defaultPadding),
-                Expanded(child: _buildStatCard('Total Revenue', '₹0', Icons.attach_money, AppConfig.successColor)),
-              ],
-            ),
-            SizedBox(height: AppConfig.defaultPadding),
-            Row(
-              children: [
-                Expanded(child: _buildStatCard('Products', '0', Icons.inventory, AppConfig.warningColor)),
-                SizedBox(width: AppConfig.defaultPadding),
-                Expanded(child: _buildStatCard('Rating', 'N/A', Icons.star, AppConfig.primaryColor)),
-              ],
-            ),
+            if (context.isDesktop) ...[
+              // Desktop: 2x2 grid
+              Row(
+                children: [
+                  Expanded(child: _buildStatCard('Total Orders', '0', Icons.shopping_cart, AppConfig.primaryColor)),
+                  SizedBox(width: AppConfig.defaultPadding),
+                  Expanded(child: _buildStatCard('Total Revenue', '₹0', Icons.attach_money, AppConfig.successColor)),
+                ],
+              ),
+              SizedBox(height: AppConfig.defaultPadding),
+              Row(
+                children: [
+                  Expanded(child: _buildStatCard('Products', '0', Icons.inventory, AppConfig.warningColor)),
+                  SizedBox(width: AppConfig.defaultPadding),
+                  Expanded(child: _buildStatCard('Rating', 'N/A', Icons.star, AppConfig.primaryColor)),
+                ],
+              ),
+            ] else ...[
+              // Mobile/Tablet: 2x2 grid with smaller spacing
+              Row(
+                children: [
+                  Expanded(child: _buildStatCard('Total Orders', '0', Icons.shopping_cart, AppConfig.primaryColor)),
+                  SizedBox(width: AppConfig.smallPadding),
+                  Expanded(child: _buildStatCard('Total Revenue', '₹0', Icons.attach_money, AppConfig.successColor)),
+                ],
+              ),
+              SizedBox(height: AppConfig.smallPadding),
+              Row(
+                children: [
+                  Expanded(child: _buildStatCard('Products', '0', Icons.inventory, AppConfig.warningColor)),
+                  SizedBox(width: AppConfig.smallPadding),
+                  Expanded(child: _buildStatCard('Rating', 'N/A', Icons.star, AppConfig.primaryColor)),
+                ],
+              ),
+            ],
           ],
         ),
       ),
@@ -241,7 +240,7 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
 
   Widget _buildStatCard(String title, String value, IconData icon, Color color) {
     return Container(
-      padding: EdgeInsets.all(AppConfig.defaultPadding),
+      padding: context.responsivePadding,
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(AppConfig.defaultRadius),
@@ -249,18 +248,14 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 24),
+          Icon(icon, color: color, size: context.isDesktop ? 28 : 24),
           SizedBox(height: AppConfig.smallPadding),
           Text(
             value,
-            style: TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold, color: color),
+            style: ResponsiveText.getTitle(context).copyWith(fontWeight: FontWeight.bold, color: color),
           ),
           SizedBox(height: AppConfig.smallPadding),
-          Text(
-            title,
-            style: TextStyle(fontSize: AppConfig.fontSizeSm, color: AppConfig.textColorSecondary),
-            textAlign: TextAlign.center,
-          ),
+          Text(title, style: ResponsiveText.getCaption(context), textAlign: TextAlign.center),
         ],
       ),
     );
@@ -280,14 +275,14 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
         title: const Text('Delete Vendor'),
         content: Text('Are you sure you want to delete ${_vendor!.name}? This action cannot be undone.'),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(UITextConstants.cancel)),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               _deleteVendor();
             },
             style: TextButton.styleFrom(foregroundColor: AppConfig.errorColor),
-            child: const Text('Delete'),
+            child: Text(UITextConstants.delete),
           ),
         ],
       ),

@@ -28,7 +28,7 @@ class VendorProvider extends BaseProvider with PaginationMixin {
         _vendors.addAll(response.data!);
         notifyListeners();
       } else {
-        _errorMessage = response.error?.message ?? 'Failed to load vendors';
+        _errorMessage = response.error?.details ?? response.error?.message ?? 'Failed to load vendors';
         notifyListeners();
       }
     } catch (e) {
@@ -56,7 +56,7 @@ class VendorProvider extends BaseProvider with PaginationMixin {
         return response.data;
       } else {
         print('❌ VendorProvider: API returned error: ${response.error?.message ?? 'Unknown error'}');
-        throw Exception(response.error?.message ?? 'Failed to load vendor');
+        throw Exception(response.error?.details ?? response.error?.message ?? 'Failed to load vendor');
       }
     } catch (e) {
       print('❌ VendorProvider: Exception caught: $e');
@@ -77,7 +77,7 @@ class VendorProvider extends BaseProvider with PaginationMixin {
         await loadVendors(); // Refresh the list
         return true;
       } else {
-        _errorMessage = response.error?.message ?? 'Failed to create vendor';
+        _errorMessage = response.error?.details ?? response.error?.message ?? 'Failed to create vendor';
         notifyListeners();
         return false;
       }
@@ -102,7 +102,7 @@ class VendorProvider extends BaseProvider with PaginationMixin {
         await loadVendors(); // Refresh the list
         return true;
       } else {
-        _errorMessage = response.error?.message ?? 'Failed to update vendor';
+        _errorMessage = response.error?.details ?? response.error?.message ?? 'Failed to update vendor';
         notifyListeners();
         return false;
       }
@@ -127,7 +127,7 @@ class VendorProvider extends BaseProvider with PaginationMixin {
         await loadVendors(); // Refresh the list
         return true;
       } else {
-        _errorMessage = response.error?.message ?? 'Failed to delete vendor';
+        _errorMessage = response.error?.details ?? response.error?.message ?? 'Failed to delete vendor';
         notifyListeners();
         return false;
       }

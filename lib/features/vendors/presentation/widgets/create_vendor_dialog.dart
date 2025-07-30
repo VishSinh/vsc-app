@@ -105,7 +105,7 @@ class _CreateVendorDialogState extends State<CreateVendorDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(UITextConstants.cancel)),
         Consumer<VendorProvider>(
           builder: (context, vendorProvider, child) {
             return ActionButton(

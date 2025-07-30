@@ -23,7 +23,12 @@ class UITextConstants {
   static const String addCard = 'Add Card';
   static const String addVendor = 'Add Vendor';
   static const String manageVendors = 'Manage Vendors';
+  static const String vendorDetails = 'Vendor Details';
   static const String createCard = 'Create Card';
+  static const String edit = 'Edit';
+  static const String delete = 'Delete';
+  static const String cancel = 'Cancel';
+  static const String back = 'Back';
   static const String getCard = 'Get Card';
   static const String findSimilarCard = 'Find Similar Card';
   static const String searchCustomer = 'Search Customer';
@@ -139,6 +144,10 @@ class UITextConstants {
   static const String noVendorsAvailable = 'No vendors available';
   static const String customerNotFound = 'Customer not found';
   static const String customerCreatedSuccessfully = 'Customer created successfully';
+  static const String customerFoundSuccess = 'Customer found successfully!';
+  static const String customerCreateFailed = 'Failed to create customer.';
+  static const String customerRetrieveFailed = 'Failed to retrieve created customer.';
+  static const String customerNotFoundWithSuggestion = 'Customer not found. You can create a new customer by clicking "Create Customer".';
   static const String cardNotFound = 'Card not found';
   static const String orderCreatedSuccessfully = 'Order created successfully';
   static const String noOrderItems = 'No items added to order';

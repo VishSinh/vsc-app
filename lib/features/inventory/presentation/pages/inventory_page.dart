@@ -15,6 +15,7 @@ import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/constants/snackbar_constants.dart';
+import 'package:vsc_app/core/constants/navigation_items.dart';
 import 'package:vsc_app/core/models/card_model.dart' as card_model;
 
 class InventoryPage extends StatefulWidget {
@@ -25,40 +26,46 @@ class InventoryPage extends StatefulWidget {
 }
 
 class _InventoryPageState extends State<InventoryPage> {
-  int _selectedIndex = 2; // Inventory tab
+  int _selectedIndex = 0; // Will be set based on permissions
   final String _searchQuery = '';
   bool _showCardsList = false;
   bool _isLoading = true;
   final TextEditingController _searchController = TextEditingController();
 
-  final List<NavigationDestination> _destinations = [
-    const NavigationDestination(icon: Icon(Icons.dashboard), label: UITextConstants.dashboard),
-    const NavigationDestination(icon: Icon(Icons.shopping_cart), label: UITextConstants.orders),
-    const NavigationDestination(icon: Icon(Icons.inventory), label: UITextConstants.inventory),
-    const NavigationDestination(icon: Icon(Icons.print), label: UITextConstants.production),
-    const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: UITextConstants.administration),
-  ];
-
   void _onDestinationSelected(int index) {
     setState(() {
       _selectedIndex = index;
     });
-    switch (index) {
-      case 0:
-        context.go(RouteConstants.dashboard);
-        break;
-      case 1:
-        context.go(RouteConstants.orders);
-        break;
-      case 2:
-        break; // Already on inventory
-      case 3:
-        context.go(RouteConstants.production);
-        break;
-      case 4:
-        context.go(RouteConstants.administration);
-        break;
+
+    final destinations = _getDestinations();
+    final route = NavigationItems.getRouteForIndex(index, destinations);
+    if (route != '/inventory') {
+      context.go(route);
     }
+  }
+
+  List<NavigationDestination> _getDestinations() {
+    final permissionProvider = context.read<PermissionProvider>();
+    return NavigationItems.getDestinationsForPermissions(
+      canManageOrders: permissionProvider.canManageOrders,
+      canManageInventory: permissionProvider.canManageInventory,
+      canManageProduction: permissionProvider.canManageProduction,
+      canManageVendors: permissionProvider.canManageVendors,
+      canManageSystem: permissionProvider.canManageSystem,
+      canViewAuditLogs: permissionProvider.canViewAuditLogs,
+    );
+  }
+
+  void _setSelectedIndex() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final destinations = _getDestinations();
+        final index = NavigationItems.getSelectedIndexForPage('inventory', destinations);
+        setState(() {
+          _selectedIndex = index;
+        });
+      }
+    });
   }
 
   @override
@@ -66,6 +73,7 @@ class _InventoryPageState extends State<InventoryPage> {
     super.initState();
     _loadCards();
     _initializePermissions();
+    _setSelectedIndex();
   }
 
   Future<void> _loadCards() async {
@@ -115,7 +123,7 @@ class _InventoryPageState extends State<InventoryPage> {
   Widget build(BuildContext context) {
     return ResponsiveLayout(
       selectedIndex: _selectedIndex,
-      destinations: _destinations,
+      destinations: _getDestinations(),
       onDestinationSelected: _onDestinationSelected,
       pageTitle: UITextConstants.inventory,
       floatingActionButton: Consumer<PermissionProvider>(

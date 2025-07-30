@@ -7,6 +7,7 @@ import 'package:vsc_app/core/models/card_model.dart' as card_model;
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
+import 'package:vsc_app/core/constants/ui_text_constants.dart';
 
 class SimilarCardsPage extends StatefulWidget {
   const SimilarCardsPage({super.key});
@@ -78,7 +79,7 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('Cancel')),
+          TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(UITextConstants.cancel)),
           ButtonUtils.primaryButton(onPressed: () => Navigator.of(context).pop(quantity), label: 'Purchase'),
         ],
       ),

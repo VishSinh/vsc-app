@@ -12,6 +12,7 @@ import 'package:vsc_app/features/auth/presentation/providers/permission_provider
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/constants/snackbar_constants.dart';
+import 'package:vsc_app/core/constants/navigation_items.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 
@@ -69,7 +70,14 @@ class _DashboardPageState extends State<DashboardPage> {
     return Consumer2<AuthProvider, PermissionProvider>(
       builder: (context, authProvider, permissionProvider, child) {
         final userRole = authProvider.userRole ?? UserRole.sales;
-        final destinations = _getAvailableDestinations(permissionProvider);
+        final destinations = NavigationItems.getDestinationsForPermissions(
+          canManageOrders: permissionProvider.canManageOrders,
+          canManageInventory: permissionProvider.canManageInventory,
+          canManageProduction: permissionProvider.canManageProduction,
+          canManageVendors: permissionProvider.canManageVendors,
+          canManageSystem: permissionProvider.canManageSystem,
+          canViewAuditLogs: permissionProvider.canViewAuditLogs,
+        );
 
         return ResponsiveLayout(
           selectedIndex: _selectedIndex,
@@ -83,37 +91,6 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  List<NavigationDestination> _getAvailableDestinations(PermissionProvider permissionProvider) {
-    final destinations = <NavigationDestination>[const NavigationDestination(icon: Icon(Icons.dashboard), label: UITextConstants.dashboard)];
-
-    // Orders - show if user can manage orders
-    if (permissionProvider.canManageOrders) {
-      destinations.add(const NavigationDestination(icon: Icon(Icons.shopping_cart), label: UITextConstants.orders));
-    }
-
-    // Inventory - show if user can manage inventory
-    if (permissionProvider.canManageInventory) {
-      destinations.add(const NavigationDestination(icon: Icon(Icons.inventory), label: UITextConstants.inventory));
-    }
-
-    // Production - show if user can manage production
-    if (permissionProvider.canManageProduction) {
-      destinations.add(const NavigationDestination(icon: Icon(Icons.print), label: UITextConstants.production));
-    }
-
-    // Vendors - show if user can manage vendors
-    if (permissionProvider.canManageVendors) {
-      destinations.add(const NavigationDestination(icon: Icon(Icons.people), label: UITextConstants.vendors));
-    }
-
-    // Administration - show if user can manage system or view audit logs
-    if (permissionProvider.canManageSystem || permissionProvider.canViewAuditLogs) {
-      destinations.add(const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: UITextConstants.administration));
-    }
-
-    return destinations;
-  }
-
   void _onDestinationSelected(int index, List<NavigationDestination> destinations) {
     setState(() {
       _selectedIndex = index;
@@ -121,62 +98,9 @@ class _DashboardPageState extends State<DashboardPage> {
 
     if (index >= destinations.length) return;
 
-    switch (index) {
-      case 0:
-        // Already on dashboard
-        break;
-      case 1:
-        if (destinations.length > 1) {
-          final secondDestination = destinations[1];
-          if (secondDestination.label == UITextConstants.orders) {
-            context.go(RouteConstants.orders);
-          } else if (secondDestination.label == UITextConstants.inventory) {
-            context.go(RouteConstants.inventory);
-          } else if (secondDestination.label == UITextConstants.production) {
-            context.go(RouteConstants.production);
-          } else if (secondDestination.label == UITextConstants.vendors) {
-            context.go(RouteConstants.vendors);
-          } else if (secondDestination.label == UITextConstants.administration) {
-            context.go(RouteConstants.administration);
-          }
-        }
-        break;
-      case 2:
-        if (destinations.length > 2) {
-          final thirdDestination = destinations[2];
-          if (thirdDestination.label == UITextConstants.inventory) {
-            context.go(RouteConstants.inventory);
-          } else if (thirdDestination.label == UITextConstants.production) {
-            context.go(RouteConstants.production);
-          } else if (thirdDestination.label == UITextConstants.vendors) {
-            context.go(RouteConstants.vendors);
-          } else if (thirdDestination.label == UITextConstants.administration) {
-            context.go(RouteConstants.administration);
-          }
-        }
-        break;
-      case 3:
-        if (destinations.length > 3) {
-          final fourthDestination = destinations[3];
-          if (fourthDestination.label == UITextConstants.production) {
-            context.go(RouteConstants.production);
-          } else if (fourthDestination.label == UITextConstants.vendors) {
-            context.go(RouteConstants.vendors);
-          } else if (fourthDestination.label == UITextConstants.administration) {
-            context.go(RouteConstants.administration);
-          }
-        }
-        break;
-      case 4:
-        if (destinations.length > 4) {
-          final fifthDestination = destinations[4];
-          if (fifthDestination.label == UITextConstants.vendors) {
-            context.go(RouteConstants.vendors);
-          } else if (fifthDestination.label == UITextConstants.administration) {
-            context.go(RouteConstants.administration);
-          }
-        }
-        break;
+    final route = NavigationItems.getRouteForIndex(index, destinations);
+    if (route != '/') {
+      context.go(route);
     }
   }
 

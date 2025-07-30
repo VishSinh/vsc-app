@@ -7,6 +7,8 @@ import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
+import 'package:vsc_app/core/utils/responsive_utils.dart';
+import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_provider.dart';
 
 class OrderReviewPage extends StatefulWidget {
@@ -63,21 +65,20 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
 
   Future<void> _submitOrder() async {
     if (_selectedDate == null || _selectedTime == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please select delivery date and time'), backgroundColor: AppConfig.errorColor));
+      SnackbarUtils.showError(context, 'Please select delivery date and time');
       return;
     }
 
     final orderProvider = context.read<OrderProvider>();
     final success = await orderProvider.createOrder();
 
+    print('Sucess - $success, mounted - $mounted');
+
     if (success && mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text(UITextConstants.orderCreatedSuccessfully), backgroundColor: AppConfig.successColor));
+      SnackbarUtils.showSuccess(context, UITextConstants.orderCreatedSuccessfully);
       context.go(RouteConstants.orders);
     }
+    print("Shoudl not reach");
   }
 
   @override
@@ -89,6 +90,14 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
       ),
       body: Consumer<OrderProvider>(
         builder: (context, orderProvider, child) {
+          // Check if customer and order items exist, if not redirect to order items
+          if (orderProvider.selectedCustomer == null || orderProvider.orderItems.isEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              context.go(RouteConstants.orderItems);
+            });
+            return const Center(child: CircularProgressIndicator());
+          }
+
           return LayoutBuilder(
             builder: (context, constraints) {
               if (constraints.maxWidth < AppConfig.mobileBreakpoint) {
@@ -104,17 +113,18 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
   }
 
   Widget _buildMobileLayout(OrderProvider orderProvider) {
+    print('🔍 OrderReviewPage: Building mobile layout');
     return SingleChildScrollView(
       padding: EdgeInsets.all(AppConfig.defaultPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(orderProvider),
-          SizedBox(height: AppConfig.largePadding),
+          // Customer Info and Delivery Date stacked on mobile
           _buildCustomerInfo(orderProvider),
-          SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.defaultPadding),
           _buildDeliveryDateSection(),
           SizedBox(height: AppConfig.largePadding),
+          // Order Items taking full width
           _buildOrderItemsReview(orderProvider),
           SizedBox(height: AppConfig.largePadding),
           _buildActionButtons(orderProvider),
@@ -124,39 +134,26 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
   }
 
   Widget _buildDesktopLayout(OrderProvider orderProvider) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 1,
-          child: SingleChildScrollView(
-            padding: EdgeInsets.all(AppConfig.largePadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(orderProvider),
-                SizedBox(height: AppConfig.largePadding),
-                _buildCustomerInfo(orderProvider),
-                SizedBox(height: AppConfig.largePadding),
-                _buildDeliveryDateSection(),
-              ],
-            ),
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(AppConfig.largePadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Customer Info and Delivery Date in same row
+          Row(
+            children: [
+              Expanded(child: _buildCustomerInfo(orderProvider)),
+              SizedBox(width: AppConfig.largePadding),
+              Expanded(child: _buildDeliveryDateSection()),
+            ],
           ),
-        ),
-        Expanded(
-          flex: 1,
-          child: SingleChildScrollView(
-            padding: EdgeInsets.all(AppConfig.largePadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildOrderItemsReview(orderProvider),
-                SizedBox(height: AppConfig.largePadding),
-                _buildActionButtons(orderProvider),
-              ],
-            ),
-          ),
-        ),
-      ],
+          SizedBox(height: AppConfig.largePadding),
+          // Order Items taking full width
+          _buildOrderItemsReview(orderProvider),
+          SizedBox(height: AppConfig.largePadding),
+          _buildActionButtons(orderProvider),
+        ],
+      ),
     );
   }
 
@@ -199,26 +196,43 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
           children: [
             Text(UITextConstants.deliveryDate, style: ResponsiveText.getTitle(context)),
             SizedBox(height: AppConfig.defaultPadding),
-            Row(
-              children: [
-                Expanded(
-                  child: ListTile(
-                    title: const Text('Date'),
-                    subtitle: Text(_selectedDate?.toString().split(' ')[0] ?? 'Not selected'),
-                    trailing: const Icon(Icons.calendar_today),
-                    onTap: _selectDate,
+            // Mobile-friendly layout
+            if (context.isMobile) ...[
+              ListTile(
+                title: const Text('Date'),
+                subtitle: Text(_selectedDate?.toString().split(' ')[0] ?? 'Not selected'),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: _selectDate,
+              ),
+              ListTile(
+                title: const Text('Time'),
+                subtitle: Text(_selectedTime?.format(context) ?? 'Not selected'),
+                trailing: const Icon(Icons.access_time),
+                onTap: _selectTime,
+              ),
+            ] else ...[
+              // Desktop layout with side-by-side
+              Row(
+                children: [
+                  Expanded(
+                    child: ListTile(
+                      title: const Text('Date'),
+                      subtitle: Text(_selectedDate?.toString().split(' ')[0] ?? 'Not selected'),
+                      trailing: const Icon(Icons.calendar_today),
+                      onTap: _selectDate,
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: ListTile(
-                    title: const Text('Time'),
-                    subtitle: Text(_selectedTime?.format(context) ?? 'Not selected'),
-                    trailing: const Icon(Icons.access_time),
-                    onTap: _selectTime,
+                  Expanded(
+                    child: ListTile(
+                      title: const Text('Time'),
+                      subtitle: Text(_selectedTime?.format(context) ?? 'Not selected'),
+                      trailing: const Icon(Icons.access_time),
+                      onTap: _selectTime,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ],
         ),
       ),
@@ -243,6 +257,24 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
                 itemCount: orderProvider.orderItems.length,
                 itemBuilder: (context, index) {
                   final item = orderProvider.orderItems[index];
+                  final card = orderProvider.getCardById(item.cardId);
+
+                  if (card == null) {
+                    return Card(
+                      margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
+                      child: Padding(padding: EdgeInsets.all(AppConfig.defaultPadding), child: Text('Item ${index + 1} - Card not found')),
+                    );
+                  }
+
+                  // Calculate line item total
+                  final basePrice = card.sellPriceAsDouble;
+                  final discountAmount = double.tryParse(item.discountAmount) ?? 0.0;
+                  final quantity = item.quantity;
+                  final boxCost = item.requiresBox ? (double.tryParse(item.totalBoxCost ?? '0') ?? 0.0) : 0.0;
+                  final printingCost = item.requiresPrinting ? (double.tryParse(item.totalPrintingCost ?? '0') ?? 0.0) : 0.0;
+
+                  final lineItemTotal = ((basePrice - discountAmount) * quantity) + boxCost + printingCost;
+
                   return Card(
                     margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
                     child: Padding(
@@ -250,15 +282,191 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Item ${index + 1}', style: ResponsiveText.getTitle(context)),
-                          SizedBox(height: AppConfig.smallPadding),
-                          Text('Quantity: ${item.quantity}'),
-                          Text('Discount: ₹${item.discountAmount}'),
-                          if (item.requiresBox) ...[
-                            Text('Box Type: ${item.boxType?.name.toUpperCase()}'),
-                            Text('Box Cost: ₹${item.totalBoxCost ?? '0.00'}'),
+                          // Header
+                          Text('Item ${index + 1}', style: ResponsiveText.getSubtitle(context).copyWith(fontWeight: FontWeight.bold)),
+                          SizedBox(height: AppConfig.defaultPadding),
+
+                          if (context.isMobile) ...[
+                            // Mobile: Compact layout
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Card Image
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(AppConfig.smallRadius),
+                                  child: Image.network(
+                                    card.image,
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        width: 80,
+                                        height: 80,
+                                        decoration: BoxDecoration(
+                                          color: AppConfig.grey300,
+                                          borderRadius: BorderRadius.circular(AppConfig.smallRadius),
+                                        ),
+                                        child: Icon(Icons.image, color: AppConfig.grey600),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                SizedBox(width: AppConfig.defaultPadding),
+                                // Basic Info
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Price: ₹${card.sellPrice}', style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w600)),
+                                      Text('Quantity: ${quantity}', style: ResponsiveText.getBody(context)),
+                                      Text('Discount: ₹${discountAmount.toStringAsFixed(2)}', style: ResponsiveText.getBody(context)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: AppConfig.defaultPadding),
+
+                            // Additional Details (only show if relevant)
+                            if (item.requiresBox || item.requiresPrinting) ...[
+                              Row(
+                                children: [
+                                  if (item.requiresBox) ...[
+                                    Expanded(child: Text('Box: ₹${boxCost.toStringAsFixed(2)}', style: ResponsiveText.getBody(context))),
+                                  ],
+                                  if (item.requiresPrinting) ...[
+                                    Expanded(child: Text('Printing: ₹${printingCost.toStringAsFixed(2)}', style: ResponsiveText.getBody(context))),
+                                  ],
+                                ],
+                              ),
+                              SizedBox(height: AppConfig.smallPadding),
+                            ],
+                          ] else ...[
+                            // Desktop: Modern card layout
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Card Image - Larger and more prominent
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(AppConfig.smallRadius),
+                                  child: Image.network(
+                                    card.image,
+                                    width: 150,
+                                    height: 150,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        width: 150,
+                                        height: 150,
+                                        decoration: BoxDecoration(
+                                          color: AppConfig.grey300,
+                                          borderRadius: BorderRadius.circular(AppConfig.smallRadius),
+                                        ),
+                                        child: Icon(Icons.image, color: AppConfig.grey600, size: 40),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                SizedBox(width: AppConfig.largePadding),
+                                // Modern info layout
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Primary info row
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: _buildDesktopInfoRow('Price', '₹${card.sellPrice}', Icons.attach_money, AppConfig.primaryColor),
+                                          ),
+                                          SizedBox(width: AppConfig.defaultPadding),
+                                          Expanded(
+                                            child: _buildDesktopInfoRow('Quantity', '${quantity}', Icons.shopping_cart, AppConfig.successColor),
+                                          ),
+                                          SizedBox(width: AppConfig.defaultPadding),
+                                          Expanded(
+                                            child: _buildDesktopInfoRow(
+                                              'Discount',
+                                              '₹${discountAmount.toStringAsFixed(2)}',
+                                              Icons.discount,
+                                              AppConfig.warningColor,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: AppConfig.defaultPadding),
+                                      // Secondary info row
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: _buildDesktopInfoRow('Stock', '${card.quantity} units', Icons.inventory, AppConfig.grey600),
+                                          ),
+                                          SizedBox(width: AppConfig.defaultPadding),
+                                          Expanded(
+                                            child: _buildDesktopInfoRow(
+                                              'Box',
+                                              item.requiresBox
+                                                  ? 'Yes - ${item.boxType?.name.toUpperCase() ?? 'N/A'} - ₹${boxCost.toStringAsFixed(2)}'
+                                                  : 'No',
+                                              Icons.inventory_2,
+                                              item.requiresBox ? AppConfig.successColor : AppConfig.grey600,
+                                            ),
+                                          ),
+                                          SizedBox(width: AppConfig.defaultPadding),
+                                          Expanded(
+                                            child: _buildDesktopInfoRow(
+                                              'Printing',
+                                              item.requiresPrinting ? 'Yes - ₹${printingCost.toStringAsFixed(2)}' : 'No',
+                                              Icons.print,
+                                              item.requiresPrinting ? AppConfig.successColor : AppConfig.grey600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: AppConfig.defaultPadding),
+                                      // Total row
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: _buildDesktopInfoRow(
+                                              'Total',
+                                              '₹${lineItemTotal.toStringAsFixed(2)}',
+                                              Icons.calculate,
+                                              AppConfig.primaryColor,
+                                              isTotal: true,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
-                          if (item.requiresPrinting) ...[Text('Printing Cost: ₹${item.totalPrintingCost ?? '0.00'}')],
+
+                          // Line Total for mobile only (desktop has it in the grid)
+                          if (context.isMobile) ...[
+                            Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.all(AppConfig.smallPadding),
+                              decoration: BoxDecoration(
+                                color: AppConfig.primaryColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(AppConfig.smallRadius),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.calculate, color: AppConfig.primaryColor, size: 16),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'Line Total: ₹${lineItemTotal.toStringAsFixed(2)}',
+                                    style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.bold, color: AppConfig.primaryColor),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -271,13 +479,75 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
     );
   }
 
+  // Widget _buildDesktopInfoRow(String label, String value, IconData icon, {bool isTotal = false}) {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Row(
+  //         children: [
+  //           Icon(icon, size: 16, color: isTotal ? AppConfig.primaryColor : AppConfig.grey600),
+  //           SizedBox(width: 4),
+  //           Text(
+  //             label,
+  //             style: ResponsiveText.getCaption(
+  //               context,
+  //             ).copyWith(color: isTotal ? AppConfig.primaryColor : AppConfig.grey600, fontWeight: isTotal ? FontWeight.bold : FontWeight.normal),
+  //           ),
+  //         ],
+  //       ),
+  //       SizedBox(height: 4),
+  //       Text(
+  //         value,
+  //         style: ResponsiveText.getBody(
+  //           context,
+  //         ).copyWith(fontWeight: isTotal ? FontWeight.bold : FontWeight.w600, color: isTotal ? AppConfig.primaryColor : null),
+  //       ),
+  //     ],
+  //   );
+  // }
+
+  Widget _buildDesktopInfoRow(String label, String value, IconData icon, Color color, {bool isTotal = false}) {
+    return Container(
+      padding: EdgeInsets.all(AppConfig.smallPadding),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(AppConfig.smallRadius),
+        border: Border.all(color: color.withOpacity(0.3), width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: color),
+              SizedBox(width: 4),
+              Text(
+                label,
+                style: ResponsiveText.getCaption(context).copyWith(color: color, fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          SizedBox(height: 4),
+          Text(
+            value,
+            style: ResponsiveText.getBody(context).copyWith(fontWeight: isTotal ? FontWeight.bold : FontWeight.w600, color: color),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildActionButtons(OrderProvider orderProvider) {
     return Column(
       children: [
         Row(
           children: [
             Expanded(
-              child: ButtonUtils.secondaryButton(onPressed: () => context.go(RouteConstants.orderItems), label: 'Back', icon: Icons.arrow_back),
+              child: ButtonUtils.secondaryButton(
+                onPressed: () => context.go(RouteConstants.orderItems),
+                label: UITextConstants.back,
+                icon: Icons.arrow_back,
+              ),
             ),
             SizedBox(width: AppConfig.defaultPadding),
             Expanded(

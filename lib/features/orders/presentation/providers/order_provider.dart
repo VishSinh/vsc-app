@@ -14,6 +14,9 @@ class OrderProvider extends BaseProvider {
   card_model.Card? _currentCard;
   String? _deliveryDate;
 
+  // Store card details for each order item
+  final Map<String, card_model.Card> _cardDetails = {};
+
   Customer? get selectedCustomer => _selectedCustomer;
   List<OrderItem> get orderItems => _orderItems;
   card_model.Card? get currentCard => _currentCard;
@@ -37,6 +40,13 @@ class OrderProvider extends BaseProvider {
       setLoading(true);
       setError(null);
 
+      // Check if card is already in order items
+      final existingItem = _orderItems.where((item) => _cardDetails[item.cardId]?.barcode == barcode).firstOrNull;
+      if (existingItem != null) {
+        setError('This card is already added to the order');
+        return null;
+      }
+
       final response = await _cardService.getCardByBarcode(barcode);
 
       if (response.success && response.data != null) {
@@ -44,7 +54,7 @@ class OrderProvider extends BaseProvider {
         notifyListeners();
         return response.data;
       } else {
-        setError(response.error?.message ?? 'Card not found');
+        setError(response.error?.details ?? response.error?.message ?? 'Card not found');
         return null;
       }
     } catch (e) {
@@ -66,6 +76,18 @@ class OrderProvider extends BaseProvider {
     String? totalBoxCost,
     String? totalPrintingCost,
   }) {
+    if (_currentCard == null) {
+      setError('No card selected');
+      return;
+    }
+
+    // Check if card is already in order items
+    final existingItem = _orderItems.where((item) => item.cardId == cardId).firstOrNull;
+    if (existingItem != null) {
+      setError('This card is already added to the order');
+      return;
+    }
+
     final orderItem = OrderItem(
       cardId: cardId,
       discountAmount: discountAmount,
@@ -78,6 +100,8 @@ class OrderProvider extends BaseProvider {
     );
 
     _orderItems.add(orderItem);
+    // Store card details for display
+    _cardDetails[cardId] = _currentCard!;
     _currentCard = null;
     notifyListeners();
   }
@@ -85,7 +109,10 @@ class OrderProvider extends BaseProvider {
   /// Remove order item
   void removeOrderItem(int index) {
     if (index >= 0 && index < _orderItems.length) {
+      final item = _orderItems[index];
       _orderItems.removeAt(index);
+      // Remove card details as well
+      _cardDetails.remove(item.cardId);
       notifyListeners();
     }
   }
@@ -94,6 +121,17 @@ class OrderProvider extends BaseProvider {
   void clearCurrentCard() {
     _currentCard = null;
     notifyListeners();
+  }
+
+  /// Get card by ID from stored card details
+  card_model.Card? getCardById(String cardId) {
+    // First check if it's the current card
+    if (_currentCard?.id == cardId) {
+      return _currentCard;
+    }
+
+    // Check stored card details
+    return _cardDetails[cardId];
   }
 
   /// Create order
@@ -124,10 +162,11 @@ class OrderProvider extends BaseProvider {
         clearOrderData();
         return true;
       } else {
-        setError(response.error?.message ?? 'Failed to create order');
+        setError(response.error?.details ?? response.error?.message ?? 'Failed to create order');
         return false;
       }
     } catch (e) {
+      print(e);
       setError('Failed to create order: $e');
       return false;
     } finally {
@@ -141,6 +180,15 @@ class OrderProvider extends BaseProvider {
     _orderItems.clear();
     _currentCard = null;
     _deliveryDate = null;
+    _cardDetails.clear(); // Clear stored card details as well
+    notifyListeners();
+  }
+
+  /// Clear only order items (preserve customer and delivery date)
+  void clearOrderItemsOnly() {
+    _orderItems.clear();
+    _currentCard = null;
+    _cardDetails.clear(); // Clear stored card details as well
     notifyListeners();
   }
 

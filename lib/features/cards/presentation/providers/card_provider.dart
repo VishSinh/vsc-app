@@ -56,7 +56,7 @@ class CardProvider extends BaseProvider with PaginationMixin {
 
         notifyListeners();
       } else {
-        _errorMessage = response.error?.message ?? 'Failed to load cards';
+        _errorMessage = response.error?.details ?? response.error?.message ?? 'Failed to load cards';
         // If we get an error on page > 1, it means there are no more pages
         if (page > 1) {
           print('🔍 CardProvider: Error on page $page, setting hasMoreData to false');
@@ -104,7 +104,7 @@ class CardProvider extends BaseProvider with PaginationMixin {
         notifyListeners();
         return response.data;
       } else {
-        _errorMessage = response.error?.message ?? 'Failed to load card';
+        _errorMessage = response.error?.details ?? response.error?.message ?? 'Failed to load card';
         notifyListeners();
         return null;
       }
@@ -160,7 +160,7 @@ class CardProvider extends BaseProvider with PaginationMixin {
         await refreshCards();
         return true;
       } else {
-        _errorMessage = response.error?.message ?? 'Failed to create card';
+        _errorMessage = response.error?.details ?? response.error?.message ?? 'Failed to create card';
         notifyListeners();
         return false;
       }
@@ -223,7 +223,7 @@ class CardProvider extends BaseProvider with PaginationMixin {
         notifyListeners();
         return response.data!;
       } else {
-        _errorMessage = response.error?.message ?? 'Failed to get similar cards';
+        _errorMessage = response.error?.details ?? response.error?.message ?? 'Failed to get similar cards';
         notifyListeners();
         return [];
       }
@@ -249,7 +249,7 @@ class CardProvider extends BaseProvider with PaginationMixin {
         await refreshCards();
         return true;
       } else {
-        _errorMessage = response.error?.message ?? 'Failed to purchase card stock';
+        _errorMessage = response.error?.details ?? response.error?.message ?? 'Failed to purchase card stock';
         notifyListeners();
         return false;
       }

@@ -11,6 +11,8 @@ import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart'
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
+import 'package:vsc_app/core/constants/navigation_items.dart';
+import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 
 class AdministrationPage extends StatefulWidget {
   const AdministrationPage({super.key});
@@ -20,7 +22,7 @@ class AdministrationPage extends StatefulWidget {
 }
 
 class _AdministrationPageState extends State<AdministrationPage> with SingleTickerProviderStateMixin {
-  int _selectedIndex = 4; // Administration tab
+  int _selectedIndex = 0; // Will be set based on permissions
   late TabController _tabController;
   String _searchQuery = '';
 
@@ -82,18 +84,11 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     },
   ];
 
-  final List<NavigationDestination> _destinations = [
-    const NavigationDestination(icon: Icon(Icons.dashboard), label: UITextConstants.dashboard),
-    const NavigationDestination(icon: Icon(Icons.shopping_cart), label: UITextConstants.orders),
-    const NavigationDestination(icon: Icon(Icons.inventory), label: UITextConstants.inventory),
-    const NavigationDestination(icon: Icon(Icons.print), label: UITextConstants.production),
-    const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: UITextConstants.administration),
-  ];
-
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _setSelectedIndex();
   }
 
   @override
@@ -106,22 +101,36 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     setState(() {
       _selectedIndex = index;
     });
-    switch (index) {
-      case 0:
-        context.go(RouteConstants.dashboard);
-        break;
-      case 1:
-        context.go(RouteConstants.orders);
-        break;
-      case 2:
-        context.go(RouteConstants.inventory);
-        break;
-      case 3:
-        context.go(RouteConstants.production);
-        break;
-      case 4:
-        break; // Already on administration
+
+    final destinations = _getDestinations();
+    final route = NavigationItems.getRouteForIndex(index, destinations);
+    if (route != RouteConstants.administration) {
+      context.go(route);
     }
+  }
+
+  List<NavigationDestination> _getDestinations() {
+    final permissionProvider = context.read<PermissionProvider>();
+    return NavigationItems.getDestinationsForPermissions(
+      canManageOrders: permissionProvider.canManageOrders,
+      canManageInventory: permissionProvider.canManageInventory,
+      canManageProduction: permissionProvider.canManageProduction,
+      canManageVendors: permissionProvider.canManageVendors,
+      canManageSystem: permissionProvider.canManageSystem,
+      canViewAuditLogs: permissionProvider.canViewAuditLogs,
+    );
+  }
+
+  void _setSelectedIndex() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final destinations = _getDestinations();
+        final index = NavigationItems.getSelectedIndexForPage('administration', destinations);
+        setState(() {
+          _selectedIndex = index;
+        });
+      }
+    });
   }
 
   List<Map<String, dynamic>> get _filteredStaff {
@@ -149,7 +158,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   Widget build(BuildContext context) {
     return ResponsiveLayout(
       selectedIndex: _selectedIndex,
-      destinations: _destinations,
+      destinations: _getDestinations(),
       onDestinationSelected: _onDestinationSelected,
       pageTitle: UITextConstants.administration,
       child: _buildAdministrationContent(),
@@ -171,7 +180,11 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   Text(UITextConstants.administration, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
                   const Spacer(),
                   if (isAdmin)
-                    ButtonUtils.primaryButton(onPressed: () => context.go('/register'), label: UITextConstants.registerStaff, icon: Icons.person_add),
+                    ButtonUtils.primaryButton(
+                      onPressed: () => context.go(RouteConstants.register),
+                      label: UITextConstants.registerStaff,
+                      icon: Icons.person_add,
+                    ),
                 ],
               ),
               SizedBox(height: AppConfig.largePadding),

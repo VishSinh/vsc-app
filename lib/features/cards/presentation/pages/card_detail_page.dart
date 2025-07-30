@@ -141,10 +141,15 @@ class _CardDetailPageState extends State<CardDetailPage> {
           return Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (canEdit) IconButton(icon: const Icon(Icons.edit), onPressed: _showEditCardDialog, tooltip: 'Edit'),
+              if (canEdit) IconButton(icon: const Icon(Icons.edit), onPressed: _showEditCardDialog, tooltip: UITextConstants.edit),
               if (canEdit && canDelete) SizedBox(width: AppConfig.smallPadding),
               if (canDelete)
-                IconButton(icon: const Icon(Icons.delete), onPressed: _showDeleteConfirmation, tooltip: 'Delete', color: AppConfig.errorColor),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: _showDeleteConfirmation,
+                  tooltip: UITextConstants.delete,
+                  color: AppConfig.errorColor,
+                ),
             ],
           );
         },
@@ -415,14 +420,14 @@ class _CardDetailPageState extends State<CardDetailPage> {
         title: const Text('Delete Card'),
         content: Text('Are you sure you want to delete card ${_card!.barcode}? This action cannot be undone.'),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(UITextConstants.cancel)),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               _deleteCard();
             },
             style: TextButton.styleFrom(foregroundColor: AppConfig.errorColor),
-            child: const Text('Delete'),
+            child: Text(UITextConstants.delete),
           ),
         ],
       ),

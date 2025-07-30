@@ -21,7 +21,9 @@ class CustomerProvider extends BaseProvider {
         notifyListeners();
         return response.data;
       } else {
-        setError(response.error?.message ?? 'Customer not found');
+        final errorMessage = response.error?.details ?? response.error?.message ?? 'Customer not found';
+        print('🔍 CustomerProvider: Setting error: "$errorMessage"');
+        setError(errorMessage);
         return null;
       }
     } catch (e) {
@@ -45,7 +47,7 @@ class CustomerProvider extends BaseProvider {
         final customer = await searchCustomerByPhone(phone);
         return customer != null;
       } else {
-        setError(response.error?.message ?? 'Failed to create customer');
+        setError(response.error?.details ?? response.error?.message ?? 'Failed to create customer');
         return false;
       }
     } catch (e) {

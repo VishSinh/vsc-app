@@ -162,7 +162,9 @@ abstract class BaseService {
       } else {
         // Error response: has error, no data
         final errorJson = jsonData['error'] as Map<String, dynamic>;
+        print('🔍 BaseService: Error JSON: $errorJson');
         final error = ErrorData.fromJson(errorJson);
+        print('🔍 BaseService: Parsed Error - code: "${error.code}", message: "${error.message}", details: "${error.details}"');
 
         return ApiResponse(success: false, data: null, error: error);
       }
@@ -173,6 +175,10 @@ abstract class BaseService {
 
   /// Handle Dio errors
   ApiResponse<T> handleDioError<T>(DioException error) {
+    print('🔍 BaseService: handleDioError called with status: ${error.response?.statusCode}');
+    print('🔍 BaseService: Error type: ${error.type}');
+    print('🔍 BaseService: Response data: ${error.response?.data}');
+
     String errorMessage = 'Network error occurred';
 
     if (error.response != null) {
@@ -195,7 +201,8 @@ abstract class BaseService {
         default:
           if (responseData is Map<String, dynamic> && responseData.containsKey('error')) {
             final errorData = responseData['error'] as Map<String, dynamic>;
-            errorMessage = errorData['message'] ?? 'Unknown error occurred';
+            print('🔍 BaseService: Error data from response: $errorData');
+            errorMessage = errorData['details'] ?? errorData['message'] ?? 'Unknown error occurred';
           } else {
             errorMessage = 'Request failed with status code: $statusCode';
           }
@@ -208,7 +215,16 @@ abstract class BaseService {
       errorMessage = 'Request timeout';
     }
 
-    return ApiResponse(success: false, data: null, error: ErrorData.networkError(errorMessage));
+    print('🔍 BaseService: Final error message: "$errorMessage"');
+
+    // Create proper ErrorData with details instead of using networkError factory
+    final errorData = ErrorData(
+      code: 'API_ERROR',
+      message: errorMessage,
+      details: errorMessage, // Use the same message for details
+    );
+
+    return ApiResponse(success: false, data: null, error: errorData);
   }
 
   /// Clear authentication data
