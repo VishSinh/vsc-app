@@ -194,10 +194,21 @@ class _CardsPageState extends State<CardsPage> {
               ),
               SizedBox(height: AppConfig.defaultPadding),
 
-              // Status and Quantity badges
+              // Max Discount and Quantity badges
               Row(
                 children: [
-                  StatusBadge(text: card.isActive ? 'Active' : 'Inactive', isActive: card.isActive),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: AppConfig.smallPadding, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppConfig.primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(AppConfig.borderRadiusSmall),
+                      border: Border.all(color: AppConfig.primaryColor.withOpacity(0.3)),
+                    ),
+                    child: Text(
+                      'Max: ${card.maxDiscount}%',
+                      style: AppConfig.captionStyle.copyWith(color: AppConfig.primaryColor, fontWeight: FontWeight.w500),
+                    ),
+                  ),
                   SizedBox(width: AppConfig.smallPadding),
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: AppConfig.smallPadding, vertical: 4),

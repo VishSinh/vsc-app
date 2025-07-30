@@ -44,7 +44,7 @@ class ResponsiveUtils {
   static double getGridChildAspectRatio(BuildContext context) {
     switch (getScreenSize(context)) {
       case ScreenSize.mobile:
-        return 1.2;
+        return 0.9; // More compact cards on mobile
       case ScreenSize.tablet:
         return 0.8;
       case ScreenSize.desktop:

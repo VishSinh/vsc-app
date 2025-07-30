@@ -70,19 +70,7 @@ class _LoginPageState extends State<LoginPage> {
                         // App Logo/Title
                         Icon(Icons.inventory, size: AppConfig.iconSizeXXLarge, color: AppConfig.primaryColor),
                         SizedBox(height: AppConfig.defaultPadding),
-                        Text(
-                          AppConfig.appName,
-                          style: ResponsiveText.getResponsiveTextForScreen(
-                            context,
-                            mobileSize: 24.0,
-                            tabletSize: 28.0,
-                            desktopSize: 32.0,
-                            weight: AppConfig.fontWeightBold,
-                          ).copyWith(color: AppConfig.primaryColor),
-                          textAlign: TextAlign.center,
-                          softWrap: true,
-                          overflow: TextOverflow.visible,
-                        ),
+                        Text(AppConfig.appName, style: ResponsiveText.getHeadlineStyle(context)),
                         SizedBox(height: AppConfig.smallPadding),
                         Text(UITextConstants.signInTitle, style: ResponsiveText.getSubtitle(context).copyWith(color: AppConfig.grey600)),
                         SizedBox(height: context.responsiveSpacing),

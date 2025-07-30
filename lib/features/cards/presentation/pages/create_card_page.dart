@@ -8,6 +8,8 @@ import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
+import 'package:vsc_app/core/utils/responsive_utils.dart';
+import 'package:vsc_app/core/utils/responsive_text.dart';
 
 class CreateCardPage extends StatefulWidget {
   const CreateCardPage({super.key});
@@ -51,61 +53,48 @@ class _CreateCardPageState extends State<CreateCardPage> {
       ),
       body: Consumer<CardProvider>(
         builder: (context, cardProvider, child) {
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              final screenWidth = constraints.maxWidth;
-              final isDesktop = screenWidth > AppConfig.desktopBreakpoint;
-              final isTablet = screenWidth > AppConfig.tabletBreakpoint && screenWidth <= AppConfig.desktopBreakpoint;
+          return SingleChildScrollView(
+            padding: context.responsivePadding,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: context.responsiveMaxWidth),
+                child: Card(
+                  elevation: 4,
+                  child: Padding(
+                    padding: context.responsivePadding,
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Header Section
+                          _buildHeaderSection(),
+                          SizedBox(height: context.responsiveSpacing),
 
-              return SingleChildScrollView(
-                padding: EdgeInsets.all(isDesktop ? AppConfig.largePadding * 1.5 : AppConfig.largePadding),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: isDesktop ? AppConfig.maxWidthXLarge : double.infinity),
-                    child: Card(
-                      elevation: 4,
-                      child: Padding(
-                        padding: EdgeInsets.all(isDesktop ? AppConfig.largePadding * 1.5 : AppConfig.largePadding),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Header Section
-                              _buildHeaderSection(),
-                              SizedBox(height: AppConfig.largePadding),
-
-                              // Content Layout
-                              if (isDesktop) ...[
-                                // Desktop: Side-by-side layout
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(flex: 1, child: _buildImageSection(cardProvider)),
-                                    SizedBox(width: AppConfig.largePadding * 1.5),
-                                    Expanded(flex: 1, child: _buildFormSection(cardProvider)),
-                                  ],
-                                ),
-                              ] else if (isTablet) ...[
-                                // Tablet: Stacked with some responsive adjustments
-                                _buildImageSection(cardProvider),
-                                SizedBox(height: AppConfig.largePadding),
-                                _buildFormSection(cardProvider),
-                              ] else ...[
-                                // Mobile: Fully stacked
-                                _buildImageSection(cardProvider),
-                                SizedBox(height: AppConfig.largePadding),
-                                _buildFormSection(cardProvider),
+                          // Content Layout
+                          if (context.isDesktop) ...[
+                            // Desktop: Side-by-side layout
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(flex: 1, child: _buildImageSection(cardProvider)),
+                                SizedBox(width: context.responsiveSpacing),
+                                Expanded(flex: 1, child: _buildFormSection(cardProvider)),
                               ],
-                            ],
-                          ),
-                        ),
+                            ),
+                          ] else ...[
+                            // Mobile/Tablet: Stacked layout
+                            _buildImageSection(cardProvider),
+                            SizedBox(height: context.isMobile ? AppConfig.defaultPadding : context.responsiveSpacing),
+                            _buildFormSection(cardProvider),
+                          ],
+                        ],
                       ),
                     ),
                   ),
                 ),
-              );
-            },
+              ),
+            ),
           );
         },
       ),
@@ -116,9 +105,9 @@ class _CreateCardPageState extends State<CreateCardPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(UITextConstants.createCardTitle, style: AppConfig.headlineStyle.copyWith(color: AppConfig.primaryColor)),
+        Text(UITextConstants.createCardTitle, style: ResponsiveText.getHeadline(context).copyWith(color: AppConfig.primaryColor)),
         SizedBox(height: AppConfig.smallPadding),
-        Text(UITextConstants.createCardSubtitle, style: AppConfig.subtitleStyle),
+        Text(UITextConstants.createCardSubtitle, style: ResponsiveText.getSubtitle(context)),
       ],
     );
   }
@@ -128,7 +117,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildFormFields(),
-        SizedBox(height: AppConfig.largePadding),
+        SizedBox(height: context.isMobile ? AppConfig.defaultPadding : AppConfig.largePadding),
         _buildSubmitButton(cardProvider),
       ],
     );
@@ -146,7 +135,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
               children: [
                 Icon(Icons.image, color: AppConfig.primaryColor, size: AppConfig.iconSizeLarge),
                 SizedBox(width: AppConfig.smallPadding),
-                Text(UITextConstants.cardImage, style: AppConfig.titleStyle),
+                Text(UITextConstants.cardImage, style: ResponsiveText.getTitle(context)),
               ],
             ),
             SizedBox(height: AppConfig.defaultPadding),
@@ -183,23 +172,58 @@ class _CreateCardPageState extends State<CreateCardPage> {
                 },
               ),
               SizedBox(height: AppConfig.defaultPadding),
-              Row(
-                children: [
-                  Expanded(
-                    child: ButtonUtils.accentButton(
-                      onPressed: () => _showImagePickerDialog(cardProvider),
-                      label: UITextConstants.changeImage,
-                      icon: Icons.edit,
+              // Responsive button layout
+              if (context.isMobile) ...[
+                // Mobile: Full-width buttons matching image width
+                SizedBox(
+                  width: double.infinity,
+                  child: ButtonUtils.accentButton(
+                    onPressed: () => _showImagePickerDialog(cardProvider),
+                    label: UITextConstants.changeImage,
+                    icon: Icons.edit,
+                  ),
+                ),
+                SizedBox(height: AppConfig.smallPadding),
+                SizedBox(
+                  width: double.infinity,
+                  child: ButtonUtils.dangerButton(onPressed: cardProvider.clearImage, label: UITextConstants.remove, icon: Icons.delete),
+                ),
+                SizedBox(height: AppConfig.smallPadding),
+                SizedBox(
+                  width: double.infinity,
+                  child: ButtonUtils.secondaryButton(
+                    onPressed: () => _checkSimilarCards(cardProvider),
+                    label: 'Check Similar Cards',
+                    icon: Icons.search,
+                  ),
+                ),
+              ] else ...[
+                // Desktop/Tablet: Side-by-side buttons with full-width similar button
+                Row(
+                  children: [
+                    Expanded(
+                      child: ButtonUtils.accentButton(
+                        onPressed: () => _showImagePickerDialog(cardProvider),
+                        label: UITextConstants.changeImage,
+                        icon: Icons.edit,
+                      ),
                     ),
+                    SizedBox(width: AppConfig.defaultPadding),
+                    Expanded(
+                      child: ButtonUtils.dangerButton(onPressed: cardProvider.clearImage, label: UITextConstants.remove, icon: Icons.delete),
+                    ),
+                  ],
+                ),
+                SizedBox(height: AppConfig.defaultPadding),
+                SizedBox(
+                  width: double.infinity,
+                  child: ButtonUtils.secondaryButton(
+                    onPressed: () => _checkSimilarCards(cardProvider),
+                    label: 'Check Similar Cards',
+                    icon: Icons.search,
                   ),
-                  SizedBox(width: AppConfig.defaultPadding),
-                  Expanded(
-                    child: ButtonUtils.dangerButton(onPressed: cardProvider.clearImage, label: UITextConstants.remove, icon: Icons.delete),
-                  ),
-                ],
-              ),
-              SizedBox(height: AppConfig.defaultPadding),
-              ButtonUtils.secondaryButton(onPressed: () => _checkSimilarCards(cardProvider), label: 'Check Similar Cards', icon: Icons.search),
+                ),
+              ],
             ] else ...[
               // Upload image placeholder with 4:3 aspect ratio
               LayoutBuilder(
@@ -223,7 +247,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
                         children: [
                           Icon(Icons.add_photo_alternate, size: AppConfig.iconSizeXLarge, color: AppConfig.grey600),
                           SizedBox(height: AppConfig.spacingSmall),
-                          Text(UITextConstants.tapToUploadImage, style: AppConfig.bodyStyle.copyWith(color: AppConfig.textColorMuted)),
+                          Text(UITextConstants.tapToUploadImage, style: ResponsiveText.getBody(context).copyWith(color: AppConfig.textColorMuted)),
                         ],
                       ),
                     ),
@@ -249,7 +273,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
               children: [
                 Icon(Icons.edit_note, color: AppConfig.primaryColor, size: AppConfig.iconSizeLarge),
                 SizedBox(width: AppConfig.smallPadding),
-                Text(UITextConstants.cardDetails, style: AppConfig.titleStyle),
+                Text(UITextConstants.cardDetails, style: ResponsiveText.getTitle(context)),
               ],
             ),
             SizedBox(height: AppConfig.defaultPadding),
@@ -262,8 +286,8 @@ class _CreateCardPageState extends State<CreateCardPage> {
                 hintText: UITextConstants.costPriceHint,
                 border: OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.attach_money),
-                labelStyle: AppConfig.bodyStyle,
-                hintStyle: AppConfig.captionStyle,
+                labelStyle: ResponsiveText.getBody(context),
+                hintStyle: ResponsiveText.getCaption(context),
               ),
               keyboardType: TextInputType.number,
               validator: (value) {
@@ -276,7 +300,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
                 return null;
               },
             ),
-            SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: context.isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding),
 
             // Sell Price
             TextFormField(
@@ -286,8 +310,8 @@ class _CreateCardPageState extends State<CreateCardPage> {
                 hintText: UITextConstants.sellPriceHint,
                 border: OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.sell),
-                labelStyle: AppConfig.bodyStyle,
-                hintStyle: AppConfig.captionStyle,
+                labelStyle: ResponsiveText.getBody(context),
+                hintStyle: ResponsiveText.getCaption(context),
               ),
               keyboardType: TextInputType.number,
               validator: (value) {
@@ -300,7 +324,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
                 return null;
               },
             ),
-            SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: context.isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding),
 
             // Quantity
             TextFormField(
@@ -310,8 +334,8 @@ class _CreateCardPageState extends State<CreateCardPage> {
                 hintText: UITextConstants.quantityHint,
                 border: OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.inventory),
-                labelStyle: AppConfig.bodyStyle,
-                hintStyle: AppConfig.captionStyle,
+                labelStyle: ResponsiveText.getBody(context),
+                hintStyle: ResponsiveText.getCaption(context),
               ),
               keyboardType: TextInputType.number,
               validator: (value) {
@@ -324,7 +348,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
                 return null;
               },
             ),
-            SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: context.isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding),
 
             // Max Discount
             TextFormField(
@@ -334,8 +358,8 @@ class _CreateCardPageState extends State<CreateCardPage> {
                 hintText: UITextConstants.maxDiscountHint,
                 border: OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.discount),
-                labelStyle: AppConfig.bodyStyle,
-                hintStyle: AppConfig.captionStyle,
+                labelStyle: ResponsiveText.getBody(context),
+                hintStyle: ResponsiveText.getCaption(context),
               ),
               keyboardType: TextInputType.number,
               validator: (value) {
@@ -352,7 +376,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
                 return null;
               },
             ),
-            SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: context.isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding),
 
             // Vendor Dropdown
             Consumer<VendorProvider>(
@@ -374,13 +398,13 @@ class _CreateCardPageState extends State<CreateCardPage> {
                     hintText: UITextConstants.chooseVendorHint,
                     border: OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.people),
-                    labelStyle: AppConfig.bodyStyle,
-                    hintStyle: AppConfig.captionStyle,
+                    labelStyle: ResponsiveText.getBody(context),
+                    hintStyle: ResponsiveText.getCaption(context),
                   ),
                   items: vendorProvider.vendors.map((vendor) {
                     return DropdownMenuItem<String>(
                       value: vendor.id,
-                      child: Text(vendor.name, style: AppConfig.bodyStyle),
+                      child: Text(vendor.name, style: ResponsiveText.getBody(context)),
                     );
                   }).toList(),
                   onChanged: (value) {

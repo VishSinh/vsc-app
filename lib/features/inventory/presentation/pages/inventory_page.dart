@@ -131,7 +131,7 @@ class _InventoryPageState extends State<InventoryPage> {
 
   Widget _buildInventoryContent() {
     return Padding(
-      padding: EdgeInsets.all(AppConfig.defaultPadding),
+      padding: context.responsivePadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -142,7 +142,7 @@ class _InventoryPageState extends State<InventoryPage> {
 
           // Quick Actions Section
           _buildQuickActions(),
-          SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: context.responsiveSpacing),
 
           // Cards List Section
           Expanded(child: _buildCardsListSection()),
@@ -156,8 +156,8 @@ class _InventoryPageState extends State<InventoryPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Wrap(
-          spacing: AppConfig.defaultPadding,
-          runSpacing: AppConfig.defaultPadding,
+          spacing: context.isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding,
+          runSpacing: context.isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding,
           children: [
             Consumer<PermissionProvider>(
               builder: (context, permissionProvider, child) {
@@ -276,8 +276,9 @@ class _InventoryPageState extends State<InventoryPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Image section - more prominent, especially on mobile
             Expanded(
-              flex: 3,
+              flex: context.isMobile ? 4 : 3, // Much more space for image on mobile
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(borderRadius: BorderRadius.vertical(top: Radius.circular(AppConfig.defaultRadius))),
@@ -294,31 +295,28 @@ class _InventoryPageState extends State<InventoryPage> {
                 ),
               ),
             ),
+            // Content section - more compact and image-focused
             Expanded(
-              flex: 2,
+              flex: context.isMobile ? 2 : 2, // Reduced content space to give more to image
               child: Padding(
-                padding: EdgeInsets.all(AppConfig.defaultPadding),
+                padding: EdgeInsets.all(context.isMobile ? 6 : AppConfig.defaultPadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Text(card.barcode, style: ResponsiveText.getTitle(context), maxLines: 1, overflow: TextOverflow.ellipsis),
-                    SizedBox(height: AppConfig.smallPadding),
-                    Text('Price: ₹${card.sellPrice}', style: ResponsiveText.getBody(context)),
-                    Text('Stock: ${card.quantity}', style: ResponsiveText.getBody(context)),
-                    Row(
-                      children: [
-                        Icon(
-                          card.isActive ? Icons.check_circle : Icons.cancel,
-                          size: AppConfig.iconSizeSmall,
-                          color: card.isActive ? AppConfig.successColor : AppConfig.errorColor,
-                        ),
-                        SizedBox(width: AppConfig.smallPadding),
-                        Text(
-                          card.isActive ? 'Active' : 'Inactive',
-                          style: ResponsiveText.getCaption(context).copyWith(color: card.isActive ? AppConfig.successColor : AppConfig.errorColor),
-                        ),
-                      ],
+                    // Price and Stock - compact layout
+                    Text(
+                      '₹${card.sellPrice}',
+                      style: context.isMobile
+                          ? ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.bold)
+                          : ResponsiveText.getTitle(context),
                     ),
+                    Text('-₹${card.maxDiscount}', style: ResponsiveText.getBody(context).copyWith(color: AppConfig.errorColor)),
+                    Text(
+                      'Stock: ${card.quantity}',
+                      style: context.isMobile ? ResponsiveText.getCaption(context) : ResponsiveText.getCaption(context),
+                    ),
+                    // Max Discount - compact display
                   ],
                 ),
               ),
@@ -332,8 +330,8 @@ class _InventoryPageState extends State<InventoryPage> {
   Widget _buildShimmerSkeleton() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth < AppConfig.mobileBreakpoint ? 1 : 3;
-        final childAspectRatio = constraints.maxWidth < AppConfig.mobileBreakpoint ? 1.2 : 0.8;
+        final crossAxisCount = context.gridCrossAxisCount;
+        final childAspectRatio = context.gridChildAspectRatio;
 
         return GridView.builder(
           shrinkWrap: true,
@@ -351,20 +349,20 @@ class _InventoryPageState extends State<InventoryPage> {
                 child: Column(
                   children: [
                     Expanded(
-                      flex: 3,
+                      flex: context.isMobile ? 4 : 3,
                       child: Container(width: double.infinity, color: Colors.white),
                     ),
                     Expanded(
-                      flex: 2,
+                      flex: context.isMobile ? 2 : 2,
                       child: Padding(
-                        padding: EdgeInsets.all(AppConfig.defaultPadding),
+                        padding: EdgeInsets.all(context.isMobile ? 6 : AppConfig.defaultPadding),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            SizedBox(height: 8, width: 100),
-                            SizedBox(height: 4, width: 80),
-                            SizedBox(height: 4, width: 60),
-                            SizedBox(height: 4, width: 40),
+                            SizedBox(height: context.isMobile ? 6 : 8, width: 80),
+                            SizedBox(height: context.isMobile ? 3 : 4, width: 60),
+                            SizedBox(height: context.isMobile ? 3 : 4, width: 50),
                           ],
                         ),
                       ),

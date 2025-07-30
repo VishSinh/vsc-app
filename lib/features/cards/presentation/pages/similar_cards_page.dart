@@ -151,9 +151,9 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Vendor ID: ${card.vendorId}'),
-            Text('Price: \$${card.sellPrice}'),
+            Text('Price: ₹${card.sellPrice}'),
             Text('Quantity: ${card.quantity}'),
-            Text('Status: ${card.isActive ? 'Active' : 'Inactive'}'),
+            Text('Max Discount: ${card.maxDiscount}%'),
           ],
         ),
         trailing: ElevatedButton(onPressed: () => _purchaseCard(card), child: Text('Purchase')),
