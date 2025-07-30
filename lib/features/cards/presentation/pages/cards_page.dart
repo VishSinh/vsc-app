@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/utils/responsive_layout.dart';
+import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/core/widgets/shimmer_widgets.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
@@ -119,8 +120,8 @@ class _CardsPageState extends State<CardsPage> {
                   onRefresh: () => cardProvider.refreshCards(),
                   child: GridView.builder(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: MediaQuery.of(context).size.width > 768 ? 3 : 1, // 3 columns on larger screens, 1 on mobile
-                      // childAspectRatio: MediaQuery.of(context).size.width > 768 ? 0.7 : 0.5, // Better aspect ratios
+                      crossAxisCount: context.gridCrossAxisCount,
+                      childAspectRatio: context.gridChildAspectRatio,
                       crossAxisSpacing: AppConfig.defaultPadding,
                       mainAxisSpacing: AppConfig.defaultPadding,
                     ),
@@ -173,17 +174,12 @@ class _CardsPageState extends State<CardsPage> {
                     ? Image.network(
                         card.image,
                         width: double.infinity,
-                        height: MediaQuery.of(context).size.width > 768
-                            ? MediaQuery.of(context).size.width *
-                                  0.15 // Desktop/tablet
-                            : MediaQuery.of(context).size.width * 0.4, // Mobile - much larger
+                        height: context.getResponsiveImageHeight(desktopFraction: 0.15, mobileFraction: 0.4), // Responsive height
                         fit: BoxFit.cover, // Changed to cover for better fill
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
                             width: double.infinity,
-                            height: MediaQuery.of(context).size.width > 768
-                                ? MediaQuery.of(context).size.width * 0.15
-                                : MediaQuery.of(context).size.width * 0.4,
+                            height: context.getResponsiveImageHeight(desktopFraction: 0.15, mobileFraction: 0.4),
                             decoration: BoxDecoration(color: AppConfig.grey300, borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
                             child: Icon(Icons.image, color: AppConfig.grey600),
                           );
@@ -191,9 +187,7 @@ class _CardsPageState extends State<CardsPage> {
                       )
                     : Container(
                         width: double.infinity,
-                        height: MediaQuery.of(context).size.width > 768
-                            ? MediaQuery.of(context).size.width * 0.15
-                            : MediaQuery.of(context).size.width * 0.4,
+                        height: context.getResponsiveImageHeight(desktopFraction: 0.15, mobileFraction: 0.4),
                         decoration: BoxDecoration(color: AppConfig.grey300, borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
                         child: Icon(Icons.image, color: AppConfig.grey600),
                       ),
@@ -231,7 +225,7 @@ class _CardsPageState extends State<CardsPage> {
               SizedBox(height: AppConfig.smallPadding),
 
               // Pricing (minimal info)
-              Text('Price: \$${card.sellPrice}', style: AppConfig.bodyStyle.copyWith(fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+              Text('Price: ₹${card.sellPrice}', style: AppConfig.bodyStyle.copyWith(fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
             ],
           ),
         ),

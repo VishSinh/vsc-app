@@ -11,6 +11,7 @@ import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
+import 'package:vsc_app/core/utils/responsive_utils.dart';
 
 class CardDetailPage extends StatefulWidget {
   final String cardId;
@@ -216,9 +217,9 @@ class _CardDetailPageState extends State<CardDetailPage> {
 
                   // Small barcode widget for scanner
                   _buildInfoRow('Vendor ID', _card!.vendorId),
-                  _buildInfoRow('Sell Price', '\$${_card!.sellPrice}'),
-                  _buildInfoRow('Cost Price', '\$${_card!.costPrice}'),
-                  _buildInfoRow('Max Discount', '${_card!.maxDiscount}%'),
+                  _buildInfoRow('Sell Price', '₹${_card!.sellPrice}'),
+                  _buildInfoRow('Cost Price', '₹${_card!.costPrice}'),
+                  _buildInfoRow('Max Discount', '₹${_card!.maxDiscount}'),
                   _buildInfoRow('Quantity', _card!.quantity.toString()),
                   _buildInfoRow('Status', _card!.isActive ? 'Active' : 'Inactive'),
                   if (_card!.perceptualHash.isNotEmpty) _buildInfoRow('Perceptual Hash', _card!.perceptualHash),
@@ -292,21 +293,21 @@ class _CardDetailPageState extends State<CardDetailPage> {
                 child: _card!.image.isNotEmpty
                     ? Image.network(
                         _card!.image,
-                        width: MediaQuery.of(context).size.width * 0.4, // Responsive width
-                        height: MediaQuery.of(context).size.width * 0.4, // Responsive height
+                        width: context.getResponsiveImageWidth(desktopFraction: 0.3, mobileFraction: 0.6), // Responsive width
+                        height: context.getResponsiveImageHeight(desktopFraction: 0.3, mobileFraction: 0.6), // Responsive height
                         fit: BoxFit.contain, // Changed from cover to contain to prevent cropping
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
-                            width: MediaQuery.of(context).size.width * 0.4, // Responsive width
-                            height: MediaQuery.of(context).size.width * 0.4, // Responsive height
+                            width: context.getResponsiveImageWidth(desktopFraction: 0.3, mobileFraction: 0.6), // Responsive width
+                            height: context.getResponsiveImageHeight(desktopFraction: 0.3, mobileFraction: 0.6), // Responsive height
                             decoration: BoxDecoration(color: AppConfig.grey300, borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
                             child: Icon(Icons.image, color: AppConfig.grey600, size: 50),
                           );
                         },
                       )
                     : Container(
-                        width: MediaQuery.of(context).size.width * 0.4, // Responsive width
-                        height: MediaQuery.of(context).size.width * 0.4, // Responsive height
+                        width: context.getResponsiveImageWidth(desktopFraction: 0.3, mobileFraction: 0.6), // Responsive width
+                        height: context.getResponsiveImageHeight(desktopFraction: 0.3, mobileFraction: 0.6), // Responsive height
                         decoration: BoxDecoration(color: AppConfig.grey300, borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
                         child: Icon(Icons.image, color: AppConfig.grey600, size: 50),
                       ),
@@ -345,7 +346,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
                 Expanded(
                   child: _buildStatCard(
                     'Total Value',
-                    '\$${(_card!.sellPriceAsDouble * _card!.quantity).toStringAsFixed(2)}',
+                    '₹${(_card!.sellPriceAsDouble * _card!.quantity).toStringAsFixed(2)}',
                     Icons.attach_money,
                     AppConfig.primaryColor,
                   ),
@@ -357,7 +358,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
               children: [
                 Expanded(child: _buildStatCard('Available', '${_card!.quantity}', Icons.inventory, AppConfig.warningColor)),
                 SizedBox(width: AppConfig.defaultPadding),
-                Expanded(child: _buildStatCard('Max Discount', '${_card!.maxDiscount}%', Icons.discount, AppConfig.primaryColor)),
+                Expanded(child: _buildStatCard('Max Discount', '₹${_card!.maxDiscount}', Icons.discount, AppConfig.primaryColor)),
               ],
             ),
           ],

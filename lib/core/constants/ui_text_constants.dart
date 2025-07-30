@@ -49,7 +49,7 @@ class UITextConstants {
   static const String costPrice = 'Cost Price';
   static const String sellPrice = 'Sell Price';
   static const String quantity = 'Quantity';
-  static const String maxDiscount = 'Max Discount (%)';
+  static const String maxDiscount = 'Max Discount (₹)';
   static const String selectVendor = 'Select Vendor';
   static const String cardImage = 'Card Image';
   static const String cardDetails = 'Card Details';

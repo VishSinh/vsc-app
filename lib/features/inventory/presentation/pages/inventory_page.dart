@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/utils/responsive_layout.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
+import 'package:vsc_app/core/utils/responsive_utils.dart';
+
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/core/widgets/shimmer_widgets.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
@@ -24,7 +26,7 @@ class InventoryPage extends StatefulWidget {
 
 class _InventoryPageState extends State<InventoryPage> {
   int _selectedIndex = 2; // Inventory tab
-  String _searchQuery = '';
+  final String _searchQuery = '';
   bool _showCardsList = false;
   bool _isLoading = true;
   final TextEditingController _searchController = TextEditingController();
@@ -234,8 +236,8 @@ class _InventoryPageState extends State<InventoryPage> {
 
         return LayoutBuilder(
           builder: (context, constraints) {
-            final crossAxisCount = constraints.maxWidth < AppConfig.mobileBreakpoint ? 2 : 3;
-            final childAspectRatio = constraints.maxWidth < AppConfig.mobileBreakpoint ? 1.2 : 0.8;
+            final crossAxisCount = context.gridCrossAxisCount;
+            final childAspectRatio = context.gridChildAspectRatio;
 
             return GridView.builder(
               shrinkWrap: true,
@@ -301,7 +303,7 @@ class _InventoryPageState extends State<InventoryPage> {
                   children: [
                     Text(card.barcode, style: ResponsiveText.getTitle(context), maxLines: 1, overflow: TextOverflow.ellipsis),
                     SizedBox(height: AppConfig.smallPadding),
-                    Text('Price: \$${card.sellPrice}', style: ResponsiveText.getBody(context)),
+                    Text('Price: ₹${card.sellPrice}', style: ResponsiveText.getBody(context)),
                     Text('Stock: ${card.quantity}', style: ResponsiveText.getBody(context)),
                     Row(
                       children: [

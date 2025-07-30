@@ -4,8 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/enums/user_role.dart';
 import 'package:vsc_app/core/utils/responsive_layout.dart';
+import 'package:vsc_app/core/utils/responsive_utils.dart';
+
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:vsc_app/core/utils/responsive_text.dart';
 
 class AdministrationPage extends StatefulWidget {
   const AdministrationPage({super.key});
@@ -207,8 +210,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   }
 
   Widget _buildStaffList() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    return screenWidth < AppConfig.mobileBreakpoint ? _buildMobileStaffList() : _buildDesktopStaffTable();
+    return context.isMobile ? _buildMobileStaffList() : _buildDesktopStaffTable();
   }
 
   Widget _buildMobileStaffList() {
@@ -219,10 +221,14 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
         return Card(
           margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
           child: ListTile(
-            title: Text(staff['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(staff['name'], style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.bold)),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [Text(staff['email']), Text('Role: ${staff['role'].value}'), Text('Last login: ${staff['lastLogin']}')],
+              children: [
+                Text(staff['email'], style: ResponsiveText.getBody(context)),
+                Text('Role: ${staff['role'].value}', style: ResponsiveText.getCaption(context)),
+                Text('Last login: ${staff['lastLogin']}', style: ResponsiveText.getCaption(context)),
+              ],
             ),
             trailing: Chip(
               label: Text(staff['status']),
@@ -251,10 +257,10 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
         rows: _filteredStaff.map((staff) {
           return DataRow(
             cells: [
-              DataCell(Text(staff['id'])),
-              DataCell(Text(staff['name'])),
-              DataCell(Text(staff['email'])),
-              DataCell(Text(staff['role'].value)),
+              DataCell(Text(staff['id'], style: ResponsiveText.getBody(context))),
+              DataCell(Text(staff['name'], style: ResponsiveText.getBody(context))),
+              DataCell(Text(staff['email'], style: ResponsiveText.getBody(context))),
+              DataCell(Text(staff['role'].value, style: ResponsiveText.getBody(context))),
               DataCell(
                 Chip(
                   label: Text(staff['status']),
@@ -262,7 +268,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   labelStyle: TextStyle(color: staff['status'] == 'Active' ? AppConfig.successColor : AppConfig.errorColor),
                 ),
               ),
-              DataCell(Text(staff['lastLogin'])),
+              DataCell(Text(staff['lastLogin'], style: ResponsiveText.getBody(context))),
               DataCell(
                 Row(
                   mainAxisSize: MainAxisSize.min,
@@ -290,8 +296,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   }
 
   Widget _buildPartnersList() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    return screenWidth < AppConfig.mobileBreakpoint ? _buildMobilePartnersList() : _buildDesktopPartnersTable();
+    return context.isMobile ? _buildMobilePartnersList() : _buildDesktopPartnersTable();
   }
 
   Widget _buildMobilePartnersList() {
@@ -373,8 +378,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   }
 
   Widget _buildAuditLogsList() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    return screenWidth < AppConfig.mobileBreakpoint ? _buildMobileAuditLogsList() : _buildDesktopAuditLogsTable();
+    return context.isMobile ? _buildMobileAuditLogsList() : _buildDesktopAuditLogsTable();
   }
 
   Widget _buildMobileAuditLogsList() {

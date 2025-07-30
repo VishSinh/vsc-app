@@ -7,6 +7,7 @@ import 'package:vsc_app/core/constants/app_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/models/vendor_model.dart';
 import 'package:vsc_app/core/utils/responsive_layout.dart';
+import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/core/widgets/shimmer_widgets.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
@@ -52,7 +53,7 @@ class _VendorsPageState extends State<VendorsPage> {
 
   Widget _buildVendorsContent() {
     return Padding(
-      padding: EdgeInsets.all(AppConfig.defaultPadding),
+      padding: context.responsivePadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -93,7 +94,7 @@ class _VendorsPageState extends State<VendorsPage> {
               });
             },
           ),
-          SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: context.responsiveSpacing),
 
           // Vendors List
           Expanded(

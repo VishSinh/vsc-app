@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AppConfig {
   // App Information
@@ -19,29 +18,29 @@ class AppConfig {
   static const double tabletBreakpoint = 900;
   static const double desktopBreakpoint = 1200;
 
-  // Spacing (now using ScreenUtil)
-  static double get defaultPadding => 20.w;
-  static double get smallPadding => 12.w;
-  static double get largePadding => 32.w;
+  // Spacing
+  static const double defaultPadding = 20.0;
+  static const double smallPadding = 12.0;
+  static const double largePadding = 32.0;
 
-  // Border radius (now using ScreenUtil)
-  static double get defaultRadius => 8.r;
-  static double get smallRadius => 4.r;
-  static double get largeRadius => 12.r;
+  // Border radius
+  static const double defaultRadius = 8.0;
+  static const double smallRadius = 4.0;
+  static const double largeRadius = 12.0;
 
   // Typography
   static const String fontFamily = 'Roboto';
 
-  // Font Sizes (now using ScreenUtil)
-  static double get fontSizeXs => 12.sp;
-  static double get fontSizeSm => 14.sp;
-  static double get fontSizeMd => 16.sp;
-  static double get fontSizeLg => 18.sp;
-  static double get fontSizeXl => 20.sp;
-  static double get fontSize2xl => 24.sp;
-  static double get fontSize3xl => 28.sp;
-  static double get fontSize4xl => 32.sp;
-  static double get fontSize5xl => 36.sp;
+  // Font Sizes
+  static const double fontSizeXs = 12.0;
+  static const double fontSizeSm = 14.0;
+  static const double fontSizeMd = 16.0;
+  static const double fontSizeLg = 18.0;
+  static const double fontSizeXl = 20.0;
+  static const double fontSize2xl = 24.0;
+  static const double fontSize3xl = 28.0;
+  static const double fontSize4xl = 32.0;
+  static const double fontSize5xl = 36.0;
 
   // Font Weights
   static const FontWeight fontWeightLight = FontWeight.w300;

@@ -1,9 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:io';
 
 /// Application constants and configuration values
 class AppConstants {
   // API Configuration
-  static const String apiBaseUrl = 'http://localhost:8000/api/v1';
+  // Dynamically determine the correct API base URL based on platform
+  static String get apiBaseUrl {
+    if (kIsWeb) {
+      // For web, use localhost
+      return 'http://localhost:8000/api/v1';
+    } else if (Platform.isAndroid) {
+      // For Android emulator, use 10.0.2.2 to reach host machine's localhost
+      return 'http://10.0.2.2:8000/api/v1';
+    } else {
+      // For iOS simulator and other platforms, use localhost
+      return 'http://localhost:8000/api/v1';
+    }
+  }
+
   static const String apiVersion = 'v1';
 
   // Storage Keys

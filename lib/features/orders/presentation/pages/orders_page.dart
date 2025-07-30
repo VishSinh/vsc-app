@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/utils/responsive_layout.dart';
+import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
+import 'package:vsc_app/core/utils/responsive_text.dart';
 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
@@ -79,23 +81,23 @@ class _OrdersPageState extends State<OrdersPage> {
 
   Widget _buildOrdersContent() {
     return Padding(
-      padding: EdgeInsets.all(AppConfig.defaultPadding),
+      padding: context.responsivePadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
           Row(
             children: [
-              Text('Orders', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
+              Text('Orders', style: ResponsiveText.getTitle(context)),
               const Spacer(),
-              Text('${_filteredOrders.length} orders', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppConfig.grey600)),
+              Text('${_filteredOrders.length} orders', style: ResponsiveText.getCaption(context).copyWith(color: AppConfig.grey600)),
             ],
           ),
-          SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: context.responsiveSpacing),
 
           // Filters
           _buildFilters(),
-          SizedBox(height: AppConfig.defaultPadding),
+          SizedBox(height: context.responsiveSpacing),
 
           // Orders List
           Expanded(child: _buildOrdersList()),
@@ -147,9 +149,7 @@ class _OrdersPageState extends State<OrdersPage> {
   }
 
   Widget _buildOrdersList() {
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    if (screenWidth < AppConfig.mobileBreakpoint) {
+    if (context.isMobile) {
       return _buildMobileList();
     } else {
       return _buildDesktopTable();
@@ -164,10 +164,13 @@ class _OrdersPageState extends State<OrdersPage> {
         return Card(
           margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
           child: ListTile(
-            title: Text(order['id'], style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(order['id'], style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.bold)),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [Text(order['customer']), Text('${order['items']} items • \$${order['total'].toStringAsFixed(2)}')],
+              children: [
+                Text(order['customer'], style: ResponsiveText.getBody(context)),
+                Text('${order['items']} items • ₹${order['total'].toStringAsFixed(2)}', style: ResponsiveText.getCaption(context)),
+              ],
             ),
             trailing: Chip(
               label: Text(order['status']),
@@ -199,9 +202,9 @@ class _OrdersPageState extends State<OrdersPage> {
         rows: _filteredOrders.map((order) {
           return DataRow(
             cells: [
-              DataCell(Text(order['id'])),
-              DataCell(Text(order['customer'])),
-              DataCell(Text(order['date'])),
+              DataCell(Text(order['id'], style: ResponsiveText.getBody(context))),
+              DataCell(Text(order['customer'], style: ResponsiveText.getBody(context))),
+              DataCell(Text(order['date'], style: ResponsiveText.getBody(context))),
               DataCell(
                 Chip(
                   label: Text(order['status']),
@@ -209,8 +212,8 @@ class _OrdersPageState extends State<OrdersPage> {
                   labelStyle: TextStyle(color: _getStatusColor(order['status'])),
                 ),
               ),
-              DataCell(Text(order['items'].toString())),
-              DataCell(Text('\$${order['total'].toStringAsFixed(2)}')),
+              DataCell(Text(order['items'].toString(), style: ResponsiveText.getBody(context))),
+              DataCell(Text('₹${order['total'].toStringAsFixed(2)}', style: ResponsiveText.getBody(context))),
               DataCell(
                 Row(
                   mainAxisSize: MainAxisSize.min,

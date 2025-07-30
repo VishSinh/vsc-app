@@ -7,6 +7,7 @@ import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart'
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
+import 'package:vsc_app/core/utils/responsive_utils.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -54,13 +55,13 @@ class _LoginPageState extends State<LoginPage> {
         ),
         child: Center(
           child: SingleChildScrollView(
-            padding: EdgeInsets.all(AppConfig.largePadding),
+            padding: context.responsivePadding,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: AppConfig.maxWidthSmall),
+              constraints: BoxConstraints(maxWidth: context.formWidth),
               child: Card(
                 elevation: AppConfig.elevationHigh,
                 child: Padding(
-                  padding: EdgeInsets.all(AppConfig.largePadding),
+                  padding: context.responsivePadding,
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -69,10 +70,22 @@ class _LoginPageState extends State<LoginPage> {
                         // App Logo/Title
                         Icon(Icons.inventory, size: AppConfig.iconSizeXXLarge, color: AppConfig.primaryColor),
                         SizedBox(height: AppConfig.defaultPadding),
-                        Text(AppConfig.appName, style: ResponsiveText.getHeadline(context).copyWith(color: AppConfig.primaryColor)),
+                        Text(
+                          AppConfig.appName,
+                          style: ResponsiveText.getResponsiveTextForScreen(
+                            context,
+                            mobileSize: 24.0,
+                            tabletSize: 28.0,
+                            desktopSize: 32.0,
+                            weight: AppConfig.fontWeightBold,
+                          ).copyWith(color: AppConfig.primaryColor),
+                          textAlign: TextAlign.center,
+                          softWrap: true,
+                          overflow: TextOverflow.visible,
+                        ),
                         SizedBox(height: AppConfig.smallPadding),
                         Text(UITextConstants.signInTitle, style: ResponsiveText.getSubtitle(context).copyWith(color: AppConfig.grey600)),
-                        SizedBox(height: AppConfig.largePadding),
+                        SizedBox(height: context.responsiveSpacing),
 
                         // Phone Field
                         TextFormField(

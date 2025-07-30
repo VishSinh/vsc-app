@@ -34,24 +34,40 @@ class VSCApp extends StatelessWidget {
           update: (context, permissionProvider, previous) => previous ?? AuthProvider(permissionProvider: permissionProvider),
         ),
       ],
-      child: AuthInitializer(
-        child: ScreenUtilInit(
-          designSize: const Size(1080, 2160), // iPhone X design size for better mobile scaling
-          minTextAdapt: true,
-          splitScreenMode: true,
-          builder: (context, child) {
-            return MaterialApp.router(
-              title: AppConfig.appName,
-              theme: AppTheme.lightTheme,
-              darkTheme: AppTheme.darkTheme,
-              themeMode: ThemeMode.system,
-              routerConfig: AppRouter.router,
-              debugShowCheckedModeBanner: false,
-            );
-          },
-        ),
-      ),
+      child: AuthInitializer(child: _buildApp()),
     );
+  }
+
+  Widget _buildApp() {
+    // Toggle this to enable/disable ScreenUtil
+    const bool useScreenUtil = true; // Set to true to enable ScreenUtil
+
+    if (useScreenUtil) {
+      return ScreenUtilInit(
+        designSize: const Size(375, 812), // iPhone X design size
+        minTextAdapt: true,
+        splitScreenMode: true,
+        builder: (context, child) {
+          return MaterialApp.router(
+            title: AppConfig.appName,
+            theme: AppTheme.darkTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: ThemeMode.dark,
+            routerConfig: AppRouter.router,
+            debugShowCheckedModeBanner: false,
+          );
+        },
+      );
+    } else {
+      return MaterialApp.router(
+        title: AppConfig.appName,
+        theme: AppTheme.darkTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.dark,
+        routerConfig: AppRouter.router,
+        debugShowCheckedModeBanner: false,
+      );
+    }
   }
 }
 

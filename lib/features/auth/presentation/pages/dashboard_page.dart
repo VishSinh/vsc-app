@@ -13,6 +13,7 @@ import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/constants/snackbar_constants.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
+import 'package:vsc_app/core/utils/responsive_utils.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -384,22 +385,15 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   int _getGridCrossAxisCount() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    if (screenWidth < AppConfig.mobileBreakpoint) {
-      return 1;
-    } else if (screenWidth < AppConfig.tabletBreakpoint) {
-      return 2;
-    } else {
-      return 3;
-    }
+    return context.gridCrossAxisCount;
   }
 
   Widget _buildShimmerSkeleton() {
     return GridView.count(
-      crossAxisCount: _getGridCrossAxisCount(),
+      crossAxisCount: context.gridCrossAxisCount,
       crossAxisSpacing: AppConfig.defaultPadding,
       mainAxisSpacing: AppConfig.defaultPadding,
-      childAspectRatio: 1.5,
+      childAspectRatio: context.gridChildAspectRatio,
       children: List.generate(6, (index) {
         return const ShimmerWrapper(child: StatsCardSkeleton());
       }),

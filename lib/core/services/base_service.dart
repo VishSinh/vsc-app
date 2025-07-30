@@ -7,7 +7,8 @@ import 'package:vsc_app/app/app_config.dart';
 
 /// Base service class that provides common functionality for all API services
 abstract class BaseService {
-  static const String _baseUrl = 'http://127.0.0.1:8000/api/v1';
+  // Use the dynamic API base URL from AppConstants
+  static String get _baseUrl => AppConstants.apiBaseUrl;
 
   late final Dio _dio;
   final FlutterSecureStorage _secureStorage;

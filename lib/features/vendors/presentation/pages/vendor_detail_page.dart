@@ -256,7 +256,7 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
               children: [
                 Expanded(child: _buildStatCard('Total Orders', '0', Icons.shopping_cart, AppConfig.primaryColor)),
                 SizedBox(width: AppConfig.defaultPadding),
-                Expanded(child: _buildStatCard('Total Revenue', '\$0', Icons.attach_money, AppConfig.successColor)),
+                Expanded(child: _buildStatCard('Total Revenue', '₹0', Icons.attach_money, AppConfig.successColor)),
               ],
             ),
             SizedBox(height: AppConfig.defaultPadding),

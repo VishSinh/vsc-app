@@ -51,77 +51,86 @@ class _CreateCardPageState extends State<CreateCardPage> {
       ),
       body: Consumer<CardProvider>(
         builder: (context, cardProvider, child) {
-          return SingleChildScrollView(
-            padding: EdgeInsets.all(AppConfig.largePadding),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: AppConfig.maxWidthXLarge),
-              child: Card(
-                elevation: 4,
-                child: Padding(
-                  padding: EdgeInsets.all(AppConfig.largePadding),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(UITextConstants.createCardTitle, style: AppConfig.headlineStyle.copyWith(color: AppConfig.primaryColor)),
-                        SizedBox(height: AppConfig.smallPadding),
-                        Text(UITextConstants.createCardSubtitle, style: AppConfig.subtitleStyle),
-                        SizedBox(height: AppConfig.largePadding),
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final screenWidth = constraints.maxWidth;
+              final isDesktop = screenWidth > AppConfig.desktopBreakpoint;
+              final isTablet = screenWidth > AppConfig.tabletBreakpoint && screenWidth <= AppConfig.desktopBreakpoint;
 
-                        // Content Layout
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            // Use row layout for larger screens (width > 800)
-                            if (constraints.maxWidth > AppConfig.maxWidthLarge) {
-                              return Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Image section on the left
-                                  Expanded(flex: 1, child: _buildImageSection(cardProvider)),
-                                  SizedBox(width: AppConfig.largePadding),
-                                  // Form section on the right
-                                  Expanded(
-                                    flex: 1,
-                                    child: Column(
-                                      children: [
-                                        _buildFormFields(),
-                                        SizedBox(height: AppConfig.largePadding),
-                                        _buildSubmitButton(cardProvider),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              );
-                            } else {
-                              // Use column layout for smaller screens
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  // Image Upload Section
-                                  _buildImageSection(cardProvider),
-                                  SizedBox(height: AppConfig.largePadding),
+              return SingleChildScrollView(
+                padding: EdgeInsets.all(isDesktop ? AppConfig.largePadding * 1.5 : AppConfig.largePadding),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: isDesktop ? AppConfig.maxWidthXLarge : double.infinity),
+                    child: Card(
+                      elevation: 4,
+                      child: Padding(
+                        padding: EdgeInsets.all(isDesktop ? AppConfig.largePadding * 1.5 : AppConfig.largePadding),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Header Section
+                              _buildHeaderSection(),
+                              SizedBox(height: AppConfig.largePadding),
 
-                                  // Form Fields
-                                  _buildFormFields(),
-                                  SizedBox(height: AppConfig.largePadding),
-
-                                  // Submit Button
-                                  _buildSubmitButton(cardProvider),
-                                ],
-                              );
-                            }
-                          },
+                              // Content Layout
+                              if (isDesktop) ...[
+                                // Desktop: Side-by-side layout
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(flex: 1, child: _buildImageSection(cardProvider)),
+                                    SizedBox(width: AppConfig.largePadding * 1.5),
+                                    Expanded(flex: 1, child: _buildFormSection(cardProvider)),
+                                  ],
+                                ),
+                              ] else if (isTablet) ...[
+                                // Tablet: Stacked with some responsive adjustments
+                                _buildImageSection(cardProvider),
+                                SizedBox(height: AppConfig.largePadding),
+                                _buildFormSection(cardProvider),
+                              ] else ...[
+                                // Mobile: Fully stacked
+                                _buildImageSection(cardProvider),
+                                SizedBox(height: AppConfig.largePadding),
+                                _buildFormSection(cardProvider),
+                              ],
+                            ],
+                          ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           );
         },
       ),
+    );
+  }
+
+  Widget _buildHeaderSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(UITextConstants.createCardTitle, style: AppConfig.headlineStyle.copyWith(color: AppConfig.primaryColor)),
+        SizedBox(height: AppConfig.smallPadding),
+        Text(UITextConstants.createCardSubtitle, style: AppConfig.subtitleStyle),
+      ],
+    );
+  }
+
+  Widget _buildFormSection(CardProvider cardProvider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildFormFields(),
+        SizedBox(height: AppConfig.largePadding),
+        _buildSubmitButton(cardProvider),
+      ],
     );
   }
 

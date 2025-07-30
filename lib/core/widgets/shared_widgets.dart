@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
+import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 
@@ -118,6 +119,9 @@ class SearchField extends StatelessWidget {
               )
             : null,
         border: const OutlineInputBorder(),
+        contentPadding: context.isMobile
+            ? EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding, vertical: AppConfig.smallPadding)
+            : EdgeInsets.all(AppConfig.defaultPadding),
       ),
       onChanged: onChanged,
     );
@@ -148,8 +152,14 @@ class ActionButton extends StatelessWidget {
     return ElevatedButton.icon(
       onPressed: isLoading ? null : onPressed,
       icon: isLoading ? SpinKitDoubleBounce(color: foregroundColor ?? AppConfig.primaryColor, size: AppConfig.loadingIndicatorSize) : Icon(icon),
-      label: Text(label),
-      style: ElevatedButton.styleFrom(backgroundColor: backgroundColor, foregroundColor: foregroundColor),
+      label: Text(label, style: ResponsiveText.getButton(context)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
+        padding: context.isMobile
+            ? EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding, vertical: AppConfig.smallPadding)
+            : EdgeInsets.symmetric(horizontal: AppConfig.largePadding, vertical: AppConfig.defaultPadding),
+      ),
     );
   }
 }
@@ -181,7 +191,7 @@ class PageHeader extends StatelessWidget {
             if (actions != null) ...[SizedBox(width: AppConfig.defaultPadding), ...actions!],
           ],
         ),
-        SizedBox(height: AppConfig.largePadding),
+        SizedBox(height: context.responsiveSpacing),
       ],
     );
   }
@@ -202,7 +212,16 @@ class ListItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: margin ?? EdgeInsets.only(bottom: AppConfig.defaultPadding),
-      child: ListTile(leading: leading, title: title, subtitle: subtitle, trailing: trailing, onTap: onTap),
+      child: ListTile(
+        leading: leading,
+        title: title,
+        subtitle: subtitle,
+        trailing: trailing,
+        onTap: onTap,
+        contentPadding: context.isMobile
+            ? EdgeInsets.symmetric(horizontal: AppConfig.smallPadding, vertical: AppConfig.smallPadding)
+            : EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding, vertical: AppConfig.defaultPadding),
+      ),
     );
   }
 }

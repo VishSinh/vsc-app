@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/enums/job_status.dart';
 import 'package:vsc_app/core/utils/responsive_layout.dart';
+import 'package:vsc_app/core/utils/responsive_utils.dart';
+import 'package:vsc_app/core/utils/responsive_text.dart';
 
 class ProductionPage extends StatefulWidget {
   const ProductionPage({super.key});
@@ -196,8 +198,7 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
   }
 
   Widget _buildJobsList(List<Map<String, dynamic>> jobs, String type) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    return screenWidth < AppConfig.mobileBreakpoint ? _buildMobileJobsList(jobs, type) : _buildDesktopJobsTable(jobs, type);
+    return context.isMobile ? _buildMobileJobsList(jobs, type) : _buildDesktopJobsTable(jobs, type);
   }
 
   Widget _buildMobileJobsList(List<Map<String, dynamic>> jobs, String type) {
@@ -208,13 +209,13 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
         return Card(
           margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
           child: ListTile(
-            title: Text(job['id'], style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(job['id'], style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.bold)),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${job['customer']} • ${job['type']}'),
-                Text('Qty: ${job['quantity']} • Due: ${job['dueDate']}'),
-                if (job['assignedTo'] != null) Text('Assigned to: ${job['assignedTo']}'),
+                Text('${job['customer']} • ${job['type']}', style: ResponsiveText.getBody(context)),
+                Text('Qty: ${job['quantity']} • Due: ${job['dueDate']}', style: ResponsiveText.getCaption(context)),
+                if (job['assignedTo'] != null) Text('Assigned to: ${job['assignedTo']}', style: ResponsiveText.getCaption(context)),
               ],
             ),
             trailing: Column(
@@ -258,11 +259,11 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
         rows: jobs.map((job) {
           return DataRow(
             cells: [
-              DataCell(Text(job['id'])),
-              DataCell(Text(job['orderId'])),
-              DataCell(Text(job['customer'])),
-              DataCell(Text(job['type'])),
-              DataCell(Text(job['quantity'].toString())),
+              DataCell(Text(job['id'], style: ResponsiveText.getBody(context))),
+              DataCell(Text(job['orderId'], style: ResponsiveText.getBody(context))),
+              DataCell(Text(job['customer'], style: ResponsiveText.getBody(context))),
+              DataCell(Text(job['type'], style: ResponsiveText.getBody(context))),
+              DataCell(Text(job['quantity'].toString(), style: ResponsiveText.getBody(context))),
               DataCell(
                 Chip(
                   label: Text(job['status'].value),
@@ -270,8 +271,8 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
                   labelStyle: TextStyle(color: _getStatusColor(job['status'])),
                 ),
               ),
-              DataCell(Text(job['assignedTo'] ?? 'Unassigned')),
-              DataCell(Text(job['dueDate'])),
+              DataCell(Text(job['assignedTo'] ?? 'Unassigned', style: ResponsiveText.getBody(context))),
+              DataCell(Text(job['dueDate'], style: ResponsiveText.getBody(context))),
               DataCell(
                 Row(
                   mainAxisSize: MainAxisSize.min,
