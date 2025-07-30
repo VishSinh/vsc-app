@@ -10,7 +10,6 @@ class RouteConstants {
   static const String administration = '/administration';
   static const String vendors = '/vendors';
   static const String vendorDetail = '/vendors/:id';
-  static const String cards = '/cards';
   static const String cardDetail = '/cards/:id';
   static const String createCard = '/cards/create';
   static const String similarCards = '/cards/similar';
@@ -29,7 +28,7 @@ class RouteConstants {
   static const String administrationRouteName = 'administration';
   static const String vendorsRouteName = 'vendors';
   static const String vendorDetailRouteName = 'vendor-detail';
-  static const String cardsRouteName = 'cards';
+
   static const String cardDetailRouteName = 'card-detail';
   static const String createCardRouteName = 'create-card';
   static const String customerSearchRouteName = 'customer-search';
@@ -47,7 +46,7 @@ class RouteConstants {
     administration,
     vendors,
     vendorDetail,
-    cards,
+
     cardDetail,
     createCard,
     customerSearch,

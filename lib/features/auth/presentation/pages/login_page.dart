@@ -6,6 +6,7 @@ import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
+import 'package:vsc_app/core/utils/responsive_text.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -53,13 +54,13 @@ class _LoginPageState extends State<LoginPage> {
         ),
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppConfig.largePadding),
+            padding: EdgeInsets.all(AppConfig.largePadding),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: AppConfig.maxWidthSmall),
+              constraints: BoxConstraints(maxWidth: AppConfig.maxWidthSmall),
               child: Card(
                 elevation: AppConfig.elevationHigh,
                 child: Padding(
-                  padding: const EdgeInsets.all(AppConfig.largePadding),
+                  padding: EdgeInsets.all(AppConfig.largePadding),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -67,14 +68,11 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         // App Logo/Title
                         Icon(Icons.inventory, size: AppConfig.iconSizeXXLarge, color: AppConfig.primaryColor),
-                        const SizedBox(height: AppConfig.defaultPadding),
-                        Text(
-                          AppConfig.appName,
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: AppConfig.primaryColor),
-                        ),
-                        const SizedBox(height: AppConfig.smallPadding),
-                        Text(UITextConstants.signInTitle, style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppConfig.grey600)),
-                        const SizedBox(height: AppConfig.largePadding),
+                        SizedBox(height: AppConfig.defaultPadding),
+                        Text(AppConfig.appName, style: ResponsiveText.getHeadline(context).copyWith(color: AppConfig.primaryColor)),
+                        SizedBox(height: AppConfig.smallPadding),
+                        Text(UITextConstants.signInTitle, style: ResponsiveText.getSubtitle(context).copyWith(color: AppConfig.grey600)),
+                        SizedBox(height: AppConfig.largePadding),
 
                         // Phone Field
                         TextFormField(
@@ -95,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: AppConfig.defaultPadding),
+                        SizedBox(height: AppConfig.defaultPadding),
 
                         // Password Field
                         TextFormField(
@@ -123,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: AppConfig.largePadding),
+                        SizedBox(height: AppConfig.largePadding),
 
                         // Error Message
                         Consumer<AuthProvider>(
@@ -131,8 +129,8 @@ class _LoginPageState extends State<LoginPage> {
                             if (authProvider.errorMessage != null) {
                               return Container(
                                 width: double.infinity,
-                                padding: const EdgeInsets.all(AppConfig.smallPadding),
-                                margin: const EdgeInsets.only(bottom: AppConfig.defaultPadding),
+                                padding: EdgeInsets.all(AppConfig.smallPadding),
+                                margin: EdgeInsets.only(bottom: AppConfig.defaultPadding),
                                 decoration: BoxDecoration(
                                   color: AppConfig.errorColor.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(AppConfig.smallRadius),

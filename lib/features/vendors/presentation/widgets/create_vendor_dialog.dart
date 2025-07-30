@@ -86,7 +86,7 @@ class _CreateVendorDialogState extends State<CreateVendorDialog> {
                 return null;
               },
             ),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
             TextFormField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,

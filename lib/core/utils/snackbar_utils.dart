@@ -11,9 +11,9 @@ class SnackbarUtils {
     if (screenWidth > AppConfig.tabletBreakpoint) {
       // For DESKTOP and TABLET: bottom-right alignment
       // Calculate position to push snackbar to bottom-right
-      const double snackbarWidth = AppConfig.snackbarMaxWidth;
-      const double rightMargin = AppConfig.snackbarRightMargin;
-      const double bottomMargin = AppConfig.snackbarBottomMargin;
+      double snackbarWidth = AppConfig.snackbarMaxWidth;
+      double rightMargin = AppConfig.snackbarRightMargin;
+      double bottomMargin = AppConfig.snackbarBottomMargin;
       final double leftMargin = screenWidth - snackbarWidth - rightMargin;
 
       return EdgeInsets.only(left: leftMargin > 0 ? leftMargin : 0, right: rightMargin, bottom: bottomMargin);
@@ -32,7 +32,7 @@ class SnackbarUtils {
   static BoxConstraints? _getSnackBarConstraints(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     if (screenWidth > AppConfig.tabletBreakpoint) {
-      return const BoxConstraints(maxWidth: AppConfig.snackbarMaxWidth);
+      return BoxConstraints(maxWidth: AppConfig.snackbarMaxWidth);
     }
     return null;
   }
@@ -84,7 +84,7 @@ class SnackbarUtils {
         child: Row(
           children: [
             Icon(iconData, color: iconColor, size: AppConfig.snackbarIconSize),
-            const SizedBox(width: AppConfig.snackbarIconSpacing),
+            SizedBox(width: AppConfig.snackbarIconSpacing),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

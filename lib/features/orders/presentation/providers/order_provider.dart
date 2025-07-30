@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:vsc_app/core/models/api_response.dart';
 import 'package:vsc_app/core/models/card_model.dart' as card_model;
 import 'package:vsc_app/core/models/customer_model.dart';
 import 'package:vsc_app/core/models/order_model.dart';

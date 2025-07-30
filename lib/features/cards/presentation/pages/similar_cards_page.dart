@@ -3,9 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
-import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/models/card_model.dart' as card_model;
-import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
 
 class SimilarCardsPage extends StatefulWidget {
@@ -51,7 +49,7 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Successfully purchased $quantity units of ${card.barcode}'), backgroundColor: AppConfig.successColor),
           );
-          context.go(RouteConstants.cards);
+          context.go(RouteConstants.inventory);
         }
       }
     }
@@ -62,15 +60,15 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
     return showDialog<int>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Purchase Quantity'),
+        title: Text('Purchase Quantity'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Enter the quantity to purchase:'),
-            const SizedBox(height: AppConfig.defaultPadding),
+            Text('Enter the quantity to purchase:'),
+            SizedBox(height: AppConfig.defaultPadding),
             TextField(
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Quantity', border: OutlineInputBorder()),
+              decoration: InputDecoration(labelText: 'Quantity', border: OutlineInputBorder()),
               onChanged: (value) {
                 quantity = int.tryParse(value) ?? 1;
               },
@@ -78,8 +76,8 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
-          ElevatedButton(onPressed: () => Navigator.of(context).pop(quantity), child: const Text('Purchase')),
+          TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('Cancel')),
+          ElevatedButton(onPressed: () => Navigator.of(context).pop(quantity), child: Text('Purchase')),
         ],
       ),
     );
@@ -89,31 +87,31 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Similar Cards'),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.createCard)),
+        title: Text('Similar Cards'),
+        leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.createCard)),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : _similarCards.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.search_off, size: AppConfig.iconSizeLarge, color: AppConfig.grey400),
-                  const SizedBox(height: AppConfig.defaultPadding),
+                  SizedBox(height: AppConfig.defaultPadding),
                   Text('No similar cards found', style: AppConfig.headlineStyle.copyWith(color: AppConfig.grey400)),
                 ],
               ),
             )
           : Padding(
-              padding: const EdgeInsets.all(AppConfig.defaultPadding),
+              padding: EdgeInsets.all(AppConfig.defaultPadding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Similar Cards Found', style: AppConfig.headlineStyle),
-                  const SizedBox(height: AppConfig.defaultPadding),
+                  SizedBox(height: AppConfig.defaultPadding),
                   Text('${_similarCards.length} similar cards found. Select one to purchase stock:', style: AppConfig.bodyStyle),
-                  const SizedBox(height: AppConfig.largePadding),
+                  SizedBox(height: AppConfig.largePadding),
                   Expanded(
                     child: ListView.builder(
                       itemCount: _similarCards.length,
@@ -131,7 +129,7 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
 
   Widget _buildSimilarCardItem(card_model.Card card) {
     return Card(
-      margin: const EdgeInsets.only(bottom: AppConfig.defaultPadding),
+      margin: EdgeInsets.only(bottom: AppConfig.defaultPadding),
       child: ListTile(
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(AppConfig.smallRadius),
@@ -158,7 +156,7 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
             Text('Status: ${card.isActive ? 'Active' : 'Inactive'}'),
           ],
         ),
-        trailing: ElevatedButton(onPressed: () => _purchaseCard(card), child: const Text('Purchase')),
+        trailing: ElevatedButton(onPressed: () => _purchaseCard(card), child: Text('Purchase')),
       ),
     );
   }

@@ -10,7 +10,7 @@ class CardSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -20,14 +20,14 @@ class CardSkeleton extends StatelessWidget {
               height: 120,
               decoration: BoxDecoration(color: AppConfig.shimmerBaseColor, borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
             ),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
             // Title skeleton
             Container(
               width: double.infinity,
               height: 16,
               decoration: BoxDecoration(color: AppConfig.shimmerBaseColor, borderRadius: BorderRadius.circular(AppConfig.smallRadius)),
             ),
-            const SizedBox(height: AppConfig.smallPadding),
+            SizedBox(height: AppConfig.smallPadding),
             // Subtitle skeleton
             Container(
               width: 200,
@@ -81,7 +81,7 @@ class TableRowSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: AppConfig.smallPadding),
+      padding: EdgeInsets.symmetric(vertical: AppConfig.smallPadding),
       child: Row(
         children: [
           Expanded(
@@ -91,7 +91,7 @@ class TableRowSkeleton extends StatelessWidget {
               decoration: BoxDecoration(color: AppConfig.shimmerBaseColor, borderRadius: BorderRadius.circular(AppConfig.smallRadius)),
             ),
           ),
-          const SizedBox(width: AppConfig.defaultPadding),
+          SizedBox(width: AppConfig.defaultPadding),
           Expanded(
             flex: 1,
             child: Container(
@@ -99,7 +99,7 @@ class TableRowSkeleton extends StatelessWidget {
               decoration: BoxDecoration(color: AppConfig.shimmerBaseColor, borderRadius: BorderRadius.circular(AppConfig.smallRadius)),
             ),
           ),
-          const SizedBox(width: AppConfig.defaultPadding),
+          SizedBox(width: AppConfig.defaultPadding),
           Expanded(
             flex: 1,
             child: Container(
@@ -107,7 +107,7 @@ class TableRowSkeleton extends StatelessWidget {
               decoration: BoxDecoration(color: AppConfig.shimmerBaseColor, borderRadius: BorderRadius.circular(AppConfig.smallRadius)),
             ),
           ),
-          const SizedBox(width: AppConfig.defaultPadding),
+          SizedBox(width: AppConfig.defaultPadding),
           Expanded(
             flex: 1,
             child: Container(
@@ -129,7 +129,7 @@ class StatsCardSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -154,13 +154,13 @@ class StatsCardSkeleton extends StatelessWidget {
               height: 24,
               decoration: BoxDecoration(color: AppConfig.shimmerBaseColor, borderRadius: BorderRadius.circular(AppConfig.smallRadius)),
             ),
-            const SizedBox(height: AppConfig.smallPadding),
+            SizedBox(height: AppConfig.smallPadding),
             Container(
               width: 100,
               height: 16,
               decoration: BoxDecoration(color: AppConfig.shimmerBaseColor, borderRadius: BorderRadius.circular(AppConfig.smallRadius)),
             ),
-            const SizedBox(height: AppConfig.smallPadding),
+            SizedBox(height: AppConfig.smallPadding),
             Container(
               width: 150,
               height: 12,
@@ -202,7 +202,7 @@ class FormFieldSkeleton extends StatelessWidget {
           height: 16,
           decoration: BoxDecoration(color: AppConfig.shimmerBaseColor, borderRadius: BorderRadius.circular(AppConfig.smallRadius)),
         ),
-        const SizedBox(height: AppConfig.smallPadding),
+        SizedBox(height: AppConfig.smallPadding),
         Container(
           width: double.infinity,
           height: 48,

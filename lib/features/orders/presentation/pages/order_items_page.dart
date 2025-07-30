@@ -141,16 +141,16 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
 
   Widget _buildMobileLayout(OrderProvider orderProvider) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppConfig.defaultPadding),
+      padding: EdgeInsets.all(AppConfig.defaultPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(orderProvider),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
           _buildSearchForm(orderProvider),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
           _buildOrderItemsList(orderProvider),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
           _buildActionButtons(orderProvider),
         ],
       ),
@@ -163,12 +163,12 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
         Expanded(
           flex: 1,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppConfig.largePadding),
+            padding: EdgeInsets.all(AppConfig.largePadding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(orderProvider),
-                const SizedBox(height: AppConfig.largePadding),
+                SizedBox(height: AppConfig.largePadding),
                 _buildSearchForm(orderProvider),
               ],
             ),
@@ -177,12 +177,12 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
         Expanded(
           flex: 1,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppConfig.largePadding),
+            padding: EdgeInsets.all(AppConfig.largePadding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildOrderItemsList(orderProvider),
-                const SizedBox(height: AppConfig.largePadding),
+                SizedBox(height: AppConfig.largePadding),
                 _buildActionButtons(orderProvider),
               ],
             ),
@@ -197,18 +197,18 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(UITextConstants.orderCreationTitle, style: AppConfig.headlineStyle.copyWith(color: AppConfig.primaryColor)),
-        const SizedBox(height: AppConfig.smallPadding),
+        SizedBox(height: AppConfig.smallPadding),
         Text(UITextConstants.orderCreationSubtitle, style: AppConfig.subtitleStyle),
         if (orderProvider.selectedCustomer != null) ...[
-          const SizedBox(height: AppConfig.defaultPadding),
+          SizedBox(height: AppConfig.defaultPadding),
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(AppConfig.defaultPadding),
+              padding: EdgeInsets.all(AppConfig.defaultPadding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Customer', style: AppConfig.titleStyle),
-                  const SizedBox(height: AppConfig.smallPadding),
+                  SizedBox(height: AppConfig.smallPadding),
                   Text('Name: ${orderProvider.selectedCustomer!.name}'),
                   Text('Phone: ${orderProvider.selectedCustomer!.phone}'),
                 ],
@@ -223,14 +223,14 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
   Widget _buildSearchForm(OrderProvider orderProvider) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Search Card', style: AppConfig.titleStyle),
-              const SizedBox(height: AppConfig.defaultPadding),
+              SizedBox(height: AppConfig.defaultPadding),
               TextFormField(
                 controller: _barcodeController,
                 decoration: InputDecoration(
@@ -245,14 +245,14 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
                   return null;
                 },
               ),
-              const SizedBox(height: AppConfig.defaultPadding),
+              SizedBox(height: AppConfig.defaultPadding),
               ButtonUtils.primaryButton(onPressed: orderProvider.isLoading ? null : _searchCard, label: 'Search Card', icon: Icons.search),
               if (orderProvider.currentCard != null) ...[
-                const SizedBox(height: AppConfig.largePadding),
+                SizedBox(height: AppConfig.largePadding),
                 _buildCardDetails(orderProvider.currentCard!),
-                const SizedBox(height: AppConfig.defaultPadding),
+                SizedBox(height: AppConfig.defaultPadding),
                 _buildItemForm(),
-                const SizedBox(height: AppConfig.defaultPadding),
+                SizedBox(height: AppConfig.defaultPadding),
                 ButtonUtils.successButton(onPressed: _addOrderItem, label: UITextConstants.addOrderItem, icon: Icons.add),
               ],
             ],
@@ -265,12 +265,12 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
   Widget _buildCardDetails(card_model.Card card) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Card Details', style: AppConfig.titleStyle),
-            const SizedBox(height: AppConfig.smallPadding),
+            SizedBox(height: AppConfig.smallPadding),
             Text('Barcode: ${card.barcode}', style: AppConfig.bodyStyle),
             Text('Price: \$${card.sellPrice}', style: AppConfig.bodyStyle),
             Text('Stock: ${card.quantity}', style: AppConfig.bodyStyle),
@@ -286,7 +286,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Item Details', style: AppConfig.titleStyle),
-        const SizedBox(height: AppConfig.defaultPadding),
+        SizedBox(height: AppConfig.defaultPadding),
         Row(
           children: [
             Expanded(
@@ -306,7 +306,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
                 },
               ),
             ),
-            const SizedBox(width: AppConfig.defaultPadding),
+            SizedBox(width: AppConfig.defaultPadding),
             Expanded(
               child: TextFormField(
                 controller: _discountController,
@@ -326,7 +326,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
             ),
           ],
         ),
-        const SizedBox(height: AppConfig.defaultPadding),
+        SizedBox(height: AppConfig.defaultPadding),
         CheckboxListTile(
           title: Text(UITextConstants.requiresBox),
           value: _requiresBox,
@@ -349,7 +349,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
               });
             },
           ),
-          const SizedBox(height: AppConfig.defaultPadding),
+          SizedBox(height: AppConfig.defaultPadding),
           TextFormField(
             controller: _boxCostController,
             decoration: InputDecoration(
@@ -370,7 +370,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
           },
         ),
         if (_requiresPrinting) ...[
-          const SizedBox(height: AppConfig.defaultPadding),
+          SizedBox(height: AppConfig.defaultPadding),
           TextFormField(
             controller: _printingCostController,
             decoration: InputDecoration(
@@ -388,18 +388,18 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
   Widget _buildOrderItemsList(OrderProvider orderProvider) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Order Items (${orderProvider.orderItems.length})', style: AppConfig.titleStyle),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
             if (orderProvider.orderItems.isEmpty)
               const EmptyStateWidget(message: UITextConstants.noOrderItems, icon: Icons.shopping_cart_outlined)
             else
               ListView.builder(
                 shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
+                physics: NeverScrollableScrollPhysics(),
                 itemCount: orderProvider.orderItems.length,
                 itemBuilder: (context, index) {
                   final item = orderProvider.orderItems[index];
@@ -422,7 +422,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
         Expanded(
           child: ButtonUtils.secondaryButton(onPressed: () => context.go(RouteConstants.customerSearch), label: 'Back', icon: Icons.arrow_back),
         ),
-        const SizedBox(width: AppConfig.defaultPadding),
+        SizedBox(width: AppConfig.defaultPadding),
         Expanded(
           child: ButtonUtils.primaryButton(
             onPressed: orderProvider.orderItems.isNotEmpty ? _proceedToReview : null,

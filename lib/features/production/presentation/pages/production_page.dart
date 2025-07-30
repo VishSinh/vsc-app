@@ -128,14 +128,14 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
 
   Widget _buildProductionContent() {
     return Padding(
-      padding: const EdgeInsets.all(AppConfig.defaultPadding),
+      padding: EdgeInsets.all(AppConfig.defaultPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Production', style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
           _buildFilters(),
-          const SizedBox(height: AppConfig.defaultPadding),
+          SizedBox(height: AppConfig.defaultPadding),
           Expanded(
             child: Column(
               children: [
@@ -146,7 +146,7 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
                     Tab(text: 'Box Orders (${_filteredBoxOrders.length})'),
                   ],
                 ),
-                const SizedBox(height: AppConfig.defaultPadding),
+                SizedBox(height: AppConfig.defaultPadding),
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
@@ -175,7 +175,7 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
             },
           ),
         ),
-        const SizedBox(width: AppConfig.defaultPadding),
+        SizedBox(width: AppConfig.defaultPadding),
         Expanded(
           flex: 1,
           child: DropdownButtonFormField<String>(
@@ -206,7 +206,7 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
       itemBuilder: (context, index) {
         final job = jobs[index];
         return Card(
-          margin: const EdgeInsets.only(bottom: AppConfig.smallPadding),
+          margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
           child: ListTile(
             title: Text(job['id'], style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Column(

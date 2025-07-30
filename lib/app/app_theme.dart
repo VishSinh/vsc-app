@@ -6,7 +6,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(seedColor: AppConfig.primaryColor, brightness: Brightness.light),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         elevation: AppConfig.elevationNone,
         centerTitle: true,
         backgroundColor: AppConfig.transparent,
@@ -19,15 +19,15 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: AppConfig.elevationLow,
-          padding: const EdgeInsets.symmetric(horizontal: AppConfig.largePadding, vertical: AppConfig.defaultPadding),
+          padding: EdgeInsets.symmetric(horizontal: AppConfig.largePadding, vertical: AppConfig.defaultPadding),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding, vertical: AppConfig.smallPadding),
+        contentPadding: EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding, vertical: AppConfig.smallPadding),
       ),
-      dataTableTheme: const DataTableThemeData(
+      dataTableTheme: DataTableThemeData(
         headingTextStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: AppConfig.fontSizeMd),
       ),
     );
@@ -37,7 +37,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(seedColor: AppConfig.primaryColor, brightness: Brightness.dark),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         elevation: AppConfig.elevationNone,
         centerTitle: true,
         backgroundColor: AppConfig.transparent,
@@ -50,15 +50,15 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 2,
-          padding: const EdgeInsets.symmetric(horizontal: AppConfig.largePadding, vertical: AppConfig.defaultPadding),
+          padding: EdgeInsets.symmetric(horizontal: AppConfig.largePadding, vertical: AppConfig.defaultPadding),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding, vertical: AppConfig.smallPadding),
+        contentPadding: EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding, vertical: AppConfig.smallPadding),
       ),
-      dataTableTheme: const DataTableThemeData(
+      dataTableTheme: DataTableThemeData(
         headingTextStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: AppConfig.fontSizeMd),
       ),
     );

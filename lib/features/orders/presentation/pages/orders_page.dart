@@ -79,7 +79,7 @@ class _OrdersPageState extends State<OrdersPage> {
 
   Widget _buildOrdersContent() {
     return Padding(
-      padding: const EdgeInsets.all(AppConfig.defaultPadding),
+      padding: EdgeInsets.all(AppConfig.defaultPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -91,11 +91,11 @@ class _OrdersPageState extends State<OrdersPage> {
               Text('${_filteredOrders.length} orders', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppConfig.grey600)),
             ],
           ),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
 
           // Filters
           _buildFilters(),
-          const SizedBox(height: AppConfig.defaultPadding),
+          SizedBox(height: AppConfig.defaultPadding),
 
           // Orders List
           Expanded(child: _buildOrdersList()),
@@ -111,7 +111,7 @@ class _OrdersPageState extends State<OrdersPage> {
         Expanded(
           flex: 2,
           child: TextField(
-            decoration: const InputDecoration(hintText: 'Search orders...', prefixIcon: Icon(Icons.search)),
+            decoration: InputDecoration(hintText: 'Search orders...', prefixIcon: Icon(Icons.search)),
             onChanged: (value) {
               setState(() {
                 _searchQuery = value;
@@ -119,13 +119,13 @@ class _OrdersPageState extends State<OrdersPage> {
             },
           ),
         ),
-        const SizedBox(width: AppConfig.defaultPadding),
+        SizedBox(width: AppConfig.defaultPadding),
         // Status Filter
         Expanded(
           flex: 1,
           child: DropdownButtonFormField<String>(
             value: _statusFilter,
-            decoration: const InputDecoration(labelText: 'Status'),
+            decoration: InputDecoration(labelText: 'Status'),
             items: [
               'All',
               'Pending',
@@ -162,7 +162,7 @@ class _OrdersPageState extends State<OrdersPage> {
       itemBuilder: (context, index) {
         final order = _filteredOrders[index];
         return Card(
-          margin: const EdgeInsets.only(bottom: AppConfig.smallPadding),
+          margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
           child: ListTile(
             title: Text(order['id'], style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Column(

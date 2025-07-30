@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/app/app_config.dart';
+import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 
@@ -19,7 +20,7 @@ class LoadingWidget extends StatelessWidget {
         children: [
           SpinKitDoubleBounce(color: AppConfig.primaryColor, size: size),
           if (message != null) ...[
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
             Text(message!, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
           ],
         ],
@@ -43,14 +44,14 @@ class CustomErrorWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon ?? Icons.error_outline, size: AppConfig.iconSizeXXLarge, color: AppConfig.errorColor),
-          const SizedBox(height: AppConfig.defaultPadding),
+          SizedBox(height: AppConfig.defaultPadding),
           Text(
             message,
             style: TextStyle(color: AppConfig.errorColor),
             textAlign: TextAlign.center,
           ),
           if (onRetry != null) ...[
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
             ButtonUtils.primaryButton(onPressed: onRetry, label: UITextConstants.retry),
           ],
         ],
@@ -75,14 +76,14 @@ class EmptyStateWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, size: AppConfig.iconSizeXXLarge, color: AppConfig.grey400),
-          const SizedBox(height: AppConfig.defaultPadding),
+          SizedBox(height: AppConfig.defaultPadding),
           Text(
             message,
             style: TextStyle(color: AppConfig.grey600),
             textAlign: TextAlign.center,
           ),
           if (onAction != null && actionLabel != null) ...[
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
             ButtonUtils.primaryButton(onPressed: onAction, label: actionLabel!),
           ],
         ],
@@ -172,15 +173,15 @@ class PageHeader extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
-                  if (subtitle != null) ...[const SizedBox(height: AppConfig.smallPadding), subtitle!],
+                  Text(title, style: ResponsiveText.getHeadline(context)),
+                  if (subtitle != null) ...[SizedBox(height: AppConfig.smallPadding), subtitle!],
                 ],
               ),
             ),
-            if (actions != null) ...[const SizedBox(width: AppConfig.defaultPadding), ...actions!],
+            if (actions != null) ...[SizedBox(width: AppConfig.defaultPadding), ...actions!],
           ],
         ),
-        const SizedBox(height: AppConfig.largePadding),
+        SizedBox(height: AppConfig.largePadding),
       ],
     );
   }
@@ -200,7 +201,7 @@ class ListItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: margin ?? const EdgeInsets.only(bottom: AppConfig.defaultPadding),
+      margin: margin ?? EdgeInsets.only(bottom: AppConfig.defaultPadding),
       child: ListTile(leading: leading, title: title, subtitle: subtitle, trailing: trailing, onTap: onTap),
     );
   }
@@ -220,12 +221,9 @@ class StatusBadge extends StatelessWidget {
     final color = isActive ? (activeColor ?? AppConfig.successColor) : (inactiveColor ?? AppConfig.grey400);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppConfig.smallPadding, vertical: 4),
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(AppConfig.borderRadiusSmall)),
-      child: Text(
-        text,
-        style: TextStyle(color: AppConfig.textColorPrimary, fontSize: AppConfig.fontSizeSm),
-      ),
+      padding: EdgeInsets.symmetric(horizontal: AppConfig.smallPadding, vertical: 4),
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(AppConfig.smallRadius)),
+      child: Text(text, style: ResponsiveText.getCaption(context)),
     );
   }
 }

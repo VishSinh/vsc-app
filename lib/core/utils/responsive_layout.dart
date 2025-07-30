@@ -63,7 +63,7 @@ class ResponsiveLayout extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(AppConfig.appName, style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Theme.of(context).colorScheme.onPrimary)),
-                const SizedBox(height: AppConfig.spacingSmall),
+                SizedBox(height: AppConfig.spacingSmall),
                 Text(
                   'Inventory Management',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8)),
@@ -100,7 +100,7 @@ class ResponsiveLayout extends StatelessWidget {
   Widget _buildAppBar(BuildContext context) {
     return Container(
       height: 64,
-      padding: const EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding),
+      padding: EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         border: Border(bottom: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.2))),

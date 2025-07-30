@@ -156,7 +156,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
         final isAdmin = authProvider.hasRole(UserRole.admin);
 
         return Padding(
-          padding: const EdgeInsets.all(AppConfig.defaultPadding),
+          padding: EdgeInsets.all(AppConfig.defaultPadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -167,9 +167,9 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   if (isAdmin) ButtonUtils.primaryButton(onPressed: () => context.go('/register'), label: 'Register Staff', icon: Icons.person_add),
                 ],
               ),
-              const SizedBox(height: AppConfig.largePadding),
+              SizedBox(height: AppConfig.largePadding),
               _buildFilters(),
-              const SizedBox(height: AppConfig.defaultPadding),
+              SizedBox(height: AppConfig.defaultPadding),
               Expanded(
                 child: Column(
                   children: [
@@ -181,7 +181,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                         Tab(text: 'Audit Logs (${_filteredAuditLogs.length})'),
                       ],
                     ),
-                    const SizedBox(height: AppConfig.defaultPadding),
+                    SizedBox(height: AppConfig.defaultPadding),
                     Expanded(
                       child: TabBarView(controller: _tabController, children: [_buildStaffList(), _buildPartnersList(), _buildAuditLogsList()]),
                     ),
@@ -217,7 +217,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
       itemBuilder: (context, index) {
         final staff = _filteredStaff[index];
         return Card(
-          margin: const EdgeInsets.only(bottom: AppConfig.smallPadding),
+          margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
           child: ListTile(
             title: Text(staff['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Column(
@@ -300,7 +300,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
       itemBuilder: (context, index) {
         final partner = _filteredPartners[index];
         return Card(
-          margin: const EdgeInsets.only(bottom: AppConfig.smallPadding),
+          margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
           child: ListTile(
             title: Text(partner['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Column(
@@ -383,7 +383,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
       itemBuilder: (context, index) {
         final log = _filteredAuditLogs[index];
         return Card(
-          margin: const EdgeInsets.only(bottom: AppConfig.smallPadding),
+          margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
           child: ListTile(
             title: Text(log['action'], style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Column(

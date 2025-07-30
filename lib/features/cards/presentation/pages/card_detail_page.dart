@@ -82,21 +82,21 @@ class _CardDetailPageState extends State<CardDetailPage> {
 
   Widget _buildCardDetailContent() {
     return Padding(
-      padding: const EdgeInsets.all(AppConfig.defaultPadding),
+      padding: EdgeInsets.all(AppConfig.defaultPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header with back button and actions
           Row(
             children: [
-              IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.cards)),
-              const SizedBox(width: AppConfig.smallPadding),
+              IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.inventory)),
+              SizedBox(width: AppConfig.smallPadding),
               Expanded(
                 child: PageHeader(title: 'Card Details', actions: _buildActionButtons()),
               ),
             ],
           ),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
 
           // Content
           Expanded(child: _buildContent()),
@@ -118,7 +118,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (canEdit) ActionButton(label: 'Edit', icon: Icons.edit, onPressed: _showEditCardDialog),
-              if (canEdit && canDelete) const SizedBox(width: AppConfig.smallPadding),
+              if (canEdit && canDelete) SizedBox(width: AppConfig.smallPadding),
               if (canDelete)
                 ActionButton(label: 'Delete', icon: Icons.delete, onPressed: _showDeleteConfirmation, backgroundColor: AppConfig.errorColor),
             ],
@@ -134,17 +134,17 @@ class _CardDetailPageState extends State<CardDetailPage> {
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppConfig.defaultPadding),
+      padding: EdgeInsets.all(AppConfig.defaultPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Card Image - First thing displayed
           _buildCardImage(),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
 
           // Card Information
           _buildCardInfo(),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
 
           // Card Statistics
           _buildCardStats(),
@@ -157,7 +157,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
     return Card(
       elevation: AppConfig.elevationLow,
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Row(
           children: [
             Container(
@@ -167,23 +167,23 @@ class _CardDetailPageState extends State<CardDetailPage> {
                 color: _card!.isActive ? AppConfig.successColor : AppConfig.grey400,
                 borderRadius: BorderRadius.circular(AppConfig.defaultRadius),
               ),
-              child: const Icon(Icons.credit_card, size: 30, color: AppConfig.textColorPrimary),
+              child: Icon(Icons.credit_card, size: 30, color: AppConfig.textColorPrimary),
             ),
-            const SizedBox(width: AppConfig.defaultPadding),
+            SizedBox(width: AppConfig.defaultPadding),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Barcode: ${_card!.barcode}',
-                    style: const TextStyle(fontSize: AppConfig.fontSizeXl, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: AppConfig.fontSizeXl, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: AppConfig.smallPadding),
+                  SizedBox(height: AppConfig.smallPadding),
                   Text(
                     'ID: ${_card!.id}',
-                    style: const TextStyle(fontSize: AppConfig.fontSizeLg, color: AppConfig.textColorSecondary),
+                    style: TextStyle(fontSize: AppConfig.fontSizeLg, color: AppConfig.textColorSecondary),
                   ),
-                  const SizedBox(height: AppConfig.smallPadding),
+                  SizedBox(height: AppConfig.smallPadding),
                   StatusBadge(text: _card!.isActive ? 'Active' : 'Inactive', isActive: _card!.isActive),
                 ],
               ),
@@ -200,7 +200,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
     return Card(
       elevation: AppConfig.elevationLow,
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -209,10 +209,10 @@ class _CardDetailPageState extends State<CardDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Card Information', style: AppConfig.headlineStyle),
-                  const SizedBox(height: AppConfig.defaultPadding),
+                  SizedBox(height: AppConfig.defaultPadding),
 
                   _buildInfoRow('Barcode', _card!.barcode),
-                  const SizedBox(height: AppConfig.smallPadding),
+                  SizedBox(height: AppConfig.smallPadding),
 
                   // Small barcode widget for scanner
                   _buildInfoRow('Vendor ID', _card!.vendorId),
@@ -236,12 +236,12 @@ class _CardDetailPageState extends State<CardDetailPage> {
               child: Center(
                 // Added Center widget to vertically center the barcode
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0), // More white padding
+                  padding: EdgeInsets.all(16.0), // More white padding
                   child: BarcodeWidget(
                     barcode: Barcode.code128(),
                     data: _card!.barcode,
                     drawText: true,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppConfig.black87),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppConfig.black87),
                     color: Colors.black,
                     width: 300, // Increased width for better scanning
                     height: 100, // Adjusted for padding
@@ -257,7 +257,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppConfig.smallPadding),
+      padding: EdgeInsets.symmetric(vertical: AppConfig.smallPadding),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -265,11 +265,11 @@ class _CardDetailPageState extends State<CardDetailPage> {
             width: 120,
             child: Text(
               label,
-              style: const TextStyle(fontWeight: FontWeight.w500, color: AppConfig.textColorSecondary),
+              style: TextStyle(fontWeight: FontWeight.w500, color: AppConfig.textColorSecondary),
             ),
           ),
           Expanded(
-            child: Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
+            child: Text(value, style: TextStyle(fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -280,12 +280,12 @@ class _CardDetailPageState extends State<CardDetailPage> {
     return Card(
       elevation: AppConfig.elevationLow,
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Card Image', style: AppConfig.headlineStyle),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
             Center(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(AppConfig.defaultRadius),
@@ -322,15 +322,15 @@ class _CardDetailPageState extends State<CardDetailPage> {
     return Card(
       elevation: AppConfig.elevationLow,
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Statistics',
-              style: const TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
             Row(
               children: [
                 Expanded(
@@ -341,7 +341,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
                     AppConfig.successColor,
                   ),
                 ),
-                const SizedBox(width: AppConfig.defaultPadding),
+                SizedBox(width: AppConfig.defaultPadding),
                 Expanded(
                   child: _buildStatCard(
                     'Total Value',
@@ -352,11 +352,11 @@ class _CardDetailPageState extends State<CardDetailPage> {
                 ),
               ],
             ),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
             Row(
               children: [
                 Expanded(child: _buildStatCard('Available', '${_card!.quantity}', Icons.inventory, AppConfig.warningColor)),
-                const SizedBox(width: AppConfig.defaultPadding),
+                SizedBox(width: AppConfig.defaultPadding),
                 Expanded(child: _buildStatCard('Max Discount', '${_card!.maxDiscount}%', Icons.discount, AppConfig.primaryColor)),
               ],
             ),
@@ -368,7 +368,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
 
   Widget _buildStatCard(String title, String value, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.all(AppConfig.defaultPadding),
+      padding: EdgeInsets.all(AppConfig.defaultPadding),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(AppConfig.defaultRadius),
@@ -377,15 +377,15 @@ class _CardDetailPageState extends State<CardDetailPage> {
       child: Column(
         children: [
           Icon(icon, color: color, size: 24),
-          const SizedBox(height: AppConfig.smallPadding),
+          SizedBox(height: AppConfig.smallPadding),
           Text(
             value,
             style: TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold, color: color),
           ),
-          const SizedBox(height: AppConfig.smallPadding),
+          SizedBox(height: AppConfig.smallPadding),
           Text(
             title,
-            style: const TextStyle(fontSize: AppConfig.fontSizeSm, color: AppConfig.textColorSecondary),
+            style: TextStyle(fontSize: AppConfig.fontSizeSm, color: AppConfig.textColorSecondary),
             textAlign: TextAlign.center,
           ),
         ],

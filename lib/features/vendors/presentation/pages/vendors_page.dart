@@ -52,7 +52,7 @@ class _VendorsPageState extends State<VendorsPage> {
 
   Widget _buildVendorsContent() {
     return Padding(
-      padding: const EdgeInsets.all(AppConfig.defaultPadding),
+      padding: EdgeInsets.all(AppConfig.defaultPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -60,7 +60,7 @@ class _VendorsPageState extends State<VendorsPage> {
           Row(
             children: [
               IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.dashboard)),
-              const SizedBox(width: AppConfig.smallPadding),
+              SizedBox(width: AppConfig.smallPadding),
               Expanded(
                 child: PageHeader(
                   title: AppConstants.featureLabels['vendors']!,
@@ -93,7 +93,7 @@ class _VendorsPageState extends State<VendorsPage> {
               });
             },
           ),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
 
           // Vendors List
           Expanded(
@@ -127,7 +127,7 @@ class _VendorsPageState extends State<VendorsPage> {
                           vendorProvider.loadMoreVendors();
                         }
                         return vendorProvider.isLoading
-                            ? const Padding(
+                            ? Padding(
                                 padding: EdgeInsets.all(AppConfig.defaultPadding),
                                 child: Center(
                                   child: SpinKitDoubleBounce(color: AppConfig.primaryColor, size: AppConfig.loadingIndicatorSize),

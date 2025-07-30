@@ -47,27 +47,27 @@ class _CreateCardPageState extends State<CreateCardPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(UITextConstants.createCard),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.cards)),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.inventory)),
       ),
       body: Consumer<CardProvider>(
         builder: (context, cardProvider, child) {
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(AppConfig.largePadding),
+            padding: EdgeInsets.all(AppConfig.largePadding),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: AppConfig.maxWidthXLarge),
+              constraints: BoxConstraints(maxWidth: AppConfig.maxWidthXLarge),
               child: Card(
                 elevation: 4,
                 child: Padding(
-                  padding: const EdgeInsets.all(AppConfig.largePadding),
+                  padding: EdgeInsets.all(AppConfig.largePadding),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(UITextConstants.createCardTitle, style: AppConfig.headlineStyle.copyWith(color: AppConfig.primaryColor)),
-                        const SizedBox(height: AppConfig.smallPadding),
+                        SizedBox(height: AppConfig.smallPadding),
                         Text(UITextConstants.createCardSubtitle, style: AppConfig.subtitleStyle),
-                        const SizedBox(height: AppConfig.largePadding),
+                        SizedBox(height: AppConfig.largePadding),
 
                         // Content Layout
                         LayoutBuilder(
@@ -79,14 +79,14 @@ class _CreateCardPageState extends State<CreateCardPage> {
                                 children: [
                                   // Image section on the left
                                   Expanded(flex: 1, child: _buildImageSection(cardProvider)),
-                                  const SizedBox(width: AppConfig.largePadding),
+                                  SizedBox(width: AppConfig.largePadding),
                                   // Form section on the right
                                   Expanded(
                                     flex: 1,
                                     child: Column(
                                       children: [
                                         _buildFormFields(),
-                                        const SizedBox(height: AppConfig.largePadding),
+                                        SizedBox(height: AppConfig.largePadding),
                                         _buildSubmitButton(cardProvider),
                                       ],
                                     ),
@@ -100,11 +100,11 @@ class _CreateCardPageState extends State<CreateCardPage> {
                                 children: [
                                   // Image Upload Section
                                   _buildImageSection(cardProvider),
-                                  const SizedBox(height: AppConfig.largePadding),
+                                  SizedBox(height: AppConfig.largePadding),
 
                                   // Form Fields
                                   _buildFormFields(),
-                                  const SizedBox(height: AppConfig.largePadding),
+                                  SizedBox(height: AppConfig.largePadding),
 
                                   // Submit Button
                                   _buildSubmitButton(cardProvider),
@@ -129,18 +129,18 @@ class _CreateCardPageState extends State<CreateCardPage> {
     return Card(
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Icon(Icons.image, color: AppConfig.primaryColor, size: AppConfig.iconSizeLarge),
-                const SizedBox(width: AppConfig.smallPadding),
+                SizedBox(width: AppConfig.smallPadding),
                 Text(UITextConstants.cardImage, style: AppConfig.titleStyle),
               ],
             ),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
 
             if (cardProvider.selectedImageUrl != null) ...[
               // Display selected image with 4:3 aspect ratio
@@ -173,7 +173,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
                   );
                 },
               ),
-              const SizedBox(height: AppConfig.defaultPadding),
+              SizedBox(height: AppConfig.defaultPadding),
               Row(
                 children: [
                   Expanded(
@@ -183,13 +183,13 @@ class _CreateCardPageState extends State<CreateCardPage> {
                       icon: Icons.edit,
                     ),
                   ),
-                  const SizedBox(width: AppConfig.defaultPadding),
+                  SizedBox(width: AppConfig.defaultPadding),
                   Expanded(
                     child: ButtonUtils.dangerButton(onPressed: cardProvider.clearImage, label: UITextConstants.remove, icon: Icons.delete),
                   ),
                 ],
               ),
-              const SizedBox(height: AppConfig.defaultPadding),
+              SizedBox(height: AppConfig.defaultPadding),
               ButtonUtils.secondaryButton(onPressed: () => _checkSimilarCards(cardProvider), label: 'Check Similar Cards', icon: Icons.search),
             ] else ...[
               // Upload image placeholder with 4:3 aspect ratio
@@ -213,7 +213,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.add_photo_alternate, size: AppConfig.iconSizeXLarge, color: AppConfig.grey600),
-                          const SizedBox(height: AppConfig.spacingSmall),
+                          SizedBox(height: AppConfig.spacingSmall),
                           Text(UITextConstants.tapToUploadImage, style: AppConfig.bodyStyle.copyWith(color: AppConfig.textColorMuted)),
                         ],
                       ),
@@ -232,18 +232,18 @@ class _CreateCardPageState extends State<CreateCardPage> {
     return Card(
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Icon(Icons.edit_note, color: AppConfig.primaryColor, size: AppConfig.iconSizeLarge),
-                const SizedBox(width: AppConfig.smallPadding),
+                SizedBox(width: AppConfig.smallPadding),
                 Text(UITextConstants.cardDetails, style: AppConfig.titleStyle),
               ],
             ),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
 
             // Cost Price
             TextFormField(
@@ -251,7 +251,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
               decoration: InputDecoration(
                 labelText: UITextConstants.costPrice,
                 hintText: UITextConstants.costPriceHint,
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.attach_money),
                 labelStyle: AppConfig.bodyStyle,
                 hintStyle: AppConfig.captionStyle,
@@ -267,7 +267,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
                 return null;
               },
             ),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
 
             // Sell Price
             TextFormField(
@@ -275,7 +275,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
               decoration: InputDecoration(
                 labelText: UITextConstants.sellPrice,
                 hintText: UITextConstants.sellPriceHint,
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.sell),
                 labelStyle: AppConfig.bodyStyle,
                 hintStyle: AppConfig.captionStyle,
@@ -291,7 +291,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
                 return null;
               },
             ),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
 
             // Quantity
             TextFormField(
@@ -299,7 +299,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
               decoration: InputDecoration(
                 labelText: UITextConstants.quantity,
                 hintText: UITextConstants.quantityHint,
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.inventory),
                 labelStyle: AppConfig.bodyStyle,
                 hintStyle: AppConfig.captionStyle,
@@ -315,7 +315,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
                 return null;
               },
             ),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
 
             // Max Discount
             TextFormField(
@@ -323,7 +323,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
               decoration: InputDecoration(
                 labelText: UITextConstants.maxDiscount,
                 hintText: UITextConstants.maxDiscountHint,
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(),
                 prefixIcon: const Icon(Icons.discount),
                 labelStyle: AppConfig.bodyStyle,
                 hintStyle: AppConfig.captionStyle,
@@ -343,7 +343,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
                 return null;
               },
             ),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
 
             // Vendor Dropdown
             Consumer<VendorProvider>(
@@ -363,7 +363,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
                   decoration: InputDecoration(
                     labelText: UITextConstants.selectVendor,
                     hintText: UITextConstants.chooseVendorHint,
-                    border: const OutlineInputBorder(),
+                    border: OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.people),
                     labelStyle: AppConfig.bodyStyle,
                     hintStyle: AppConfig.captionStyle,
@@ -412,7 +412,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.photo_library),
+              leading: Icon(Icons.photo_library),
               title: Text(UITextConstants.galleryTitle),
               onTap: () {
                 Navigator.pop(context);
@@ -420,7 +420,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.camera_alt),
+              leading: Icon(Icons.camera_alt),
               title: Text(UITextConstants.cameraTitle),
               onTap: () {
                 Navigator.pop(context);
@@ -466,7 +466,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
 
     if (success && mounted) {
       // Navigate back to cards page
-      context.go(RouteConstants.cards);
+      context.go(RouteConstants.inventory);
     }
   }
 

@@ -83,7 +83,7 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
 
   Widget _buildVendorDetailContent() {
     return Padding(
-      padding: const EdgeInsets.all(AppConfig.defaultPadding),
+      padding: EdgeInsets.all(AppConfig.defaultPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -91,13 +91,13 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
           Row(
             children: [
               IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.vendors)),
-              const SizedBox(width: AppConfig.smallPadding),
+              SizedBox(width: AppConfig.smallPadding),
               Expanded(
                 child: PageHeader(title: 'Vendor Details', actions: _buildActionButtons()),
               ),
             ],
           ),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
 
           // Content
           Expanded(child: _buildContent()),
@@ -119,7 +119,7 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (canEdit) ActionButton(label: 'Edit', icon: Icons.edit, onPressed: _showEditVendorDialog),
-              if (canEdit && canDelete) const SizedBox(width: AppConfig.smallPadding),
+              if (canEdit && canDelete) SizedBox(width: AppConfig.smallPadding),
               if (canDelete)
                 ActionButton(label: 'Delete', icon: Icons.delete, onPressed: _showDeleteConfirmation, backgroundColor: AppConfig.errorColor),
             ],
@@ -149,9 +149,9 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildVendorCard(),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
           _buildVendorInfo(),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
           _buildVendorStats(),
         ],
       ),
@@ -162,7 +162,7 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
     return Card(
       elevation: AppConfig.elevationLow,
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Row(
           children: [
             CircleAvatar(
@@ -170,21 +170,21 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
               backgroundColor: _vendor!.isActive ? AppConfig.successColor : AppConfig.grey400,
               child: const Icon(Icons.business, size: 40, color: AppConfig.textColorPrimary),
             ),
-            const SizedBox(width: AppConfig.defaultPadding),
+            SizedBox(width: AppConfig.defaultPadding),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     _vendor!.name,
-                    style: const TextStyle(fontSize: AppConfig.fontSizeXl, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: AppConfig.fontSizeXl, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: AppConfig.smallPadding),
+                  SizedBox(height: AppConfig.smallPadding),
                   Text(
                     _vendor!.phone,
-                    style: const TextStyle(fontSize: AppConfig.fontSizeLg, color: AppConfig.textColorSecondary),
+                    style: TextStyle(fontSize: AppConfig.fontSizeLg, color: AppConfig.textColorSecondary),
                   ),
-                  const SizedBox(height: AppConfig.smallPadding),
+                  SizedBox(height: AppConfig.smallPadding),
                   StatusBadge(text: _vendor!.isActive ? 'Active' : 'Inactive', isActive: _vendor!.isActive),
                 ],
               ),
@@ -199,15 +199,15 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
     return Card(
       elevation: AppConfig.elevationLow,
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Vendor Information',
-              style: const TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
             _buildInfoRow('ID', _vendor!.id),
             _buildInfoRow('Name', _vendor!.name),
             _buildInfoRow('Phone', _vendor!.phone),
@@ -220,7 +220,7 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppConfig.smallPadding),
+      padding: EdgeInsets.symmetric(vertical: AppConfig.smallPadding),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -228,11 +228,11 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
             width: 100,
             child: Text(
               label,
-              style: const TextStyle(fontWeight: FontWeight.w500, color: AppConfig.textColorSecondary),
+              style: TextStyle(fontWeight: FontWeight.w500, color: AppConfig.textColorSecondary),
             ),
           ),
           Expanded(
-            child: Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
+            child: Text(value, style: TextStyle(fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -243,27 +243,27 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
     return Card(
       elevation: AppConfig.elevationLow,
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Statistics',
-              style: const TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
             Row(
               children: [
                 Expanded(child: _buildStatCard('Total Orders', '0', Icons.shopping_cart, AppConfig.primaryColor)),
-                const SizedBox(width: AppConfig.defaultPadding),
+                SizedBox(width: AppConfig.defaultPadding),
                 Expanded(child: _buildStatCard('Total Revenue', '\$0', Icons.attach_money, AppConfig.successColor)),
               ],
             ),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
             Row(
               children: [
                 Expanded(child: _buildStatCard('Products', '0', Icons.inventory, AppConfig.warningColor)),
-                const SizedBox(width: AppConfig.defaultPadding),
+                SizedBox(width: AppConfig.defaultPadding),
                 Expanded(child: _buildStatCard('Rating', 'N/A', Icons.star, AppConfig.primaryColor)),
               ],
             ),
@@ -275,7 +275,7 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
 
   Widget _buildStatCard(String title, String value, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.all(AppConfig.defaultPadding),
+      padding: EdgeInsets.all(AppConfig.defaultPadding),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(AppConfig.defaultRadius),
@@ -284,15 +284,15 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
       child: Column(
         children: [
           Icon(icon, color: color, size: 24),
-          const SizedBox(height: AppConfig.smallPadding),
+          SizedBox(height: AppConfig.smallPadding),
           Text(
             value,
             style: TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold, color: color),
           ),
-          const SizedBox(height: AppConfig.smallPadding),
+          SizedBox(height: AppConfig.smallPadding),
           Text(
             title,
-            style: const TextStyle(fontSize: AppConfig.fontSizeSm, color: AppConfig.textColorSecondary),
+            style: TextStyle(fontSize: AppConfig.fontSizeSm, color: AppConfig.textColorSecondary),
             textAlign: TextAlign.center,
           ),
         ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AppConfig {
   // App Information
@@ -18,29 +19,29 @@ class AppConfig {
   static const double tabletBreakpoint = 900;
   static const double desktopBreakpoint = 1200;
 
-  // Spacing
-  static const double defaultPadding = 16.0;
-  static const double smallPadding = 8.0;
-  static const double largePadding = 24.0;
+  // Spacing (now using ScreenUtil)
+  static double get defaultPadding => 20.w;
+  static double get smallPadding => 12.w;
+  static double get largePadding => 32.w;
 
-  // Border radius
-  static const double defaultRadius = 8.0;
-  static const double smallRadius = 4.0;
-  static const double largeRadius = 12.0;
+  // Border radius (now using ScreenUtil)
+  static double get defaultRadius => 8.r;
+  static double get smallRadius => 4.r;
+  static double get largeRadius => 12.r;
 
   // Typography
   static const String fontFamily = 'Roboto';
 
-  // Font Sizes
-  static const double fontSizeXs = 10.0;
-  static const double fontSizeSm = 12.0;
-  static const double fontSizeMd = 14.0;
-  static const double fontSizeLg = 16.0;
-  static const double fontSizeXl = 18.0;
-  static const double fontSize2xl = 20.0;
-  static const double fontSize3xl = 24.0;
-  static const double fontSize4xl = 28.0;
-  static const double fontSize5xl = 32.0;
+  // Font Sizes (now using ScreenUtil)
+  static double get fontSizeXs => 12.sp;
+  static double get fontSizeSm => 14.sp;
+  static double get fontSizeMd => 16.sp;
+  static double get fontSizeLg => 18.sp;
+  static double get fontSizeXl => 20.sp;
+  static double get fontSize2xl => 24.sp;
+  static double get fontSize3xl => 28.sp;
+  static double get fontSize4xl => 32.sp;
+  static double get fontSize5xl => 36.sp;
 
   // Font Weights
   static const FontWeight fontWeightLight = FontWeight.w300;
@@ -62,36 +63,48 @@ class AppConfig {
   static const Color grey400 = Color(0xFFBDBDBD);
   static const Color grey600 = Color(0xFF757575);
   static const Color transparent = Colors.transparent;
-  static const Color black87 = Color(0xffdd000000);
+  static const Color black87 = Color(0xDD000000);
   static const Color red = Colors.red;
 
-  // Text Styles
-  static const TextStyle headlineStyle = TextStyle(
-    fontFamily: fontFamily,
-    fontSize: fontSize4xl,
-    fontWeight: fontWeightBold,
-    color: textColorPrimary,
-  );
+  // Text Styles (Legacy - Use ResponsiveText for new code)
+  static TextStyle get headlineStyle => TextStyle(fontFamily: fontFamily, fontSize: fontSize4xl, fontWeight: fontWeightBold, color: textColorPrimary);
 
-  static const TextStyle titleStyle = TextStyle(
-    fontFamily: fontFamily,
-    fontSize: fontSize2xl,
-    fontWeight: fontWeightSemiBold,
-    color: textColorPrimary,
-  );
+  static TextStyle get titleStyle =>
+      TextStyle(fontFamily: fontFamily, fontSize: fontSize2xl, fontWeight: fontWeightSemiBold, color: textColorPrimary);
 
-  static const TextStyle subtitleStyle = TextStyle(
-    fontFamily: fontFamily,
-    fontSize: fontSizeLg,
-    fontWeight: fontWeightMedium,
-    color: textColorSecondary,
-  );
+  static TextStyle get subtitleStyle =>
+      TextStyle(fontFamily: fontFamily, fontSize: fontSizeLg, fontWeight: fontWeightMedium, color: textColorSecondary);
 
-  static const TextStyle bodyStyle = TextStyle(fontFamily: fontFamily, fontSize: fontSizeMd, fontWeight: fontWeightNormal, color: textColorPrimary);
+  static TextStyle get bodyStyle => TextStyle(fontFamily: fontFamily, fontSize: fontSizeMd, fontWeight: fontWeightNormal, color: textColorPrimary);
 
-  static const TextStyle captionStyle = TextStyle(fontFamily: fontFamily, fontSize: fontSizeSm, fontWeight: fontWeightNormal, color: textColorMuted);
+  static TextStyle get captionStyle => TextStyle(fontFamily: fontFamily, fontSize: fontSizeSm, fontWeight: fontWeightNormal, color: textColorMuted);
 
-  static const TextStyle buttonStyle = TextStyle(fontFamily: fontFamily, fontSize: fontSizeMd, fontWeight: fontWeightMedium, color: textColorPrimary);
+  static TextStyle get buttonStyle => TextStyle(fontFamily: fontFamily, fontSize: fontSizeMd, fontWeight: fontWeightMedium, color: textColorPrimary);
+
+  // Responsive Text Styles (Recommended for new code)
+  static TextStyle getResponsiveHeadline(BuildContext context) {
+    return Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: fontWeightBold, color: textColorPrimary) ?? headlineStyle;
+  }
+
+  static TextStyle getResponsiveTitle(BuildContext context) {
+    return Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: fontWeightSemiBold, color: textColorPrimary) ?? titleStyle;
+  }
+
+  static TextStyle getResponsiveSubtitle(BuildContext context) {
+    return Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: fontWeightMedium, color: textColorSecondary) ?? subtitleStyle;
+  }
+
+  static TextStyle getResponsiveBody(BuildContext context) {
+    return Theme.of(context).textTheme.bodyMedium?.copyWith(color: textColorPrimary) ?? bodyStyle;
+  }
+
+  static TextStyle getResponsiveCaption(BuildContext context) {
+    return Theme.of(context).textTheme.bodySmall?.copyWith(color: textColorMuted) ?? captionStyle;
+  }
+
+  static TextStyle getResponsiveButton(BuildContext context) {
+    return Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: fontWeightMedium, color: textColorPrimary) ?? buttonStyle;
+  }
 
   // ================================ UI CONSTANTS ================================
 
@@ -140,7 +153,7 @@ class AppConfig {
   static const Color snackbarInfoColor = Color(0xFF1976D2); // Colors.blue[700]
   static const Color snackbarDefaultColor = Color(0xFF424242); // Colors.grey[700]
   static const Color snackbarTextColor = Colors.white;
-  static const Color snackbarTextSecondaryColor = Color(0xffb3ffffff); // Colors.white70
+  static const Color snackbarTextSecondaryColor = Color(0xB3FFFFFF); // Colors.white70
 
   // Snackbar Spacing
   static const EdgeInsets snackbarPadding = EdgeInsets.symmetric(horizontal: 16, vertical: 12);

@@ -104,18 +104,18 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
 
   Widget _buildMobileLayout(OrderProvider orderProvider) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppConfig.defaultPadding),
+      padding: EdgeInsets.all(AppConfig.defaultPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(orderProvider),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
           _buildCustomerInfo(orderProvider),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
           _buildDeliveryDateSection(),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
           _buildOrderItemsReview(orderProvider),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
           _buildActionButtons(orderProvider),
         ],
       ),
@@ -128,14 +128,14 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
         Expanded(
           flex: 1,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppConfig.largePadding),
+            padding: EdgeInsets.all(AppConfig.largePadding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(orderProvider),
-                const SizedBox(height: AppConfig.largePadding),
+                SizedBox(height: AppConfig.largePadding),
                 _buildCustomerInfo(orderProvider),
-                const SizedBox(height: AppConfig.largePadding),
+                SizedBox(height: AppConfig.largePadding),
                 _buildDeliveryDateSection(),
               ],
             ),
@@ -144,12 +144,12 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
         Expanded(
           flex: 1,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppConfig.largePadding),
+            padding: EdgeInsets.all(AppConfig.largePadding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildOrderItemsReview(orderProvider),
-                const SizedBox(height: AppConfig.largePadding),
+                SizedBox(height: AppConfig.largePadding),
                 _buildActionButtons(orderProvider),
               ],
             ),
@@ -164,7 +164,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(UITextConstants.orderReviewTitle, style: AppConfig.headlineStyle.copyWith(color: AppConfig.primaryColor)),
-        const SizedBox(height: AppConfig.smallPadding),
+        SizedBox(height: AppConfig.smallPadding),
         Text(UITextConstants.orderReviewSubtitle, style: AppConfig.subtitleStyle),
       ],
     );
@@ -175,12 +175,12 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Customer Information', style: AppConfig.titleStyle),
-            const SizedBox(height: AppConfig.smallPadding),
+            SizedBox(height: AppConfig.smallPadding),
             Text('Name: ${orderProvider.selectedCustomer!.name}'),
             Text('Phone: ${orderProvider.selectedCustomer!.phone}'),
           ],
@@ -192,12 +192,12 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
   Widget _buildDeliveryDateSection() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(UITextConstants.deliveryDate, style: AppConfig.titleStyle),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
             Row(
               children: [
                 Expanded(
@@ -227,12 +227,12 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
   Widget _buildOrderItemsReview(OrderProvider orderProvider) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Order Items (${orderProvider.orderItems.length})', style: AppConfig.titleStyle),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
             if (orderProvider.orderItems.isEmpty)
               const EmptyStateWidget(message: UITextConstants.noOrderItems, icon: Icons.shopping_cart_outlined)
             else
@@ -243,14 +243,14 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
                 itemBuilder: (context, index) {
                   final item = orderProvider.orderItems[index];
                   return Card(
-                    margin: const EdgeInsets.only(bottom: AppConfig.smallPadding),
+                    margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
                     child: Padding(
-                      padding: const EdgeInsets.all(AppConfig.defaultPadding),
+                      padding: EdgeInsets.all(AppConfig.defaultPadding),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Item ${index + 1}', style: AppConfig.titleStyle),
-                          const SizedBox(height: AppConfig.smallPadding),
+                          SizedBox(height: AppConfig.smallPadding),
                           Text('Quantity: ${item.quantity}'),
                           Text('Discount: \$${item.discountAmount}'),
                           if (item.requiresBox) ...[
@@ -278,7 +278,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
             Expanded(
               child: ButtonUtils.secondaryButton(onPressed: () => context.go(RouteConstants.orderItems), label: 'Back', icon: Icons.arrow_back),
             ),
-            const SizedBox(width: AppConfig.defaultPadding),
+            SizedBox(width: AppConfig.defaultPadding),
             Expanded(
               child: ButtonUtils.primaryButton(
                 onPressed: orderProvider.isLoading ? null : _submitOrder,
@@ -288,7 +288,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
             ),
           ],
         ),
-        if (orderProvider.isLoading) ...[const SizedBox(height: AppConfig.defaultPadding), const LoadingWidget(message: 'Creating order...')],
+        if (orderProvider.isLoading) ...[SizedBox(height: AppConfig.defaultPadding), LoadingWidget(message: 'Creating order...')],
       ],
     );
   }

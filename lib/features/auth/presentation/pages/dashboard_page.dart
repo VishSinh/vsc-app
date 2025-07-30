@@ -12,6 +12,7 @@ import 'package:vsc_app/features/auth/presentation/providers/permission_provider
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/constants/snackbar_constants.dart';
+import 'package:vsc_app/core/utils/responsive_text.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -171,22 +172,22 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildDashboardContent(UserRole userRole, PermissionProvider permissionProvider) {
     return Padding(
-      padding: const EdgeInsets.all(AppConfig.defaultPadding),
+      padding: EdgeInsets.all(AppConfig.defaultPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Welcome Header
-          Text(UITextConstants.welcomeBack, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
-          const SizedBox(height: AppConfig.smallPadding),
+          Text(UITextConstants.welcomeBack, style: ResponsiveText.getHeadline(context)),
+          SizedBox(height: AppConfig.smallPadding),
           Text(
             UITextConstants.welcomeSubtitle.replaceAll('{role}', userRole.value.toLowerCase()),
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppConfig.grey600),
+            style: ResponsiveText.getBody(context).copyWith(color: AppConfig.grey600),
           ),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
 
           // Quick Actions
           _buildQuickActions(permissionProvider),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
 
           // Stats Cards
           Expanded(child: _isLoading ? _buildShimmerSkeleton() : _buildStatsGrid(userRole, permissionProvider)),
@@ -265,8 +266,8 @@ class _DashboardPageState extends State<DashboardPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(UITextConstants.quickActions, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-        const SizedBox(height: AppConfig.defaultPadding),
+        Text(UITextConstants.quickActions, style: ResponsiveText.getTitle(context)),
+        SizedBox(height: AppConfig.defaultPadding),
         Wrap(spacing: AppConfig.defaultPadding, runSpacing: AppConfig.defaultPadding, children: actions),
       ],
     );
@@ -359,26 +360,23 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _buildStatCard({required String title, required String value, required IconData icon, required Color color, required String subtitle}) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Icon(icon, color: color, size: AppConfig.iconSizeMedium),
-                const Spacer(),
+                Spacer(),
                 Icon(Icons.trending_up, color: color.withOpacity(0.5), size: AppConfig.iconSizeSmall),
               ],
             ),
-            const Spacer(),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: color),
-            ),
-            const SizedBox(height: AppConfig.smallPadding),
-            Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500)),
-            const SizedBox(height: AppConfig.smallPadding),
-            Text(subtitle, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppConfig.grey600)),
+            Spacer(),
+            Text(value, style: ResponsiveText.getHeadline(context).copyWith(color: color)),
+            SizedBox(height: AppConfig.smallPadding),
+            Text(title, style: ResponsiveText.getTitle(context)),
+            SizedBox(height: AppConfig.smallPadding),
+            Text(subtitle, style: ResponsiveText.getCaption(context).copyWith(color: AppConfig.grey600)),
           ],
         ),
       ),

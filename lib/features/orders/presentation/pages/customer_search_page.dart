@@ -84,14 +84,14 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
 
   Widget _buildMobileLayout(CustomerProvider customerProvider) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppConfig.defaultPadding),
+      padding: EdgeInsets.all(AppConfig.defaultPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
           _buildSearchForm(customerProvider),
-          if (_isCreatingCustomer) ...[const SizedBox(height: AppConfig.largePadding), _buildCreateForm(customerProvider)],
+          if (_isCreatingCustomer) ...[SizedBox(height: AppConfig.largePadding), _buildCreateForm(customerProvider)],
         ],
       ),
     );
@@ -103,12 +103,12 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
         Expanded(
           flex: 1,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppConfig.largePadding),
+            padding: EdgeInsets.all(AppConfig.largePadding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(),
-                const SizedBox(height: AppConfig.largePadding),
+                SizedBox(height: AppConfig.largePadding),
                 _buildSearchForm(customerProvider),
               ],
             ),
@@ -117,7 +117,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
         if (_isCreatingCustomer)
           Expanded(
             flex: 1,
-            child: SingleChildScrollView(padding: const EdgeInsets.all(AppConfig.largePadding), child: _buildCreateForm(customerProvider)),
+            child: SingleChildScrollView(padding: EdgeInsets.all(AppConfig.largePadding), child: _buildCreateForm(customerProvider)),
           ),
       ],
     );
@@ -128,7 +128,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(UITextConstants.customerSearchTitle, style: AppConfig.headlineStyle.copyWith(color: AppConfig.primaryColor)),
-        const SizedBox(height: AppConfig.smallPadding),
+        SizedBox(height: AppConfig.smallPadding),
         Text(UITextConstants.customerSearchSubtitle, style: AppConfig.subtitleStyle),
       ],
     );
@@ -137,20 +137,20 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
   Widget _buildSearchForm(CustomerProvider customerProvider) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Search Customer', style: AppConfig.titleStyle),
-              const SizedBox(height: AppConfig.defaultPadding),
+              SizedBox(height: AppConfig.defaultPadding),
               TextFormField(
                 controller: _phoneController,
                 decoration: InputDecoration(
                   labelText: UITextConstants.customerPhone,
                   hintText: UITextConstants.customerPhoneHint,
-                  border: const OutlineInputBorder(),
+                  border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.phone,
                 validator: (value) {
@@ -160,7 +160,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
                   return null;
                 },
               ),
-              const SizedBox(height: AppConfig.defaultPadding),
+              SizedBox(height: AppConfig.defaultPadding),
               Row(
                 children: [
                   Expanded(
@@ -170,7 +170,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
                       icon: Icons.search,
                     ),
                   ),
-                  const SizedBox(width: AppConfig.defaultPadding),
+                  SizedBox(width: AppConfig.defaultPadding),
                   Expanded(
                     child: ButtonUtils.secondaryButton(
                       onPressed: () {
@@ -194,18 +194,18 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
   Widget _buildCreateForm(CustomerProvider customerProvider) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppConfig.defaultPadding),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Create Customer', style: AppConfig.titleStyle),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
             TextFormField(
               controller: _nameController,
               decoration: InputDecoration(
                 labelText: UITextConstants.customerName,
                 hintText: UITextConstants.customerNameHint,
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
@@ -214,7 +214,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
                 return null;
               },
             ),
-            const SizedBox(height: AppConfig.defaultPadding),
+            SizedBox(height: AppConfig.defaultPadding),
             SizedBox(
               width: double.infinity,
               child: ButtonUtils.primaryButton(

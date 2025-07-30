@@ -72,13 +72,13 @@ class _RegisterPageState extends State<RegisterPage> {
         leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.administration)),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppConfig.largePadding),
+        padding: EdgeInsets.all(AppConfig.largePadding),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: AppConfig.maxWidthMedium),
+          constraints: BoxConstraints(maxWidth: AppConfig.maxWidthMedium),
           child: Card(
             elevation: AppConfig.elevationMedium,
             child: Padding(
-              padding: const EdgeInsets.all(AppConfig.largePadding),
+              padding: EdgeInsets.all(AppConfig.largePadding),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -88,9 +88,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       UITextConstants.registerStaffMember,
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: AppConfig.smallPadding),
+                    SizedBox(height: AppConfig.smallPadding),
                     Text(UITextConstants.registerSubtitle, style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppConfig.grey600)),
-                    const SizedBox(height: AppConfig.largePadding),
+                    SizedBox(height: AppConfig.largePadding),
 
                     // Name Field
                     TextFormField(
@@ -110,7 +110,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: AppConfig.defaultPadding),
+                    SizedBox(height: AppConfig.defaultPadding),
 
                     // Phone Field
                     TextFormField(
@@ -131,7 +131,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: AppConfig.defaultPadding),
+                    SizedBox(height: AppConfig.defaultPadding),
 
                     // Role Selection
                     DropdownButtonFormField<UserRole>(
@@ -148,7 +148,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         }
                       },
                     ),
-                    const SizedBox(height: AppConfig.defaultPadding),
+                    SizedBox(height: AppConfig.defaultPadding),
 
                     // Password Field
                     TextFormField(
@@ -179,7 +179,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: AppConfig.defaultPadding),
+                    SizedBox(height: AppConfig.defaultPadding),
 
                     // Confirm Password Field
                     TextFormField(
@@ -207,7 +207,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: AppConfig.largePadding),
+                    SizedBox(height: AppConfig.largePadding),
 
                     // Error Message
                     Consumer<AuthProvider>(
@@ -215,8 +215,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         if (authProvider.errorMessage != null) {
                           return Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.all(AppConfig.smallPadding),
-                            margin: const EdgeInsets.only(bottom: AppConfig.defaultPadding),
+                            padding: EdgeInsets.all(AppConfig.smallPadding),
+                            margin: EdgeInsets.only(bottom: AppConfig.defaultPadding),
                             decoration: BoxDecoration(
                               color: AppConfig.errorColor.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(AppConfig.smallRadius),
@@ -235,8 +235,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         if (authProvider.successMessage != null) {
                           return Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.all(AppConfig.smallPadding),
-                            margin: const EdgeInsets.only(bottom: AppConfig.defaultPadding),
+                            padding: EdgeInsets.all(AppConfig.smallPadding),
+                            margin: EdgeInsets.only(bottom: AppConfig.defaultPadding),
                             decoration: BoxDecoration(
                               color: AppConfig.successColor.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(AppConfig.smallRadius),

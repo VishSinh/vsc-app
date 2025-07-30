@@ -106,12 +106,12 @@ class ButtonUtils {
   }) {
     return ElevatedButton.icon(
       onPressed: isLoading ? null : onPressed,
-      icon: isLoading ? SpinKitDoubleBounce(color: foregroundColor ?? AppConfig.primaryColor, size: AppConfig.loadingIndicatorSize) : Icon(icon),
+      icon: isLoading ? SpinKitDoubleBounce(color: foregroundColor, size: AppConfig.loadingIndicatorSize) : Icon(icon),
       label: Text(label, style: AppConfig.buttonStyle),
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
         foregroundColor: foregroundColor,
-        padding: const EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding, vertical: AppConfig.spacingSmall),
+        padding: EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding, vertical: AppConfig.smallPadding),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
         textStyle: AppConfig.buttonStyle,
       ),

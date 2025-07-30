@@ -11,7 +11,6 @@ import 'package:vsc_app/features/administration/presentation/pages/administratio
 import 'package:vsc_app/features/auth/presentation/pages/register_page.dart';
 import 'package:vsc_app/features/vendors/presentation/pages/vendors_page.dart';
 import 'package:vsc_app/features/vendors/presentation/pages/vendor_detail_page.dart';
-import 'package:vsc_app/features/cards/presentation/pages/cards_page.dart';
 import 'package:vsc_app/features/cards/presentation/pages/card_detail_page.dart';
 import 'package:vsc_app/features/cards/presentation/pages/create_card_page.dart';
 import 'package:vsc_app/features/cards/presentation/pages/similar_cards_page.dart';
@@ -62,7 +61,7 @@ class AppRouter {
             return VendorDetailPage(vendorId: vendorId);
           },
         ),
-        GoRoute(path: RouteConstants.cards, name: RouteConstants.cardsRouteName, builder: (context, state) => const CardsPage()),
+
         GoRoute(path: RouteConstants.createCard, name: RouteConstants.createCardRouteName, builder: (context, state) => const CreateCardPage()),
         GoRoute(path: RouteConstants.similarCards, builder: (context, state) => const SimilarCardsPage()),
         GoRoute(

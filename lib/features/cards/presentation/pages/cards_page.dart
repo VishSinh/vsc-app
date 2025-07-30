@@ -51,7 +51,7 @@ class _CardsPageState extends State<CardsPage> {
 
   Widget _buildCardsContent() {
     return Padding(
-      padding: const EdgeInsets.all(AppConfig.defaultPadding),
+      padding: EdgeInsets.all(AppConfig.defaultPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -59,7 +59,7 @@ class _CardsPageState extends State<CardsPage> {
           Row(
             children: [
               IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.inventory)),
-              const SizedBox(width: AppConfig.smallPadding),
+              SizedBox(width: AppConfig.smallPadding),
               Expanded(
                 child: PageHeader(
                   title: 'Cards Inventory',
@@ -92,7 +92,7 @@ class _CardsPageState extends State<CardsPage> {
               });
             },
           ),
-          const SizedBox(height: AppConfig.largePadding),
+          SizedBox(height: AppConfig.largePadding),
 
           // Cards List
           Expanded(
@@ -132,8 +132,8 @@ class _CardsPageState extends State<CardsPage> {
                           cardProvider.loadMoreCards();
                         }
                         return cardProvider.isLoading
-                            ? const Padding(
-                                padding: EdgeInsets.all(AppConfig.defaultPadding),
+                            ? Padding(
+                                padding: EdgeInsets.all(AppConfig.defaultPadding), // Changed from const to EdgeInsets
                                 child: Center(
                                   child: SpinKitDoubleBounce(color: AppConfig.primaryColor, size: AppConfig.loadingIndicatorSize),
                                 ),
@@ -162,7 +162,7 @@ class _CardsPageState extends State<CardsPage> {
           context.go('/cards/${card.id}');
         },
         child: Padding(
-          padding: const EdgeInsets.all(AppConfig.smallPadding), // Reduced padding
+          padding: EdgeInsets.all(AppConfig.smallPadding), // Reduced padding
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -198,15 +198,15 @@ class _CardsPageState extends State<CardsPage> {
                         child: Icon(Icons.image, color: AppConfig.grey600),
                       ),
               ),
-              const SizedBox(height: AppConfig.defaultPadding),
+              SizedBox(height: AppConfig.defaultPadding),
 
               // Status and Quantity badges
               Row(
                 children: [
                   StatusBadge(text: card.isActive ? 'Active' : 'Inactive', isActive: card.isActive),
-                  const SizedBox(width: AppConfig.smallPadding),
+                  SizedBox(width: AppConfig.smallPadding),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: AppConfig.smallPadding, vertical: 4),
+                    padding: EdgeInsets.symmetric(horizontal: AppConfig.smallPadding, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppConfig.primaryColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(AppConfig.borderRadiusSmall),
@@ -219,7 +219,7 @@ class _CardsPageState extends State<CardsPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: AppConfig.smallPadding),
+              SizedBox(height: AppConfig.smallPadding),
 
               // Barcode text (minimal info)
               Text(
@@ -228,7 +228,7 @@ class _CardsPageState extends State<CardsPage> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: AppConfig.smallPadding),
+              SizedBox(height: AppConfig.smallPadding),
 
               // Pricing (minimal info)
               Text('Price: \$${card.sellPrice}', style: AppConfig.bodyStyle.copyWith(fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -246,7 +246,7 @@ class _CardsPageState extends State<CardsPage> {
         return ShimmerWrapper(
           child: Card(
             child: Padding(
-              padding: const EdgeInsets.all(AppConfig.defaultPadding),
+              padding: EdgeInsets.all(AppConfig.defaultPadding),
               child: Row(
                 children: [
                   Container(
@@ -254,7 +254,7 @@ class _CardsPageState extends State<CardsPage> {
                     height: 60,
                     decoration: BoxDecoration(color: AppConfig.grey300, borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
                   ),
-                  const SizedBox(width: AppConfig.defaultPadding),
+                  SizedBox(width: AppConfig.defaultPadding),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,7 +264,7 @@ class _CardsPageState extends State<CardsPage> {
                           width: double.infinity,
                           decoration: BoxDecoration(color: AppConfig.grey300, borderRadius: BorderRadius.circular(AppConfig.smallRadius)),
                         ),
-                        const SizedBox(height: AppConfig.smallPadding),
+                        SizedBox(height: AppConfig.smallPadding),
                         Container(
                           height: 12,
                           width: 200,

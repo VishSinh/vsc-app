@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/app/app_router.dart';
@@ -34,13 +35,20 @@ class VSCApp extends StatelessWidget {
         ),
       ],
       child: AuthInitializer(
-        child: MaterialApp.router(
-          title: AppConfig.appName,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: ThemeMode.system,
-          routerConfig: AppRouter.router,
-          debugShowCheckedModeBanner: false,
+        child: ScreenUtilInit(
+          designSize: const Size(1080, 2160), // iPhone X design size for better mobile scaling
+          minTextAdapt: true,
+          splitScreenMode: true,
+          builder: (context, child) {
+            return MaterialApp.router(
+              title: AppConfig.appName,
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: ThemeMode.system,
+              routerConfig: AppRouter.router,
+              debugShowCheckedModeBanner: false,
+            );
+          },
         ),
       ),
     );
