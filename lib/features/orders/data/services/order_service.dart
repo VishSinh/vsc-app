@@ -1,14 +1,16 @@
 import 'package:vsc_app/core/models/api_response.dart';
-import 'package:vsc_app/core/models/order_model.dart';
+import 'package:vsc_app/features/orders/data/models/order_api_models.dart';
+import 'package:vsc_app/features/orders/data/models/order_requests.dart';
+import 'package:vsc_app/features/orders/data/models/order_responses.dart';
 import 'package:vsc_app/core/services/base_service.dart';
 import 'package:vsc_app/core/constants/app_constants.dart';
 
-class OrderService extends BaseService {
+class OrderService extends ApiService {
   /// Get orders with pagination
-  Future<ApiResponse<List<Order>>> getOrders({int page = 1, int pageSize = 10}) async {
+  Future<ApiResponse<List<OrderResponse>>> getOrders({int page = 1, int pageSize = 10}) async {
     return await executeRequest(() => get('${AppConstants.ordersEndpoint}?page=$page&page_size=$pageSize'), (json) {
       if (json is List<dynamic>) {
-        return json.map((orderJson) => Order.fromJson(orderJson as Map<String, dynamic>)).toList();
+        return json.map((orderJson) => OrderResponse.fromJson(orderJson as Map<String, dynamic>)).toList();
       }
       throw Exception('Invalid response format');
     });
@@ -18,7 +20,7 @@ class OrderService extends BaseService {
   Future<ApiResponse<MessageData>> createOrder({
     required String customerId,
     required String deliveryDate,
-    required List<OrderItem> orderItems,
+    required List<OrderItemApiModel> orderItems,
   }) async {
     final request = CreateOrderRequest(customerId: customerId, deliveryDate: deliveryDate, orderItems: orderItems);
 

@@ -14,6 +14,7 @@ import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.
 import 'package:vsc_app/features/vendors/presentation/widgets/create_vendor_dialog.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/navigation_items.dart';
+import 'package:vsc_app/core/utils/app_logger.dart';
 
 class VendorsPage extends StatefulWidget {
   const VendorsPage({super.key});
@@ -31,7 +32,7 @@ class _VendorsPageState extends State<VendorsPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      print('🚀 VendorsPage: Loading vendors...');
+      AppLogger.service('VendorsPage', 'Loading vendors...');
       context.read<VendorProvider>().loadVendors();
       _setSelectedIndex();
     });
@@ -164,8 +165,7 @@ class _VendorsPageState extends State<VendorsPage> {
       trailing: StatusBadge(text: vendor.isActive ? 'Active' : 'Inactive', isActive: vendor.isActive),
       onTap: () {
         // Navigate to vendor details page
-        print('🖱️ VendorsPage: Tapped vendor card for ID: ${vendor.id}');
-        print('🖱️ VendorsPage: Vendor name: ${vendor.name}');
+        AppLogger.uiAction('Tapped vendor card', details: 'ID: ${vendor.id}, Name: ${vendor.name}');
         context.goNamed(RouteConstants.vendorDetailRouteName, pathParameters: {'id': vendor.id});
       },
     );

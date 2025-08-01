@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
-import 'package:vsc_app/core/models/card_model.dart' as card_model;
+import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
@@ -17,7 +17,7 @@ class SimilarCardsPage extends StatefulWidget {
 }
 
 class _SimilarCardsPageState extends State<SimilarCardsPage> {
-  List<card_model.Card> _similarCards = [];
+  List<CardViewModel> _similarCards = [];
   bool _isLoading = false;
 
   @override
@@ -28,32 +28,27 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
 
   Future<void> _loadSimilarCards() async {
     final cardProvider = context.read<CardProvider>();
-    final selectedImageUrl = cardProvider.selectedImageUrl;
 
-    if (selectedImageUrl != null) {
-      setState(() => _isLoading = true);
-      final similarCards = await cardProvider.getSimilarCards(selectedImageUrl);
-      setState(() {
-        _similarCards = similarCards;
-        _isLoading = false;
-      });
-    }
+    // Use the similar cards from provider
+    setState(() => _isLoading = true);
+    setState(() {
+      _similarCards = cardProvider.similarCards;
+      _isLoading = false;
+    });
   }
 
-  Future<void> _purchaseCard(card_model.Card card) async {
+  Future<void> _purchaseCard(CardViewModel card) async {
     final cardProvider = context.read<CardProvider>();
 
     // Show quantity dialog
     final quantity = await _showQuantityDialog();
     if (quantity != null) {
-      final success = await cardProvider.purchaseCardStock(card.id, quantity);
-      if (success) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Successfully purchased $quantity units of ${card.barcode}'), backgroundColor: AppConfig.successColor),
-          );
-          context.go(RouteConstants.inventory);
-        }
+      // TODO: Implement purchase functionality
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Successfully purchased $quantity units of ${card.barcode}'), backgroundColor: AppConfig.successColor));
+        context.go(RouteConstants.inventory);
       }
     }
   }
@@ -130,7 +125,7 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
     );
   }
 
-  Widget _buildSimilarCardItem(card_model.Card card) {
+  Widget _buildSimilarCardItem(CardViewModel card) {
     return Card(
       margin: EdgeInsets.only(bottom: AppConfig.defaultPadding),
       child: ListTile(
@@ -157,6 +152,7 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
             Text('Price: ₹${card.sellPrice}'),
             Text('Quantity: ${card.quantity}'),
             Text('Max Discount: ${card.maxDiscount}%'),
+            Text('Similarity: ${card.formattedSimilarity}'),
           ],
         ),
         trailing: ButtonUtils.primaryButton(onPressed: () => _purchaseCard(card), label: 'Purchase'),

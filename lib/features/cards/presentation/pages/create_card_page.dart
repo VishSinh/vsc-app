@@ -1,6 +1,10 @@
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
@@ -10,6 +14,7 @@ import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
+import 'package:vsc_app/core/utils/app_logger.dart';
 
 class CreateCardPage extends StatefulWidget {
   const CreateCardPage({super.key});
@@ -68,7 +73,6 @@ class _CreateCardPageState extends State<CreateCardPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Header Section
-                          _buildHeaderSection(),
                           SizedBox(height: context.responsiveSpacing),
 
                           // Content Layout
@@ -101,17 +105,6 @@ class _CreateCardPageState extends State<CreateCardPage> {
     );
   }
 
-  Widget _buildHeaderSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(UITextConstants.createCardTitle, style: ResponsiveText.getHeadline(context).copyWith(color: AppConfig.primaryColor)),
-        SizedBox(height: AppConfig.smallPadding),
-        Text(UITextConstants.createCardSubtitle, style: ResponsiveText.getSubtitle(context)),
-      ],
-    );
-  }
-
   Widget _buildFormSection(CardProvider cardProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -140,7 +133,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
             ),
             SizedBox(height: AppConfig.defaultPadding),
 
-            if (cardProvider.selectedImageUrl != null) ...[
+            if (cardProvider.formModel.image != null) ...[
               // Display selected image with 4:3 aspect ratio
               LayoutBuilder(
                 builder: (context, constraints) {
@@ -157,16 +150,12 @@ class _CreateCardPageState extends State<CreateCardPage> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        cardProvider.selectedImageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: AppConfig.grey300,
-                            child: const Icon(Icons.error, color: AppConfig.red, size: AppConfig.iconSizeXLarge),
-                          );
-                        },
-                      ),
+                      child: cardProvider.formModel.image != null
+                          ? _buildImageWidget(cardProvider.formModel.image!)
+                          : Container(
+                              color: AppConfig.grey300,
+                              child: const Icon(Icons.error, color: AppConfig.red, size: AppConfig.iconSizeXLarge),
+                            ),
                     ),
                   );
                 },
@@ -186,7 +175,12 @@ class _CreateCardPageState extends State<CreateCardPage> {
                 SizedBox(height: AppConfig.smallPadding),
                 SizedBox(
                   width: double.infinity,
-                  child: ButtonUtils.dangerButton(onPressed: cardProvider.clearImage, label: UITextConstants.remove, icon: Icons.delete),
+                  child: ButtonUtils.dangerButton(
+                    onPressed: () => cardProvider.clearImage(),
+                    label: UITextConstants.remove,
+                    icon: Icons.delete,
+                    isLoading: cardProvider.isLoading,
+                  ),
                 ),
                 SizedBox(height: AppConfig.smallPadding),
                 SizedBox(
@@ -210,7 +204,12 @@ class _CreateCardPageState extends State<CreateCardPage> {
                     ),
                     SizedBox(width: AppConfig.defaultPadding),
                     Expanded(
-                      child: ButtonUtils.dangerButton(onPressed: cardProvider.clearImage, label: UITextConstants.remove, icon: Icons.delete),
+                      child: ButtonUtils.dangerButton(
+                        onPressed: () => cardProvider.clearImage(),
+                        label: UITextConstants.remove,
+                        icon: Icons.delete,
+                        isLoading: cardProvider.isLoading,
+                      ),
                     ),
                   ],
                 ),
@@ -447,7 +446,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
               title: Text(UITextConstants.galleryTitle),
               onTap: () {
                 Navigator.pop(context);
-                _uploadDummyImage(cardProvider);
+                _pickImage(cardProvider, ImageSource.gallery);
               },
             ),
             ListTile(
@@ -455,7 +454,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
               title: Text(UITextConstants.cameraTitle),
               onTap: () {
                 Navigator.pop(context);
-                _uploadDummyImage(cardProvider);
+                _pickImage(cardProvider, ImageSource.camera);
               },
             ),
           ],
@@ -464,9 +463,17 @@ class _CreateCardPageState extends State<CreateCardPage> {
     );
   }
 
-  void _uploadDummyImage(CardProvider cardProvider) {
-    // Simulate image upload
-    cardProvider.uploadImage('dummy_image_file');
+  Future<void> _pickImage(CardProvider cardProvider, ImageSource source) async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: source, maxWidth: 1024, maxHeight: 1024, imageQuality: 85);
+
+      if (image != null) {
+        cardProvider.uploadImage(image);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to pick image: $e'), backgroundColor: AppConfig.errorColor));
+    }
   }
 
   Future<void> _handleSubmit() async {
@@ -474,29 +481,35 @@ class _CreateCardPageState extends State<CreateCardPage> {
 
     final cardProvider = context.read<CardProvider>();
 
-    // Use selected image URL or a default one
-    final imageUrl = cardProvider.selectedImageUrl ?? 'https://t4.ftcdn.net/jpg/05/08/65/87/360_F_508658796_Np78KNMINjP6CemujX79bJsOWOTRbNCW.jpg';
-
-    // Check for similar cards first
-    final similarCards = await cardProvider.getSimilarCards(imageUrl);
-
-    if (similarCards.isNotEmpty && mounted) {
-      // Show dialog with similar cards found
-      final shouldProceed = await _showSimilarCardsDialog(similarCards.length);
-      if (!shouldProceed) return;
+    // Check if image is selected
+    if (cardProvider.formModel.image == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please select an image first'), backgroundColor: AppConfig.errorColor));
+      return;
     }
 
-    final success = await cardProvider.createCard(
-      image: imageUrl,
-      costPrice: double.parse(_costPriceController.text),
-      sellPrice: double.parse(_sellPriceController.text),
-      quantity: int.parse(_quantityController.text),
-      maxDiscount: double.parse(_maxDiscountController.text),
+    // Update form model with form data
+    cardProvider.updateFormField(
+      costPrice: _costPriceController.text,
+      sellPrice: _sellPriceController.text,
+      quantity: _quantityController.text,
+      maxDiscount: _maxDiscountController.text,
       vendorId: _selectedVendorId!,
     );
 
-    if (success && mounted) {
-      // Navigate back to cards page
+    // Check for similar cards first
+    await cardProvider.searchSimilarCards(cardProvider.formModel.image!);
+
+    if (cardProvider.similarCards.isNotEmpty && mounted) {
+      // Show dialog with similar cards found
+      final shouldProceed = await _showSimilarCardsDialog(cardProvider.similarCards.length);
+      if (!shouldProceed) return;
+    }
+
+    // Create the card
+    await cardProvider.createCard();
+
+    // Navigate back to cards page
+    if (mounted) {
       context.go(RouteConstants.inventory);
     }
   }
@@ -523,22 +536,63 @@ class _CreateCardPageState extends State<CreateCardPage> {
   }
 
   Future<void> _checkSimilarCards(CardProvider cardProvider) async {
-    if (cardProvider.selectedImageUrl == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please upload an image first'), backgroundColor: AppConfig.errorColor));
+    if (cardProvider.formModel.image == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please upload an image first'), backgroundColor: AppConfig.errorColor));
       return;
     }
 
-    final similarCards = await cardProvider.getSimilarCards(cardProvider.selectedImageUrl!);
+    await cardProvider.searchSimilarCards(cardProvider.formModel.image!);
 
-    if (similarCards.isNotEmpty && mounted) {
-      final shouldView = await _showSimilarCardsDialog(similarCards.length);
+    if (cardProvider.similarCards.isNotEmpty && mounted) {
+      final shouldView = await _showSimilarCardsDialog(cardProvider.similarCards.length);
       if (shouldView) {
         context.go(RouteConstants.similarCards);
       }
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No similar cards found'), backgroundColor: AppConfig.successColor));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('No similar cards found'), backgroundColor: AppConfig.successColor));
+    }
+  }
+
+  /// Build image widget with platform-specific handling
+  Widget _buildImageWidget(XFile imageFile) {
+    if (kIsWeb) {
+      // For web, use Image.memory with bytes
+      return FutureBuilder<Uint8List>(
+        future: imageFile.readAsBytes(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Image.memory(
+              snapshot.data!,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: AppConfig.grey300,
+                  child: const Icon(Icons.error, color: AppConfig.red, size: AppConfig.iconSizeXLarge),
+                );
+              },
+            );
+          } else if (snapshot.hasError) {
+            return Container(
+              color: AppConfig.grey300,
+              child: const Icon(Icons.error, color: AppConfig.red, size: AppConfig.iconSizeXLarge),
+            );
+          } else {
+            return Container(color: AppConfig.grey300, child: const CircularProgressIndicator());
+          }
+        },
+      );
+    } else {
+      // For mobile, use Image.file
+      return Image.file(
+        File(imageFile.path),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: AppConfig.grey300,
+            child: const Icon(Icons.error, color: AppConfig.red, size: AppConfig.iconSizeXLarge),
+          );
+        },
+      );
     }
   }
 }

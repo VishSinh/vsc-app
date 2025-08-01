@@ -65,6 +65,10 @@ dependencies:
   # Utilities
   intl: ^0.20.2
   uuid: ^4.3.3
+  logger: ^2.6.1
+  
+  # Image Picker
+  image_picker: ^1.0.7
 
 dev_dependencies:
   flutter_test:

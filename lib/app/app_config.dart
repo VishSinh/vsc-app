@@ -119,6 +119,17 @@ class AppConfig {
   static const double iconSizeXLarge = 48.0;
   static const double iconSizeXXLarge = 64.0;
 
+  // Image Sizes
+  static const double imageSizeSmall = 80.0;
+  static const double imageSizeMedium = 150.0;
+  static const double imageSizeLarge = 200.0;
+  static const double imageSizeXLarge = 300.0;
+
+  // Card Dimensions
+  static const double cardHeightSmall = 100.0;
+  static const double cardHeightMedium = 150.0;
+  static const double cardHeightLarge = 200.0;
+
   // Elevation
   static const double elevationNone = 0.0;
   static const double elevationLow = 2.0;

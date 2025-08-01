@@ -106,7 +106,8 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Future<void> _handleLogout() async {
     final authProvider = context.read<AuthProvider>();
-    await authProvider.logout(context: context);
+    authProvider.setContext(context);
+    await authProvider.logout();
     if (mounted) {
       context.go(RouteConstants.login);
     }

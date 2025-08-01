@@ -16,7 +16,7 @@ import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/constants/snackbar_constants.dart';
 import 'package:vsc_app/core/constants/navigation_items.dart';
-import 'package:vsc_app/core/models/card_model.dart' as card_model;
+import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});
@@ -279,7 +279,7 @@ class _InventoryPageState extends State<InventoryPage> {
     );
   }
 
-  Widget _buildCardItem(card_model.Card card) {
+  Widget _buildCardItem(CardViewModel card) {
     return Card(
       child: InkWell(
         onTap: () => context.goNamed(RouteConstants.cardDetailRouteName, pathParameters: {'id': card.id}),

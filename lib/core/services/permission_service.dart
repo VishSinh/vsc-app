@@ -3,7 +3,7 @@ import 'package:vsc_app/core/constants/app_constants.dart';
 import 'package:vsc_app/core/models/permission_model.dart';
 import 'package:vsc_app/core/services/base_service.dart';
 
-class PermissionService extends BaseService {
+class PermissionService extends ApiService {
   PermissionService({super.dio, super.secureStorage});
 
   Future<AllPermissionsResponse> getAllPermissions() async {

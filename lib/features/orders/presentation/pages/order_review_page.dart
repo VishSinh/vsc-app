@@ -6,10 +6,12 @@ import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
+import '../widgets/order_widgets.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_provider.dart';
+import 'package:vsc_app/core/utils/app_logger.dart';
 
 class OrderReviewPage extends StatefulWidget {
   const OrderReviewPage({super.key});
@@ -72,13 +74,13 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
     final orderProvider = context.read<OrderProvider>();
     final success = await orderProvider.createOrder();
 
-    print('Sucess - $success, mounted - $mounted');
+    AppLogger.debug('OrderReviewPage: Success - $success, mounted - $mounted');
 
     if (success && mounted) {
       SnackbarUtils.showSuccess(context, UITextConstants.orderCreatedSuccessfully);
-      context.go(RouteConstants.orders);
+      context.go(RouteConstants.dashboard);
     }
-    print("Shoudl not reach");
+    AppLogger.debug("OrderReviewPage: Should not reach this point");
   }
 
   @override
@@ -113,7 +115,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
   }
 
   Widget _buildMobileLayout(OrderProvider orderProvider) {
-    print('🔍 OrderReviewPage: Building mobile layout');
+    AppLogger.debug('OrderReviewPage: Building mobile layout');
     return SingleChildScrollView(
       padding: EdgeInsets.all(AppConfig.defaultPadding),
       child: Column(
@@ -157,34 +159,10 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
     );
   }
 
-  Widget _buildHeader(OrderProvider orderProvider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(UITextConstants.orderReviewTitle, style: ResponsiveText.getHeadline(context).copyWith(color: AppConfig.primaryColor)),
-        SizedBox(height: AppConfig.smallPadding),
-        Text(UITextConstants.orderReviewSubtitle, style: AppConfig.subtitleStyle),
-      ],
-    );
-  }
-
   Widget _buildCustomerInfo(OrderProvider orderProvider) {
     if (orderProvider.selectedCustomer == null) return const SizedBox.shrink();
 
-    return Card(
-      child: Padding(
-        padding: EdgeInsets.all(AppConfig.defaultPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Customer Information', style: ResponsiveText.getTitle(context)),
-            SizedBox(height: AppConfig.smallPadding),
-            Text('Name: ${orderProvider.selectedCustomer!.name}'),
-            Text('Phone: ${orderProvider.selectedCustomer!.phone}'),
-          ],
-        ),
-      ),
-    );
+    return CustomerInfoCard(customer: orderProvider.selectedCustomer, title: 'Customer Information');
   }
 
   Widget _buildDeliveryDateSection() {
@@ -257,7 +235,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
                 itemCount: orderProvider.orderItems.length,
                 itemBuilder: (context, index) {
                   final item = orderProvider.orderItems[index];
-                  final card = orderProvider.getCardById(item.cardId);
+                  final card = orderProvider.getCardViewModelById(item.cardId);
 
                   if (card == null) {
                     return Card(
@@ -266,273 +244,11 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
                     );
                   }
 
-                  // Calculate line item total
-                  final basePrice = card.sellPriceAsDouble;
-                  final discountAmount = double.tryParse(item.discountAmount) ?? 0.0;
-                  final quantity = item.quantity;
-                  final boxCost = item.requiresBox ? (double.tryParse(item.totalBoxCost ?? '0') ?? 0.0) : 0.0;
-                  final printingCost = item.requiresPrinting ? (double.tryParse(item.totalPrintingCost ?? '0') ?? 0.0) : 0.0;
-
-                  final lineItemTotal = ((basePrice - discountAmount) * quantity) + boxCost + printingCost;
-
-                  return Card(
-                    margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
-                    child: Padding(
-                      padding: EdgeInsets.all(AppConfig.defaultPadding),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Header
-                          Text('Item ${index + 1}', style: ResponsiveText.getSubtitle(context).copyWith(fontWeight: FontWeight.bold)),
-                          SizedBox(height: AppConfig.defaultPadding),
-
-                          if (context.isMobile) ...[
-                            // Mobile: Compact layout
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Card Image
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(AppConfig.smallRadius),
-                                  child: Image.network(
-                                    card.image,
-                                    width: 80,
-                                    height: 80,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Container(
-                                        width: 80,
-                                        height: 80,
-                                        decoration: BoxDecoration(
-                                          color: AppConfig.grey300,
-                                          borderRadius: BorderRadius.circular(AppConfig.smallRadius),
-                                        ),
-                                        child: Icon(Icons.image, color: AppConfig.grey600),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                SizedBox(width: AppConfig.defaultPadding),
-                                // Basic Info
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text('Price: ₹${card.sellPrice}', style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w600)),
-                                      Text('Quantity: ${quantity}', style: ResponsiveText.getBody(context)),
-                                      Text('Discount: ₹${discountAmount.toStringAsFixed(2)}', style: ResponsiveText.getBody(context)),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: AppConfig.defaultPadding),
-
-                            // Additional Details (only show if relevant)
-                            if (item.requiresBox || item.requiresPrinting) ...[
-                              Row(
-                                children: [
-                                  if (item.requiresBox) ...[
-                                    Expanded(child: Text('Box: ₹${boxCost.toStringAsFixed(2)}', style: ResponsiveText.getBody(context))),
-                                  ],
-                                  if (item.requiresPrinting) ...[
-                                    Expanded(child: Text('Printing: ₹${printingCost.toStringAsFixed(2)}', style: ResponsiveText.getBody(context))),
-                                  ],
-                                ],
-                              ),
-                              SizedBox(height: AppConfig.smallPadding),
-                            ],
-                          ] else ...[
-                            // Desktop: Modern card layout
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Card Image - Larger and more prominent
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(AppConfig.smallRadius),
-                                  child: Image.network(
-                                    card.image,
-                                    width: 150,
-                                    height: 150,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Container(
-                                        width: 150,
-                                        height: 150,
-                                        decoration: BoxDecoration(
-                                          color: AppConfig.grey300,
-                                          borderRadius: BorderRadius.circular(AppConfig.smallRadius),
-                                        ),
-                                        child: Icon(Icons.image, color: AppConfig.grey600, size: 40),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                SizedBox(width: AppConfig.largePadding),
-                                // Modern info layout
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      // Primary info row
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: _buildDesktopInfoRow('Price', '₹${card.sellPrice}', Icons.attach_money, AppConfig.primaryColor),
-                                          ),
-                                          SizedBox(width: AppConfig.defaultPadding),
-                                          Expanded(
-                                            child: _buildDesktopInfoRow('Quantity', '${quantity}', Icons.shopping_cart, AppConfig.successColor),
-                                          ),
-                                          SizedBox(width: AppConfig.defaultPadding),
-                                          Expanded(
-                                            child: _buildDesktopInfoRow(
-                                              'Discount',
-                                              '₹${discountAmount.toStringAsFixed(2)}',
-                                              Icons.discount,
-                                              AppConfig.warningColor,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: AppConfig.defaultPadding),
-                                      // Secondary info row
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: _buildDesktopInfoRow('Stock', '${card.quantity} units', Icons.inventory, AppConfig.grey600),
-                                          ),
-                                          SizedBox(width: AppConfig.defaultPadding),
-                                          Expanded(
-                                            child: _buildDesktopInfoRow(
-                                              'Box',
-                                              item.requiresBox
-                                                  ? 'Yes - ${item.boxType?.name.toUpperCase() ?? 'N/A'} - ₹${boxCost.toStringAsFixed(2)}'
-                                                  : 'No',
-                                              Icons.inventory_2,
-                                              item.requiresBox ? AppConfig.successColor : AppConfig.grey600,
-                                            ),
-                                          ),
-                                          SizedBox(width: AppConfig.defaultPadding),
-                                          Expanded(
-                                            child: _buildDesktopInfoRow(
-                                              'Printing',
-                                              item.requiresPrinting ? 'Yes - ₹${printingCost.toStringAsFixed(2)}' : 'No',
-                                              Icons.print,
-                                              item.requiresPrinting ? AppConfig.successColor : AppConfig.grey600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: AppConfig.defaultPadding),
-                                      // Total row
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: _buildDesktopInfoRow(
-                                              'Total',
-                                              '₹${lineItemTotal.toStringAsFixed(2)}',
-                                              Icons.calculate,
-                                              AppConfig.primaryColor,
-                                              isTotal: true,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-
-                          // Line Total for mobile only (desktop has it in the grid)
-                          if (context.isMobile) ...[
-                            Container(
-                              width: double.infinity,
-                              padding: EdgeInsets.all(AppConfig.smallPadding),
-                              decoration: BoxDecoration(
-                                color: AppConfig.primaryColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(AppConfig.smallRadius),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.calculate, color: AppConfig.primaryColor, size: 16),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    'Line Total: ₹${lineItemTotal.toStringAsFixed(2)}',
-                                    style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.bold, color: AppConfig.primaryColor),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  );
+                  return OrderItemCard(item: item, card: card, index: index, showRemoveButton: false, isReviewMode: true);
                 },
               ),
           ],
         ),
-      ),
-    );
-  }
-
-  // Widget _buildDesktopInfoRow(String label, String value, IconData icon, {bool isTotal = false}) {
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       Row(
-  //         children: [
-  //           Icon(icon, size: 16, color: isTotal ? AppConfig.primaryColor : AppConfig.grey600),
-  //           SizedBox(width: 4),
-  //           Text(
-  //             label,
-  //             style: ResponsiveText.getCaption(
-  //               context,
-  //             ).copyWith(color: isTotal ? AppConfig.primaryColor : AppConfig.grey600, fontWeight: isTotal ? FontWeight.bold : FontWeight.normal),
-  //           ),
-  //         ],
-  //       ),
-  //       SizedBox(height: 4),
-  //       Text(
-  //         value,
-  //         style: ResponsiveText.getBody(
-  //           context,
-  //         ).copyWith(fontWeight: isTotal ? FontWeight.bold : FontWeight.w600, color: isTotal ? AppConfig.primaryColor : null),
-  //       ),
-  //     ],
-  //   );
-  // }
-
-  Widget _buildDesktopInfoRow(String label, String value, IconData icon, Color color, {bool isTotal = false}) {
-    return Container(
-      padding: EdgeInsets.all(AppConfig.smallPadding),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppConfig.smallRadius),
-        border: Border.all(color: color.withOpacity(0.3), width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 16, color: color),
-              SizedBox(width: 4),
-              Text(
-                label,
-                style: ResponsiveText.getCaption(context).copyWith(color: color, fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
-          SizedBox(height: 4),
-          Text(
-            value,
-            style: ResponsiveText.getBody(context).copyWith(fontWeight: isTotal ? FontWeight.bold : FontWeight.w600, color: color),
-          ),
-        ],
       ),
     );
   }

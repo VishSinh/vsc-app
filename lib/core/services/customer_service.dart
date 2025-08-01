@@ -3,7 +3,7 @@ import 'package:vsc_app/core/models/customer_model.dart';
 import 'package:vsc_app/core/services/base_service.dart';
 import 'package:vsc_app/core/constants/app_constants.dart';
 
-class CustomerService extends BaseService {
+class CustomerService extends ApiService {
   /// Get customer by phone number
   Future<ApiResponse<Customer>> getCustomerByPhone(String phone) async {
     return await executeRequest(

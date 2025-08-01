@@ -1,26 +1,54 @@
-import 'package:vsc_app/core/models/card_model.dart' as card_model;
 import 'package:vsc_app/core/models/customer_model.dart';
-import 'package:vsc_app/core/models/order_model.dart';
+import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
-import 'package:vsc_app/core/services/card_service.dart';
-import 'package:vsc_app/core/services/order_service.dart';
+import 'package:vsc_app/features/cards/data/services/card_service.dart';
+import 'package:vsc_app/features/orders/data/services/order_service.dart';
+import 'package:vsc_app/features/orders/domain/services/order_price_calculator_service.dart';
+import 'package:vsc_app/features/orders/domain/services/order_mapper_service.dart';
+import 'package:vsc_app/features/orders/domain/models/order_item.dart';
+import 'package:vsc_app/features/orders/data/models/order_api_models.dart';
+import 'package:vsc_app/features/orders/presentation/validators/order_validators.dart' as presentation;
+import 'package:vsc_app/features/orders/domain/validators/order_validators.dart' as domain;
+import 'package:vsc_app/core/utils/app_logger.dart';
+import 'package:vsc_app/features/cards/domain/models/card.dart';
+import 'package:vsc_app/features/cards/domain/services/card_mapper_service.dart';
+import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 
-class OrderProvider extends BaseProvider {
+class OrderProvider extends BaseProvider with AutoSnackBarMixin {
   final OrderService _orderService = OrderService();
   final CardService _cardService = CardService();
+  final OrderPriceCalculatorService _priceCalculator = OrderPriceCalculatorService();
 
   Customer? _selectedCustomer;
-  final List<OrderItem> _orderItems = [];
-  card_model.Card? _currentCard;
+  final List<OrderItemViewModel> _orderItems = [];
+  CardEntity? _currentCard;
   String? _deliveryDate;
 
   // Store card details for each order item
-  final Map<String, card_model.Card> _cardDetails = {};
+  final Map<String, CardEntity> _cardDetails = {};
 
   Customer? get selectedCustomer => _selectedCustomer;
-  List<OrderItem> get orderItems => _orderItems;
-  card_model.Card? get currentCard => _currentCard;
+  List<OrderItemViewModel> get orderItems => _orderItems;
+  CardEntity? get currentCard => _currentCard;
+  CardViewModel? get currentCardViewModel => _currentCard != null ? CardViewModel.fromDomainModel(_currentCard!) : null;
   String? get deliveryDate => _deliveryDate;
+
+  /// Get cached domain models for calculations
+  List<OrderItem> get _domainOrderItems => _orderItems.map((item) => item.toDomainModel()).toList();
+
+  /// Get order total using business logic
+  double get orderTotal => _priceCalculator.calculateOrderTotal(_domainOrderItems, _cardDetails);
+
+  /// Get total discount for the order
+  double get totalDiscount => _priceCalculator.calculateTotalDiscount(_domainOrderItems);
+
+  /// Get total additional costs (box + printing)
+  double get totalAdditionalCosts => _priceCalculator.calculateTotalAdditionalCosts(_domainOrderItems);
+
+  /// Check if order is ready for submission
+  bool get isOrderReady {
+    return _selectedCustomer != null && _orderItems.isNotEmpty && _deliveryDate != null;
+  }
 
   /// Set selected customer
   void setSelectedCustomer(Customer customer) {
@@ -35,24 +63,32 @@ class OrderProvider extends BaseProvider {
   }
 
   /// Search card by barcode
-  Future<card_model.Card?> searchCardByBarcode(String barcode) async {
+  Future<CardEntity?> searchCardByBarcode(String barcode) async {
     try {
       setLoading(true);
       setError(null);
 
-      // Check if card is already in order items
-      final existingItem = _orderItems.where((item) => _cardDetails[item.cardId]?.barcode == barcode).firstOrNull;
-      if (existingItem != null) {
-        setError('This card is already added to the order');
+      // Validate barcode (UI validation)
+      final barcodeResult = presentation.OrderValidators.validateBarcode(barcode);
+      if (!barcodeResult.isValid) {
+        setError(barcodeResult.firstMessage ?? 'Invalid barcode'); // ✅ Auto SnackBar via mixin
+        return null;
+      }
+
+      // Check if card is already in order items (business rule)
+      final cardNotInOrderResult = domain.OrderDomainValidators.validateCardNotInOrder(barcode, _domainOrderItems);
+      if (!cardNotInOrderResult.isValid) {
+        setError(cardNotInOrderResult.firstMessage ?? 'Card already in order'); // ✅ Auto SnackBar via mixin
         return null;
       }
 
       final response = await _cardService.getCardByBarcode(barcode);
 
       if (response.success && response.data != null) {
-        _currentCard = response.data;
+        // Convert API response to domain model
+        _currentCard = CardMapperService.fromApiResponse(response.data!);
         notifyListeners();
-        return response.data;
+        return _currentCard;
       } else {
         setError(response.error?.details ?? response.error?.message ?? 'Card not found');
         return null;
@@ -76,19 +112,48 @@ class OrderProvider extends BaseProvider {
     String? totalBoxCost,
     String? totalPrintingCost,
   }) {
-    if (_currentCard == null) {
-      setError('No card selected');
+    // Validate item addition using business logic
+    final validationResult = domain.OrderDomainValidators.validateItemAddition(
+      cardId: cardId,
+      existingItems: _domainOrderItems,
+      quantity: quantity,
+      availableStock: _currentCard?.quantity ?? 0,
+    );
+
+    if (!validationResult.isValid) {
+      setError(validationResult.firstMessage ?? 'Invalid item addition');
       return;
     }
 
-    // Check if card is already in order items
-    final existingItem = _orderItems.where((item) => item.cardId == cardId).firstOrNull;
-    if (existingItem != null) {
-      setError('This card is already added to the order');
+    // Validate discount amount (business rule)
+    final discountAmountDouble = double.tryParse(discountAmount) ?? 0.0;
+    final discountResult = domain.OrderDomainValidators.validateDiscountAmount(discountAmountDouble, _currentCard?.maxDiscount ?? 0.0);
+    if (!discountResult.isValid) {
+      setError(discountResult.firstMessage ?? 'Invalid discount amount');
       return;
     }
 
-    final orderItem = OrderItem(
+    // Validate additional costs if required (business rules)
+    if (requiresBox) {
+      final boxCost = double.tryParse(totalBoxCost ?? '0') ?? 0.0;
+      final boxCostResult = domain.OrderDomainValidators.validateBoxCost(boxCost, requiresBox);
+      if (!boxCostResult.isValid) {
+        setError(boxCostResult.firstMessage ?? 'Invalid box cost');
+        return;
+      }
+    }
+
+    if (requiresPrinting) {
+      final printingCost = double.tryParse(totalPrintingCost ?? '0') ?? 0.0;
+      final printingCostResult = domain.OrderDomainValidators.validatePrintingCost(printingCost, requiresPrinting);
+      if (!printingCostResult.isValid) {
+        setError(printingCostResult.firstMessage ?? 'Invalid printing cost');
+        return;
+      }
+    }
+
+    // Create view model from API model
+    final apiModel = OrderItemApiModel(
       cardId: cardId,
       discountAmount: discountAmount,
       quantity: quantity,
@@ -98,6 +163,8 @@ class OrderProvider extends BaseProvider {
       totalBoxCost: totalBoxCost,
       totalPrintingCost: totalPrintingCost,
     );
+
+    final orderItem = OrderItemViewModel.fromApiModel(apiModel, CardMapperService.toApiResponse(_currentCard!));
 
     _orderItems.add(orderItem);
     // Store card details for display
@@ -124,7 +191,7 @@ class OrderProvider extends BaseProvider {
   }
 
   /// Get card by ID from stored card details
-  card_model.Card? getCardById(String cardId) {
+  CardEntity? getCardById(String cardId) {
     // First check if it's the current card
     if (_currentCard?.id == cardId) {
       return _currentCard;
@@ -134,20 +201,23 @@ class OrderProvider extends BaseProvider {
     return _cardDetails[cardId];
   }
 
+  /// Get card ViewModel by ID from stored card details (for UI)
+  CardViewModel? getCardViewModelById(String cardId) {
+    final card = getCardById(cardId);
+    return card != null ? CardViewModel.fromDomainModel(card) : null;
+  }
+
   /// Create order
   Future<bool> createOrder() async {
-    if (_selectedCustomer == null) {
-      setError('Please select a customer');
-      return false;
-    }
+    // Validate order creation using UI validation
+    final validationResult = presentation.OrderValidators.validateOrderCreation(
+      customer: _selectedCustomer,
+      items: _domainOrderItems,
+      deliveryDate: _deliveryDate,
+    );
 
-    if (_orderItems.isEmpty) {
-      setError('Please add at least one item to the order');
-      return false;
-    }
-
-    if (_deliveryDate == null) {
-      setError('Please select a delivery date');
+    if (!validationResult.isValid) {
+      setError(validationResult.firstMessage ?? 'Invalid order data');
       return false;
     }
 
@@ -155,7 +225,11 @@ class OrderProvider extends BaseProvider {
       setLoading(true);
       setError(null);
 
-      final response = await _orderService.createOrder(customerId: _selectedCustomer!.id, deliveryDate: _deliveryDate!, orderItems: _orderItems);
+      final response = await _orderService.createOrder(
+        customerId: _selectedCustomer!.id,
+        deliveryDate: _deliveryDate!,
+        orderItems: _domainOrderItems.map((item) => OrderMapperService.toApiModel(item)).toList(),
+      );
 
       if (response.success) {
         // Clear the order data after successful creation
@@ -166,7 +240,7 @@ class OrderProvider extends BaseProvider {
         return false;
       }
     } catch (e) {
-      print(e);
+      AppLogger.errorCaught('OrderProvider.createOrder', e.toString(), errorObject: e);
       setError('Failed to create order: $e');
       return false;
     } finally {

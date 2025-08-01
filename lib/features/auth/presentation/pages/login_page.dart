@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/app/app_config.dart';
-import 'package:vsc_app/core/widgets/button_utils.dart';
-import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
-import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
-import 'package:vsc_app/core/utils/responsive_text.dart';
+import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
+import 'package:vsc_app/core/utils/responsive_text.dart';
+import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -23,6 +22,15 @@ class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true;
 
   @override
+  void initState() {
+    super.initState();
+    // Initialize the login form in the provider
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthProvider>().initializeLoginForm();
+    });
+  }
+
+  @override
   void dispose() {
     _phoneController.dispose();
     _passwordController.dispose();
@@ -30,11 +38,17 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     final authProvider = context.read<AuthProvider>();
+    authProvider.setContext(context);
 
-    final success = await authProvider.login(phone: _phoneController.text.trim(), password: _passwordController.text, context: context);
+    // Update the form with current values
+    authProvider.updateLoginForm(phone: _phoneController.text.trim(), password: _passwordController.text);
+
+    final success = await authProvider.login();
 
     if (success && mounted) {
       // Navigate to dashboard
@@ -50,18 +64,18 @@ class _LoginPageState extends State<LoginPage> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [AppConfig.primaryColor.withOpacity(0.1), AppConfig.accentColor.withOpacity(0.1)],
+            colors: [AppConfig.primaryColor.withValues(alpha: 0.1), AppConfig.accentColor.withValues(alpha: 0.1)],
           ),
         ),
         child: Center(
           child: SingleChildScrollView(
-            padding: context.responsivePadding,
+            padding: ResponsiveUtils.getResponsivePadding(context),
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: context.formWidth),
+              constraints: BoxConstraints(maxWidth: ResponsiveUtils.getFormWidth(context)),
               child: Card(
                 elevation: AppConfig.elevationHigh,
                 child: Padding(
-                  padding: context.responsivePadding,
+                  padding: ResponsiveUtils.getResponsivePadding(context),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -70,10 +84,10 @@ class _LoginPageState extends State<LoginPage> {
                         // App Logo/Title
                         Icon(Icons.inventory, size: AppConfig.iconSizeXXLarge, color: AppConfig.primaryColor),
                         SizedBox(height: AppConfig.defaultPadding),
-                        Text('Dashboard', style: ResponsiveText.getHeadlineStyle(context)),
+                        Text(UITextConstants.appName, style: ResponsiveText.getHeadlineStyle(context)),
                         SizedBox(height: AppConfig.smallPadding),
                         Text(UITextConstants.signInTitle, style: ResponsiveText.getSubtitle(context).copyWith(color: AppConfig.grey600)),
-                        SizedBox(height: context.responsiveSpacing),
+                        SizedBox(height: AppConfig.largePadding),
 
                         // Phone Field
                         TextFormField(
@@ -92,6 +106,10 @@ class _LoginPageState extends State<LoginPage> {
                               return UITextConstants.pleaseEnterValidPhone;
                             }
                             return null;
+                          },
+                          onChanged: (value) {
+                            // Update form in provider as user types
+                            context.read<AuthProvider>().updateLoginForm(phone: value);
                           },
                         ),
                         SizedBox(height: AppConfig.defaultPadding),
@@ -121,6 +139,10 @@ class _LoginPageState extends State<LoginPage> {
                             }
                             return null;
                           },
+                          onChanged: (value) {
+                            // Update form in provider as user types
+                            context.read<AuthProvider>().updateLoginForm(password: value);
+                          },
                         ),
                         SizedBox(height: AppConfig.largePadding),
 
@@ -133,11 +155,15 @@ class _LoginPageState extends State<LoginPage> {
                                 padding: EdgeInsets.all(AppConfig.smallPadding),
                                 margin: EdgeInsets.only(bottom: AppConfig.defaultPadding),
                                 decoration: BoxDecoration(
-                                  color: AppConfig.errorColor.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(AppConfig.smallRadius),
-                                  border: Border.all(color: AppConfig.errorColor),
+                                  color: Colors.red.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(AppConfig.borderRadiusSmall),
+                                  border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
                                 ),
-                                child: Text(authProvider.errorMessage!, style: TextStyle(color: AppConfig.errorColor)),
+                                child: Text(
+                                  authProvider.errorMessage!,
+                                  style: TextStyle(color: Colors.red[700]),
+                                  textAlign: TextAlign.center,
+                                ),
                               );
                             }
                             return const SizedBox.shrink();
@@ -147,10 +173,19 @@ class _LoginPageState extends State<LoginPage> {
                         // Login Button
                         Consumer<AuthProvider>(
                           builder: (context, authProvider, child) {
-                            return ButtonUtils.fullWidthPrimaryButton(
-                              onPressed: _handleLogin,
-                              label: UITextConstants.signIn,
-                              isLoading: authProvider.isLoading,
+                            return SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: authProvider.isLoading ? null : _handleLogin,
+                                style: ElevatedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(vertical: AppConfig.largePadding),
+                                  backgroundColor: AppConfig.primaryColor,
+                                  foregroundColor: Colors.white,
+                                ),
+                                child: authProvider.isLoading
+                                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                    : Text(UITextConstants.signIn, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              ),
                             );
                           },
                         ),

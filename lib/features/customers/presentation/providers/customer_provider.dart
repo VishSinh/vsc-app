@@ -1,6 +1,7 @@
 import 'package:vsc_app/core/models/customer_model.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
 import 'package:vsc_app/core/services/customer_service.dart';
+import 'package:vsc_app/core/utils/app_logger.dart';
 
 class CustomerProvider extends BaseProvider {
   final CustomerService _customerService = CustomerService();
@@ -22,7 +23,7 @@ class CustomerProvider extends BaseProvider {
         return response.data;
       } else {
         final errorMessage = response.error?.details ?? response.error?.message ?? 'Customer not found';
-        print('🔍 CustomerProvider: Setting error: "$errorMessage"');
+        AppLogger.debug('CustomerProvider: Setting error: "$errorMessage"');
         setError(errorMessage);
         return null;
       }

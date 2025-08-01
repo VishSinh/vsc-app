@@ -13,6 +13,7 @@ import 'package:vsc_app/features/vendors/presentation/widgets/create_vendor_dial
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
+import 'package:vsc_app/core/utils/app_logger.dart';
 
 class VendorDetailPage extends StatefulWidget {
   final String vendorId;
@@ -41,14 +42,14 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
         _errorMessage = null;
       });
 
-      print('🔍 Loading vendor details for ID: ${widget.vendorId}');
+      AppLogger.service('VendorDetailPage', 'Loading vendor details for ID: ${widget.vendorId}');
 
       final vendorProvider = context.read<VendorProvider>();
       final vendor = await vendorProvider.getVendorById(widget.vendorId);
 
-      print('📦 Vendor data received: $vendor');
-      print('📦 Vendor is null: ${vendor == null}');
-      print('📦 Vendor type: ${vendor.runtimeType}');
+      AppLogger.debug('VendorDetailPage: Vendor data received: $vendor');
+      AppLogger.debug('VendorDetailPage: Vendor is null: ${vendor == null}');
+      AppLogger.debug('VendorDetailPage: Vendor type: ${vendor.runtimeType}');
 
       if (mounted) {
         setState(() {
@@ -61,8 +62,7 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
         });
       }
     } catch (e) {
-      print('❌ Error loading vendor details: $e');
-      print('❌ Error type: ${e.runtimeType}');
+      AppLogger.errorCaught('VendorDetailPage._loadVendorDetails', e.toString(), errorObject: e);
       if (mounted) {
         setState(() {
           _errorMessage = e.toString();

@@ -1,6 +1,7 @@
 import 'package:vsc_app/core/models/vendor_model.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
 import 'package:vsc_app/core/services/vendor_service.dart';
+import 'package:vsc_app/core/utils/app_logger.dart';
 
 class VendorProvider extends BaseProvider with PaginationMixin {
   final VendorService _vendorService;
@@ -42,25 +43,24 @@ class VendorProvider extends BaseProvider with PaginationMixin {
   /// Get vendor by ID
   Future<Vendor?> getVendorById(String id) async {
     try {
-      print('🔍 VendorProvider: Getting vendor by ID: $id');
+      AppLogger.service('VendorProvider', 'Getting vendor by ID: $id');
 
       final response = await _vendorService.getVendorById(id);
 
-      print('📦 VendorProvider: API response received');
-      print('📦 VendorProvider: Response success: ${response.success}');
-      print('📦 VendorProvider: Response data: ${response.data}');
-      print('📦 VendorProvider: Response error: ${response.error}');
+      AppLogger.debug('VendorProvider: API response received');
+      AppLogger.debug('VendorProvider: Response success: ${response.success}');
+      AppLogger.debug('VendorProvider: Response data: ${response.data}');
+      AppLogger.debug('VendorProvider: Response error: ${response.error}');
 
       if (response.success && response.data != null) {
-        print('✅ VendorProvider: Successfully retrieved vendor');
+        AppLogger.success('VendorProvider', 'Successfully retrieved vendor');
         return response.data;
       } else {
-        print('❌ VendorProvider: API returned error: ${response.error?.message ?? 'Unknown error'}');
+        AppLogger.apiError('getVendorById', response.error?.message ?? 'Unknown error');
         throw Exception(response.error?.details ?? response.error?.message ?? 'Failed to load vendor');
       }
     } catch (e) {
-      print('❌ VendorProvider: Exception caught: $e');
-      print('❌ VendorProvider: Exception type: ${e.runtimeType}');
+      AppLogger.errorCaught('VendorProvider.getVendorById', e.toString(), errorObject: e);
       throw Exception('Failed to load vendor: $e');
     }
   }

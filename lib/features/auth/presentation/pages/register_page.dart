@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/app/app_config.dart';
-import 'package:vsc_app/core/enums/user_role.dart';
-import 'package:vsc_app/core/widgets/button_utils.dart';
-import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
-import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
+import 'package:vsc_app/core/constants/ui_text_constants.dart';
+import 'package:vsc_app/core/enums/user_role.dart';
+import 'package:vsc_app/core/utils/responsive_utils.dart';
+import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -26,6 +26,15 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _obscureConfirmPassword = true;
 
   @override
+  void initState() {
+    super.initState();
+    // Initialize the register form in the provider
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthProvider>().initializeRegisterForm();
+    });
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
@@ -35,24 +44,25 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _handleRegister() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     final authProvider = context.read<AuthProvider>();
+    authProvider.setContext(context);
 
-    final success = await authProvider.register(
+    // Update the form with current values
+    authProvider.updateRegisterForm(
       name: _nameController.text.trim(),
       phone: _phoneController.text.trim(),
       password: _passwordController.text,
+      confirmPassword: _confirmPasswordController.text,
       role: _selectedRole.value,
-      context: context,
     );
 
-    if (success && mounted) {
-      // Show success message and clear form
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(authProvider.successMessage ?? UITextConstants.registrationSuccessful), backgroundColor: AppConfig.successColor),
-      );
+    final success = await authProvider.register();
 
+    if (success && mounted) {
       // Clear form
       _nameController.clear();
       _phoneController.clear();
@@ -72,13 +82,13 @@ class _RegisterPageState extends State<RegisterPage> {
         leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.administration)),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(AppConfig.largePadding),
+        padding: ResponsiveUtils.getResponsivePadding(context),
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: AppConfig.maxWidthMedium),
+          constraints: BoxConstraints(maxWidth: ResponsiveUtils.getFormWidth(context)),
           child: Card(
             elevation: AppConfig.elevationMedium,
             child: Padding(
-              padding: EdgeInsets.all(AppConfig.largePadding),
+              padding: ResponsiveUtils.getResponsivePadding(context),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -109,6 +119,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         }
                         return null;
                       },
+                      onChanged: (value) {
+                        context.read<AuthProvider>().updateRegisterForm(name: value);
+                      },
                     ),
                     SizedBox(height: AppConfig.defaultPadding),
 
@@ -130,6 +143,9 @@ class _RegisterPageState extends State<RegisterPage> {
                         }
                         return null;
                       },
+                      onChanged: (value) {
+                        context.read<AuthProvider>().updateRegisterForm(phone: value);
+                      },
                     ),
                     SizedBox(height: AppConfig.defaultPadding),
 
@@ -145,7 +161,14 @@ class _RegisterPageState extends State<RegisterPage> {
                           setState(() {
                             _selectedRole = value;
                           });
+                          context.read<AuthProvider>().updateRegisterForm(role: value.value);
                         }
+                      },
+                      validator: (value) {
+                        if (value == null) {
+                          return 'Please select a role';
+                        }
+                        return null;
                       },
                     ),
                     SizedBox(height: AppConfig.defaultPadding),
@@ -170,13 +193,13 @@ class _RegisterPageState extends State<RegisterPage> {
                         if (value == null || value.isEmpty) {
                           return UITextConstants.pleaseEnterPassword;
                         }
-                        if (value.length < 8) {
-                          return UITextConstants.passwordTooShortRegister;
-                        }
-                        if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)').hasMatch(value)) {
-                          return UITextConstants.passwordComplexity;
+                        if (value.length < 6) {
+                          return UITextConstants.passwordTooShort;
                         }
                         return null;
+                      },
+                      onChanged: (value) {
+                        context.read<AuthProvider>().updateRegisterForm(password: value);
                       },
                     ),
                     SizedBox(height: AppConfig.defaultPadding),
@@ -202,9 +225,12 @@ class _RegisterPageState extends State<RegisterPage> {
                           return UITextConstants.pleaseEnterConfirmPassword;
                         }
                         if (value != _passwordController.text) {
-                          return UITextConstants.passwordsDoNotMatch;
+                          return 'Passwords do not match';
                         }
                         return null;
+                      },
+                      onChanged: (value) {
+                        context.read<AuthProvider>().updateRegisterForm(confirmPassword: value);
                       },
                     ),
                     SizedBox(height: AppConfig.largePadding),
@@ -218,31 +244,15 @@ class _RegisterPageState extends State<RegisterPage> {
                             padding: EdgeInsets.all(AppConfig.smallPadding),
                             margin: EdgeInsets.only(bottom: AppConfig.defaultPadding),
                             decoration: BoxDecoration(
-                              color: AppConfig.errorColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(AppConfig.smallRadius),
-                              border: Border.all(color: AppConfig.errorColor),
+                              color: Colors.red.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(AppConfig.borderRadiusSmall),
+                              border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
                             ),
-                            child: Text(authProvider.errorMessage!, style: TextStyle(color: AppConfig.errorColor)),
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
-
-                    // Success Message
-                    Consumer<AuthProvider>(
-                      builder: (context, authProvider, child) {
-                        if (authProvider.successMessage != null) {
-                          return Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.all(AppConfig.smallPadding),
-                            margin: EdgeInsets.only(bottom: AppConfig.defaultPadding),
-                            decoration: BoxDecoration(
-                              color: AppConfig.successColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(AppConfig.smallRadius),
-                              border: Border.all(color: AppConfig.successColor),
+                            child: Text(
+                              authProvider.errorMessage!,
+                              style: TextStyle(color: Colors.red[700]),
+                              textAlign: TextAlign.center,
                             ),
-                            child: Text(authProvider.successMessage!, style: TextStyle(color: AppConfig.successColor)),
                           );
                         }
                         return const SizedBox.shrink();
@@ -252,10 +262,19 @@ class _RegisterPageState extends State<RegisterPage> {
                     // Register Button
                     Consumer<AuthProvider>(
                       builder: (context, authProvider, child) {
-                        return ButtonUtils.fullWidthPrimaryButton(
-                          onPressed: _handleRegister,
-                          label: UITextConstants.registerStaffMember,
-                          isLoading: authProvider.isLoading,
+                        return SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: authProvider.isLoading ? null : _handleRegister,
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(vertical: AppConfig.largePadding),
+                              backgroundColor: AppConfig.primaryColor,
+                              foregroundColor: Colors.white,
+                            ),
+                            child: authProvider.isLoading
+                                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                : Text(UITextConstants.registerStaff, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          ),
                         );
                       },
                     ),

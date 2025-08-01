@@ -1,185 +1,112 @@
-import 'package:vsc_app/core/models/card_model.dart' as card_model;
-import 'package:vsc_app/core/services/card_service.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
+import 'package:vsc_app/core/utils/app_logger.dart';
+import 'package:vsc_app/features/cards/data/services/card_service.dart';
 
-class CardProvider extends BaseProvider with PaginationMixin {
+import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
+import 'package:vsc_app/features/cards/presentation/models/card_form_models.dart';
+import 'package:vsc_app/features/cards/presentation/validators/card_validators.dart';
+import 'package:vsc_app/features/cards/domain/services/card_mapper_service.dart';
+import 'package:vsc_app/features/cards/domain/models/card.dart';
+
+/// Provider for managing card state and operations
+class CardProvider extends BaseProvider with AutoSnackBarMixin {
   final CardService _cardService = CardService();
-  final List<card_model.Card> _cards = [];
-  String? _errorMessage;
-  String? _selectedImageUrl;
+
+  // State
+  List<CardViewModel> _cards = [];
+  List<CardViewModel> _similarCards = [];
+  CardFormViewModel _formModel = CardFormViewModel.empty();
+  CardViewModel? _selectedCard;
+  bool _isSearchingSimilar = false;
 
   // Getters
-  List<card_model.Card> get cards => _cards;
-  @override
-  String? get errorMessage => _errorMessage;
-  String? get selectedImageUrl => _selectedImageUrl;
+  List<CardViewModel> get cards => _cards;
+  List<CardViewModel> get similarCards => _similarCards;
+  CardFormViewModel get formModel => _formModel;
+  CardViewModel? get selectedCard => _selectedCard;
+  bool get isSearchingSimilar => _isSearchingSimilar;
 
-  /// Load cards with pagination
+  /// Get selected image URL (for backward compatibility)
+  String? get selectedImageUrl => _formModel.image?.path;
+
+  /// Clear selected image (for backward compatibility)
+  void clearImage() {
+    // Create a new form model without the image
+    _formModel = CardFormViewModel.fromFormData(
+      costPrice: _formModel.costPrice,
+      sellPrice: _formModel.sellPrice,
+      quantity: _formModel.quantity,
+      maxDiscount: _formModel.maxDiscount,
+      vendorId: _formModel.vendorId,
+      image: null,
+    );
+    notifyListeners();
+  }
+
+  /// Upload image (for backward compatibility)
+  Future<void> uploadImage(XFile imageFile) async {
+    _formModel = _formModel.copyWith(image: imageFile);
+    notifyListeners();
+  }
+
+  /// Get similar cards (for backward compatibility)
+  List<CardViewModel> getSimilarCards() {
+    return _similarCards;
+  }
+
+  /// Load cards with pagination (for backward compatibility)
   Future<void> loadCards({int page = 1, int pageSize = 10}) async {
     try {
       setLoading(true);
-      _errorMessage = null;
-
-      print('🔍 CardProvider: Loading cards page $page, pageSize $pageSize');
-      print('🔍 CardProvider: Current cards count before loading: ${_cards.length}');
+      setError(null);
 
       final response = await _cardService.getCards(page: page, pageSize: pageSize);
 
       if (response.success && response.data != null) {
-        print('🔍 CardProvider: Received ${response.data!.length} cards from API');
-
         if (page == 1) {
-          // First page - replace all cards
           _cards.clear();
-          _cards.addAll(response.data!);
-          print('🔍 CardProvider: Cleared and added ${response.data!.length} cards (page 1)');
-        } else {
-          // Subsequent pages - append cards
-          _cards.addAll(response.data!);
-          print('🔍 CardProvider: Added ${response.data!.length} cards to existing ${_cards.length - response.data!.length} cards (page $page)');
         }
-
-        print('🔍 CardProvider: Total cards after loading: ${_cards.length}');
-
-        // Update pagination data
-        if (response.pagination != null) {
-          print(
-            '🔍 CardProvider: Pagination data - hasNext: ${response.pagination!.hasNext}, currentPage: ${response.pagination!.currentPage}, totalPages: ${response.pagination!.totalPages}',
-          );
-          setHasMoreData(response.pagination!.hasNext);
-          if (page == 1) {
-            resetPagination();
-          } else {
-            incrementPage();
-          }
-        }
-
+        _cards.addAll(response.data!.map((apiModel) => CardViewModel.fromDomainModel(CardMapperService.fromApiResponse(apiModel))));
         notifyListeners();
       } else {
-        _errorMessage = response.error?.details ?? response.error?.message ?? 'Failed to load cards';
-        // If we get an error on page > 1, it means there are no more pages
-        if (page > 1) {
-          print('🔍 CardProvider: Error on page $page, setting hasMoreData to false');
-          setHasMoreData(false);
-        }
-        notifyListeners();
+        setError(response.error?.message ?? 'Failed to load cards');
       }
     } catch (e) {
-      _errorMessage = 'Failed to load cards: $e';
-      // If we get an error on page > 1, it means there are no more pages
-      if (page > 1) {
-        print('🔍 CardProvider: Exception on page $page, setting hasMoreData to false');
-        setHasMoreData(false);
-      }
-      notifyListeners();
+      setError('Failed to load cards: $e');
     } finally {
       setLoading(false);
     }
   }
 
-  /// Load more cards (for infinite scroll)
-  Future<void> loadMoreCards() async {
-    if (hasMoreData && !isLoading) {
-      print('🔍 CardProvider: loadMoreCards called - hasMoreData: $hasMoreData, isLoading: $isLoading, currentPage: $currentPage');
-      await loadCards(page: currentPage + 1);
-    } else {
-      print('🔍 CardProvider: loadMoreCards skipped - hasMoreData: $hasMoreData, isLoading: $isLoading');
-    }
-  }
-
-  /// Refresh cards (reload first page)
-  Future<void> refreshCards() async {
-    await loadCards(page: 1);
-  }
-
-  /// Get card by ID
-  Future<card_model.Card?> getCardById(String id) async {
+  /// Get card by ID (for backward compatibility)
+  Future<CardViewModel?> getCardById(String id) async {
     try {
       setLoading(true);
-      _errorMessage = null;
+      setError(null);
 
       final response = await _cardService.getCardById(id);
 
       if (response.success && response.data != null) {
+        final cardViewModel = CardViewModel.fromDomainModel(CardMapperService.fromApiResponse(response.data!));
         notifyListeners();
-        return response.data;
+        return cardViewModel;
       } else {
-        _errorMessage = response.error?.details ?? response.error?.message ?? 'Failed to load card';
-        notifyListeners();
+        setError(response.error?.message ?? 'Card not found');
         return null;
       }
     } catch (e) {
-      _errorMessage = 'Failed to load card: $e';
-      notifyListeners();
+      setError('Failed to load card: $e');
       return null;
     } finally {
       setLoading(false);
     }
   }
 
-  /// Upload image (placeholder for future implementation)
-  Future<void> uploadImage(dynamic imageFile) async {
-    try {
-      setLoading(true);
-      // TODO: Implement actual image upload
-      await Future.delayed(const Duration(seconds: 2)); // Simulate upload
-      _selectedImageUrl = 'https://t4.ftcdn.net/jpg/05/08/65/87/360_F_508658796_Np78KNMINjP6CemujX79bJsOWOTRbNCW.jpg';
-      notifyListeners();
-    } catch (e) {
-      _errorMessage = 'Failed to upload image: $e';
-      notifyListeners();
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  /// Create a new card
-  Future<bool> createCard({
-    required String image,
-    required double costPrice,
-    required double sellPrice,
-    required int quantity,
-    required double maxDiscount,
-    required String vendorId,
-  }) async {
-    try {
-      setLoading(true);
-      _errorMessage = null;
-
-      final response = await _cardService.createCard(
-        image: image,
-        costPrice: costPrice,
-        sellPrice: sellPrice,
-        quantity: quantity,
-        maxDiscount: maxDiscount,
-        vendorId: vendorId,
-      );
-
-      if (response.success) {
-        // Refresh cards after successful creation
-        await refreshCards();
-        return true;
-      } else {
-        _errorMessage = response.error?.details ?? response.error?.message ?? 'Failed to create card';
-        notifyListeners();
-        return false;
-      }
-    } catch (e) {
-      _errorMessage = 'Failed to create card: $e';
-      notifyListeners();
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  /// Get filtered cards based on search query
-  List<card_model.Card> getFilteredCards(String query) {
-    print('🔍 CardProvider: getFilteredCards called with query: "$query"');
-    print('🔍 CardProvider: Total cards in _cards: ${_cards.length}');
-
+  /// Get filtered cards (for backward compatibility)
+  List<CardViewModel> getFilteredCards(String query) {
     if (query.isEmpty) {
-      print('🔍 CardProvider: Query is empty, returning all ${_cards.length} cards');
       return _cards;
     }
 
@@ -193,72 +120,186 @@ class CardProvider extends BaseProvider with PaginationMixin {
           card.maxDiscount.toLowerCase().contains(searchLower);
     }).toList();
 
-    print('🔍 CardProvider: Filtered cards count: ${filteredCards.length}');
     return filteredCards;
   }
 
-  /// Clear all data
-  void clearData() {
-    _cards.clear();
-    _errorMessage = null;
-    resetPagination();
-    notifyListeners();
+  /// Load more cards (for backward compatibility)
+  Future<void> loadMoreCards() async {
+    // For now, just reload the first page
+    await loadCards(page: 1);
   }
 
-  /// Clear image (for form reset)
-  void clearImage() {
-    _selectedImageUrl = null;
-    notifyListeners();
-  }
-
-  /// Get similar cards based on image URL
-  Future<List<card_model.Card>> getSimilarCards(String imageUrl) async {
+  /// Search for similar cards using image upload
+  Future<void> searchSimilarCards(XFile imageFile) async {
     try {
       setLoading(true);
-      _errorMessage = null;
+      _isSearchingSimilar = true;
+      _similarCards.clear();
+      notifyListeners();
 
-      final response = await _cardService.getSimilarCards(imageUrl);
+      AppLogger.service('CardProvider', 'Searching for similar cards');
+
+      final response = await _cardService.searchSimilarCards(imageFile);
 
       if (response.success && response.data != null) {
-        notifyListeners();
-        return response.data!;
+        _similarCards = response.data!.map((apiModel) {
+          AppLogger.debug('CardProvider: Processing apiModel type: ${apiModel.runtimeType}');
+          return CardViewModel.fromDomainModel(CardMapperService.fromApiResponse(apiModel));
+        }).toList();
+
+        setSuccess('Found ${_similarCards.length} similar cards');
+        AppLogger.service('CardProvider', 'Found ${_similarCards.length} similar cards');
       } else {
-        _errorMessage = response.error?.details ?? response.error?.message ?? 'Failed to get similar cards';
-        notifyListeners();
-        return [];
+        setError(response.error?.message ?? 'Failed to search similar cards');
+        AppLogger.error('Similar search failed: ${response.error?.message}', category: 'CardProvider');
       }
     } catch (e) {
-      _errorMessage = 'Failed to get similar cards: $e';
-      notifyListeners();
-      return [];
+      setError('Failed to search similar cards: $e');
+      AppLogger.error('Similar search exception: $e', category: 'CardProvider');
     } finally {
       setLoading(false);
+      _isSearchingSimilar = false;
+      notifyListeners();
     }
   }
 
-  /// Purchase card stock
-  Future<bool> purchaseCardStock(String cardId, int quantity) async {
+  /// Create a new card
+  Future<void> createCard() async {
     try {
       setLoading(true);
-      _errorMessage = null;
 
-      final response = await _cardService.purchaseCardStock(cardId, quantity);
+      AppLogger.service('CardProvider', 'Creating new card');
+
+      // Validate form using presentation validators
+      final validationResult = CardValidators.validateCardForm(
+        costPrice: _formModel.costPrice,
+        sellPrice: _formModel.sellPrice,
+        quantity: _formModel.quantity,
+        maxDiscount: _formModel.maxDiscount,
+        vendorId: _formModel.vendorId,
+        image: _formModel.image,
+      );
+      if (!validationResult.isValid) {
+        setError(validationResult.firstMessage ?? 'Invalid form data');
+        return;
+      }
+
+      if (_formModel.image == null) {
+        setError('Image is required');
+        return;
+      }
+
+      // Convert form model to domain model, then to API request
+      final domainModel = CardMapperService.fromFormModel(_formModel);
+      final apiRequest = CardMapperService.toCreateCardRequest(domainModel);
+
+      final response = await _cardService.createCard(imageFile: _formModel.image!, request: apiRequest);
 
       if (response.success) {
-        // Refresh cards after successful purchase
-        await refreshCards();
-        return true;
+        setSuccess('Card created successfully');
+        _formModel = CardFormViewModel.empty();
       } else {
-        _errorMessage = response.error?.details ?? response.error?.message ?? 'Failed to purchase card stock';
-        notifyListeners();
-        return false;
+        setError(response.error?.message ?? 'Failed to create card');
       }
     } catch (e) {
-      _errorMessage = 'Failed to purchase card stock: $e';
-      notifyListeners();
-      return false;
+      setError('Failed to create card: $e');
+      AppLogger.error('Card creation exception: $e', category: 'CardProvider');
     } finally {
       setLoading(false);
+      notifyListeners();
     }
   }
+
+  /// Update form model
+  void updateFormModel(CardFormViewModel newFormModel) {
+    _formModel = newFormModel;
+    notifyListeners();
+  }
+
+  /// Update form field
+  void updateFormField({String? costPrice, String? sellPrice, String? quantity, String? maxDiscount, String? vendorId, XFile? image}) {
+    _formModel = _formModel.copyWith(
+      costPrice: costPrice,
+      sellPrice: sellPrice,
+      quantity: quantity,
+      maxDiscount: maxDiscount,
+      vendorId: vendorId,
+      image: image,
+    );
+    notifyListeners();
+  }
+
+  /// Select a card from similar results
+  void selectCard(CardViewModel card) {
+    _selectedCard = card;
+    notifyListeners();
+  }
+
+  /// Select a similar card
+  void selectSimilarCard(CardViewModel card) {
+    _selectedCard = card;
+    notifyListeners();
+  }
+
+  /// Clear selected card
+  void clearSelectedCard() {
+    _selectedCard = null;
+    notifyListeners();
+  }
+
+  /// Clear similar cards
+  void clearSimilarCards() {
+    _similarCards.clear();
+    notifyListeners();
+  }
+
+  /// Reset form
+  void resetForm() {
+    _formModel = CardFormViewModel.empty();
+    notifyListeners();
+  }
+
+  /// Validate form field
+  String? validateField(String fieldName, String value) {
+    switch (fieldName) {
+      case 'costPrice':
+        final result = CardValidators.validateCostPrice(value);
+        return result.isValid ? null : result.firstMessage;
+      case 'sellPrice':
+        final result = CardValidators.validateSellPrice(value);
+        return result.isValid ? null : result.firstMessage;
+      case 'quantity':
+        final result = CardValidators.validateQuantity(value);
+        return result.isValid ? null : result.firstMessage;
+      case 'maxDiscount':
+        final result = CardValidators.validateMaxDiscount(value);
+        return result.isValid ? null : result.firstMessage;
+      case 'vendorId':
+        final result = CardValidators.validateVendorId(value);
+        return result.isValid ? null : result.firstMessage;
+      default:
+        return null;
+    }
+  }
+
+  /// Validate image
+  String? validateImage(File? image) {
+    final result = CardValidators.validateImage(image);
+    return result.isValid ? null : result.firstMessage;
+  }
+
+  /// Check if form is valid
+  bool get isFormValid => _formModel.isValid;
+
+  /// Check if similar search is in progress
+  bool get isSearching => _isSearchingSimilar;
+
+  /// Check if any similar cards found
+  bool get hasSimilarCards => _similarCards.isNotEmpty;
+
+  /// Check if a card is selected
+  bool get hasSelectedCard => _selectedCard != null;
+
+  /// Check if has more data (for backward compatibility)
+  bool get hasMoreData => false; // Simplified for now
 }

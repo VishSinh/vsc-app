@@ -121,6 +121,8 @@ class UITextConstants {
   static const String pleaseSelectDeliveryDate = 'Please select delivery date';
 
   // ================================ PAGE TITLES ================================
+  static const String appName = 'Vijay Shaadi Card';
+  static const String loginTitle = 'Login';
   static const String signInTitle = 'Sign in to your account';
   static const String registerTitle = 'Register New Staff';
   static const String registerSubtitle = 'Add a new staff member to the system';

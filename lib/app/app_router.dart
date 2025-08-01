@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:vsc_app/core/services/navigation_service.dart';
-import 'package:vsc_app/core/services/auth_service.dart';
+import 'package:vsc_app/features/auth/data/services/auth_service.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/features/auth/presentation/pages/login_page.dart';
 import 'package:vsc_app/features/auth/presentation/pages/dashboard_page.dart';

@@ -4,8 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
-import 'package:vsc_app/core/models/card_model.dart' as card_model;
-import 'package:vsc_app/core/utils/responsive_layout.dart';
+import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
@@ -13,7 +12,7 @@ import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
-import 'package:vsc_app/core/services/card_service.dart';
+import 'package:vsc_app/core/utils/app_logger.dart';
 
 class CardDetailPage extends StatefulWidget {
   final String cardId;
@@ -25,8 +24,7 @@ class CardDetailPage extends StatefulWidget {
 }
 
 class _CardDetailPageState extends State<CardDetailPage> {
-  card_model.Card? _card;
-  bool _isLoading = true;
+  CardViewModel? _card;
   String? _errorMessage;
 
   @override
@@ -38,23 +36,21 @@ class _CardDetailPageState extends State<CardDetailPage> {
   Future<void> _loadCardDetails() async {
     try {
       setState(() {
-        _isLoading = true;
         _errorMessage = null;
       });
 
-      print('🔍 Loading card details for ID: ${widget.cardId}');
+      AppLogger.service('CardDetailPage', 'Loading card details for ID: ${widget.cardId}');
 
       final cardProvider = context.read<CardProvider>();
       final card = await cardProvider.getCardById(widget.cardId);
 
-      print('📦 Card data received: $card');
-      print('📦 Card is null: ${card == null}');
-      print('📦 Card type: ${card.runtimeType}');
+      AppLogger.debug('CardDetailPage: Card data received: $card');
+      AppLogger.debug('CardDetailPage: Card is null: ${card == null}');
+      AppLogger.debug('CardDetailPage: Card type: ${card.runtimeType}');
 
       if (mounted) {
         setState(() {
           _card = card;
-          _isLoading = false;
           // If card is null, set an error message
           if (card == null) {
             _errorMessage = 'Card not found or no longer available';
@@ -62,12 +58,10 @@ class _CardDetailPageState extends State<CardDetailPage> {
         });
       }
     } catch (e) {
-      print('❌ Error loading card details: $e');
-      print('❌ Error type: ${e.runtimeType}');
+      AppLogger.errorCaught('CardDetailPage._loadCardDetails', e.toString(), errorObject: e);
       if (mounted) {
         setState(() {
           _errorMessage = e.toString();
-          _isLoading = false;
         });
       }
     }
@@ -118,7 +112,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
                           SizedBox(height: context.responsiveSpacing),
 
                           // Card Statistics
-                          _buildCardStats(),
+                          // _buildCardStats(),
                         ],
                       ),
                     ),
@@ -339,9 +333,9 @@ class _CardDetailPageState extends State<CardDetailPage> {
               // Desktop: 2x2 grid
               Row(
                 children: [
-                  Expanded(child: _buildStatCard('Profit Margin', CardService.formatProfitMargin(_card!), Icons.trending_up, AppConfig.successColor)),
+                  Expanded(child: _buildStatCard('Profit Margin', _card!.formattedProfitMargin, Icons.trending_up, AppConfig.successColor)),
                   SizedBox(width: AppConfig.defaultPadding),
-                  Expanded(child: _buildStatCard('Total Value', CardService.formatTotalValue(_card!), Icons.attach_money, AppConfig.primaryColor)),
+                  Expanded(child: _buildStatCard('Total Value', _card!.formattedTotalValue, Icons.attach_money, AppConfig.primaryColor)),
                 ],
               ),
               SizedBox(height: AppConfig.defaultPadding),
@@ -356,9 +350,9 @@ class _CardDetailPageState extends State<CardDetailPage> {
               // Mobile/Tablet: 2x2 grid with smaller spacing
               Row(
                 children: [
-                  Expanded(child: _buildStatCard('Profit Margin', CardService.formatProfitMargin(_card!), Icons.trending_up, AppConfig.successColor)),
+                  Expanded(child: _buildStatCard('Profit Margin', _card!.formattedProfitMargin, Icons.trending_up, AppConfig.successColor)),
                   SizedBox(width: AppConfig.smallPadding),
-                  Expanded(child: _buildStatCard('Total Value', CardService.formatTotalValue(_card!), Icons.attach_money, AppConfig.primaryColor)),
+                  Expanded(child: _buildStatCard('Total Value', _card!.formattedTotalValue, Icons.attach_money, AppConfig.primaryColor)),
                 ],
               ),
               SizedBox(height: AppConfig.smallPadding),
@@ -405,10 +399,6 @@ class _CardDetailPageState extends State<CardDetailPage> {
   }
 
   void _showEditCardDialog() {
-    if (!CardService.canEditCard(_card!)) {
-      SnackbarUtils.showError(context, 'Card cannot be edited at this time');
-      return;
-    }
     // TODO: Implement edit card dialog
     SnackbarUtils.showInfo(context, 'Edit card functionality coming soon!');
   }
@@ -436,10 +426,6 @@ class _CardDetailPageState extends State<CardDetailPage> {
 
   Future<void> _deleteCard() async {
     try {
-      if (!CardService.canDeleteCard(_card!)) {
-        SnackbarUtils.showError(context, 'Card cannot be deleted at this time');
-        return;
-      }
       // TODO: Implement delete card functionality
       SnackbarUtils.showInfo(context, 'Delete card functionality coming soon!');
     } catch (e) {

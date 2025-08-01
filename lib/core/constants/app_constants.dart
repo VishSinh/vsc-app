@@ -9,8 +9,9 @@ class AppConstants {
   static String get apiBaseUrl {
     if (kIsWeb) {
       // For web, use localhost
-      return 'http://localhost:8000/api/v1';
+      return 'https://vsc-be.onrender.com/api/v1';
     } else if (Platform.isAndroid) {
+      return 'https://vsc-be.onrender.com/api/v1';
       // For Android emulator, use 10.0.2.2 to reach host machine's localhost
       return 'http://10.0.2.2:8000/api/v1';
     } else {
@@ -37,7 +38,7 @@ class AppConstants {
   static const String vendorsEndpoint = '/vendors/';
   // Cards
   static const String cardsEndpoint = '/cards/';
-  static const String similarCardsEndpoint = '/cards/similar';
+  static const String similarCardsEndpoint = '/cards/similar/';
   // Customers
   static const String customersEndpoint = '/customers/';
   // Orders

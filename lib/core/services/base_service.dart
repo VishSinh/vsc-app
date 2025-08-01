@@ -3,19 +3,18 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:vsc_app/core/constants/app_constants.dart';
 import 'package:vsc_app/core/models/api_response.dart';
-import 'package:vsc_app/app/app_config.dart';
+import 'package:vsc_app/core/utils/app_logger.dart';
 
 /// Base service class that provides common functionality for all API services
-abstract class BaseService {
+abstract class ApiService {
   // Use the dynamic API base URL from AppConstants
   static String get _baseUrl => AppConstants.apiBaseUrl;
 
   late final Dio _dio;
   final FlutterSecureStorage _secureStorage;
 
-  BaseService({Dio? dio, FlutterSecureStorage? secureStorage}) : _secureStorage = secureStorage ?? const FlutterSecureStorage() {
+  ApiService({Dio? dio, FlutterSecureStorage? secureStorage}) : _secureStorage = secureStorage ?? const FlutterSecureStorage() {
     _dio = dio ?? _createDio();
-    _setupInterceptors();
   }
 
   /// Create and configure Dio instance with interceptors
@@ -32,15 +31,7 @@ abstract class BaseService {
 
     // Add pretty logger interceptor
     dio.interceptors.add(
-      PrettyDioLogger(
-        requestHeader: true,
-        requestBody: true,
-        responseBody: true,
-        responseHeader: false,
-        error: true,
-        compact: true,
-        maxWidth: AppConfig.fontSize5xl.toInt(),
-      ),
+      PrettyDioLogger(requestHeader: true, requestBody: true, responseBody: true, responseHeader: false, error: true, compact: true),
     );
 
     // Add auth token interceptor
@@ -66,30 +57,6 @@ abstract class BaseService {
     );
 
     return dio;
-  }
-
-  /// Setup Dio interceptors for authentication and error handling
-  void _setupInterceptors() {
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          // Add authorization header if token exists
-          final token = await _secureStorage.read(key: AppConstants.authTokenKey);
-          if (token != null) {
-            options.headers['Authorization'] = 'Bearer $token';
-          }
-          handler.next(options);
-        },
-        onError: (error, handler) {
-          // Handle network errors
-          if (error.type == DioExceptionType.connectionError) {
-            handler.reject(DioException(requestOptions: error.requestOptions, error: 'Network error: No internet connection'));
-          } else {
-            handler.next(error);
-          }
-        },
-      ),
-    );
   }
 
   /// Get the secure storage instance
@@ -134,6 +101,15 @@ abstract class BaseService {
   ApiResponse<T> handleResponse<T>(Response response, T Function(dynamic json) fromJson) {
     try {
       // Dio automatically parses JSON, so response.data is already parsed
+
+      if (response.data is! Map<String, dynamic>) {
+        return ApiResponse(
+          success: false,
+          data: null,
+          error: ErrorData.networkError('Invalid response format: expected Map but got ${response.data.runtimeType}'),
+        );
+      }
+
       final jsonData = response.data as Map<String, dynamic>;
 
       // Check if this is a success or error response
@@ -148,6 +124,8 @@ abstract class BaseService {
           // Handle case where data is null but success is true
           parsedData = fromJson({});
         } else {
+          AppLogger.debug('BaseService: handleResponse calling fromJson with data type: ${data.runtimeType}');
+          AppLogger.debug('BaseService: handleResponse data value: $data');
           parsedData = fromJson(data);
         }
 
@@ -162,9 +140,9 @@ abstract class BaseService {
       } else {
         // Error response: has error, no data
         final errorJson = jsonData['error'] as Map<String, dynamic>;
-        print('🔍 BaseService: Error JSON: $errorJson');
+        AppLogger.debug('BaseService: Error JSON: $errorJson');
         final error = ErrorData.fromJson(errorJson);
-        print('🔍 BaseService: Parsed Error - code: "${error.code}", message: "${error.message}", details: "${error.details}"');
+        AppLogger.debug('BaseService: Parsed Error - code: "${error.code}", message: "${error.message}", details: "${error.details}"');
 
         return ApiResponse(success: false, data: null, error: error);
       }
@@ -175,9 +153,9 @@ abstract class BaseService {
 
   /// Handle Dio errors
   ApiResponse<T> handleDioError<T>(DioException error) {
-    print('🔍 BaseService: handleDioError called with status: ${error.response?.statusCode}');
-    print('🔍 BaseService: Error type: ${error.type}');
-    print('🔍 BaseService: Response data: ${error.response?.data}');
+    AppLogger.debug('BaseService: handleDioError called with status: ${error.response?.statusCode}');
+    AppLogger.debug('BaseService: Error type: ${error.type}');
+    AppLogger.debug('BaseService: Response data: ${error.response?.data}');
 
     String errorMessage = 'Network error occurred';
 
@@ -201,7 +179,7 @@ abstract class BaseService {
         default:
           if (responseData is Map<String, dynamic> && responseData.containsKey('error')) {
             final errorData = responseData['error'] as Map<String, dynamic>;
-            print('🔍 BaseService: Error data from response: $errorData');
+            AppLogger.debug('BaseService: Error data from response: $errorData');
             errorMessage = errorData['details'] ?? errorData['message'] ?? 'Unknown error occurred';
           } else {
             errorMessage = 'Request failed with status code: $statusCode';
@@ -215,7 +193,7 @@ abstract class BaseService {
       errorMessage = 'Request timeout';
     }
 
-    print('🔍 BaseService: Final error message: "$errorMessage"');
+    AppLogger.debug('BaseService: Final error message: "$errorMessage"');
 
     // Create proper ErrorData with details instead of using networkError factory
     final errorData = ErrorData(
@@ -239,21 +217,6 @@ abstract class BaseService {
     return token != null;
   }
 
-  /// Get stored authentication token
-  Future<String?> getToken() async {
-    return await _secureStorage.read(key: AppConstants.authTokenKey);
-  }
-
-  /// Store authentication token
-  Future<void> storeToken(String token) async {
-    await _secureStorage.write(key: AppConstants.authTokenKey, value: token);
-  }
-
-  /// Store user role
-  Future<void> storeUserRole(String role) async {
-    await _secureStorage.write(key: AppConstants.userRoleKey, value: role);
-  }
-
   /// Get stored user role
   Future<String?> getUserRole() async {
     return await _secureStorage.read(key: AppConstants.userRoleKey);
@@ -262,30 +225,6 @@ abstract class BaseService {
   /// Clear all stored data
   Future<void> clearAllData() async {
     await _secureStorage.deleteAll();
-  }
-
-  /// Update base URL (useful for switching environments)
-  void updateBaseUrl(String newBaseUrl) {
-    _dio.options.baseUrl = newBaseUrl;
-  }
-
-  /// Add custom headers
-  void addHeaders(Map<String, dynamic> headers) {
-    _dio.options.headers.addAll(headers);
-  }
-
-  /// Remove custom headers
-  void removeHeaders(List<String> headerKeys) {
-    for (final key in headerKeys) {
-      _dio.options.headers.remove(key);
-    }
-  }
-
-  /// Set request timeout
-  void setTimeout(Duration timeout) {
-    _dio.options.connectTimeout = timeout;
-    _dio.options.receiveTimeout = timeout;
-    _dio.options.sendTimeout = timeout;
   }
 }
 

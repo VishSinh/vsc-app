@@ -2,8 +2,9 @@ import 'package:vsc_app/core/constants/app_constants.dart';
 import 'package:vsc_app/core/models/api_response.dart';
 import 'package:vsc_app/core/models/vendor_model.dart';
 import 'package:vsc_app/core/services/base_service.dart';
+import 'package:vsc_app/core/utils/app_logger.dart';
 
-class VendorService extends BaseService {
+class VendorService extends ApiService {
   VendorService({super.dio, super.secureStorage});
 
   /// Get all vendors with pagination
@@ -47,25 +48,25 @@ class VendorService extends BaseService {
 
   /// Get vendor by ID
   Future<ApiResponse<Vendor>> getVendorById(String id) async {
-    print('🔍 VendorService: Getting vendor by ID: $id');
-    print('🔍 VendorService: Endpoint: ${AppConstants.vendorsEndpoint}$id/');
+    AppLogger.service('VendorService', 'Getting vendor by ID: $id');
+    AppLogger.debug('VendorService: Endpoint: ${AppConstants.vendorsEndpoint}$id/');
 
     final response = await executeRequest(() => get('${AppConstants.vendorsEndpoint}$id/'), (json) {
-      print('📦 VendorService: Raw JSON received: $json');
-      print('📦 VendorService: JSON type: ${json.runtimeType}');
+      AppLogger.debug('VendorService: Raw JSON received: $json');
+      AppLogger.debug('VendorService: JSON type: ${json.runtimeType}');
 
       if (json is Map<String, dynamic>) {
-        print('📦 VendorService: Creating Vendor from JSON');
+        AppLogger.debug('VendorService: Creating Vendor from JSON');
         return Vendor.fromJson(json);
       } else {
-        print('❌ VendorService: JSON is not a Map, it is: ${json.runtimeType}');
+        AppLogger.error('VendorService: JSON is not a Map, it is: ${json.runtimeType}');
         throw Exception('Invalid vendor data format');
       }
     });
 
-    print('📦 VendorService: Final response: $response');
-    print('📦 VendorService: Response success: ${response.success}');
-    print('📦 VendorService: Response data: ${response.data}');
+    AppLogger.debug('VendorService: Final response: $response');
+    AppLogger.debug('VendorService: Response success: ${response.success}');
+    AppLogger.debug('VendorService: Response data: ${response.data}');
 
     return response;
   }

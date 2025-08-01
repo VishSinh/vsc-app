@@ -9,6 +9,7 @@ import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/constants/navigation_items.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
+import 'package:vsc_app/core/utils/app_logger.dart';
 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
@@ -52,8 +53,8 @@ class _OrdersPageState extends State<OrdersPage> {
       canViewAuditLogs: permissionProvider.canViewAuditLogs,
     );
 
-    print('🔍 OrdersPage: Available destinations: ${destinations.map((d) => d.label).toList()}');
-    print('🔍 OrdersPage: Permissions - Orders: ${permissionProvider.canManageOrders}, Inventory: ${permissionProvider.canManageInventory}');
+    AppLogger.debug('OrdersPage: Available destinations: ${destinations.map((d) => d.label).toList()}');
+    AppLogger.debug('OrdersPage: Permissions - Orders: ${permissionProvider.canManageOrders}, Inventory: ${permissionProvider.canManageInventory}');
 
     return destinations;
   }
@@ -63,7 +64,7 @@ class _OrdersPageState extends State<OrdersPage> {
       if (mounted) {
         final destinations = _getDestinations();
         final index = NavigationItems.getSelectedIndexForPage('orders', destinations);
-        print('🔍 OrdersPage: Setting selected index to $index for destinations: ${destinations.map((d) => d.label).toList()}');
+        AppLogger.debug('OrdersPage: Setting selected index to $index for destinations: ${destinations.map((d) => d.label).toList()}');
         setState(() {
           _selectedIndex = index;
         });
@@ -95,7 +96,7 @@ class _OrdersPageState extends State<OrdersPage> {
     int validSelectedIndex = _selectedIndex;
     if (validSelectedIndex < 0 || validSelectedIndex >= destinations.length) {
       validSelectedIndex = 0; // Default to first destination
-      print('🔍 OrdersPage: Invalid selectedIndex $_selectedIndex, defaulting to 0');
+      AppLogger.debug('OrdersPage: Invalid selectedIndex $_selectedIndex, defaulting to 0');
     }
 
     return ResponsiveLayout(
