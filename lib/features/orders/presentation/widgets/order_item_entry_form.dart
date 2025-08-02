@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
-import 'package:vsc_app/features/orders/data/models/order_api_models.dart';
+import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_form_models.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 
 /// Widget for entering order item details
 class OrderItemEntryForm extends StatefulWidget {
-  final void Function(OrderItemFormViewModel) onAddItem;
+  final void Function(OrderItemCreationFormViewModel) onAddItem;
   final bool isLoading;
 
   const OrderItemEntryForm({super.key, required this.onAddItem, this.isLoading = false});
@@ -58,8 +58,9 @@ class _OrderItemEntryFormState extends State<OrderItemEntryForm> {
 
   void _handleAddItem() {
     if (_formKey.currentState?.validate() ?? false) {
+      AppLogger.debug('OrderItemEntryForm: Adding item without cardId');
       widget.onAddItem(
-        OrderItemFormViewModel.fromFormData(
+        OrderItemCreationFormViewModel(
           quantity: int.tryParse(_quantityController.text) ?? 1,
           discountAmount: _discountController.text,
           requiresBox: _requiresBox,

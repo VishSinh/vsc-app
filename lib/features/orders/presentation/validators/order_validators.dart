@@ -1,6 +1,6 @@
-import 'package:vsc_app/features/orders/domain/models/order_item.dart';
-import 'package:vsc_app/features/cards/domain/models/card.dart';
 import 'package:vsc_app/core/validation/validation_result.dart';
+import 'package:vsc_app/features/orders/presentation/models/order_form_models.dart';
+import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 
 /// Presentation validators for UI-specific validations
 /// These validators handle form field validation and UI state checks
@@ -38,7 +38,11 @@ class OrderValidators {
   }
 
   /// Validates if order can be created (UI validation)
-  static ValidationResult validateOrderCreation({required dynamic customer, required List<OrderItem> items, required String? deliveryDate}) {
+  static ValidationResult validateOrderCreation({
+    required dynamic customer,
+    required List<OrderItemCreationFormViewModel> items,
+    required String? deliveryDate,
+  }) {
     final errors = <ValidationError>[];
 
     if (customer == null) {
@@ -57,7 +61,7 @@ class OrderValidators {
   }
 
   /// Validates if current card is selected (UI validation)
-  static ValidationResult validateCurrentCardSelected(CardEntity? currentCard) {
+  static ValidationResult validateCurrentCardSelected(CardViewModel? currentCard) {
     if (currentCard == null) {
       return ValidationResult.failureSingle('currentCard', 'No card selected');
     }

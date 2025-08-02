@@ -23,6 +23,7 @@ class OrderReviewPage extends StatefulWidget {
 class _OrderReviewPageState extends State<OrderReviewPage> {
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
+  final TextEditingController _orderNameController = TextEditingController();
 
   @override
   void initState() {
@@ -30,6 +31,12 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
     // Set default delivery date to tomorrow
     _selectedDate = DateTime.now().add(const Duration(days: 1));
     _selectedTime = const TimeOfDay(hour: 10, minute: 0);
+  }
+
+  @override
+  void dispose() {
+    _orderNameController.dispose();
+    super.dispose();
   }
 
   Future<void> _selectDate() async {
@@ -65,7 +72,17 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
     }
   }
 
+  void _updateOrderName() {
+    final orderProvider = context.read<OrderProvider>();
+    orderProvider.setOrderName(_orderNameController.text);
+  }
+
   Future<void> _submitOrder() async {
+    if (_orderNameController.text.trim().isEmpty) {
+      SnackbarUtils.showError(context, 'Please enter an order name');
+      return;
+    }
+
     if (_selectedDate == null || _selectedTime == null) {
       SnackbarUtils.showError(context, 'Please select delivery date and time');
       return;
@@ -121,6 +138,9 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Order Name field
+          _buildOrderNameSection(),
+          SizedBox(height: AppConfig.defaultPadding),
           // Customer Info and Delivery Date stacked on mobile
           _buildCustomerInfo(orderProvider),
           SizedBox(height: AppConfig.defaultPadding),
@@ -141,6 +161,9 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Order Name field taking full width
+          _buildOrderNameSection(),
+          SizedBox(height: AppConfig.largePadding),
           // Customer Info and Delivery Date in same row
           Row(
             children: [
@@ -155,6 +178,26 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
           SizedBox(height: AppConfig.largePadding),
           _buildActionButtons(orderProvider),
         ],
+      ),
+    );
+  }
+
+  Widget _buildOrderNameSection() {
+    return Card(
+      child: Padding(
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Order Name', style: ResponsiveText.getTitle(context)),
+            SizedBox(height: AppConfig.defaultPadding),
+            TextField(
+              controller: _orderNameController,
+              decoration: const InputDecoration(labelText: 'Enter order name', hintText: 'e.g., John weds Jane', border: OutlineInputBorder()),
+              onChanged: (value) => _updateOrderName(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -234,8 +277,8 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: orderProvider.orderItems.length,
                 itemBuilder: (context, index) {
-                  final item = orderProvider.orderItems[index];
-                  final card = orderProvider.getCardViewModelById(item.cardId);
+                  final formItem = orderProvider.orderItems[index];
+                  final card = orderProvider.getCardViewModelById(formItem.cardId);
 
                   if (card == null) {
                     return Card(
@@ -244,7 +287,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
                     );
                   }
 
-                  return OrderItemCard(item: item, card: card, index: index, showRemoveButton: false, isReviewMode: true);
+                  return OrderItemCard(item: formItem, card: card, index: index, showRemoveButton: false, isReviewMode: true);
                 },
               ),
           ],

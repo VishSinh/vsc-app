@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
-import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
+import 'package:vsc_app/features/orders/presentation/models/order_form_models.dart';
+
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'desktop_info_row.dart';
@@ -9,7 +10,7 @@ import 'image_display.dart';
 
 /// Reusable order item card widget
 class OrderItemCard extends StatelessWidget {
-  final OrderItemViewModel item;
+  final OrderItemCreationFormViewModel item;
   final CardViewModel card;
   final int index;
   final VoidCallback? onRemove;

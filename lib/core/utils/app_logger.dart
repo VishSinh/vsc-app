@@ -9,49 +9,27 @@ class AppLogger {
 
   // Debug logging
   static void debug(String message, {String? category, Object? data}) {
-    _logger.d('${LoggingConstants.emojiDebug} $message');
+    print('${LoggingConstants.emojiDebug} $message');
   }
 
   // Info logging
   static void info(String message, {String? category, Object? data}) {
-    _logger.i('${LoggingConstants.emojiInfo} $message');
+    print('${LoggingConstants.emojiInfo} $message');
   }
 
   // Warning logging
   static void warning(String message, {String? category, Object? data}) {
-    _logger.w('${LoggingConstants.emojiWarning} $message');
+    print('${LoggingConstants.emojiWarning} $message');
   }
 
   // Error logging
   static void error(String message, {String? category, Object? data, Object? error, StackTrace? stackTrace}) {
-    _logger.e('${LoggingConstants.emojiError} $message', error: error, stackTrace: stackTrace);
+    print('${LoggingConstants.emojiError} $message');
   }
 
   // Fatal logging
   static void fatal(String message, {String? category, Object? data, Object? error, StackTrace? stackTrace}) {
-    _logger.f('${LoggingConstants.emojiError} $message', error: error, stackTrace: stackTrace);
-  }
-
-  // API specific logging
-  static void apiRequest(String endpoint, {String? method, Map<String, dynamic>? params}) {
-    debug(
-      LoggingConstants.apiRequest(endpoint, method: method, params: params),
-      category: LoggingConstants.categoryApi,
-    );
-  }
-
-  static void apiResponse(String endpoint, {bool success = true, String? data}) {
-    if (success) {
-      info(
-        LoggingConstants.apiResponse(endpoint, success: success, data: data),
-        category: LoggingConstants.categoryApi,
-      );
-    } else {
-      warning(
-        LoggingConstants.apiResponse(endpoint, success: success, data: data),
-        category: LoggingConstants.categoryApi,
-      );
-    }
+    print('${LoggingConstants.emojiError} $message');
   }
 
   static void apiError(String endpoint, String error) {

@@ -125,7 +125,7 @@ abstract class ApiService {
           parsedData = fromJson({});
         } else {
           AppLogger.debug('BaseService: handleResponse calling fromJson with data type: ${data.runtimeType}');
-          AppLogger.debug('BaseService: handleResponse data value: $data');
+          // AppLogger.debug('BaseService: handleResponse data value: $data');
           parsedData = fromJson(data);
         }
 

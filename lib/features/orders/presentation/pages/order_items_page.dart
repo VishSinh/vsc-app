@@ -31,7 +31,6 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
     // Clear order items but preserve selected customer when entering the page
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final orderProvider = context.read<OrderProvider>();
-      orderProvider.setContext(context); // Set context for auto SnackBar
       final selectedCustomer = orderProvider.selectedCustomer; // Preserve customer
       orderProvider.clearOrderItemsOnly(); // Only clear items, not customer
       AppLogger.debug('OrderItemsPage: Cleared order items but preserved customer: ${selectedCustomer?.name}');
@@ -64,24 +63,21 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
     context.go(RouteConstants.orderReview);
   }
 
-  void _handleAddOrderItem(OrderItemFormViewModel data) {
+  void _handleAddOrderItem(OrderItemCreationFormViewModel item) {
+    AppLogger.debug('OrderItemsPage: Adding item with cardId: ${item.cardId}');
+
     final orderProvider = context.read<OrderProvider>();
     final currentCard = orderProvider.currentCardViewModel;
     if (currentCard == null) {
       orderProvider.setError('Please search for a card first'); // ✅ Auto SnackBar
       return;
     }
-    orderProvider.addOrderItem(
-      cardId: currentCard.id,
-      discountAmount: data.discountAmount,
-      quantity: data.quantity,
-      requiresBox: data.requiresBox,
-      requiresPrinting: data.requiresPrinting,
-      boxType: data.boxType,
-      totalBoxCost: data.totalBoxCost,
-      totalPrintingCost: data.totalPrintingCost,
-    );
+
+    item.cardId = currentCard.id;
+
+    orderProvider.addOrderItem(item);
     orderProvider.setSuccess('Item added to order'); // ✅ Auto SnackBar
+    AppLogger.debug('OrderItemsPage: Item added to order: ${item.cardId}');
   }
 
   @override
@@ -329,6 +325,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
 
   Widget _buildOrderItemsList(OrderProvider orderProvider) {
     AppLogger.debug('OrderItemsPage: Building order items list, count: ${orderProvider.orderItems.length}');
+    AppLogger.debug('OrderItemsPage: Order items: ${orderProvider.orderItems}');
 
     return Card(
       child: Padding(
@@ -346,8 +343,8 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: orderProvider.orderItems.length,
                 itemBuilder: (context, index) {
-                  final item = orderProvider.orderItems[index];
-                  final card = orderProvider.getCardViewModelById(item.cardId);
+                  final formItem = orderProvider.orderItems[index];
+                  final card = orderProvider.getCardViewModelById(formItem.cardId);
 
                   if (card == null) {
                     return ListTile(
@@ -357,7 +354,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
                   }
 
                   return OrderItemCard(
-                    item: item,
+                    item: formItem,
                     card: card,
                     index: index,
                     onRemove: () => _removeOrderItem(index),

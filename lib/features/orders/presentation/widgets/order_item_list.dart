@@ -33,8 +33,8 @@ class OrderItemList extends StatelessWidget {
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: orderProvider.orderItems.length,
                     itemBuilder: (context, index) {
-                      final item = orderProvider.orderItems[index];
-                      final card = orderProvider.getCardViewModelById(item.cardId);
+                      final formItem = orderProvider.orderItems[index];
+                      final card = orderProvider.getCardViewModelById(formItem.cardId);
 
                       if (card == null) {
                         return ListTile(
@@ -43,9 +43,12 @@ class OrderItemList extends StatelessWidget {
                         );
                       }
 
+                      // Convert form model to view model for display
+                      // final viewItem = OrderItemViewModel.fromCreationFormModel(formItem, card);
+
                       return OrderItemCard(
-                        key: ValueKey('order_item_${item.cardId}_$index'),
-                        item: item,
+                        key: ValueKey('order_item_${formItem.cardId}_$index'),
+                        item: formItem,
                         card: card,
                         index: index,
                         onRemove: onRemoveItem,

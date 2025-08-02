@@ -9,9 +9,10 @@ class AppConstants {
   static String get apiBaseUrl {
     if (kIsWeb) {
       // For web, use localhost
-      return 'https://vsc-be.onrender.com/api/v1';
+      // return 'https://vsc-be.onrender.com/api/v1';
+      return 'http://localhost:8000/api/v1';
     } else if (Platform.isAndroid) {
-      return 'https://vsc-be.onrender.com/api/v1';
+      // return 'https://vsc-be.onrender.com/api/v1';
       // For Android emulator, use 10.0.2.2 to reach host machine's localhost
       return 'http://10.0.2.2:8000/api/v1';
     } else {

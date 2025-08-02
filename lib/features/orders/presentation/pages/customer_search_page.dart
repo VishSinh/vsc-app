@@ -43,7 +43,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
     if (mounted) {
       if (customer != null) {
         AppLogger.debug('CustomerSearchPage: Customer found: ${customer.name}');
-        orderProvider.setSelectedCustomer(customer);
+        orderProvider.setSelectedCustomerData(customer);
         AppLogger.debug('CustomerSearchPage: Customer set in OrderProvider, navigating to order items');
         SnackbarUtils.showSuccess(context, UITextConstants.customerFoundSuccess);
         context.go(RouteConstants.orderItems);
@@ -70,7 +70,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
       if (success) {
         final customer = customerProvider.selectedCustomer;
         if (customer != null) {
-          orderProvider.setSelectedCustomer(customer);
+          orderProvider.setSelectedCustomerData(customer);
           SnackbarUtils.showSuccess(context, UITextConstants.customerCreatedSuccessfully);
           context.go(RouteConstants.orderItems);
         } else {
