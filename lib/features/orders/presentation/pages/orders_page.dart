@@ -235,99 +235,102 @@ class _OrdersPageState extends State<OrdersPage> {
         final order = _filteredOrders[index];
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            order.name.isNotEmpty ? order.name : 'Order #${order.id.substring(0, 8)}',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                          ),
-                          if (order.specialInstruction.isNotEmpty)
+          child: InkWell(
+            onTap: () => context.go('${RouteConstants.orderDetail.replaceAll(':id', order.id)}'),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Text(
-                              order.specialInstruction,
-                              style: const TextStyle(fontSize: 12, color: Colors.orange, fontStyle: FontStyle.italic),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                              order.name.isNotEmpty ? order.name : 'Order #${order.id.substring(0, 8)}',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                             ),
-                        ],
+                            if (order.specialInstruction.isNotEmpty)
+                              Text(
+                                order.specialInstruction,
+                                style: const TextStyle(fontSize: 12, color: Colors.orange, fontStyle: FontStyle.italic),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(color: _getStatusColor(order.orderStatus), borderRadius: BorderRadius.circular(16)),
-                      child: Text(
-                        _formatStatus(order.orderStatus),
-                        style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(color: _getStatusColor(order.orderStatus), borderRadius: BorderRadius.circular(16)),
+                        child: Text(
+                          _formatStatus(order.orderStatus),
+                          style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text('Ordered: ${_formatDateTime(order.orderDate)}')),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.local_shipping, size: 16, color: Colors.grey),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text('Delivery: ${_formatDateTime(order.deliveryDate)}')),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const Icon(Icons.shopping_cart, size: 16, color: Colors.grey),
-                    const SizedBox(width: 8),
-                    Text('${order.orderItems.length} item${order.orderItems.length != 1 ? 's' : ''}'),
-                    if (_hasBoxRequirements(order)) ...[const SizedBox(width: 12), const Icon(Icons.inventory_2, size: 16, color: Colors.blue)],
-                    if (_hasPrintingRequirements(order)) ...[const SizedBox(width: 8), const Icon(Icons.print, size: 16, color: Colors.green)],
-                    const Spacer(),
-                    Text(
-                      '₹${_calculateTotalAmount(order.orderItems).toStringAsFixed(2)}',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                    ),
-                  ],
-                ),
-                if (_hasBoxRequirements(order) || _hasPrintingRequirements(order)) ...[
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text('Ordered: ${_formatDateTime(order.orderDate)}')),
+                    ],
+                  ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      if (_hasBoxRequirements(order))
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                          child: const Text(
-                            'Box',
-                            style: TextStyle(fontSize: 11, color: Colors.blue, fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                      if (_hasBoxRequirements(order) && _hasPrintingRequirements(order)) const SizedBox(width: 4),
-                      if (_hasPrintingRequirements(order))
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                          child: const Text(
-                            'Print',
-                            style: TextStyle(fontSize: 11, color: Colors.green, fontWeight: FontWeight.w500),
-                          ),
-                        ),
+                      const Icon(Icons.local_shipping, size: 16, color: Colors.grey),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text('Delivery: ${_formatDateTime(order.deliveryDate)}')),
                     ],
                   ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(Icons.shopping_cart, size: 16, color: Colors.grey),
+                      const SizedBox(width: 8),
+                      Text('${order.orderItems.length} item${order.orderItems.length != 1 ? 's' : ''}'),
+                      if (_hasBoxRequirements(order)) ...[const SizedBox(width: 12), const Icon(Icons.inventory_2, size: 16, color: Colors.blue)],
+                      if (_hasPrintingRequirements(order)) ...[const SizedBox(width: 8), const Icon(Icons.print, size: 16, color: Colors.green)],
+                      const Spacer(),
+                      Text(
+                        '₹${_calculateTotalAmount(order.orderItems).toStringAsFixed(2)}',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                    ],
+                  ),
+                  if (_hasBoxRequirements(order) || _hasPrintingRequirements(order)) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        if (_hasBoxRequirements(order))
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                            child: const Text(
+                              'Box',
+                              style: TextStyle(fontSize: 11, color: Colors.blue, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        if (_hasBoxRequirements(order) && _hasPrintingRequirements(order)) const SizedBox(width: 4),
+                        if (_hasPrintingRequirements(order))
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                            child: const Text(
+                              'Print',
+                              style: TextStyle(fontSize: 11, color: Colors.green, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         );
@@ -343,6 +346,7 @@ class _OrdersPageState extends State<OrdersPage> {
           minWidth: MediaQuery.of(context).size.width - 200, // Account for navigation rail
         ),
         child: DataTable(
+          onSelectAll: (value) {},
           columns: const [
             DataColumn(label: Text('Order Name')),
             DataColumn(label: Text('Order Date')),
@@ -356,64 +360,93 @@ class _OrdersPageState extends State<OrdersPage> {
             return DataRow(
               cells: [
                 DataCell(
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        order.name.isNotEmpty ? order.name : 'Order #${order.id.substring(0, 8)}',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      if (order.specialInstruction.isNotEmpty)
+                  GestureDetector(
+                    onTap: () => context.go('${RouteConstants.orderDetail.replaceAll(':id', order.id)}'),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          order.specialInstruction,
-                          style: const TextStyle(fontSize: 10, color: Colors.orange, fontStyle: FontStyle.italic),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          order.name.isNotEmpty ? order.name : 'Order #${order.id.substring(0, 8)}',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                    ],
-                  ),
-                ),
-                DataCell(Text(_formatDateTime(order.orderDate))),
-                DataCell(Text(_formatDateTime(order.deliveryDate))),
-                DataCell(
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(color: _getStatusColor(order.orderStatus), borderRadius: BorderRadius.circular(12)),
-                    child: Text(
-                      _formatStatus(order.orderStatus),
-                      style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                        if (order.specialInstruction.isNotEmpty)
+                          Text(
+                            order.specialInstruction,
+                            style: const TextStyle(fontSize: 10, color: Colors.orange, fontStyle: FontStyle.italic),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
                     ),
                   ),
                 ),
-                DataCell(Text('${order.orderItems.length}')),
                 DataCell(
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (_hasBoxRequirements(order))
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(color: Colors.blue.withOpacity(0.2), borderRadius: BorderRadius.circular(6)),
-                          child: const Text(
-                            'Box',
-                            style: TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                      if (_hasBoxRequirements(order) && _hasPrintingRequirements(order)) const SizedBox(width: 6),
-                      if (_hasPrintingRequirements(order))
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(color: Colors.green.withOpacity(0.2), borderRadius: BorderRadius.circular(6)),
-                          child: const Text(
-                            'Print',
-                            style: TextStyle(fontSize: 12, color: Colors.green, fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                    ],
+                  GestureDetector(
+                    onTap: () => context.go('${RouteConstants.orderDetail.replaceAll(':id', order.id)}'),
+                    child: Text(_formatDateTime(order.orderDate)),
                   ),
                 ),
-                DataCell(Text('₹${_calculateTotalAmount(order.orderItems).toStringAsFixed(2)}')),
+                DataCell(
+                  GestureDetector(
+                    onTap: () => context.go('${RouteConstants.orderDetail.replaceAll(':id', order.id)}'),
+                    child: Text(_formatDateTime(order.deliveryDate)),
+                  ),
+                ),
+                DataCell(
+                  GestureDetector(
+                    onTap: () => context.go('${RouteConstants.orderDetail.replaceAll(':id', order.id)}'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(color: _getStatusColor(order.orderStatus), borderRadius: BorderRadius.circular(12)),
+                      child: Text(
+                        _formatStatus(order.orderStatus),
+                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+                DataCell(
+                  GestureDetector(
+                    onTap: () => context.go('${RouteConstants.orderDetail.replaceAll(':id', order.id)}'),
+                    child: Text('${order.orderItems.length}'),
+                  ),
+                ),
+                DataCell(
+                  GestureDetector(
+                    onTap: () => context.go('${RouteConstants.orderDetail.replaceAll(':id', order.id)}'),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_hasBoxRequirements(order))
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(color: Colors.blue.withOpacity(0.2), borderRadius: BorderRadius.circular(6)),
+                            child: const Text(
+                              'Box',
+                              style: TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        if (_hasBoxRequirements(order) && _hasPrintingRequirements(order)) const SizedBox(width: 6),
+                        if (_hasPrintingRequirements(order))
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(color: Colors.green.withOpacity(0.2), borderRadius: BorderRadius.circular(6)),
+                            child: const Text(
+                              'Print',
+                              style: TextStyle(fontSize: 12, color: Colors.green, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                DataCell(
+                  GestureDetector(
+                    onTap: () => context.go('${RouteConstants.orderDetail.replaceAll(':id', order.id)}'),
+                    child: Text('₹${_calculateTotalAmount(order.orderItems).toStringAsFixed(2)}'),
+                  ),
+                ),
               ],
             );
           }).toList(),

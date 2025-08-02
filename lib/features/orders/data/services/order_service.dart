@@ -32,4 +32,9 @@ class OrderService extends ApiService {
       (json) => MessageData.fromJson(json as Map<String, dynamic>),
     );
   }
+
+  /// Get order by ID
+  Future<ApiResponse<OrderResponse>> getOrderById(String orderId) async {
+    return await executeRequest(() => get('${AppConstants.ordersEndpoint}$orderId/'), (json) => OrderResponse.fromJson(json as Map<String, dynamic>));
+  }
 }

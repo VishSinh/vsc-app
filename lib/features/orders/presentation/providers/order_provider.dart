@@ -218,6 +218,38 @@ class OrderProvider extends BaseProvider {
     return await fetchOrders();
   }
 
+  // Order detail methods
+  OrderViewModel? _currentOrder;
+  OrderViewModel? get currentOrder => _currentOrder;
+
+  Future<bool> fetchOrderById(String orderId) async {
+    try {
+      setLoading(true);
+      clearMessages();
+
+      final response = await _orderService.getOrderById(orderId);
+
+      if (response.success) {
+        _currentOrder = OrderMapperService.orderResponseToViewModel(response.data!);
+        notifyListeners();
+        return true;
+      } else {
+        setError(response.error?.message ?? 'Failed to fetch order details');
+        return false;
+      }
+    } catch (e) {
+      setError('Error fetching order details: $e');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  void clearCurrentOrder() {
+    _currentOrder = null;
+    notifyListeners();
+  }
+
   // Utility methods
   @override
   void reset() {
