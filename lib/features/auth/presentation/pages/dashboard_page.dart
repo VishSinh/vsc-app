@@ -4,17 +4,13 @@ import 'package:provider/provider.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/enums/user_role.dart';
 import 'package:vsc_app/core/utils/responsive_layout.dart';
-import 'package:vsc_app/core/utils/snackbar_utils.dart';
-import 'package:vsc_app/core/widgets/shimmer_widgets.dart';
-import 'package:vsc_app/core/widgets/button_utils.dart';
+import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
-import 'package:vsc_app/core/constants/snackbar_constants.dart';
 import 'package:vsc_app/core/constants/navigation_items.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
-import 'package:vsc_app/core/utils/responsive_utils.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -108,9 +104,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final authProvider = context.read<AuthProvider>();
     authProvider.setContext(context);
     await authProvider.logout();
-    if (mounted) {
-      context.go(RouteConstants.login);
-    }
+    if (mounted) context.go(RouteConstants.login);
   }
 
   Widget _buildDashboardContent(UserRole userRole, PermissionProvider permissionProvider) {
@@ -119,92 +113,12 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Role-based subtitle
-
-          // Quick Actions
-          _buildQuickActions(permissionProvider),
-          SizedBox(height: AppConfig.largePadding),
-
+          // Quick Action Button for Order Creation flow
+          if (permissionProvider.canCreate('order')) ...[_buildCreateOrderButton(), SizedBox(height: AppConfig.largePadding)],
           // Stats Cards
-          Expanded(child: _isLoading ? _buildShimmerSkeleton() : _buildStatsGrid(userRole, permissionProvider)),
+          Expanded(child: _isLoading ? const LoadingWidget(message: 'Loading dashboard...') : _buildStatsGrid(userRole, permissionProvider)),
         ],
       ),
-    );
-  }
-
-  Widget _buildQuickActions(PermissionProvider permissionProvider) {
-    final actions = <Widget>[];
-
-    // Register Staff - only for users who can create accounts
-    if (permissionProvider.canCreate('account')) {
-      actions.add(
-        ButtonUtils.primaryButton(onPressed: () => context.go(RouteConstants.register), label: UITextConstants.registerStaff, icon: Icons.person_add),
-      );
-    }
-
-    // Create Order - for users who can create orders
-    if (permissionProvider.canCreate('order')) {
-      actions.add(
-        ButtonUtils.accentButton(
-          onPressed: () => context.go(RouteConstants.newOrder),
-          label: UITextConstants.createOrder,
-          icon: Icons.add_shopping_cart,
-        ),
-      );
-    }
-
-    // Add Inventory - for users who can create inventory
-    if (permissionProvider.canCreate('inventory')) {
-      actions.add(
-        ButtonUtils.successButton(
-          onPressed: () {
-            // TODO: Navigate to add inventory page
-            SnackbarUtils.showInfo(context, SnackbarConstants.addInventoryComingSoon);
-          },
-          label: UITextConstants.addInventory,
-          icon: Icons.add_box,
-        ),
-      );
-    }
-
-    // Create Production Job - for users who can create production
-    if (permissionProvider.canCreate('production')) {
-      actions.add(
-        ButtonUtils.secondaryButton(
-          onPressed: () {
-            // TODO: Navigate to create production job page
-            SnackbarUtils.showInfo(context, SnackbarConstants.createProductionJobComingSoon);
-          },
-          label: UITextConstants.createJob,
-          icon: Icons.print,
-        ),
-      );
-    }
-
-    // Manage Vendors - for users who can manage vendors
-    if (permissionProvider.canManageVendors) {
-      actions.add(
-        ButtonUtils.warningButton(onPressed: () => context.go(RouteConstants.vendors), label: UITextConstants.manageVendors, icon: Icons.people),
-      );
-    }
-
-    // Create Card - for users who can manage inventory
-    if (permissionProvider.canManageInventory) {
-      actions.add(
-        ButtonUtils.successButton(onPressed: () => context.go(RouteConstants.createCard), label: UITextConstants.createCard, icon: Icons.credit_card),
-      );
-    }
-
-    if (actions.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Text(UITextConstants.quickActions, style: ResponsiveText.getTitle(context)),
-        Wrap(spacing: AppConfig.defaultPadding, runSpacing: AppConfig.defaultPadding, children: actions),
-      ],
     );
   }
 
@@ -283,12 +197,89 @@ class _DashboardPageState extends State<DashboardPage> {
       );
     }
 
-    return GridView.count(
-      crossAxisCount: _getGridCrossAxisCount(),
-      crossAxisSpacing: AppConfig.defaultPadding,
-      mainAxisSpacing: AppConfig.defaultPadding,
-      childAspectRatio: 1.5,
-      children: statsCards,
+    // Customer stats - show if user can manage orders or customers
+    if (permissionProvider.canManageOrders || permissionProvider.canManageCustomers) {
+      statsCards.add(
+        _buildStatCard(
+          title: 'Active Customers',
+          value: '89',
+          icon: Icons.person,
+          color: AppConfig.secondaryColor,
+          subtitle: 'Customers with recent orders',
+        ),
+      );
+    }
+
+    // System health stats - show for all users
+    statsCards.add(
+      _buildStatCard(title: 'System Uptime', value: '99.8%', icon: Icons.check_circle, color: AppConfig.successColor, subtitle: 'Last 30 days'),
+    );
+
+    // Recent activity stats - show for all users
+    statsCards.add(
+      _buildStatCard(title: 'Today\'s Orders', value: '15', icon: Icons.today, color: AppConfig.primaryColor, subtitle: 'Orders created today'),
+    );
+
+    // Inventory alerts - show if user can manage inventory
+    if (permissionProvider.canManageInventory) {
+      statsCards.add(
+        _buildStatCard(
+          title: 'Out of Stock',
+          value: '3',
+          icon: Icons.remove_shopping_cart,
+          color: AppConfig.errorColor,
+          subtitle: 'Items need restocking',
+        ),
+      );
+    }
+
+    // Production efficiency - show if user can manage production
+    if (permissionProvider.canManageProduction) {
+      statsCards.add(
+        _buildStatCard(
+          title: 'Production Efficiency',
+          value: '94%',
+          icon: Icons.speed,
+          color: AppConfig.accentColor,
+          subtitle: 'On-time delivery rate',
+        ),
+      );
+    }
+
+    // Financial metrics - show if user can manage billing
+    if (permissionProvider.canManageBilling) {
+      statsCards.add(
+        _buildStatCard(
+          title: 'Monthly Growth',
+          value: '+12.5%',
+          icon: Icons.trending_up,
+          color: AppConfig.successColor,
+          subtitle: 'Revenue growth this month',
+        ),
+      );
+    }
+
+    // Quality metrics - show for all users
+    statsCards.add(
+      _buildStatCard(title: 'Customer Satisfaction', value: '4.8/5', icon: Icons.star, color: AppConfig.warningColor, subtitle: 'Average rating'),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate responsive grid parameters to maintain consistent card sizes
+        final availableWidth = constraints.maxWidth;
+        final cardWidth = 300.0; // Fixed card width
+        final crossAxisCount = (availableWidth / (cardWidth + AppConfig.defaultPadding)).floor();
+        final actualCrossAxisCount = crossAxisCount.clamp(1, 4); // Max 4 columns
+
+        return GridView.count(
+          crossAxisCount: actualCrossAxisCount,
+          crossAxisSpacing: AppConfig.defaultPadding,
+          mainAxisSpacing: AppConfig.defaultPadding,
+          childAspectRatio: 1.2, // Fixed aspect ratio for consistent card proportions
+          children: statsCards,
+        );
+      },
     );
   }
 
@@ -318,19 +309,55 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  int _getGridCrossAxisCount() {
-    return context.gridCrossAxisCount;
-  }
-
-  Widget _buildShimmerSkeleton() {
-    return GridView.count(
-      crossAxisCount: context.gridCrossAxisCount,
-      crossAxisSpacing: AppConfig.defaultPadding,
-      mainAxisSpacing: AppConfig.defaultPadding,
-      childAspectRatio: context.gridChildAspectRatio,
-      children: List.generate(6, (index) {
-        return const ShimmerWrapper(child: StatsCardSkeleton());
-      }),
+  Widget _buildCreateOrderButton() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppConfig.primaryColor, AppConfig.primaryColor.withOpacity(0.8)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(AppConfig.defaultRadius),
+        boxShadow: [BoxShadow(color: AppConfig.primaryColor.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => context.go(RouteConstants.customerSearch),
+          borderRadius: BorderRadius.circular(AppConfig.defaultRadius),
+          child: Padding(
+            padding: EdgeInsets.all(AppConfig.largePadding),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(AppConfig.defaultPadding),
+                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
+                  child: Icon(Icons.shopping_cart, color: Colors.white, size: AppConfig.iconSizeLarge),
+                ),
+                SizedBox(width: AppConfig.defaultPadding),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Create New Order',
+                        style: ResponsiveText.getTitle(context).copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: AppConfig.smallPadding),
+                      Text(
+                        'Start the order creation process by searching for a customer',
+                        style: ResponsiveText.getBody(context).copyWith(color: Colors.white.withOpacity(0.9)),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(Icons.arrow_forward_ios, color: Colors.white.withOpacity(0.8), size: AppConfig.iconSizeMedium),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

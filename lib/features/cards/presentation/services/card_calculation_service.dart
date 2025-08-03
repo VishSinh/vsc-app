@@ -1,5 +1,6 @@
 /// Business service for card operations - pure business logic only
-class CardBusinessService {
+/// Moved from domain layer to presentation layer to match orders pattern
+class CardCalculationService {
   /// Calculate profit margin for a card
   static double calculateProfitMargin(double sellPrice, double costPrice) {
     if (sellPrice <= 0) return 0.0;

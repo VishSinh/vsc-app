@@ -8,10 +8,21 @@ abstract class BaseProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   String? _successMessage;
+  BuildContext? _context;
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   String? get successMessage => _successMessage;
+
+  /// Set the context for centralized snackbar management
+  void setContext(BuildContext context) {
+    _context = context;
+  }
+
+  /// Clear the stored context
+  void clearContext() {
+    _context = null;
+  }
 
   void setLoading(bool loading) {
     _isLoading = loading;
@@ -89,15 +100,31 @@ abstract class BaseProvider extends ChangeNotifier {
     }
   }
 
+  /// Extract message from response data if it has a message property
+  String? _extractMessageFromData(dynamic data) {
+    if (data == null) return null;
+
+    // Try to access message property using reflection
+    try {
+      if (data is Map<String, dynamic>) {
+        return data['message'] as String?;
+      }
+      // For objects with message property
+      final message = (data as dynamic).message;
+      return message is String ? message : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   /// Unified API operation handler
   Future<R?> executeApiOperation<T, R>({
     required Future<ApiResponse<T>> Function() apiCall,
     required R Function(ApiResponse<T> response) onSuccess,
-    BuildContext? context,
     bool showSnackbar = true,
     bool showLoading = true,
-    String? successMessage,
-    String? errorMessage,
+    String? successMessage = 'Operation successful',
+    String? errorMessage = 'Operation failed',
   }) async {
     try {
       if (showLoading) setLoading(true);
@@ -108,29 +135,32 @@ abstract class BaseProvider extends ChangeNotifier {
       if (response.success) {
         final result = onSuccess(response);
 
+        // Prioritize response.data.message over successMessage
+        final finalSuccessMessage = _extractMessageFromData(response.data) ?? successMessage;
+
         // Success messages respect the showSnackbar parameter
-        if (showSnackbar && context != null && successMessage != null) {
-          setSuccessWithSnackBar(successMessage, context);
-        } else if (successMessage != null) {
-          setSuccess(successMessage);
+        if (showSnackbar && _context != null && finalSuccessMessage != null) {
+          setSuccessWithSnackBar(finalSuccessMessage, _context!);
+        } else if (finalSuccessMessage != null) {
+          setSuccess(finalSuccessMessage);
         }
 
         return result;
       } else {
-        final errorMsg = errorMessage ?? response.error?.message ?? 'Operation failed';
+        // Prioritize response.error.message over errorMessage
+        final finalErrorMessage = response.error?.message ?? errorMessage;
         // Error cases always show snackbar for better UX
-        if (context != null) {
-          setErrorWithSnackBar(errorMsg, context);
+        if (_context != null) {
+          setErrorWithSnackBar(finalErrorMessage, _context!);
         } else {
-          setError(errorMsg);
+          setError(finalErrorMessage);
         }
         return null;
       }
     } catch (e) {
-      final errorMsg = errorMessage ?? 'Error: $e';
-      // Error cases always show snackbar for better UX
-      if (context != null) {
-        setErrorWithSnackBar(errorMsg, context);
+      final errorMsg = 'Error: $e';
+      if (_context != null) {
+        setErrorWithSnackBar(errorMsg, _context!);
       } else {
         setError(errorMsg);
       }
@@ -146,49 +176,6 @@ abstract class BaseProvider extends ChangeNotifier {
     _errorMessage = null;
     _successMessage = null;
     notifyListeners();
-  }
-}
-
-/// Mixin for automatic error handling with SnackBar display
-mixin AutoSnackBarMixin on BaseProvider {
-  BuildContext? _context;
-
-  /// Set the context for automatic SnackBar display
-  void setContext(BuildContext context) {
-    _context = context;
-  }
-
-  /// Override setError to automatically show SnackBar
-  @override
-  void setError(String? error) {
-    super.setError(error);
-
-    if (error != null && _context != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_context!.mounted) {
-          SnackbarUtils.showError(_context!, error);
-        }
-      });
-    }
-  }
-
-  /// Override setSuccess to automatically show SnackBar
-  @override
-  void setSuccess(String? success) {
-    super.setSuccess(success);
-
-    if (success != null && _context != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_context!.mounted) {
-          SnackbarUtils.showSuccess(_context!, success);
-        }
-      });
-    }
-  }
-
-  /// Clear context when provider is disposed
-  void clearContext() {
-    _context = null;
   }
 }
 

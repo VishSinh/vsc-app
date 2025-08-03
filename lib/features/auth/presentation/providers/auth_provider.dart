@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:vsc_app/core/enums/user_role.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
 import 'package:vsc_app/features/auth/data/services/auth_service.dart';
@@ -9,7 +8,7 @@ import 'package:vsc_app/features/auth/presentation/providers/permission_provider
 import 'package:vsc_app/features/auth/presentation/services/auth_validators.dart';
 
 /// Provider for managing authentication state and operations
-class AuthProvider extends BaseProvider with AutoSnackBarMixin {
+class AuthProvider extends BaseProvider {
   final AuthService _authService = AuthService();
   final PermissionProvider _permissionProvider = PermissionProvider();
 
@@ -105,7 +104,7 @@ class AuthProvider extends BaseProvider with AutoSnackBarMixin {
   }
 
   /// Login with current form data
-  Future<bool> login({BuildContext? context}) async {
+  Future<bool> login() async {
     if (_loginForm == null) {
       setError('Login form not initialized');
       return false;
@@ -131,7 +130,6 @@ class AuthProvider extends BaseProvider with AutoSnackBarMixin {
         _permissionProvider.initializePermissions();
         return response.data!;
       },
-      context: context,
       successMessage: 'Login successful!',
       errorMessage: 'Login failed',
     );
@@ -139,7 +137,7 @@ class AuthProvider extends BaseProvider with AutoSnackBarMixin {
   }
 
   /// Register new staff member (Admin only)
-  Future<bool> register({BuildContext? context}) async {
+  Future<bool> register() async {
     if (_registerForm == null) {
       setError('Register form not initialized');
       return false;
@@ -169,7 +167,6 @@ class AuthProvider extends BaseProvider with AutoSnackBarMixin {
       onSuccess: (response) {
         return response.data!;
       },
-      context: context,
       successMessage: 'Staff member registered successfully!',
       errorMessage: 'Registration failed',
     );
@@ -177,19 +174,14 @@ class AuthProvider extends BaseProvider with AutoSnackBarMixin {
   }
 
   /// Logout user
-  Future<void> logout({BuildContext? context}) async {
+  Future<void> logout() async {
     await executeAsync(() async {
       // Clear permissions first
       _permissionProvider.clearPermissions();
 
       await _authService.logout();
       _currentUser = null;
-
-      if (context != null) {
-        setSuccessWithSnackBar('Logged out successfully!', context);
-      } else {
-        setSuccess('Logged out successfully!');
-      }
+      setSuccess('Logged out successfully!');
     }, showLoading: false);
   }
 

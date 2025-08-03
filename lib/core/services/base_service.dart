@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:vsc_app/core/constants/app_constants.dart';
 import 'package:vsc_app/core/models/api_response.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 /// Base service class that provides common functionality for all API services
 abstract class ApiService {
@@ -24,7 +25,8 @@ abstract class ApiService {
         baseUrl: _baseUrl,
         connectTimeout: AppConstants.requestTimeout,
         receiveTimeout: AppConstants.requestTimeout,
-        sendTimeout: AppConstants.requestTimeout,
+        // Only set sendTimeout for non-web platforms to avoid warnings
+        sendTimeout: kIsWeb ? null : AppConstants.requestTimeout,
         headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
       ),
     );

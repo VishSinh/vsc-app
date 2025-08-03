@@ -49,7 +49,6 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     final authProvider = context.read<AuthProvider>();
-    authProvider.setContext(context);
 
     // Update the form with current values
     authProvider.updateRegisterForm(

@@ -130,7 +130,7 @@ class UITextConstants {
   static const String createCardSubtitle = 'Add a new card to the inventory system';
   static const String inventoryManagementTitle = 'Inventory Management';
   static const String inventoryManagementSubtitle = 'Manage your inventory items and cards';
-  static const String customerSearchTitle = 'Customer Search';
+  static const String createOrderCustomerSearchTitle = 'Create Order - Customer Search';
   static const String customerSearchSubtitle = 'Find or create a customer for the order';
   static const String orderCreationTitle = 'Create Order';
   static const String orderCreationSubtitle = 'Add items to the order';

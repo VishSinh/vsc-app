@@ -3,7 +3,6 @@ import 'package:vsc_app/core/providers/base_provider.dart';
 import 'package:vsc_app/features/cards/data/services/card_service.dart';
 import '../../data/services/order_service.dart';
 import '../models/order_form_models.dart';
-import 'package:vsc_app/core/validation/validation_result.dart';
 import '../services/order_calculation_service.dart';
 
 import 'package:vsc_app/features/cards/data/models/card_responses.dart';
@@ -11,7 +10,7 @@ import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart
 import 'package:vsc_app/core/models/customer_model.dart';
 
 /// Provider for managing order creation state and operations
-class OrderCreateProvider extends BaseProvider with AutoSnackBarMixin {
+class OrderCreateProvider extends BaseProvider {
   final OrderService _orderService = OrderService();
 
   final OrderCreationFormViewModel _orderCreationForm = OrderCreationFormViewModel(orderItems: []);
@@ -90,11 +89,7 @@ class OrderCreateProvider extends BaseProvider with AutoSnackBarMixin {
   }
 
   /// Search for card by barcode
-  Future<void> searchCardByBarcode(String barcode, {BuildContext? context}) async {
-    if (context != null) {
-      setContext(context);
-    }
-
+  Future<void> searchCardByBarcode(String barcode) async {
     await executeApiOperation(
       apiCall: () => CardService().getCardByBarcode(barcode),
       onSuccess: (response) {
@@ -120,8 +115,6 @@ class OrderCreateProvider extends BaseProvider with AutoSnackBarMixin {
         notifyListeners();
         return card;
       },
-      context: context,
-      successMessage: 'Card found successfully',
       errorMessage: 'Failed to search for card',
     );
   }
@@ -150,11 +143,7 @@ class OrderCreateProvider extends BaseProvider with AutoSnackBarMixin {
   }
 
   /// Create order with current form data
-  Future<bool> createOrder({BuildContext? context}) async {
-    if (context != null) {
-      setContext(context);
-    }
-
+  Future<bool> createOrder() async {
     // Validate order creation
     final validationResult = _orderCreationForm.validate();
     if (!validationResult.isValid) {
@@ -168,7 +157,6 @@ class OrderCreateProvider extends BaseProvider with AutoSnackBarMixin {
         reset();
         return response.data!; // Return the MessageData
       },
-      context: context,
       successMessage: 'Order created successfully',
       errorMessage: 'Failed to create order',
     );
@@ -188,7 +176,6 @@ class OrderCreateProvider extends BaseProvider with AutoSnackBarMixin {
     _currentCard = null;
     _selectedDeliveryDate = null;
     _selectedDeliveryTime = null;
-    clearContext(); // Clear context when resetting
     super.reset();
   }
 

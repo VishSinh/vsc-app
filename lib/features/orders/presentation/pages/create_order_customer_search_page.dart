@@ -12,14 +12,14 @@ import 'package:vsc_app/features/customers/presentation/providers/customer_provi
 import 'package:vsc_app/features/orders/presentation/providers/order_create_provider.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 
-class CustomerSearchPage extends StatefulWidget {
-  const CustomerSearchPage({super.key});
+class CreateOrderCustomerSearchPage extends StatefulWidget {
+  const CreateOrderCustomerSearchPage({super.key});
 
   @override
-  State<CustomerSearchPage> createState() => _CustomerSearchPageState();
+  State<CreateOrderCustomerSearchPage> createState() => _CreateOrderCustomerSearchPageState();
 }
 
-class _CustomerSearchPageState extends State<CustomerSearchPage> {
+class _CreateOrderCustomerSearchPageState extends State<CreateOrderCustomerSearchPage> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
   final _nameController = TextEditingController();
@@ -87,8 +87,8 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(UITextConstants.customerSearchTitle),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.orders)),
+        title: const Text(UITextConstants.createOrderCustomerSearchTitle),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.dashboard)),
       ),
       body: Consumer2<CustomerProvider, OrderCreateProvider>(
         builder: (context, customerProvider, orderProvider, child) {

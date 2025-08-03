@@ -4,10 +4,8 @@ import 'package:vsc_app/core/services/base_service.dart';
 import 'package:vsc_app/features/cards/data/models/card_requests.dart';
 import 'package:vsc_app/features/cards/data/models/card_responses.dart';
 import 'package:vsc_app/core/constants/app_constants.dart';
-import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:vsc_app/core/utils/file_upload_utils.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter/foundation.dart';
 
 /// Data layer service for card API communication
 /// Handles all API calls related to cards using DTOs only

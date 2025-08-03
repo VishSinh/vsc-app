@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
@@ -14,7 +13,6 @@ import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
-import 'package:vsc_app/core/utils/app_logger.dart';
 
 class CreateCardPage extends StatefulWidget {
   const CreateCardPage({super.key});
@@ -497,6 +495,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
     );
 
     // Check for similar cards first
+    cardProvider.setContext(context);
     await cardProvider.searchSimilarCards(cardProvider.formModel.image!);
 
     if (cardProvider.similarCards.isNotEmpty && mounted) {

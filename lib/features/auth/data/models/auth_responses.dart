@@ -1,6 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:vsc_app/core/enums/user_role.dart';
-import 'package:vsc_app/core/models/api_response.dart';
 
 part 'auth_responses.g.dart';
 

@@ -78,8 +78,8 @@ class OrderListProvider extends BaseProvider {
   }
 
   // Order fetching methods
-  Future<bool> fetchOrders({int page = 1, int pageSize = 10}) async {
-    final result = await executeApiOperation(
+  Future<void> fetchOrders({int page = 1, int pageSize = 10}) async {
+    await executeApiOperation(
       apiCall: () => _orderService.getOrders(page: page, pageSize: pageSize),
       onSuccess: (response) {
         _orders.clear();
@@ -88,12 +88,10 @@ class OrderListProvider extends BaseProvider {
         _orders.addAll(orderViewModels);
         _pagination = response.pagination;
         notifyListeners();
-        return true;
       },
-      showSnackbar: false, // No snackbar for frequent API calls
+      showSnackbar: false,
       errorMessage: 'Failed to fetch orders',
     );
-    return result ?? false;
   }
 
   Future<void> loadNextPage() async {
@@ -109,8 +107,8 @@ class OrderListProvider extends BaseProvider {
   }
 
   // Order detail methods
-  Future<bool> fetchOrderById(String orderId) async {
-    final result = await executeApiOperation(
+  Future<void> fetchOrderById(String orderId) async {
+    await executeApiOperation(
       apiCall: () => _orderService.getOrderById(orderId),
       onSuccess: (response) {
         _currentOrder = OrderViewModel.fromApiResponse(response.data!);
@@ -120,7 +118,6 @@ class OrderListProvider extends BaseProvider {
       showSnackbar: false, // No snackbar for detail fetching
       errorMessage: 'Failed to fetch order details',
     );
-    return result != null; // Convert to boolean
   }
 
   void clearCurrentOrder() {
@@ -172,7 +169,7 @@ class OrderListProvider extends BaseProvider {
         return response.data!;
       },
       showLoading: false, // Use custom loading state
-      showSnackbar: false, // No snackbar for data fetching
+      showSnackbar: false, // Enable snackbar for testing
       errorMessage: 'Failed to fetch box makers',
     );
 

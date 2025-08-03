@@ -1,12 +1,6 @@
-import 'package:logger/logger.dart';
 import '../constants/logging_constants.dart';
 
 class AppLogger {
-  static final Logger _logger = Logger(
-    printer: PrettyPrinter(methodCount: 2, errorMethodCount: 8, lineLength: 120, colors: true, printEmojis: true),
-    level: Level.debug,
-  );
-
   // Debug logging
   static void debug(String message, {String? category, Object? data}) {
     print('${LoggingConstants.emojiDebug} $message');

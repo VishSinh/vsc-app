@@ -1,6 +1,7 @@
-import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'package:vsc_app/features/cards/presentation/validators/card_validators.dart';
+import 'package:vsc_app/core/validation/validation_result.dart';
+import 'package:vsc_app/features/cards/data/models/card_requests.dart';
+import 'package:vsc_app/features/cards/presentation/services/card_validators.dart';
 
 /// Form model for card creation with validation
 class CardFormViewModel {
@@ -103,4 +104,56 @@ class CardFormViewModel {
   double? get sellPriceAsDouble => double.tryParse(sellPrice);
   int? get quantityAsInt => int.tryParse(quantity);
   double? get maxDiscountAsDouble => double.tryParse(maxDiscount);
+
+  /// Validates the card form
+  ValidationResult validate() {
+    final errors = <String>[];
+
+    if (costPrice.isEmpty) {
+      errors.add('Cost price is required');
+    } else if (costPriceAsDouble == null || costPriceAsDouble! <= 0) {
+      errors.add('Cost price must be a positive number');
+    }
+
+    if (sellPrice.isEmpty) {
+      errors.add('Sell price is required');
+    } else if (sellPriceAsDouble == null || sellPriceAsDouble! <= 0) {
+      errors.add('Sell price must be a positive number');
+    }
+
+    if (quantity.isEmpty) {
+      errors.add('Quantity is required');
+    } else if (quantityAsInt == null || quantityAsInt! <= 0) {
+      errors.add('Quantity must be a positive number');
+    }
+
+    if (maxDiscount.isEmpty) {
+      errors.add('Max discount is required');
+    } else if (maxDiscountAsDouble == null || maxDiscountAsDouble! < 0) {
+      errors.add('Max discount must be a non-negative number');
+    }
+
+    if (vendorId.isEmpty) {
+      errors.add('Vendor is required');
+    }
+
+    if (image == null) {
+      errors.add('Image is required');
+    }
+
+    return errors.isEmpty
+        ? ValidationResult.success()
+        : ValidationResult.failure(errors.map((e) => ValidationError(field: 'card', message: e)).toList());
+  }
+
+  /// Convert form model to API request
+  CreateCardRequest toApiRequest() {
+    return CreateCardRequest(
+      costPrice: costPriceAsDouble ?? 0.0,
+      sellPrice: sellPriceAsDouble ?? 0.0,
+      quantity: quantityAsInt ?? 0,
+      maxDiscount: maxDiscountAsDouble ?? 0.0,
+      vendorId: vendorId,
+    );
+  }
 }

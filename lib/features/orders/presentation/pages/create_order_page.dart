@@ -15,14 +15,14 @@ import 'package:vsc_app/features/orders/presentation/providers/order_create_prov
 import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_form_models.dart';
 
-class OrderItemsPage extends StatefulWidget {
-  const OrderItemsPage({super.key});
+class CreateOrderPage extends StatefulWidget {
+  const CreateOrderPage({super.key});
 
   @override
-  State<OrderItemsPage> createState() => _OrderItemsPageState();
+  State<CreateOrderPage> createState() => _CreateOrderPageState();
 }
 
-class _OrderItemsPageState extends State<OrderItemsPage> {
+class _CreateOrderPageState extends State<CreateOrderPage> {
   final _barcodeController = TextEditingController();
 
   @override
@@ -43,10 +43,10 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
     super.dispose();
   }
 
-  Future<void> _searchCard() async {
+  void _searchCard() {
     final orderProvider = context.read<OrderCreateProvider>();
-    await orderProvider.searchCardByBarcode(_barcodeController.text.trim(), context: context);
-    // ✅ Auto SnackBar - no manual error handling needed!
+    orderProvider.setContext(context);
+    orderProvider.searchCardByBarcode(_barcodeController.text.trim());
   }
 
   void _removeOrderItem(int index) {

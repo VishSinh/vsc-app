@@ -17,7 +17,7 @@ class SimilarCardsPage extends StatefulWidget {
 }
 
 class _SimilarCardsPageState extends State<SimilarCardsPage> {
-  List<CardViewModel> _similarCards = [];
+  List<SimilarCardViewModel> _similarCards = [];
   bool _isLoading = false;
 
   @override
@@ -37,8 +37,8 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
     });
   }
 
-  Future<void> _purchaseCard(CardViewModel card) async {
-    final cardProvider = context.read<CardProvider>();
+  Future<void> _purchaseCard(SimilarCardViewModel card) async {
+    context.read<CardProvider>();
 
     // Show quantity dialog
     final quantity = await _showQuantityDialog();
@@ -125,7 +125,7 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
     );
   }
 
-  Widget _buildSimilarCardItem(CardViewModel card) {
+  Widget _buildSimilarCardItem(SimilarCardViewModel card) {
     return Card(
       margin: EdgeInsets.only(bottom: AppConfig.defaultPadding),
       child: ListTile(

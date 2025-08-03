@@ -5,7 +5,7 @@ import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/features/auth/presentation/pages/login_page.dart';
 import 'package:vsc_app/features/auth/presentation/pages/dashboard_page.dart';
 import 'package:vsc_app/features/orders/presentation/pages/orders_page.dart';
-import 'package:vsc_app/features/inventory/presentation/pages/inventory_page.dart';
+import 'package:vsc_app/features/cards/presentation/pages/inventory_page.dart';
 import 'package:vsc_app/features/production/presentation/pages/production_page.dart';
 import 'package:vsc_app/features/administration/presentation/pages/administration_page.dart';
 import 'package:vsc_app/features/auth/presentation/pages/register_page.dart';
@@ -14,9 +14,9 @@ import 'package:vsc_app/features/vendors/presentation/pages/vendor_detail_page.d
 import 'package:vsc_app/features/cards/presentation/pages/card_detail_page.dart';
 import 'package:vsc_app/features/cards/presentation/pages/create_card_page.dart';
 import 'package:vsc_app/features/cards/presentation/pages/similar_cards_page.dart';
-import 'package:vsc_app/features/orders/presentation/pages/customer_search_page.dart';
-import 'package:vsc_app/features/orders/presentation/pages/order_items_page.dart';
-import 'package:vsc_app/features/orders/presentation/pages/order_review_page.dart';
+import 'package:vsc_app/features/orders/presentation/pages/create_order_customer_search_page.dart';
+import 'package:vsc_app/features/orders/presentation/pages/create_order_page.dart';
+import 'package:vsc_app/features/orders/presentation/pages/create_order_review_page.dart';
 import 'package:vsc_app/features/orders/presentation/pages/order_detail_page.dart';
 
 class AppRouter {
@@ -76,10 +76,14 @@ class AppRouter {
         GoRoute(
           path: RouteConstants.customerSearch,
           name: RouteConstants.customerSearchRouteName,
-          builder: (context, state) => const CustomerSearchPage(),
+          builder: (context, state) => const CreateOrderCustomerSearchPage(),
         ),
-        GoRoute(path: RouteConstants.orderItems, name: RouteConstants.orderItemsRouteName, builder: (context, state) => const OrderItemsPage()),
-        GoRoute(path: RouteConstants.orderReview, name: RouteConstants.orderReviewRouteName, builder: (context, state) => const OrderReviewPage()),
+        GoRoute(path: RouteConstants.orderItems, name: RouteConstants.orderItemsRouteName, builder: (context, state) => const CreateOrderPage()),
+        GoRoute(
+          path: RouteConstants.orderReview,
+          name: RouteConstants.orderReviewRouteName,
+          builder: (context, state) => const CreateOrderReviewPage(),
+        ),
         GoRoute(
           path: RouteConstants.orderDetail,
           name: RouteConstants.orderDetailRouteName,

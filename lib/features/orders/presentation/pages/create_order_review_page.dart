@@ -9,18 +9,17 @@ import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import '../widgets/order_widgets.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
-import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_create_provider.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 
-class OrderReviewPage extends StatefulWidget {
-  const OrderReviewPage({super.key});
+class CreateOrderReviewPage extends StatefulWidget {
+  const CreateOrderReviewPage({super.key});
 
   @override
-  State<OrderReviewPage> createState() => _OrderReviewPageState();
+  State<CreateOrderReviewPage> createState() => _CreateOrderReviewPageState();
 }
 
-class _OrderReviewPageState extends State<OrderReviewPage> {
+class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
   final TextEditingController _orderNameController = TextEditingController();
 
   @override
@@ -69,18 +68,12 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
   Future<void> _submitOrder() async {
     final orderProvider = context.read<OrderCreateProvider>();
 
-    // Update the form model with current values
     orderProvider.setOrderName(_orderNameController.text);
-    // Delivery date/time is already managed by the provider
 
-    // Validate the form
+    orderProvider.setContext(context);
+    final success = await orderProvider.createOrder();
 
-    final success = await orderProvider.createOrder(context: context);
-
-    if (success && mounted) {
-      context.go(RouteConstants.dashboard);
-    }
-    AppLogger.debug("OrderReviewPage: Should not reach this point");
+    if (success && mounted) context.go(RouteConstants.dashboard); // Redirect to dashboard after successful order creation
   }
 
   @override

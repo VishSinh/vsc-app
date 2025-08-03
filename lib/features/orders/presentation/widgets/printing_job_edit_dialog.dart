@@ -43,52 +43,55 @@ class PrintingJobEditDialog extends StatelessWidget {
         );
         return provider;
       },
-      child: Consumer2<PrintingJobEditFormProvider, OrderListProvider>(
-        builder: (context, formProvider, orderProvider, child) {
-          // Fetch printers and tracing studios when dialog opens
+      child: Builder(
+        builder: (context) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
+            final orderProvider = context.read<OrderListProvider>();
+            orderProvider.setContext(context);
             orderProvider.fetchPrinters();
             orderProvider.fetchTracingStudios();
           });
 
-          return Dialog(
-            child: Container(
-              width: 500,
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.edit, color: Colors.green),
-                      const SizedBox(width: 8),
-                      const Text('Edit Printing Job', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                      const Spacer(),
-                      IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.close)),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Form(
-                    child: Column(
+          return Consumer2<PrintingJobEditFormProvider, OrderListProvider>(
+            builder: (context, formProvider, orderProvider, child) => Dialog(
+              child: Container(
+                width: 500,
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        _buildPrinterSection(context, formProvider, orderProvider),
-                        const SizedBox(height: 16),
-                        _buildTracingStudioSection(context, formProvider, orderProvider),
-                        const SizedBox(height: 16),
-                        _buildPrintingStatusSection(context, formProvider),
-                        const SizedBox(height: 16),
-                        _buildTotalPrintingCostSection(context, formProvider),
-                        const SizedBox(height: 16),
-                        _buildPrintQuantitySection(context, formProvider),
-                        const SizedBox(height: 16),
-                        _buildEstimatedCompletionSection(context, formProvider),
-                        const SizedBox(height: 24),
-                        _buildActionButtons(context, formProvider, orderProvider),
+                        const Icon(Icons.edit, color: Colors.green),
+                        const SizedBox(width: 8),
+                        const Text('Edit Printing Job', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        const Spacer(),
+                        IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.close)),
                       ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 24),
+                    Form(
+                      child: Column(
+                        children: [
+                          _buildPrinterSection(context, formProvider, orderProvider),
+                          const SizedBox(height: 16),
+                          _buildTracingStudioSection(context, formProvider, orderProvider),
+                          const SizedBox(height: 16),
+                          _buildPrintingStatusSection(context, formProvider),
+                          const SizedBox(height: 16),
+                          _buildTotalPrintingCostSection(context, formProvider),
+                          const SizedBox(height: 16),
+                          _buildPrintQuantitySection(context, formProvider),
+                          const SizedBox(height: 16),
+                          _buildEstimatedCompletionSection(context, formProvider),
+                          const SizedBox(height: 24),
+                          _buildActionButtons(context, formProvider, orderProvider),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );

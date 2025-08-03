@@ -11,7 +11,7 @@ import 'package:vsc_app/core/constants/navigation_items.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:vsc_app/core/widgets/shared_widgets.dart';
 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
@@ -52,12 +52,19 @@ class _OrdersPageState extends State<OrdersPage> {
   void initState() {
     super.initState();
     _setSelectedIndex();
-    _loadOrders();
+    // Delay the initial load to ensure Scaffold is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final orderProvider = context.read<OrderListProvider>();
+      if (mounted && orderProvider.orders.isEmpty) {
+        _loadOrders();
+      }
+    });
   }
 
   void _loadOrders() {
     // Fetch orders from API - BaseProvider handles errors automatically
     final orderProvider = context.read<OrderListProvider>();
+    orderProvider.setContext(context);
     orderProvider.fetchOrders();
   }
 
@@ -104,7 +111,6 @@ class _OrdersPageState extends State<OrdersPage> {
       destinations: _getDestinations(),
       onDestinationSelected: _onDestinationSelected,
       pageTitle: UITextConstants.orders,
-      child: _buildOrdersContent(),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -125,6 +131,7 @@ class _OrdersPageState extends State<OrdersPage> {
           ),
         ],
       ),
+      child: _buildOrdersContent(),
     );
   }
 
@@ -132,7 +139,7 @@ class _OrdersPageState extends State<OrdersPage> {
     return Consumer<OrderListProvider>(
       builder: (context, orderProvider, child) {
         if (orderProvider.isLoading) {
-          return _buildLoadingSpinner();
+          return const LoadingWidget(message: 'Loading orders...');
         }
 
         return Column(
@@ -179,10 +186,6 @@ class _OrdersPageState extends State<OrdersPage> {
     );
   }
 
-  Widget _buildLoadingSpinner() {
-    return const Center(child: SpinKitDoubleBounce(color: Colors.blue, size: 50.0));
-  }
-
   Widget _buildOrdersList(OrderListProvider orderProvider) {
     if (orderProvider.errorMessage != null) {
       return Center(
@@ -217,7 +220,7 @@ class _OrdersPageState extends State<OrdersPage> {
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           child: InkWell(
-            onTap: () => context.go('${RouteConstants.orderDetail.replaceAll(':id', order.id)}'),
+            onTap: () => context.go(RouteConstants.orderDetail.replaceAll(':id', order.id)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -339,7 +342,7 @@ class _OrdersPageState extends State<OrdersPage> {
     const double fixedRowHeight = 70.0; // Fixed height for each row
     const double headerHeight = 50.0; // Height of the header row
 
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.height - 200, // Account for header, padding, etc.
       child: Column(
         children: [
@@ -444,12 +447,12 @@ class _OrdersPageState extends State<OrdersPage> {
 
   Widget _buildDesktopRow(OrderViewModel order, double rowHeight) {
     return InkWell(
-      onTap: () => context.go('${RouteConstants.orderDetail.replaceAll(':id', order.id)}'),
+      onTap: () => context.go(RouteConstants.orderDetail.replaceAll(':id', order.id)),
       child: Container(
         height: rowHeight,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+          border: Border(bottom: BorderSide(color: const Color(0xFF4C4B4B))),
         ),
         child: Row(
           children: [
@@ -605,10 +608,6 @@ class _OrdersPageState extends State<OrdersPage> {
     );
   }
 
-  String _formatDate(DateTime dateTime) {
-    return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
-  }
-
   String _formatDateTime(DateTime dateTime) {
     return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
@@ -636,14 +635,6 @@ class _OrdersPageState extends State<OrdersPage> {
 
   bool _hasPrintingRequirements(OrderViewModel order) {
     return order.orderItems.any((item) => item.requiresPrinting);
-  }
-
-  bool _hasBoxMakerAssigned(OrderViewModel order) {
-    return order.orderItems.any((item) => item.boxOrders?.any((box) => box.boxMakerId != null) ?? false);
-  }
-
-  bool _hasPrinterAssigned(OrderViewModel order) {
-    return order.orderItems.any((item) => item.printingJobs?.any((job) => job.printerId != null || job.tracingStudioId != null) ?? false);
   }
 
   String? _getBoxMakerName(OrderViewModel order) {

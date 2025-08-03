@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vsc_app/core/enums/order_box_type.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_form_models.dart';
 
 /// Provider for managing order item form state

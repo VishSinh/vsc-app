@@ -1,5 +1,5 @@
-import 'package:vsc_app/features/cards/domain/models/card.dart';
-import 'package:vsc_app/features/cards/domain/services/card_business_service.dart';
+import 'package:vsc_app/features/cards/data/models/card_responses.dart';
+import 'package:vsc_app/features/cards/presentation/services/card_calculation_service.dart';
 
 /// UI model for displaying card information
 /// Contains only formatting and display logic
@@ -40,27 +40,27 @@ class CardViewModel {
     required this.totalValue,
   });
 
-  /// Create from domain model with formatting
-  factory CardViewModel.fromDomainModel(CardEntity domainModel) {
-    final sellPriceAsDouble = domainModel.sellPrice;
-    final costPriceAsDouble = domainModel.costPrice;
-    final maxDiscountAsDouble = domainModel.maxDiscount;
+  /// Create from API response with direct conversion
+  factory CardViewModel.fromApiResponse(CardResponse response) {
+    final sellPriceAsDouble = response.sellPriceAsDouble;
+    final costPriceAsDouble = response.costPriceAsDouble;
+    final maxDiscountAsDouble = response.maxDiscountAsDouble;
 
-    // Use domain service for business calculations
-    final profitMargin = CardBusinessService.calculateProfitMargin(domainModel.sellPrice, domainModel.costPrice);
-    final totalValue = CardBusinessService.calculateTotalValue(domainModel.sellPrice, domainModel.quantity);
+    // Calculate business logic using presentation service
+    final profitMargin = CardCalculationService.calculateProfitMargin(sellPriceAsDouble, costPriceAsDouble);
+    final totalValue = CardCalculationService.calculateTotalValue(sellPriceAsDouble, response.quantity);
 
     return CardViewModel(
-      id: domainModel.id,
-      vendorId: domainModel.vendorId,
-      barcode: domainModel.barcode,
+      id: response.id,
+      vendorId: response.vendorId,
+      barcode: response.barcode,
       sellPrice: sellPriceAsDouble.toString(),
       costPrice: costPriceAsDouble.toString(),
       maxDiscount: maxDiscountAsDouble.toString(),
-      quantity: domainModel.quantity,
-      image: domainModel.image,
-      perceptualHash: domainModel.perceptualHash,
-      isActive: domainModel.isActive,
+      quantity: response.quantity,
+      image: response.image,
+      perceptualHash: response.perceptualHash,
+      isActive: response.isActive,
       sellPriceAsDouble: sellPriceAsDouble,
       costPriceAsDouble: costPriceAsDouble,
       maxDiscountAsDouble: maxDiscountAsDouble,
@@ -77,4 +77,85 @@ class CardViewModel {
   String get formattedTotalValue => '\$${totalValue.toStringAsFixed(2)}';
   String get formattedQuantity => quantity.toString();
   String get formattedSimilarity => ''; // Not applicable for regular cards
+}
+
+/// UI model for displaying similar card information
+/// Contains only formatting and display logic
+class SimilarCardViewModel {
+  final String id;
+  final String vendorId;
+  final String barcode;
+  final String sellPrice;
+  final String costPrice;
+  final String maxDiscount;
+  final int quantity;
+  final String image;
+  final String perceptualHash;
+  final bool isActive;
+  final double similarity;
+
+  // Computed properties for UI
+  final double sellPriceAsDouble;
+  final double costPriceAsDouble;
+  final double maxDiscountAsDouble;
+  final double profitMargin;
+  final double totalValue;
+
+  const SimilarCardViewModel({
+    required this.id,
+    required this.vendorId,
+    required this.barcode,
+    required this.sellPrice,
+    required this.costPrice,
+    required this.maxDiscount,
+    required this.quantity,
+    required this.image,
+    required this.perceptualHash,
+    required this.isActive,
+    required this.similarity,
+    required this.sellPriceAsDouble,
+    required this.costPriceAsDouble,
+    required this.maxDiscountAsDouble,
+    required this.profitMargin,
+    required this.totalValue,
+  });
+
+  /// Create from API response with direct conversion
+  factory SimilarCardViewModel.fromApiResponse(CardResponse response, {double similarity = 0.0}) {
+    final sellPriceAsDouble = response.sellPriceAsDouble;
+    final costPriceAsDouble = response.costPriceAsDouble;
+    final maxDiscountAsDouble = response.maxDiscountAsDouble;
+
+    // Calculate business logic using presentation service
+    final profitMargin = CardCalculationService.calculateProfitMargin(sellPriceAsDouble, costPriceAsDouble);
+    final totalValue = CardCalculationService.calculateTotalValue(sellPriceAsDouble, response.quantity);
+
+    return SimilarCardViewModel(
+      id: response.id,
+      vendorId: response.vendorId,
+      barcode: response.barcode,
+      sellPrice: sellPriceAsDouble.toString(),
+      costPrice: costPriceAsDouble.toString(),
+      maxDiscount: maxDiscountAsDouble.toString(),
+      quantity: response.quantity,
+      image: response.image,
+      perceptualHash: response.perceptualHash,
+      isActive: response.isActive,
+      similarity: similarity,
+      sellPriceAsDouble: sellPriceAsDouble,
+      costPriceAsDouble: costPriceAsDouble,
+      maxDiscountAsDouble: maxDiscountAsDouble,
+      profitMargin: profitMargin,
+      totalValue: totalValue,
+    );
+  }
+
+  // Formatted getters for UI
+  String get formattedSellPrice => '\$${sellPriceAsDouble.toStringAsFixed(2)}';
+  String get formattedCostPrice => '\$${costPriceAsDouble.toStringAsFixed(2)}';
+  String get formattedMaxDiscount => '${maxDiscountAsDouble.toStringAsFixed(2)}%';
+  String get formattedProfitMargin => '${profitMargin.toStringAsFixed(1)}%';
+  String get formattedTotalValue => '\$${totalValue.toStringAsFixed(2)}';
+  String get formattedQuantity => quantity.toString();
+  String get formattedSimilarity => CardCalculationService.formatSimilarityScore(similarity);
 }

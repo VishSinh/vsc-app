@@ -44,53 +44,58 @@ class BoxOrderEditDialog extends StatelessWidget {
         );
         return provider;
       },
-      child: Consumer2<BoxOrderEditFormProvider, OrderListProvider>(
-        builder: (context, formProvider, orderProvider, child) {
-          // Fetch box makers when dialog opens
+      child: Builder(
+        builder: (context) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
+            final orderProvider = context.read<OrderListProvider>();
+            orderProvider.setContext(context);
             orderProvider.fetchBoxMakers();
           });
 
-          return Dialog(
-            child: Container(
-              width: 500,
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+          return Consumer2<BoxOrderEditFormProvider, OrderListProvider>(
+            builder: (context, formProvider, orderProvider, child) {
+              return Dialog(
+                child: Container(
+                  width: 500,
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.edit, color: Colors.blue),
-                      const SizedBox(width: 8),
-                      const Text('Edit Box Order', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                      const Spacer(),
-                      IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.close)),
+                      Row(
+                        children: [
+                          const Icon(Icons.edit, color: Colors.blue),
+                          const SizedBox(width: 8),
+                          const Text('Edit Box Order', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          const Spacer(),
+                          IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.close)),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Form(
+                        child: Column(
+                          children: [
+                            _buildBoxMakerSection(context, formProvider, orderProvider),
+                            const SizedBox(height: 16),
+                            _buildBoxStatusSection(context, formProvider),
+                            const SizedBox(height: 16),
+                            _buildBoxTypeSection(context, formProvider),
+                            const SizedBox(height: 16),
+                            _buildTotalBoxCostSection(context, formProvider),
+                            const SizedBox(height: 16),
+                            _buildBoxQuantitySection(context, formProvider),
+                            const SizedBox(height: 16),
+                            _buildEstimatedCompletionSection(context, formProvider),
+                            const SizedBox(height: 24),
+                            _buildActionButtons(context, formProvider, orderProvider),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 24),
-                  Form(
-                    child: Column(
-                      children: [
-                        _buildBoxMakerSection(context, formProvider, orderProvider),
-                        const SizedBox(height: 16),
-                        _buildBoxStatusSection(context, formProvider),
-                        const SizedBox(height: 16),
-                        _buildBoxTypeSection(context, formProvider),
-                        const SizedBox(height: 16),
-                        _buildTotalBoxCostSection(context, formProvider),
-                        const SizedBox(height: 16),
-                        _buildBoxQuantitySection(context, formProvider),
-                        const SizedBox(height: 16),
-                        _buildEstimatedCompletionSection(context, formProvider),
-                        const SizedBox(height: 24),
-                        _buildActionButtons(context, formProvider, orderProvider),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         },
       ),

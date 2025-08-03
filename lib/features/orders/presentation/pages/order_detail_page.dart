@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
-import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
@@ -29,7 +27,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
   void _loadOrderDetails() {
     final orderProvider = context.read<OrderListProvider>();
-    // BaseProvider handles errors automatically
+    orderProvider.setContext(context);
     orderProvider.fetchOrderById(widget.orderId);
   }
 
@@ -217,7 +215,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       children: [
         const Text('Order Items', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
-        ...order.orderItems.map((item) => _buildOrderItemCard(item)).toList(),
+        ...order.orderItems.map((item) => _buildOrderItemCard(item)),
       ],
     );
   }
@@ -306,7 +304,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
         ),
         const SizedBox(height: 8),
-        ...boxOrders.map((box) => _buildBoxOrderItem(box)).toList(),
+        ...boxOrders.map((box) => _buildBoxOrderItem(box)),
       ],
     );
   }
@@ -366,7 +364,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
         ),
         const SizedBox(height: 8),
-        ...printingJobs.map((job) => _buildPrintingJobItem(job)).toList(),
+        ...printingJobs.map((job) => _buildPrintingJobItem(job)),
       ],
     );
   }

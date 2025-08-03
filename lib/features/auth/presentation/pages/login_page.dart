@@ -43,7 +43,6 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     final authProvider = context.read<AuthProvider>();
-    authProvider.setContext(context);
 
     // Update the form with current values
     authProvider.updateLoginForm(phone: _phoneController.text.trim(), password: _passwordController.text);

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:vsc_app/app/app_config.dart';
+
 import 'package:vsc_app/app/app_router.dart';
 import 'package:vsc_app/app/app_theme.dart';
 import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
@@ -31,45 +31,28 @@ class VSCApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => CustomerProvider()),
         ChangeNotifierProvider(create: (context) => OrderCreateProvider()),
         ChangeNotifierProvider(create: (context) => OrderListProvider()),
-        ChangeNotifierProxyProvider<PermissionProvider, AuthProvider>(
-          create: (context) => AuthProvider(permissionProvider: context.read<PermissionProvider>()),
-          update: (context, permissionProvider, previous) => previous ?? AuthProvider(permissionProvider: permissionProvider),
-        ),
+        ChangeNotifierProvider(create: (context) => AuthProvider()),
       ],
       child: AuthInitializer(child: _buildApp()),
     );
   }
 
   Widget _buildApp() {
-    // Toggle this to enable/disable ScreenUtil
-    const bool useScreenUtil = true; // Set to true to enable ScreenUtil
-
-    if (useScreenUtil) {
-      return ScreenUtilInit(
-        designSize: const Size(375, 812), // iPhone X design size
-        minTextAdapt: true,
-        splitScreenMode: true,
-        builder: (context, child) {
-          return MaterialApp.router(
-            title: 'Dashboard',
-            theme: AppTheme.darkTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: ThemeMode.dark,
-            routerConfig: AppRouter.router,
-            debugShowCheckedModeBanner: false,
-          );
-        },
-      );
-    } else {
-      return MaterialApp.router(
-        title: 'Dashboard',
-        theme: AppTheme.darkTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.dark,
-        routerConfig: AppRouter.router,
-        debugShowCheckedModeBanner: false,
-      );
-    }
+    return ScreenUtilInit(
+      designSize: const Size(375, 812), // iPhone X design size
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return MaterialApp.router(
+          title: 'Dashboard',
+          theme: AppTheme.darkTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.dark,
+          routerConfig: AppRouter.router,
+          debugShowCheckedModeBanner: false,
+        );
+      },
+    );
   }
 }
 
