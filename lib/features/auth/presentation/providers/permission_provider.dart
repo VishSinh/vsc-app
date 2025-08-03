@@ -51,10 +51,11 @@ class PermissionProvider extends BaseProvider {
 
   /// Load all available permissions (for admin use)
   Future<void> loadAllPermissions() async {
-    await executeApiCall(
-      () => _permissionService.getAllPermissions(),
-      onSuccess: (data) {
-        _allPermissions = data.permissions;
+    await executeApiOperation(
+      apiCall: () => _permissionService.getAllPermissions(),
+      onSuccess: (response) {
+        _allPermissions = response.data!.permissions;
+        return response.data!;
       },
     );
   }
@@ -102,20 +103,6 @@ class PermissionProvider extends BaseProvider {
     _permissionManager.clearPermissions();
     _permissionService.clearCachedPermissions();
     clearMessages();
-  }
-
-  List<String> getPermissionsByDomain(String domain) {
-    return _currentPermissions.where((permission) => permission.startsWith('$domain.')).toList();
-  }
-
-  Set<String> getAvailableDomains() {
-    return _currentPermissions
-        .map((permission) {
-          final parts = permission.split('.');
-          return parts.isNotEmpty ? parts.first : '';
-        })
-        .where((domain) => domain.isNotEmpty)
-        .toSet();
   }
 
   void _initializeWithPermissions(List<String> permissions) {

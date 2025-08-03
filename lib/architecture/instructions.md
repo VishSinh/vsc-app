@@ -1,34 +1,92 @@
-# Clean Architecture Rules
+# Clean Architecture and Coding Standards
 
-## ✅ ALLOWED
+## setState Usage
 
-- Converting a presentation model to a domain model via a Mapper located in the domain layer is correct and not a violation
-- If it's pure UI representation, you can map directly between models in presentation/models/
-- Domain layer can import both data models and presentation models for conversion purposes
-- Presentation layer can import domain models and domain services
-- Data layer can import other data models and HTTP/JSON packages
-- Cross-feature imports of shared services (logging, validation, permissions) are acceptable
+- Do not use `setState` in any widget.
+  - If the widget needs local state, use a Provider (ChangeNotifier).
+    - Move the provider class to its own file in `presentation/providers/`.
+  - If the state comes from the parent, pass it down via constructor along with callbacks.
 
-## ❌ FORBIDDEN
+## Loading Indicators
 
-- Direct import of data models in presentation layer (must go through domain)
-- Direct import of API services in presentation layer (must go through domain)
-- Business logic in presentation models (belongs in domain services)
-- UI formatting in domain models (belongs in presentation models)
-- Flutter imports in data layer
-- JSON annotations in domain models
-- Direct cross-feature imports of presentation models (use domain models instead)
-- Direct cross-feature imports of data models (use domain models instead)
+- Use `DoubleBounce` from `flutter_spinkit` for any loading state UI.
 
-## 🔄 CONVERSION FLOWS
+## Project Architecture
 
-- FormModel → DomainModel → RequestDTO (via mapper)
-- ResponseDTO → DomainModel → ViewModel (via mapper)
-- PresentationModel → PresentationModel (direct, same layer)
-- DomainModel → DomainModel (direct, same layer)
+This project uses a simplified 2-layer architecture:
 
-## 📝 NAMING
+### 1. Data Layer
 
-- Data: `*_requests.dart`, `*_responses.dart`, `*_service.dart`
-- Domain: `*_service.dart`, `*_mapper_service.dart`, `*_validators.dart`
-- Presentation: `*_form_models.dart`, `*_view_models.dart`, `*_provider.dart` 
+- Location: `features/<module>/data/`
+- Responsibility: Handles all API interactions and data transfer models.
+- Includes:
+  - Request models (`*_requests.dart`)
+  - Response models (`*_responses.dart`)
+  - API services (`*_api_service.dart`)
+
+### 2. Presentation Layer
+
+- Location: `features/<module>/presentation/`
+- Responsibility: Handles all UI logic, state management, and UI-specific models.
+- Includes:
+  - Form models (`*_form_models.dart`)
+  - View models (`*_view_models.dart`)
+  - Providers (`*_provider.dart`)
+  - Pages
+  - Reusable widgets
+  - Services - Validtors, helpers, services
+
+## Data Flow Guidelines
+
+- Form flow: FormModel → validated → converted to RequestModel → passed to API service
+- Fetch flow: ResponseModel → converted to ViewModel → used in UI
+- Conversions within the same layer (e.g., between two presentation models) can be done directly.
+
+## Cross-Feature Rules
+
+- You can use API services and view models from other modules.
+- Do not use providers from other modules to prevent shared state conflicts.
+- Each feature should manage its own state independently.
+- If an API from another module is needed, call the service method directly from your own provider.
+
+## Validation Guidelines
+
+- All form validation must reside in the presentation layer.
+- Validation logic **should not** be written inside Providers.
+- Simple validations can be placed inside FormModels directly.
+- For validations that require access to multiple FormModel fields or other contextual logic, create a dedicated file in:
+  - `presentation/services/<feature>_validator.dart`
+
+## Business Logic and Calculations in Presentation
+
+- Presentation-specific calculations or lightweight business rules can exist in:
+  - `presentation/services/<feature>_service.dart`  
+  - `presentation/services/<feature>_calculation.dart`
+- These may include:
+  - Price calculations
+  - Cross-field logic checks
+  - Local decision making for UI before API submission
+- These services must not contain side-effects or mutate state. They should be pure functions.
+
+## Form → API Preparation
+
+- ViewModels or FormModels may contain conversion methods **only if** they have all the necessary data internally.
+- Otherwise, offload conversion or computation to services mentioned above.
+
+
+## UI Component Rules
+
+- UI widgets should be stateless and free of business logic.
+- Any state used by a widget should come from a Provider.
+- Avoid duplicating logic across widgets—extract shared behavior into utilities or models.
+
+## File Naming
+
+- `*_requests.dart` → API request DTOs
+- `*_responses.dart` → API response DTOs
+- `*_api_service.dart` → Service class with API calls
+- `*_form_models.dart` → Models bound to input forms
+- `*_view_models.dart` → Models for formatting UI display
+- `*_provider.dart` → State management for a feature or page
+- `*_validators.dart` → Input or business validation logic
+

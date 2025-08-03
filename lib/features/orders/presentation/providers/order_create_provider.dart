@@ -4,13 +4,14 @@ import 'package:vsc_app/features/cards/data/services/card_service.dart';
 import '../../data/services/order_service.dart';
 import '../models/order_form_models.dart';
 import 'package:vsc_app/core/validation/validation_result.dart';
+import '../services/order_calculation_service.dart';
 
 import 'package:vsc_app/features/cards/data/models/card_responses.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/core/models/customer_model.dart';
 
 /// Provider for managing order creation state and operations
-class OrderCreateProvider extends BaseProvider {
+class OrderCreateProvider extends BaseProvider with AutoSnackBarMixin {
   final OrderService _orderService = OrderService();
 
   final OrderCreationFormViewModel _orderCreationForm = OrderCreationFormViewModel(orderItems: []);
@@ -40,18 +41,20 @@ class OrderCreateProvider extends BaseProvider {
   // Getters for fetched data
   Map<String, CardResponse> get cardDetails => Map.unmodifiable(_cardDetails);
 
-  // Order creation methods
+  /// Add order item to the form
   void addOrderItem(OrderItemCreationFormViewModel item) {
     _orderCreationForm.orderItems!.add(item);
     notifyListeners();
   }
 
+  /// Set selected customer data
   void setSelectedCustomerData(Customer customer) {
     _selectedCustomer = customer;
     _orderCreationForm.customerId = customer.id;
     notifyListeners();
   }
 
+  /// Remove order item at specified index
   void removeOrderItem(int index) {
     if (_orderCreationForm.orderItems != null && index >= 0 && index < _orderCreationForm.orderItems!.length) {
       _orderCreationForm.orderItems!.removeAt(index);
@@ -59,6 +62,7 @@ class OrderCreateProvider extends BaseProvider {
     }
   }
 
+  /// Update order item at specified index
   void updateOrderItem(int index, OrderItemCreationFormViewModel item) {
     if (_orderCreationForm.orderItems != null && index >= 0 && index < _orderCreationForm.orderItems!.length) {
       _orderCreationForm.orderItems![index] = item;
@@ -66,24 +70,31 @@ class OrderCreateProvider extends BaseProvider {
     }
   }
 
+  /// Add card details to the cache
   void addCardDetails(String cardId, CardResponse card) {
     _cardDetails[cardId] = card;
     notifyListeners();
   }
 
+  /// Clear current card selection
   void clearCurrentCard() {
     _currentCard = null;
     notifyListeners();
   }
 
+  /// Clear order items only (keep other form data)
   void clearOrderItemsOnly() {
     _orderCreationForm.orderItems?.clear();
     _orderCreationForm.orderItems ??= [];
     notifyListeners();
   }
 
-  // Card search method
+  /// Search for card by barcode
   Future<void> searchCardByBarcode(String barcode, {BuildContext? context}) async {
+    if (context != null) {
+      setContext(context);
+    }
+
     await executeApiOperation(
       apiCall: () => CardService().getCardByBarcode(barcode),
       onSuccess: (response) {
@@ -102,8 +113,8 @@ class OrderCreateProvider extends BaseProvider {
           sellPriceAsDouble: card.sellPriceAsDouble,
           costPriceAsDouble: card.costPriceAsDouble,
           maxDiscountAsDouble: card.maxDiscountAsDouble,
-          profitMargin: _calculateProfitMargin(card.sellPriceAsDouble, card.costPriceAsDouble),
-          totalValue: _calculateTotalValue(card.sellPriceAsDouble, card.quantity),
+          profitMargin: OrderCalculationService.calculateProfitMargin(card.sellPriceAsDouble, card.costPriceAsDouble),
+          totalValue: OrderCalculationService.calculateTotalValue(card.sellPriceAsDouble, card.quantity),
         );
         addCardDetails(card.id, card);
         notifyListeners();
@@ -133,22 +144,24 @@ class OrderCreateProvider extends BaseProvider {
       sellPriceAsDouble: cardResponse.sellPriceAsDouble,
       costPriceAsDouble: cardResponse.costPriceAsDouble,
       maxDiscountAsDouble: cardResponse.maxDiscountAsDouble,
-      profitMargin: _calculateProfitMargin(cardResponse.sellPriceAsDouble, cardResponse.costPriceAsDouble),
-      totalValue: _calculateTotalValue(cardResponse.sellPriceAsDouble, cardResponse.quantity),
+      profitMargin: OrderCalculationService.calculateProfitMargin(cardResponse.sellPriceAsDouble, cardResponse.costPriceAsDouble),
+      totalValue: OrderCalculationService.calculateTotalValue(cardResponse.sellPriceAsDouble, cardResponse.quantity),
     );
   }
 
-  // Simple business calculations
-  static double _calculateProfitMargin(double sellPrice, double costPrice) {
-    if (costPrice == 0) return 0;
-    return ((sellPrice - costPrice) / costPrice) * 100;
-  }
-
-  static double _calculateTotalValue(double sellPrice, int quantity) {
-    return sellPrice * quantity;
-  }
-
+  /// Create order with current form data
   Future<bool> createOrder({BuildContext? context}) async {
+    if (context != null) {
+      setContext(context);
+    }
+
+    // Validate order creation
+    final validationResult = _orderCreationForm.validate();
+    if (!validationResult.isValid) {
+      setError(validationResult.firstMessage ?? 'Please check your input');
+      return false;
+    }
+
     final result = await executeApiOperation(
       apiCall: () => _orderService.createOrder(request: _orderCreationForm.toApiRequest()),
       onSuccess: (response) {
@@ -162,7 +175,7 @@ class OrderCreateProvider extends BaseProvider {
     return result != null; // Convert to boolean
   }
 
-  // Utility methods
+  /// Reset the provider state
   @override
   void reset() {
     _orderCreationForm.orderItems?.clear();
@@ -175,15 +188,17 @@ class OrderCreateProvider extends BaseProvider {
     _currentCard = null;
     _selectedDeliveryDate = null;
     _selectedDeliveryTime = null;
+    clearContext(); // Clear context when resetting
     super.reset();
   }
 
+  /// Set order name
   void setOrderName(String orderName) {
     _orderCreationForm.name = orderName;
     notifyListeners();
   }
 
-  // Delivery date/time management methods
+  /// Set delivery date
   void setDeliveryDate(DateTime? date) {
     _selectedDeliveryDate = date;
     if (date != null && _selectedDeliveryTime != null) {
@@ -193,6 +208,7 @@ class OrderCreateProvider extends BaseProvider {
     notifyListeners();
   }
 
+  /// Set delivery time
   void setDeliveryTime(TimeOfDay? time) {
     _selectedDeliveryTime = time;
     if (_selectedDeliveryDate != null && time != null) {
@@ -208,6 +224,7 @@ class OrderCreateProvider extends BaseProvider {
     notifyListeners();
   }
 
+  /// Set default delivery date and time (tomorrow at 10:00 AM)
   void setDefaultDeliveryDateTime() {
     _selectedDeliveryDate = DateTime.now().add(const Duration(days: 1));
     _selectedDeliveryTime = const TimeOfDay(hour: 10, minute: 0);
@@ -224,8 +241,22 @@ class OrderCreateProvider extends BaseProvider {
     notifyListeners();
   }
 
-  /// Validate the order creation form
-  ValidationResult validateOrderCreation() {
-    return _orderCreationForm.validate();
+  /// Check if order can be created (has required data)
+  bool get canCreateOrder {
+    return _orderCreationForm.customerId != null &&
+        _orderCreationForm.name != null &&
+        _orderCreationForm.deliveryDate != null &&
+        (_orderCreationForm.orderItems?.isNotEmpty ?? false);
+  }
+
+  /// Get order items count
+  int get orderItemsCount => _orderCreationForm.orderItems?.length ?? 0;
+
+  /// Check if form has any data
+  bool get hasFormData {
+    return _orderCreationForm.customerId != null ||
+        _orderCreationForm.name != null ||
+        _orderCreationForm.deliveryDate != null ||
+        (_orderCreationForm.orderItems?.isNotEmpty ?? false);
   }
 }

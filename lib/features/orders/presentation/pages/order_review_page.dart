@@ -74,11 +74,6 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
     // Delivery date/time is already managed by the provider
 
     // Validate the form
-    final validationResult = orderProvider.validateOrderCreation();
-    if (!validationResult.isValid) {
-      SnackbarUtils.showError(context, validationResult.firstMessage ?? 'Validation failed');
-      return;
-    }
 
     final success = await orderProvider.createOrder(context: context);
 

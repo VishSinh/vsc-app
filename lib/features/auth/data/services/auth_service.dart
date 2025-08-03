@@ -8,11 +8,11 @@ class AuthService extends ApiService {
   AuthService({super.dio, super.secureStorage});
 
   /// Login with phone and password
-  Future<ApiResponse<LoginData>> login(String phone, String password) async {
+  Future<ApiResponse<LoginResponse>> login(String phone, String password) async {
     try {
       final response = await executeRequest(
         () => post(AppConstants.loginEndpoint, data: {'phone': phone, 'password': password}),
-        (json) => LoginData.fromJson(json as Map<String, dynamic>),
+        (json) => LoginResponse.fromJson(json as Map<String, dynamic>),
       );
 
       if (response.success && response.data != null) {
@@ -28,7 +28,7 @@ class AuthService extends ApiService {
   }
 
   /// Register new staff member (Admin only)
-  Future<RegisterResponse> register({required String name, required String phone, required String password, required String role}) async {
+  Future<ApiResponse<MessageData>> register({required String name, required String phone, required String password, required String role}) async {
     final request = RegisterRequest(name: name, phone: phone, password: password, role: role);
 
     return await executeRequest(

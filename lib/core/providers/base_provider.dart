@@ -89,50 +89,7 @@ abstract class BaseProvider extends ChangeNotifier {
     }
   }
 
-  /// Execute an API call with automatic error handling
-  Future<bool> executeApiCall<T>(
-    Future<ApiResponse<T>> Function() apiCall, {
-    Function(T data)? onSuccess,
-    Function(ErrorData error)? onError,
-    BuildContext? context,
-  }) async {
-    try {
-      setLoading(true);
-      clearMessages();
-
-      final response = await apiCall();
-
-      if (response.success && response.data != null) {
-        if (onSuccess != null) {
-          onSuccess(response.data as T);
-        }
-        return true;
-      } else {
-        final errorMessage = response.error?.details ?? response.error?.message ?? 'Unknown error occurred';
-        if (context != null) {
-          setErrorWithSnackBar(errorMessage, context);
-        } else {
-          setError(errorMessage);
-        }
-        if (onError != null && response.error != null) {
-          onError(response.error!);
-        }
-        return false;
-      }
-    } catch (e) {
-      final errorMessage = 'Network error: $e';
-      if (context != null) {
-        setErrorWithSnackBar(errorMessage, context);
-      } else {
-        setError(errorMessage);
-      }
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  /// Unified API operation handler - combines the best of executeAsync and executeApiCall
+  /// Unified API operation handler
   Future<R?> executeApiOperation<T, R>({
     required Future<ApiResponse<T>> Function() apiCall,
     required R Function(ApiResponse<T> response) onSuccess,
