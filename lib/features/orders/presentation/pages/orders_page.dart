@@ -359,14 +359,11 @@ class _OrdersPageState extends State<OrdersPage> {
   }
 
   Widget _buildDesktopTable() {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final availableHeight = screenHeight - 200; // Account for header, padding, etc.
-    final headerHeight = 50.0; // Height of the header row
-    final dataHeight = availableHeight - headerHeight;
-    final rowHeight = dataHeight / _filteredOrders.length.clamp(1, 10); // Max 10 rows, min 1
+    const double fixedRowHeight = 70.0; // Fixed height for each row
+    const double headerHeight = 50.0; // Height of the header row
 
     return Container(
-      height: availableHeight,
+      height: MediaQuery.of(context).size.height - 200, // Account for header, padding, etc.
       child: Column(
         children: [
           // Header Row
@@ -453,13 +450,13 @@ class _OrdersPageState extends State<OrdersPage> {
               ],
             ),
           ),
-          // Data Rows
+          // Data Rows - Scrollable with fixed height
           Expanded(
             child: ListView.builder(
               itemCount: _filteredOrders.length,
               itemBuilder: (context, index) {
                 final order = _filteredOrders[index];
-                return _buildDesktopRow(order, rowHeight);
+                return _buildDesktopRow(order, fixedRowHeight);
               },
             ),
           ),
@@ -569,7 +566,7 @@ class _OrdersPageState extends State<OrdersPage> {
             Expanded(
               flex: 1,
               child: Center(
-                child: Column(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (_hasBoxRequirements(order))
