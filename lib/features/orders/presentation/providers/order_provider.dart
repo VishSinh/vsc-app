@@ -1,7 +1,5 @@
 import 'package:vsc_app/core/providers/base_provider.dart';
-import 'package:vsc_app/core/models/api_response.dart';
 import 'package:vsc_app/features/cards/data/services/card_service.dart';
-import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
 import '../../data/services/order_service.dart';
 import '../services/order_mapper_service.dart';
 import '../models/order_form_models.dart';
@@ -10,7 +8,7 @@ import 'package:vsc_app/features/cards/data/models/card_responses.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/core/models/customer_model.dart';
 
-/// Provider for managing order state and operations
+/// Provider for managing order creation state and operations
 class OrderProvider extends BaseProvider {
   final OrderService _orderService = OrderService();
 
@@ -19,8 +17,6 @@ class OrderProvider extends BaseProvider {
   Customer? _selectedCustomer;
   CardViewModel? _currentCard;
 
-  final List<OrderViewModel> _orders = [];
-  PaginationData? _pagination;
   final Map<String, CardResponse> _cardDetails = {};
 
   // Getters for form data
@@ -33,13 +29,7 @@ class OrderProvider extends BaseProvider {
   CardViewModel? get currentCardViewModel => _currentCard;
 
   // Getters for fetched data
-  List<OrderViewModel> get orders => List.unmodifiable(_orders);
-  PaginationData? get pagination => _pagination;
   Map<String, CardResponse> get cardDetails => Map.unmodifiable(_cardDetails);
-
-  bool get hasMoreOrders {
-    return _pagination?.hasNext ?? false;
-  }
 
   // Order creation methods
   void addOrderItem(OrderItemCreationFormViewModel item) {
@@ -179,77 +169,6 @@ class OrderProvider extends BaseProvider {
     }
   }
 
-  // Order fetching methods
-  Future<bool> fetchOrders({int page = 1, int pageSize = 10}) async {
-    try {
-      setLoading(true);
-      clearMessages();
-
-      final response = await _orderService.getOrders(page: page, pageSize: pageSize);
-
-      if (response.success) {
-        _orders.clear();
-        // Use the mapper to convert OrderResponse to OrderViewModel
-        final orderViewModels = (response.data ?? []).map((orderResponse) => OrderMapperService.orderResponseToViewModel(orderResponse)).toList();
-        _orders.addAll(orderViewModels);
-        _pagination = response.pagination;
-        notifyListeners();
-        return true;
-      } else {
-        setError(response.error?.message ?? 'Failed to fetch orders');
-        return false;
-      }
-    } catch (e) {
-      setError('Error fetching orders: $e');
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  Future<bool> loadNextPage() async {
-    if (_pagination?.hasNext == true) {
-      return await fetchOrders(page: (_pagination?.currentPage ?? 1) + 1);
-    }
-    return false;
-  }
-
-  Future<bool> refreshOrders() async {
-    return await fetchOrders();
-  }
-
-  // Order detail methods
-  OrderViewModel? _currentOrder;
-  OrderViewModel? get currentOrder => _currentOrder;
-
-  Future<bool> fetchOrderById(String orderId) async {
-    try {
-      setLoading(true);
-      clearMessages();
-
-      final response = await _orderService.getOrderById(orderId);
-
-      if (response.success) {
-        _currentOrder = OrderMapperService.orderResponseToViewModel(response.data!);
-        notifyListeners();
-        return true;
-      } else {
-        setError(response.error?.message ?? 'Failed to fetch order details');
-        return false;
-      }
-    } catch (e) {
-      setError('Error fetching order details: $e');
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  void clearCurrentOrder() {
-    _currentOrder = null;
-    notifyListeners();
-  }
-
   // Utility methods
   @override
   void reset() {
@@ -262,12 +181,6 @@ class OrderProvider extends BaseProvider {
     _selectedCustomer = null;
     _currentCard = null;
     super.reset();
-  }
-
-  void clearOrders() {
-    _orders.clear();
-    _pagination = null;
-    notifyListeners();
   }
 
   void setDeliveryDate(String deliveryDate) {

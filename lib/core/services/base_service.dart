@@ -70,14 +70,33 @@ abstract class ApiService {
     return _dio.get(path, queryParameters: queryParameters);
   }
 
+  /// Filter out null values from request data
+  dynamic _filterNullValues(dynamic data) {
+    if (data is Map<String, dynamic>) {
+      final filtered = <String, dynamic>{};
+      data.forEach((key, value) {
+        if (value != null) {
+          filtered[key] = value;
+        }
+      });
+      return filtered;
+    }
+    return data;
+  }
+
   /// HTTP POST request
   Future<Response> post(String path, {dynamic data}) {
-    return _dio.post(path, data: data);
+    return _dio.post(path, data: _filterNullValues(data));
   }
 
   /// HTTP PUT request
   Future<Response> put(String path, {dynamic data}) {
-    return _dio.put(path, data: data);
+    return _dio.put(path, data: _filterNullValues(data));
+  }
+
+  /// HTTP PATCH request
+  Future<Response> patch(String path, {dynamic data}) {
+    return _dio.patch(path, data: _filterNullValues(data));
   }
 
   /// HTTP DELETE request

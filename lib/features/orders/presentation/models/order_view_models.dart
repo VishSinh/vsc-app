@@ -6,7 +6,9 @@ class OrderViewModel {
   final String id;
   final String name;
   final String customerId;
+  final String customerName;
   final String staffId;
+  final String staffName;
   final DateTime orderDate;
   final DateTime deliveryDate;
   final String orderStatus;
@@ -17,7 +19,9 @@ class OrderViewModel {
     required this.id,
     required this.name,
     required this.customerId,
+    required this.customerName,
     required this.staffId,
+    required this.staffName,
     required this.orderDate,
     required this.deliveryDate,
     required this.orderStatus,
@@ -29,6 +33,7 @@ class OrderViewModel {
 class OrderItemViewModel {
   final String id;
   final String orderId;
+  final String orderName;
   final String cardId;
   final int quantity;
   final String pricePerItem;
@@ -41,6 +46,7 @@ class OrderItemViewModel {
   OrderItemViewModel({
     required this.id,
     required this.orderId,
+    required this.orderName,
     required this.cardId,
     required this.quantity,
     required this.pricePerItem,
@@ -56,6 +62,7 @@ class BoxOrderViewModel {
   final String id;
   final String orderItemId;
   final String? boxMakerId;
+  final String? boxMakerName;
   final OrderBoxType boxType;
   final int boxQuantity;
   final String totalBoxCost;
@@ -66,6 +73,7 @@ class BoxOrderViewModel {
     required this.id,
     required this.orderItemId,
     this.boxMakerId,
+    this.boxMakerName,
     required this.boxType,
     required this.boxQuantity,
     required this.totalBoxCost,
@@ -78,7 +86,9 @@ class PrintingJobViewModel {
   final String id;
   final String orderItemId;
   final String? printerId;
+  final String? printerName;
   final String? tracingStudioId;
+  final String? tracingStudioName;
   final int printQuantity;
   final String totalPrintingCost;
   final String printingStatus;
@@ -88,7 +98,9 @@ class PrintingJobViewModel {
     required this.id,
     required this.orderItemId,
     this.printerId,
+    this.printerName,
     this.tracingStudioId,
+    this.tracingStudioName,
     required this.printQuantity,
     required this.totalPrintingCost,
     required this.printingStatus,

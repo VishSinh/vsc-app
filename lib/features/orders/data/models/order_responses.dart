@@ -8,8 +8,12 @@ class OrderResponse {
   final String name;
   @JsonKey(name: 'customer_id')
   final String customerId;
+  @JsonKey(name: 'customer_name')
+  final String customerName;
   @JsonKey(name: 'staff_id')
   final String staffId;
+  @JsonKey(name: 'staff_name')
+  final String staffName;
   @JsonKey(name: 'order_date')
   final String orderDate;
   @JsonKey(name: 'delivery_date')
@@ -25,7 +29,9 @@ class OrderResponse {
     required this.id,
     required this.name,
     required this.customerId,
+    required this.customerName,
     required this.staffId,
+    required this.staffName,
     required this.orderDate,
     required this.deliveryDate,
     required this.orderStatus,
@@ -42,6 +48,8 @@ class OrderItemResponse {
   final String id;
   @JsonKey(name: 'order_id')
   final String orderId;
+  @JsonKey(name: 'order_name')
+  final String orderName;
   @JsonKey(name: 'card_id')
   final String cardId;
   final int quantity;
@@ -61,6 +69,7 @@ class OrderItemResponse {
   const OrderItemResponse({
     required this.id,
     required this.orderId,
+    required this.orderName,
     required this.cardId,
     required this.quantity,
     required this.pricePerItem,
@@ -82,6 +91,8 @@ class BoxOrderResponse {
   final String orderItemId;
   @JsonKey(name: 'box_maker_id')
   final String? boxMakerId;
+  @JsonKey(name: 'box_maker_name')
+  final String? boxMakerName;
   @JsonKey(name: 'box_type')
   final String boxType;
   @JsonKey(name: 'box_quantity')
@@ -97,6 +108,7 @@ class BoxOrderResponse {
     required this.id,
     required this.orderItemId,
     this.boxMakerId,
+    this.boxMakerName,
     required this.boxType,
     required this.boxQuantity,
     required this.totalBoxCost,
@@ -115,8 +127,12 @@ class PrintingJobResponse {
   final String orderItemId;
   @JsonKey(name: 'printer_id')
   final String? printerId;
+  @JsonKey(name: 'printer_name')
+  final String? printerName;
   @JsonKey(name: 'tracing_studio_id')
   final String? tracingStudioId;
+  @JsonKey(name: 'tracing_studio_name')
+  final String? tracingStudioName;
   @JsonKey(name: 'print_quantity')
   final int printQuantity;
   @JsonKey(name: 'total_printing_cost')
@@ -130,7 +146,9 @@ class PrintingJobResponse {
     required this.id,
     required this.orderItemId,
     this.printerId,
+    this.printerName,
     this.tracingStudioId,
+    this.tracingStudioName,
     required this.printQuantity,
     required this.totalPrintingCost,
     required this.printingStatus,

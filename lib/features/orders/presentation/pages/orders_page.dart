@@ -8,7 +8,7 @@ import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/constants/navigation_items.dart';
-import 'package:vsc_app/features/orders/presentation/providers/order_provider.dart';
+import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -27,14 +27,18 @@ class _OrdersPageState extends State<OrdersPage> {
   bool _isLoading = true; // Show shimmer while orders load
 
   List<OrderViewModel> get _filteredOrders {
-    final orderProvider = context.read<OrderProvider>();
+    final orderProvider = context.read<OrderListProvider>();
     var orders = orderProvider.orders;
 
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
       orders = orders
           .where(
-            (order) => order.id.toLowerCase().contains(_searchQuery.toLowerCase()) || order.name.toLowerCase().contains(_searchQuery.toLowerCase()),
+            (order) =>
+                order.id.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                order.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                order.customerName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                order.staffName.toLowerCase().contains(_searchQuery.toLowerCase()),
           )
           .toList();
     }
@@ -61,7 +65,7 @@ class _OrdersPageState extends State<OrdersPage> {
     });
 
     // Fetch orders from API
-    final orderProvider = context.read<OrderProvider>();
+    final orderProvider = context.read<OrderListProvider>();
     orderProvider
         .fetchOrders()
         .then((_) {
@@ -148,7 +152,7 @@ class _OrdersPageState extends State<OrdersPage> {
   }
 
   Widget _buildOrdersContent() {
-    return Consumer<OrderProvider>(
+    return Consumer<OrderListProvider>(
       builder: (context, orderProvider, child) {
         if (_isLoading) {
           return _buildLoadingSpinner();
@@ -171,7 +175,7 @@ class _OrdersPageState extends State<OrdersPage> {
       children: [
         Expanded(
           child: TextField(
-            decoration: const InputDecoration(labelText: 'Search by name or order ID...', prefixIcon: Icon(Icons.search)),
+            decoration: const InputDecoration(labelText: 'Search by name, customer, staff or order ID...', prefixIcon: Icon(Icons.search)),
             onChanged: (value) {
               setState(() {
                 _searchQuery = value;
@@ -202,7 +206,7 @@ class _OrdersPageState extends State<OrdersPage> {
     return const Center(child: SpinKitDoubleBounce(color: Colors.blue, size: 50.0));
   }
 
-  Widget _buildOrdersList(OrderProvider orderProvider) {
+  Widget _buildOrdersList(OrderListProvider orderProvider) {
     if (orderProvider.errorMessage != null) {
       return Center(
         child: Column(
@@ -283,6 +287,22 @@ class _OrdersPageState extends State<OrdersPage> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
+                      const Icon(Icons.person, size: 16, color: Colors.grey),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text('Customer: ${order.customerName}')),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.badge, size: 16, color: Colors.grey),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text('Staff: ${order.staffName}')),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
                       const Icon(Icons.local_shipping, size: 16, color: Colors.grey),
                       const SizedBox(width: 8),
                       Expanded(child: Text('Delivery: ${_formatDateTime(order.deliveryDate)}')),
@@ -339,123 +359,261 @@ class _OrdersPageState extends State<OrdersPage> {
   }
 
   Widget _buildDesktopTable() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          minWidth: MediaQuery.of(context).size.width - 200, // Account for navigation rail
-        ),
-        child: DataTable(
-          onSelectAll: (value) {},
-          columns: const [
-            DataColumn(label: Text('Order Name')),
-            DataColumn(label: Text('Order Date')),
-            DataColumn(label: Text('Delivery Date')),
-            DataColumn(label: Text('Status')),
-            DataColumn(label: Text('Items')),
-            DataColumn(label: Text('Services')),
-            DataColumn(label: Text('Total')),
-          ],
-          rows: _filteredOrders.map((order) {
-            return DataRow(
-              cells: [
-                DataCell(
-                  GestureDetector(
-                    onTap: () => context.go('${RouteConstants.orderDetail.replaceAll(':id', order.id)}'),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          order.name.isNotEmpty ? order.name : 'Order #${order.id.substring(0, 8)}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        if (order.specialInstruction.isNotEmpty)
-                          Text(
-                            order.specialInstruction,
-                            style: const TextStyle(fontSize: 10, color: Colors.orange, fontStyle: FontStyle.italic),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                      ],
-                    ),
+    final screenHeight = MediaQuery.of(context).size.height;
+    final availableHeight = screenHeight - 200; // Account for header, padding, etc.
+    final headerHeight = 50.0; // Height of the header row
+    final dataHeight = availableHeight - headerHeight;
+    final rowHeight = dataHeight / _filteredOrders.length.clamp(1, 10); // Max 10 rows, min 1
+
+    return Container(
+      height: availableHeight,
+      child: Column(
+        children: [
+          // Header Row
+          Container(
+            height: headerHeight,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: Center(
+                    child: Text('Order Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                   ),
                 ),
-                DataCell(
-                  GestureDetector(
-                    onTap: () => context.go('${RouteConstants.orderDetail.replaceAll(':id', order.id)}'),
-                    child: Text(_formatDateTime(order.orderDate)),
+                Expanded(
+                  flex: 1,
+                  child: Center(
+                    child: Text('Customer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                   ),
                 ),
-                DataCell(
-                  GestureDetector(
-                    onTap: () => context.go('${RouteConstants.orderDetail.replaceAll(':id', order.id)}'),
-                    child: Text(_formatDateTime(order.deliveryDate)),
+                Expanded(
+                  flex: 1,
+                  child: Center(
+                    child: Text('Staff', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                   ),
                 ),
-                DataCell(
-                  GestureDetector(
-                    onTap: () => context.go('${RouteConstants.orderDetail.replaceAll(':id', order.id)}'),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(color: _getStatusColor(order.orderStatus), borderRadius: BorderRadius.circular(12)),
-                      child: Text(
-                        _formatStatus(order.orderStatus),
-                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                      ),
-                    ),
+                Expanded(
+                  flex: 1,
+                  child: Center(
+                    child: Text('Order Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                   ),
                 ),
-                DataCell(
-                  GestureDetector(
-                    onTap: () => context.go('${RouteConstants.orderDetail.replaceAll(':id', order.id)}'),
-                    child: Text('${order.orderItems.length}'),
+                Expanded(
+                  flex: 1,
+                  child: Center(
+                    child: Text('Delivery Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                   ),
                 ),
-                DataCell(
-                  GestureDetector(
-                    onTap: () => context.go('${RouteConstants.orderDetail.replaceAll(':id', order.id)}'),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (_hasBoxRequirements(order))
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(color: Colors.blue.withOpacity(0.2), borderRadius: BorderRadius.circular(6)),
-                            child: const Text(
-                              'Box',
-                              style: TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.w500),
-                            ),
-                          ),
-                        if (_hasBoxRequirements(order) && _hasPrintingRequirements(order)) const SizedBox(width: 6),
-                        if (_hasPrintingRequirements(order))
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(color: Colors.green.withOpacity(0.2), borderRadius: BorderRadius.circular(6)),
-                            child: const Text(
-                              'Print',
-                              style: TextStyle(fontSize: 12, color: Colors.green, fontWeight: FontWeight.w500),
-                            ),
-                          ),
-                      ],
-                    ),
+                Expanded(
+                  flex: 1,
+                  child: Center(
+                    child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                   ),
                 ),
-                DataCell(
-                  GestureDetector(
-                    onTap: () => context.go('${RouteConstants.orderDetail.replaceAll(':id', order.id)}'),
-                    child: Text('₹${_calculateTotalAmount(order.orderItems).toStringAsFixed(2)}'),
+                Expanded(
+                  flex: 1,
+                  child: Center(
+                    child: Text('Items', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Center(
+                    child: Text('Box Maker', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Center(
+                    child: Text('Printer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Center(
+                    child: Text('Tracing Studio', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Center(
+                    child: Text('Services', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Center(
+                    child: Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                   ),
                 ),
               ],
-            );
-          }).toList(),
+            ),
+          ),
+          // Data Rows
+          Expanded(
+            child: ListView.builder(
+              itemCount: _filteredOrders.length,
+              itemBuilder: (context, index) {
+                final order = _filteredOrders[index];
+                return _buildDesktopRow(order, rowHeight);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopRow(OrderViewModel order, double rowHeight) {
+    return InkWell(
+      onTap: () => context.go('${RouteConstants.orderDetail.replaceAll(':id', order.id)}'),
+      child: Container(
+        height: rowHeight,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Text(
+                  order.name.isNotEmpty ? order.name : 'Order #${order.id.substring(0, 8)}',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  // overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Text(order.customerName, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Text(order.staffName, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Text(_formatDateTime(order.orderDate), style: const TextStyle(fontSize: 13), textAlign: TextAlign.center),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Text(_formatDateTime(order.deliveryDate), style: const TextStyle(fontSize: 13), textAlign: TextAlign.center),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(color: _getStatusColor(order.orderStatus), borderRadius: BorderRadius.circular(12)),
+                  child: Text(
+                    _formatStatus(order.orderStatus),
+                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Text('${order.orderItems.length}', style: const TextStyle(fontSize: 13), textAlign: TextAlign.center),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Text(
+                  _getBoxMakerName(order) ?? '--',
+                  style: const TextStyle(fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Text(
+                  _getPrinterName(order) ?? '--',
+                  style: const TextStyle(fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Text(
+                  _getTracingStudioName(order) ?? '--',
+                  style: const TextStyle(fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (_hasBoxRequirements(order))
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(color: Colors.blue.withOpacity(0.2), borderRadius: BorderRadius.circular(8)),
+                        child: const Text(
+                          'Box',
+                          style: TextStyle(fontSize: 10, color: Colors.blue, fontWeight: FontWeight.w500),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    if (_hasPrintingRequirements(order))
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(color: Colors.green.withOpacity(0.2), borderRadius: BorderRadius.circular(8)),
+                        child: const Text(
+                          'Print',
+                          style: TextStyle(fontSize: 10, color: Colors.green, fontWeight: FontWeight.w500),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Text(
+                  '₹${_calculateTotalAmount(order.orderItems).toStringAsFixed(2)}',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildPagination(OrderProvider orderProvider) {
+  Widget _buildPagination(OrderListProvider orderProvider) {
     if (orderProvider.pagination == null) return const SizedBox.shrink();
 
     return Padding(
@@ -504,6 +662,53 @@ class _OrdersPageState extends State<OrdersPage> {
 
   bool _hasPrintingRequirements(OrderViewModel order) {
     return order.orderItems.any((item) => item.requiresPrinting);
+  }
+
+  bool _hasBoxMakerAssigned(OrderViewModel order) {
+    return order.orderItems.any((item) => item.boxOrders?.any((box) => box.boxMakerId != null) ?? false);
+  }
+
+  bool _hasPrinterAssigned(OrderViewModel order) {
+    return order.orderItems.any((item) => item.printingJobs?.any((job) => job.printerId != null || job.tracingStudioId != null) ?? false);
+  }
+
+  String? _getBoxMakerName(OrderViewModel order) {
+    for (final item in order.orderItems) {
+      if (item.boxOrders != null) {
+        for (final box in item.boxOrders!) {
+          if (box.boxMakerName != null && box.boxMakerName!.isNotEmpty) {
+            return box.boxMakerName;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  String? _getPrinterName(OrderViewModel order) {
+    for (final item in order.orderItems) {
+      if (item.printingJobs != null) {
+        for (final job in item.printingJobs!) {
+          if (job.printerName != null && job.printerName!.isNotEmpty) {
+            return job.printerName;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  String? _getTracingStudioName(OrderViewModel order) {
+    for (final item in order.orderItems) {
+      if (item.printingJobs != null) {
+        for (final job in item.printingJobs!) {
+          if (job.tracingStudioName != null && job.tracingStudioName!.isNotEmpty) {
+            return job.tracingStudioName;
+          }
+        }
+      }
+    }
+    return null;
   }
 
   double _calculateTotalAmount(List<OrderItemViewModel> orderItems) {

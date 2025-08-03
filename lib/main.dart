@@ -10,6 +10,7 @@ import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.
 import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
 import 'package:vsc_app/features/customers/presentation/providers/customer_provider.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_provider.dart';
+import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
 
 void main() {
   // Initialize the app router
@@ -29,6 +30,7 @@ class VSCApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => CardProvider()),
         ChangeNotifierProvider(create: (context) => CustomerProvider()),
         ChangeNotifierProvider(create: (context) => OrderProvider()),
+        ChangeNotifierProvider(create: (context) => OrderListProvider()),
         ChangeNotifierProxyProvider<PermissionProvider, AuthProvider>(
           create: (context) => AuthProvider(permissionProvider: context.read<PermissionProvider>()),
           update: (context, permissionProvider, previous) => previous ?? AuthProvider(permissionProvider: permissionProvider),

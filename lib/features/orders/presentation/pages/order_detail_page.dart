@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vsc_app/app/app_config.dart';
-import 'package:vsc_app/core/utils/responsive_layout.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
-import 'package:vsc_app/core/constants/navigation_items.dart';
-import 'package:vsc_app/features/orders/presentation/providers/order_provider.dart';
+import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
-import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
+import 'package:vsc_app/features/orders/presentation/widgets/box_order_edit_dialog.dart';
+import 'package:vsc_app/features/orders/presentation/widgets/printing_job_edit_dialog.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class OrderDetailPage extends StatefulWidget {
@@ -22,13 +21,11 @@ class OrderDetailPage extends StatefulWidget {
 }
 
 class _OrderDetailPageState extends State<OrderDetailPage> {
-  int _selectedIndex = 0;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _setSelectedIndex();
     _loadOrderDetails();
   }
 
@@ -37,7 +34,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       _isLoading = true;
     });
 
-    final orderProvider = context.read<OrderProvider>();
+    final orderProvider = context.read<OrderListProvider>();
     orderProvider
         .fetchOrderById(widget.orderId)
         .then((_) {
@@ -56,50 +53,14 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         });
   }
 
-  void _onDestinationSelected(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    final destinations = _getDestinations();
-    final route = NavigationItems.getRouteForIndex(index, destinations);
-    if (route != RouteConstants.orders) {
-      context.go(route);
-    }
-  }
-
-  List<NavigationDestination> _getDestinations() {
-    final permissionProvider = context.read<PermissionProvider>();
-    return NavigationItems.getDestinationsForPermissions(
-      canManageOrders: permissionProvider.canManageOrders,
-      canManageInventory: permissionProvider.canManageInventory,
-      canManageProduction: permissionProvider.canManageProduction,
-      canManageVendors: permissionProvider.canManageVendors,
-      canManageSystem: permissionProvider.canManageSystem,
-      canViewAuditLogs: permissionProvider.canViewAuditLogs,
-    );
-  }
-
-  void _setSelectedIndex() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final destinations = _getDestinations();
-        final index = NavigationItems.getSelectedIndexForPage('orders', destinations);
-        setState(() {
-          _selectedIndex = index;
-        });
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return ResponsiveLayout(
-      selectedIndex: _selectedIndex,
-      destinations: _getDestinations(),
-      onDestinationSelected: _onDestinationSelected,
-      pageTitle: 'Order Details',
-      child: _buildOrderDetailContent(),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Order Details'),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.orders)),
+      ),
+      body: _buildOrderDetailContent(),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _loadOrderDetails(),
         backgroundColor: Colors.orange,
@@ -111,7 +72,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   }
 
   Widget _buildOrderDetailContent() {
-    return Consumer<OrderProvider>(
+    return Consumer<OrderListProvider>(
       builder: (context, orderProvider, child) {
         if (_isLoading) {
           return _buildLoadingSpinner();
@@ -237,8 +198,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             const Text('Order Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             _buildInfoRow('Order ID', order.id),
-            _buildInfoRow('Customer ID', order.customerId),
-            _buildInfoRow('Staff ID', order.staffId),
+            _buildInfoRow('Customer', order.customerName),
+            _buildInfoRow('Staff', order.staffName),
             _buildInfoRow('Order Date', _formatDateTime(order.orderDate)),
             _buildInfoRow('Delivery Date', _formatDateTime(order.deliveryDate)),
             _buildInfoRow('Total Items', '${order.orderItems.length}'),
@@ -298,7 +259,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
                   child: Text(
-                    'Card ID: ${item.cardId.substring(0, 8)}',
+                    'Order: ${item.orderName}',
                     style: const TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.w500),
                   ),
                 ),
@@ -395,13 +356,21 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                 ),
               ),
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: () => _showEditBoxOrderDialog(box),
+                icon: const Icon(Icons.edit, size: 16, color: Colors.blue),
+                tooltip: 'Edit Box Order',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+              ),
             ],
           ),
           const SizedBox(height: 8),
           _buildBoxInfoRow('Type', box.boxType.toString().split('.').last.toUpperCase()),
           _buildBoxInfoRow('Quantity', '${box.boxQuantity}'),
           _buildBoxInfoRow('Cost', '₹${box.totalBoxCost}'),
-          if (box.boxMakerId != null) _buildBoxInfoRow('Box Maker', box.boxMakerId!),
+          if (box.boxMakerId != null) _buildBoxInfoRow('Box Maker', box.boxMakerName ?? box.boxMakerId!),
           if (box.estimatedCompletion != null) _buildBoxInfoRow('Est. Completion', _formatDateTime(box.estimatedCompletion!)),
         ],
       ),
@@ -447,12 +416,20 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                 ),
               ),
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: () => _showEditPrintingJobDialog(job),
+                icon: const Icon(Icons.edit, size: 16, color: Colors.green),
+                tooltip: 'Edit Printing Job',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+              ),
             ],
           ),
           const SizedBox(height: 8),
           _buildPrintingInfoRow('Quantity', '${job.printQuantity}'),
           _buildPrintingInfoRow('Cost', '₹${job.totalPrintingCost}'),
-          if (job.printerId != null) _buildPrintingInfoRow('Printer', job.printerId!),
+          if (job.printerId != null) _buildPrintingInfoRow('Printer', job.printerName ?? job.printerId!),
           if (job.tracingStudioId != null) _buildPrintingInfoRow('Tracing Studio', job.tracingStudioId!),
           if (job.estimatedCompletion != null) _buildPrintingInfoRow('Est. Completion', _formatDateTime(job.estimatedCompletion!)),
         ],
@@ -596,5 +573,43 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
       return total + lineTotal + boxCosts + printingCosts;
     });
+  }
+
+  void _showEditBoxOrderDialog(BoxOrderViewModel box) {
+    showDialog(
+      context: context,
+      builder: (context) => BoxOrderEditDialog(
+        boxOrderId: box.id,
+        currentBoxMakerId: box.boxMakerId ?? '',
+        currentTotalBoxCost: box.totalBoxCost,
+        currentBoxStatus: box.boxStatus,
+        currentBoxType: box.boxType.toString().split('.').last,
+        currentBoxQuantity: box.boxQuantity,
+        currentEstimatedCompletion: box.estimatedCompletion?.toIso8601String(),
+        onSuccess: () {
+          // Reload order details after successful update
+          _loadOrderDetails();
+        },
+      ),
+    );
+  }
+
+  void _showEditPrintingJobDialog(PrintingJobViewModel job) {
+    showDialog(
+      context: context,
+      builder: (context) => PrintingJobEditDialog(
+        printingJobId: job.id,
+        currentPrinterId: job.printerId ?? '',
+        currentTracingStudioId: job.tracingStudioId ?? '',
+        currentTotalPrintingCost: job.totalPrintingCost,
+        currentPrintingStatus: job.printingStatus,
+        currentPrintQuantity: job.printQuantity,
+        currentEstimatedCompletion: job.estimatedCompletion?.toIso8601String(),
+        onSuccess: () {
+          // Reload order details after successful update
+          _loadOrderDetails();
+        },
+      ),
+    );
   }
 }

@@ -44,6 +44,12 @@ class AppConstants {
   static const String customersEndpoint = '/customers/';
   // Orders
   static const String ordersEndpoint = '/orders/';
+  // Production
+  static const String boxOrdersEndpoint = '/box-orders/';
+  static const String printingJobsEndpoint = '/printing-jobs/';
+  static const String printersEndpoint = '/printers/';
+  static const String tracingStudiosEndpoint = '/tracing-studios/';
+  static const String boxMakersEndpoint = '/box-makers/';
   // ==========================================================================
 
   // Pagination
