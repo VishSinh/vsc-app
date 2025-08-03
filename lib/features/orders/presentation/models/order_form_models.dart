@@ -1,4 +1,6 @@
 import 'package:vsc_app/core/enums/order_box_type.dart';
+import 'package:vsc_app/features/orders/data/models/order_requests.dart';
+import 'package:vsc_app/core/validation/validation_result.dart';
 
 /// Alias for backward compatibility
 typedef BoxType = OrderBoxType;
@@ -25,33 +27,22 @@ class OrderItemCreationFormViewModel {
     this.totalPrintingCost,
   });
 
-  /// Check if the form is valid
-  bool get isValid {
-    return cardId.isNotEmpty &&
-        quantity > 0 &&
-        double.tryParse(discountAmount) != null &&
-        double.tryParse(discountAmount)! >= 0 &&
-        (!requiresBox || (totalBoxCost != null && double.tryParse(totalBoxCost!) != null && double.tryParse(totalBoxCost!)! >= 0)) &&
-        (!requiresPrinting ||
-            (totalPrintingCost != null && double.tryParse(totalPrintingCost!) != null && double.tryParse(totalPrintingCost!)! >= 0));
-  }
-
-  // Line item total ((basePrice - discountAmount) * formModel.quantity) + boxCost + printingCost;
-  double get lineItemTotal {
-    return 0.00;
-  }
-
-  /// Get validation errors
-  List<String> get validationErrors {
+  /// Validates the order item form
+  ValidationResult validate() {
     final errors = <String>[];
 
-    if (cardId.isEmpty) errors.add('Card is required');
-    if (quantity <= 0) errors.add('Quantity must be greater than 0');
+    if (cardId.isEmpty) {
+      errors.add('Card is required');
+    }
 
-    final discountAmount = double.tryParse(this.discountAmount);
-    if (discountAmount == null) {
+    if (quantity <= 0) {
+      errors.add('Quantity must be greater than 0');
+    }
+
+    final discountAmountValue = double.tryParse(discountAmount);
+    if (discountAmountValue == null) {
       errors.add('Invalid discount amount');
-    } else if (discountAmount < 0) {
+    } else if (discountAmountValue < 0) {
       errors.add('Discount amount cannot be negative');
     }
 
@@ -69,7 +60,22 @@ class OrderItemCreationFormViewModel {
       }
     }
 
-    return errors;
+    return errors.isEmpty
+        ? ValidationResult.success()
+        : ValidationResult.failure(errors.map((e) => ValidationError(field: 'orderItem', message: e)).toList());
+  }
+
+  OrderItemRequest toApiRequest() {
+    return OrderItemRequest(
+      cardId: cardId,
+      discountAmount: discountAmount,
+      quantity: quantity,
+      requiresBox: requiresBox,
+      requiresPrinting: requiresPrinting,
+      boxType: boxType?.toApiString(),
+      totalBoxCost: totalBoxCost ?? '0.00',
+      totalPrintingCost: totalPrintingCost ?? '0.00',
+    );
   }
 
   /// Create a copy with updated values
@@ -106,25 +112,8 @@ class OrderCreationFormViewModel {
 
   OrderCreationFormViewModel({this.customerId, this.name, this.deliveryDate, this.orderItems, this.specialInstruction});
 
-  // factory OrderCreationFormViewModel.empty() {
-  //   return OrderCreationFormViewModel(customerId: '', deliveryDate: '', orderItems: [], specialInstruction: '');
-  // }
-
-  /// Check if the form is valid
-  bool get isValid {
-    return customerId != null &&
-        customerId!.isNotEmpty &&
-        name != null &&
-        name!.isNotEmpty &&
-        deliveryDate != null &&
-        deliveryDate!.isNotEmpty &&
-        orderItems != null &&
-        orderItems!.isNotEmpty &&
-        orderItems!.every((item) => item.isValid);
-  }
-
-  /// Get validation errors
-  List<String> get validationErrors {
+  /// Validates the order creation form
+  ValidationResult validate() {
     final errors = <String>[];
 
     if (customerId == null || customerId!.isEmpty) {
@@ -151,13 +140,22 @@ class OrderCreationFormViewModel {
     } else {
       for (int i = 0; i < orderItems!.length; i++) {
         final item = orderItems![i];
-        if (!item.isValid) {
-          errors.add('Order item ${i + 1}: ${item.validationErrors.join(', ')}');
+        final itemValidation = item.validate();
+        if (!itemValidation.isValid) {
+          errors.add('Order item ${i + 1}: ${itemValidation.firstMessage}');
         }
       }
     }
 
-    return errors;
+    return errors.isEmpty
+        ? ValidationResult.success()
+        : ValidationResult.failure(errors.map((e) => ValidationError(field: 'order', message: e)).toList());
+  }
+
+  CreateOrderRequest toApiRequest() {
+    final orderItems = this.orderItems?.map((item) => item.toApiRequest()).toList() ?? [];
+
+    return CreateOrderRequest(customerId: customerId!, name: name!, deliveryDate: deliveryDate!, orderItems: orderItems);
   }
 
   /// Create a copy with updated values

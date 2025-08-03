@@ -21,8 +21,6 @@ class OrderDetailPage extends StatefulWidget {
 }
 
 class _OrderDetailPageState extends State<OrderDetailPage> {
-  bool _isLoading = true;
-
   @override
   void initState() {
     super.initState();
@@ -30,27 +28,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   }
 
   void _loadOrderDetails() {
-    setState(() {
-      _isLoading = true;
-    });
-
     final orderProvider = context.read<OrderListProvider>();
-    orderProvider
-        .fetchOrderById(widget.orderId)
-        .then((_) {
-          if (mounted) {
-            setState(() {
-              _isLoading = false;
-            });
-          }
-        })
-        .catchError((error) {
-          if (mounted) {
-            setState(() {
-              _isLoading = false;
-            });
-          }
-        });
+    // BaseProvider handles errors automatically
+    orderProvider.fetchOrderById(widget.orderId);
   }
 
   @override
@@ -74,7 +54,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   Widget _buildOrderDetailContent() {
     return Consumer<OrderListProvider>(
       builder: (context, orderProvider, child) {
-        if (_isLoading) {
+        if (orderProvider.isLoading) {
           return _buildLoadingSpinner();
         }
 

@@ -11,7 +11,7 @@ import '../widgets/order_widgets.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 
-import 'package:vsc_app/features/orders/presentation/providers/order_provider.dart';
+import 'package:vsc_app/features/orders/presentation/providers/order_create_provider.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_form_models.dart';
 
@@ -30,7 +30,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
     super.initState();
     // Clear order items but preserve selected customer when entering the page
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final orderProvider = context.read<OrderProvider>();
+      final orderProvider = context.read<OrderCreateProvider>();
       final selectedCustomer = orderProvider.selectedCustomer; // Preserve customer
       orderProvider.clearOrderItemsOnly(); // Only clear items, not customer
       AppLogger.debug('OrderItemsPage: Cleared order items but preserved customer: ${selectedCustomer?.name}');
@@ -44,20 +44,20 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
   }
 
   Future<void> _searchCard() async {
-    final orderProvider = context.read<OrderProvider>();
-    await orderProvider.searchCardByBarcode(_barcodeController.text.trim());
+    final orderProvider = context.read<OrderCreateProvider>();
+    await orderProvider.searchCardByBarcode(_barcodeController.text.trim(), context: context);
     // ✅ Auto SnackBar - no manual error handling needed!
   }
 
   void _removeOrderItem(int index) {
-    final orderProvider = context.read<OrderProvider>();
+    final orderProvider = context.read<OrderCreateProvider>();
     orderProvider.removeOrderItem(index);
   }
 
   void _proceedToReview() {
-    final orderProvider = context.read<OrderProvider>();
+    final orderProvider = context.read<OrderCreateProvider>();
     if (orderProvider.orderItems.isEmpty) {
-      orderProvider.setError('Please add at least one item to the order'); // ✅ Auto SnackBar
+      orderProvider.setErrorWithSnackBar('Please add at least one item to the order', context);
       return;
     }
     context.go(RouteConstants.orderReview);
@@ -66,17 +66,17 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
   void _handleAddOrderItem(OrderItemCreationFormViewModel item) {
     AppLogger.debug('OrderItemsPage: Adding item with cardId: ${item.cardId}');
 
-    final orderProvider = context.read<OrderProvider>();
+    final orderProvider = context.read<OrderCreateProvider>();
     final currentCard = orderProvider.currentCardViewModel;
     if (currentCard == null) {
-      orderProvider.setError('Please search for a card first'); // ✅ Auto SnackBar
+      orderProvider.setErrorWithSnackBar('Please search for a card first', context);
       return;
     }
 
     item.cardId = currentCard.id;
 
     orderProvider.addOrderItem(item);
-    orderProvider.setSuccess('Item added to order'); // ✅ Auto SnackBar
+    orderProvider.setSuccessWithSnackBar('Item added to order', context);
     AppLogger.debug('OrderItemsPage: Item added to order: ${item.cardId}');
   }
 
@@ -87,7 +87,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
         title: const Text(UITextConstants.orderCreationTitle),
         leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.customerSearch)),
       ),
-      body: Consumer<OrderProvider>(
+      body: Consumer<OrderCreateProvider>(
         builder: (context, orderProvider, child) {
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -103,7 +103,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
     );
   }
 
-  Widget _buildMobileLayout(OrderProvider orderProvider) {
+  Widget _buildMobileLayout(OrderCreateProvider orderProvider) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(AppConfig.defaultPadding),
       child: Column(
@@ -125,7 +125,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
     );
   }
 
-  Widget _buildDesktopLayout(OrderProvider orderProvider) {
+  Widget _buildDesktopLayout(OrderCreateProvider orderProvider) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(AppConfig.largePadding),
       child: Column(
@@ -160,11 +160,11 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
     );
   }
 
-  Widget _buildCustomerCard(OrderProvider orderProvider) {
+  Widget _buildCustomerCard(OrderCreateProvider orderProvider) {
     return CustomerInfoCard(customer: orderProvider.selectedCustomer);
   }
 
-  Widget _buildSearchForm(OrderProvider orderProvider) {
+  Widget _buildSearchForm(OrderCreateProvider orderProvider) {
     return Card(
       child: Padding(
         padding: EdgeInsets.all(AppConfig.defaultPadding),
@@ -209,7 +209,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
                 ),
                 IconButton(
                   onPressed: () {
-                    final orderProvider = context.read<OrderProvider>();
+                    final orderProvider = context.read<OrderCreateProvider>();
                     orderProvider.clearCurrentCard();
                   },
                   icon: Icon(Icons.close, color: AppConfig.errorColor),
@@ -323,7 +323,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
     );
   }
 
-  Widget _buildOrderItemsList(OrderProvider orderProvider) {
+  Widget _buildOrderItemsList(OrderCreateProvider orderProvider) {
     AppLogger.debug('OrderItemsPage: Building order items list, count: ${orderProvider.orderItems.length}');
     AppLogger.debug('OrderItemsPage: Order items: ${orderProvider.orderItems}');
 
@@ -369,7 +369,7 @@ class _OrderItemsPageState extends State<OrderItemsPage> {
     );
   }
 
-  Widget _buildActionButtons(OrderProvider orderProvider) {
+  Widget _buildActionButtons(OrderCreateProvider orderProvider) {
     return Row(
       children: [
         Expanded(

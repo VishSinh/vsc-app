@@ -132,6 +132,57 @@ abstract class BaseProvider extends ChangeNotifier {
     }
   }
 
+  /// Unified API operation handler - combines the best of executeAsync and executeApiCall
+  Future<R?> executeApiOperation<T, R>({
+    required Future<ApiResponse<T>> Function() apiCall,
+    required R Function(ApiResponse<T> response) onSuccess,
+    BuildContext? context,
+    bool showSnackbar = true,
+    bool showLoading = true,
+    String? successMessage,
+    String? errorMessage,
+  }) async {
+    try {
+      if (showLoading) setLoading(true);
+      clearMessages();
+
+      final response = await apiCall();
+
+      if (response.success) {
+        final result = onSuccess(response);
+
+        // Success messages respect the showSnackbar parameter
+        if (showSnackbar && context != null && successMessage != null) {
+          setSuccessWithSnackBar(successMessage, context);
+        } else if (successMessage != null) {
+          setSuccess(successMessage);
+        }
+
+        return result;
+      } else {
+        final errorMsg = errorMessage ?? response.error?.message ?? 'Operation failed';
+        // Error cases always show snackbar for better UX
+        if (context != null) {
+          setErrorWithSnackBar(errorMsg, context);
+        } else {
+          setError(errorMsg);
+        }
+        return null;
+      }
+    } catch (e) {
+      final errorMsg = errorMessage ?? 'Error: $e';
+      // Error cases always show snackbar for better UX
+      if (context != null) {
+        setErrorWithSnackBar(errorMsg, context);
+      } else {
+        setError(errorMsg);
+      }
+      return null;
+    } finally {
+      if (showLoading) setLoading(false);
+    }
+  }
+
   /// Reset the provider state
   void reset() {
     _isLoading = false;

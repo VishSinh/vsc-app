@@ -28,7 +28,15 @@ class OrderItemCard extends StatelessWidget {
   });
 
   /// Get line item total from view model
-  double get lineItemTotal => item.lineItemTotal;
+  double get lineItemTotal {
+    final basePrice = card.sellPriceAsDouble;
+    final discountAmount = double.tryParse(item.discountAmount) ?? 0.0;
+    final quantity = item.quantity;
+    final boxCost = item.requiresBox ? (double.tryParse(item.totalBoxCost ?? '0') ?? 0.0) : 0.0;
+    final printingCost = item.requiresPrinting ? (double.tryParse(item.totalPrintingCost ?? '0') ?? 0.0) : 0.0;
+
+    return (basePrice - discountAmount) * quantity + boxCost + printingCost;
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -9,6 +9,10 @@ class CustomerProvider extends BaseProvider {
   Customer? _selectedCustomer;
   Customer? get selectedCustomer => _selectedCustomer;
 
+  // UI state for customer search page
+  bool _isCreatingCustomer = false;
+  bool get isCreatingCustomer => _isCreatingCustomer;
+
   /// Search customer by phone number
   Future<Customer?> searchCustomerByPhone(String phone) async {
     try {
@@ -65,9 +69,21 @@ class CustomerProvider extends BaseProvider {
     notifyListeners();
   }
 
+  // UI state management methods
+  void toggleCreatingCustomer() {
+    _isCreatingCustomer = !_isCreatingCustomer;
+    notifyListeners();
+  }
+
+  void setCreatingCustomer(bool isCreating) {
+    _isCreatingCustomer = isCreating;
+    notifyListeners();
+  }
+
   @override
   void reset() {
     super.reset();
     _selectedCustomer = null;
+    _isCreatingCustomer = false;
   }
 }

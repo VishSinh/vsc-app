@@ -10,7 +10,7 @@ import '../widgets/order_widgets.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
-import 'package:vsc_app/features/orders/presentation/providers/order_provider.dart';
+import 'package:vsc_app/features/orders/presentation/providers/order_create_provider.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 
 class OrderReviewPage extends StatefulWidget {
@@ -21,16 +21,14 @@ class OrderReviewPage extends StatefulWidget {
 }
 
 class _OrderReviewPageState extends State<OrderReviewPage> {
-  DateTime? _selectedDate;
-  TimeOfDay? _selectedTime;
   final TextEditingController _orderNameController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     // Set default delivery date to tomorrow
-    _selectedDate = DateTime.now().add(const Duration(days: 1));
-    _selectedTime = const TimeOfDay(hour: 10, minute: 0);
+    final orderProvider = context.read<OrderCreateProvider>();
+    orderProvider.setDefaultDeliveryDateTime();
   }
 
   @override
@@ -40,61 +38,51 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
   }
 
   Future<void> _selectDate() async {
+    final orderProvider = context.read<OrderCreateProvider>();
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
+      initialDate: orderProvider.selectedDeliveryDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-      _updateDeliveryDate();
+    if (picked != null && picked != orderProvider.selectedDeliveryDate) {
+      orderProvider.setDeliveryDate(picked);
     }
   }
 
   Future<void> _selectTime() async {
-    final TimeOfDay? picked = await showTimePicker(context: context, initialTime: _selectedTime ?? const TimeOfDay(hour: 10, minute: 0));
-    if (picked != null && picked != _selectedTime) {
-      setState(() {
-        _selectedTime = picked;
-      });
-      _updateDeliveryDate();
-    }
-  }
-
-  void _updateDeliveryDate() {
-    if (_selectedDate != null && _selectedTime != null) {
-      final orderProvider = context.read<OrderProvider>();
-      final deliveryDateTime = DateTime(_selectedDate!.year, _selectedDate!.month, _selectedDate!.day, _selectedTime!.hour, _selectedTime!.minute);
-      orderProvider.setDeliveryDate(deliveryDateTime.toIso8601String());
+    final orderProvider = context.read<OrderCreateProvider>();
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: orderProvider.selectedDeliveryTime ?? const TimeOfDay(hour: 10, minute: 0),
+    );
+    if (picked != null && picked != orderProvider.selectedDeliveryTime) {
+      orderProvider.setDeliveryTime(picked);
     }
   }
 
   void _updateOrderName() {
-    final orderProvider = context.read<OrderProvider>();
+    final orderProvider = context.read<OrderCreateProvider>();
     orderProvider.setOrderName(_orderNameController.text);
   }
 
   Future<void> _submitOrder() async {
-    if (_orderNameController.text.trim().isEmpty) {
-      SnackbarUtils.showError(context, 'Please enter an order name');
+    final orderProvider = context.read<OrderCreateProvider>();
+
+    // Update the form model with current values
+    orderProvider.setOrderName(_orderNameController.text);
+    // Delivery date/time is already managed by the provider
+
+    // Validate the form
+    final validationResult = orderProvider.validateOrderCreation();
+    if (!validationResult.isValid) {
+      SnackbarUtils.showError(context, validationResult.firstMessage ?? 'Validation failed');
       return;
     }
 
-    if (_selectedDate == null || _selectedTime == null) {
-      SnackbarUtils.showError(context, 'Please select delivery date and time');
-      return;
-    }
-
-    final orderProvider = context.read<OrderProvider>();
-    final success = await orderProvider.createOrder();
-
-    AppLogger.debug('OrderReviewPage: Success - $success, mounted - $mounted');
+    final success = await orderProvider.createOrder(context: context);
 
     if (success && mounted) {
-      SnackbarUtils.showSuccess(context, UITextConstants.orderCreatedSuccessfully);
       context.go(RouteConstants.dashboard);
     }
     AppLogger.debug("OrderReviewPage: Should not reach this point");
@@ -107,7 +95,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
         title: const Text(UITextConstants.orderReviewTitle),
         leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.orderItems)),
       ),
-      body: Consumer<OrderProvider>(
+      body: Consumer<OrderCreateProvider>(
         builder: (context, orderProvider, child) {
           // Check if customer and order items exist, if not redirect to order items
           if (orderProvider.selectedCustomer == null || orderProvider.orderItems.isEmpty) {
@@ -131,7 +119,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
     );
   }
 
-  Widget _buildMobileLayout(OrderProvider orderProvider) {
+  Widget _buildMobileLayout(OrderCreateProvider orderProvider) {
     AppLogger.debug('OrderReviewPage: Building mobile layout');
     return SingleChildScrollView(
       padding: EdgeInsets.all(AppConfig.defaultPadding),
@@ -155,7 +143,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
     );
   }
 
-  Widget _buildDesktopLayout(OrderProvider orderProvider) {
+  Widget _buildDesktopLayout(OrderCreateProvider orderProvider) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(AppConfig.largePadding),
       child: Column(
@@ -202,7 +190,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
     );
   }
 
-  Widget _buildCustomerInfo(OrderProvider orderProvider) {
+  Widget _buildCustomerInfo(OrderCreateProvider orderProvider) {
     if (orderProvider.selectedCustomer == null) return const SizedBox.shrink();
 
     return CustomerInfoCard(customer: orderProvider.selectedCustomer, title: 'Customer Information');
@@ -221,13 +209,13 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
             if (context.isMobile) ...[
               ListTile(
                 title: const Text('Date'),
-                subtitle: Text(_selectedDate?.toString().split(' ')[0] ?? 'Not selected'),
+                subtitle: Text(context.read<OrderCreateProvider>().selectedDeliveryDate?.toString().split(' ')[0] ?? 'Not selected'),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: _selectDate,
               ),
               ListTile(
                 title: const Text('Time'),
-                subtitle: Text(_selectedTime?.format(context) ?? 'Not selected'),
+                subtitle: Text(context.read<OrderCreateProvider>().selectedDeliveryTime?.format(context) ?? 'Not selected'),
                 trailing: const Icon(Icons.access_time),
                 onTap: _selectTime,
               ),
@@ -238,7 +226,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
                   Expanded(
                     child: ListTile(
                       title: const Text('Date'),
-                      subtitle: Text(_selectedDate?.toString().split(' ')[0] ?? 'Not selected'),
+                      subtitle: Text(context.read<OrderCreateProvider>().selectedDeliveryDate?.toString().split(' ')[0] ?? 'Not selected'),
                       trailing: const Icon(Icons.calendar_today),
                       onTap: _selectDate,
                     ),
@@ -246,7 +234,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
                   Expanded(
                     child: ListTile(
                       title: const Text('Time'),
-                      subtitle: Text(_selectedTime?.format(context) ?? 'Not selected'),
+                      subtitle: Text(context.read<OrderCreateProvider>().selectedDeliveryTime?.format(context) ?? 'Not selected'),
                       trailing: const Icon(Icons.access_time),
                       onTap: _selectTime,
                     ),
@@ -260,7 +248,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
     );
   }
 
-  Widget _buildOrderItemsReview(OrderProvider orderProvider) {
+  Widget _buildOrderItemsReview(OrderCreateProvider orderProvider) {
     return Card(
       child: Padding(
         padding: EdgeInsets.all(AppConfig.defaultPadding),
@@ -296,7 +284,7 @@ class _OrderReviewPageState extends State<OrderReviewPage> {
     );
   }
 
-  Widget _buildActionButtons(OrderProvider orderProvider) {
+  Widget _buildActionButtons(OrderCreateProvider orderProvider) {
     return Column(
       children: [
         Row(

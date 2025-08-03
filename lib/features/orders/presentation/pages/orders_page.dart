@@ -22,30 +22,27 @@ class OrdersPage extends StatefulWidget {
 
 class _OrdersPageState extends State<OrdersPage> {
   int _selectedIndex = 0;
-  String _searchQuery = '';
-  String _statusFilter = 'all';
-  bool _isLoading = true; // Show shimmer while orders load
 
   List<OrderViewModel> get _filteredOrders {
     final orderProvider = context.read<OrderListProvider>();
     var orders = orderProvider.orders;
 
     // Apply search filter
-    if (_searchQuery.isNotEmpty) {
+    if (orderProvider.searchQuery.isNotEmpty) {
       orders = orders
           .where(
             (order) =>
-                order.id.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                order.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                order.customerName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                order.staffName.toLowerCase().contains(_searchQuery.toLowerCase()),
+                order.id.toLowerCase().contains(orderProvider.searchQuery.toLowerCase()) ||
+                order.name.toLowerCase().contains(orderProvider.searchQuery.toLowerCase()) ||
+                order.customerName.toLowerCase().contains(orderProvider.searchQuery.toLowerCase()) ||
+                order.staffName.toLowerCase().contains(orderProvider.searchQuery.toLowerCase()),
           )
           .toList();
     }
 
     // Apply status filter
-    if (_statusFilter != 'all') {
-      orders = orders.where((order) => order.orderStatus.toLowerCase() == _statusFilter.toLowerCase()).toList();
+    if (orderProvider.statusFilter != 'all') {
+      orders = orders.where((order) => order.orderStatus.toLowerCase() == orderProvider.statusFilter.toLowerCase()).toList();
     }
 
     return orders;
@@ -59,29 +56,9 @@ class _OrdersPageState extends State<OrdersPage> {
   }
 
   void _loadOrders() {
-    // Show shimmer while loading
-    setState(() {
-      _isLoading = true;
-    });
-
-    // Fetch orders from API
+    // Fetch orders from API - BaseProvider handles errors automatically
     final orderProvider = context.read<OrderListProvider>();
-    orderProvider
-        .fetchOrders()
-        .then((_) {
-          if (mounted) {
-            setState(() {
-              _isLoading = false;
-            });
-          }
-        })
-        .catchError((error) {
-          if (mounted) {
-            setState(() {
-              _isLoading = false;
-            });
-          }
-        });
+    orderProvider.fetchOrders();
   }
 
   void _onDestinationSelected(int index) {
@@ -154,7 +131,7 @@ class _OrdersPageState extends State<OrdersPage> {
   Widget _buildOrdersContent() {
     return Consumer<OrderListProvider>(
       builder: (context, orderProvider, child) {
-        if (_isLoading) {
+        if (orderProvider.isLoading) {
           return _buildLoadingSpinner();
         }
 
@@ -171,34 +148,34 @@ class _OrdersPageState extends State<OrdersPage> {
   }
 
   Widget _buildFilters() {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            decoration: const InputDecoration(labelText: 'Search by name, customer, staff or order ID...', prefixIcon: Icon(Icons.search)),
-            onChanged: (value) {
-              setState(() {
-                _searchQuery = value;
-              });
-            },
-          ),
-        ),
-        const SizedBox(width: 16),
-        DropdownButton<String>(
-          value: _statusFilter,
-          items: const [
-            DropdownMenuItem(value: 'all', child: Text('All Status')),
-            DropdownMenuItem(value: 'pending', child: Text('Pending')),
-            DropdownMenuItem(value: 'confirmed', child: Text('Confirmed')),
-            DropdownMenuItem(value: 'completed', child: Text('Completed')),
+    return Consumer<OrderListProvider>(
+      builder: (context, orderProvider, child) {
+        return Row(
+          children: [
+            Expanded(
+              child: TextField(
+                decoration: const InputDecoration(labelText: 'Search by name, customer, staff or order ID...', prefixIcon: Icon(Icons.search)),
+                onChanged: (value) {
+                  orderProvider.setSearchQuery(value);
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            DropdownButton<String>(
+              value: orderProvider.statusFilter,
+              items: const [
+                DropdownMenuItem(value: 'all', child: Text('All Status')),
+                DropdownMenuItem(value: 'pending', child: Text('Pending')),
+                DropdownMenuItem(value: 'confirmed', child: Text('Confirmed')),
+                DropdownMenuItem(value: 'completed', child: Text('Completed')),
+              ],
+              onChanged: (value) {
+                orderProvider.setStatusFilter(value ?? 'all');
+              },
+            ),
           ],
-          onChanged: (value) {
-            setState(() {
-              _statusFilter = value ?? 'all';
-            });
-          },
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -618,7 +595,7 @@ class _OrdersPageState extends State<OrdersPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (orderProvider.pagination!.hasPrevious) ElevatedButton(onPressed: () => orderProvider.loadNextPage(), child: const Text('Previous')),
+          if (orderProvider.pagination!.hasPrevious) ElevatedButton(onPressed: () => orderProvider.loadPreviousPage(), child: const Text('Previous')),
           const SizedBox(width: 16),
           Text('Page ${orderProvider.pagination?.currentPage ?? 1} of ${orderProvider.pagination?.totalPages ?? 1}'),
           const SizedBox(width: 16),

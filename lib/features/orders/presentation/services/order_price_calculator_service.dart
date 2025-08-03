@@ -80,32 +80,6 @@ class OrderPriceCalculatorService {
     });
   }
 
-  // VALIDATION METHODS (moved from domain validators)
-
-  /// Validate order submission
-  static bool validateOrderSubmission(List<OrderItemCreationFormViewModel> items) {
-    if (items.isEmpty) return false;
-
-    for (final item in items) {
-      if (item.cardId.isEmpty || item.quantity <= 0) return false;
-
-      final discountAmount = double.tryParse(item.discountAmount) ?? 0.0;
-      if (discountAmount < 0) return false;
-
-      if (item.requiresBox) {
-        final boxCost = double.tryParse(item.totalBoxCost ?? '0') ?? 0.0;
-        if (boxCost < 0) return false;
-      }
-
-      if (item.requiresPrinting) {
-        final printingCost = double.tryParse(item.totalPrintingCost ?? '0') ?? 0.0;
-        if (printingCost < 0) return false;
-      }
-    }
-
-    return true;
-  }
-
   /// Get order item count
   static int getOrderItemCount(List<OrderItemCreationFormViewModel> items) {
     return items.fold(0, (total, item) => total + item.quantity);

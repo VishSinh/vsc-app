@@ -1,191 +1,151 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_form_models.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
+import 'package:vsc_app/features/orders/presentation/providers/order_item_form_provider.dart';
 
 /// Widget for entering order item details
-class OrderItemEntryForm extends StatefulWidget {
+class OrderItemEntryForm extends StatelessWidget {
   final void Function(OrderItemCreationFormViewModel) onAddItem;
   final bool isLoading;
 
   const OrderItemEntryForm({super.key, required this.onAddItem, this.isLoading = false});
 
-  @override
-  State<OrderItemEntryForm> createState() => _OrderItemEntryFormState();
-}
+  void _handleAddItem(BuildContext context) {
+    final formProvider = context.read<OrderItemFormProvider>();
 
-class _OrderItemEntryFormState extends State<OrderItemEntryForm> {
-  final _formKey = GlobalKey<FormState>();
-  final _quantityController = TextEditingController();
-  final _discountController = TextEditingController();
-  final _boxCostController = TextEditingController();
-  final _printingCostController = TextEditingController();
-
-  bool _requiresBox = false;
-  bool _requiresPrinting = false;
-  BoxType _selectedBoxType = BoxType.folding;
-
-  @override
-  void initState() {
-    super.initState();
-    _quantityController.text = '1';
-    _discountController.text = '0.00';
-    _boxCostController.text = '0.00';
-    _printingCostController.text = '0.00';
-  }
-
-  @override
-  void dispose() {
-    _quantityController.dispose();
-    _discountController.dispose();
-    _boxCostController.dispose();
-    _printingCostController.dispose();
-    super.dispose();
-  }
-
-  void _resetForm() {
-    _quantityController.text = '1';
-    _discountController.text = '0.00';
-    _boxCostController.text = '0.00';
-    _printingCostController.text = '0.00';
-    _requiresBox = false;
-    _requiresPrinting = false;
-    _selectedBoxType = BoxType.folding;
-  }
-
-  void _handleAddItem() {
-    if (_formKey.currentState?.validate() ?? false) {
+    if (formProvider.quantityController.text.isNotEmpty) {
       AppLogger.debug('OrderItemEntryForm: Adding item without cardId');
-      widget.onAddItem(
+      onAddItem(
         OrderItemCreationFormViewModel(
-          quantity: int.tryParse(_quantityController.text) ?? 1,
-          discountAmount: _discountController.text,
-          requiresBox: _requiresBox,
-          requiresPrinting: _requiresPrinting,
-          totalBoxCost: _requiresBox ? _boxCostController.text : null,
-          totalPrintingCost: _requiresPrinting ? _printingCostController.text : null,
-          boxType: _selectedBoxType,
+          quantity: int.tryParse(formProvider.quantityController.text) ?? 1,
+          discountAmount: formProvider.discountController.text,
+          requiresBox: formProvider.requiresBox,
+          requiresPrinting: formProvider.requiresPrinting,
+          totalBoxCost: formProvider.requiresBox ? formProvider.boxCostController.text : null,
+          totalPrintingCost: formProvider.requiresPrinting ? formProvider.printingCostController.text : null,
+          boxType: formProvider.selectedBoxType,
         ),
       );
-      reset();
+      formProvider.reset();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Item Details', style: ResponsiveText.getTitle(context)),
-          SizedBox(height: AppConfig.defaultPadding),
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  controller: _quantityController,
-                  decoration: InputDecoration(labelText: UITextConstants.quantity, border: const OutlineInputBorder()),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return UITextConstants.pleaseEnterValidQuantity;
-                    }
-                    final quantity = int.tryParse(value);
-                    if (quantity == null || quantity <= 0) {
-                      return UITextConstants.pleaseEnterValidQuantity;
-                    }
-                    return null;
+    return ChangeNotifierProvider(
+      create: (context) => OrderItemFormProvider(),
+      child: Consumer<OrderItemFormProvider>(
+        builder: (context, formProvider, child) {
+          return Form(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Item Details', style: ResponsiveText.getTitle(context)),
+                SizedBox(height: AppConfig.defaultPadding),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: formProvider.quantityController,
+                        decoration: InputDecoration(labelText: UITextConstants.quantity, border: const OutlineInputBorder()),
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return UITextConstants.pleaseEnterValidQuantity;
+                          }
+                          final quantity = int.tryParse(value);
+                          if (quantity == null || quantity <= 0) {
+                            return UITextConstants.pleaseEnterValidQuantity;
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    SizedBox(width: AppConfig.defaultPadding),
+                    Expanded(
+                      child: TextFormField(
+                        controller: formProvider.discountController,
+                        decoration: InputDecoration(labelText: UITextConstants.discountAmount, border: const OutlineInputBorder()),
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return UITextConstants.pleaseEnterDiscountAmount;
+                          }
+                          final discount = double.tryParse(value);
+                          if (discount == null || discount < 0) {
+                            return UITextConstants.pleaseEnterValidDiscount;
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: AppConfig.defaultPadding),
+                CheckboxListTile(
+                  title: Text(UITextConstants.requiresBox),
+                  value: formProvider.requiresBox,
+                  onChanged: (value) {
+                    formProvider.setRequiresBox(value ?? false);
                   },
                 ),
-              ),
-              SizedBox(width: AppConfig.defaultPadding),
-              Expanded(
-                child: TextFormField(
-                  controller: _discountController,
-                  decoration: InputDecoration(labelText: UITextConstants.discountAmount, border: const OutlineInputBorder()),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return UITextConstants.pleaseEnterDiscountAmount;
-                    }
-                    final discount = double.tryParse(value);
-                    if (discount == null || discount < 0) {
-                      return UITextConstants.pleaseEnterValidDiscount;
-                    }
-                    return null;
+                if (formProvider.requiresBox) ...[
+                  DropdownButtonFormField<BoxType>(
+                    value: formProvider.selectedBoxType,
+                    decoration: InputDecoration(labelText: UITextConstants.boxType, border: const OutlineInputBorder()),
+                    items: BoxType.values.map((type) {
+                      return DropdownMenuItem(value: type, child: Text(type.name.toUpperCase()));
+                    }).toList(),
+                    onChanged: (value) {
+                      formProvider.setSelectedBoxType(value ?? BoxType.folding);
+                    },
+                  ),
+                  SizedBox(height: AppConfig.defaultPadding),
+                  TextFormField(
+                    controller: formProvider.boxCostController,
+                    decoration: InputDecoration(
+                      labelText: UITextConstants.boxCost,
+                      hintText: UITextConstants.boxCostHint,
+                      border: const OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ],
+                CheckboxListTile(
+                  title: Text(UITextConstants.requiresPrinting),
+                  value: formProvider.requiresPrinting,
+                  onChanged: (value) {
+                    formProvider.setRequiresPrinting(value ?? false);
                   },
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: AppConfig.defaultPadding),
-          CheckboxListTile(
-            title: Text(UITextConstants.requiresBox),
-            value: _requiresBox,
-            onChanged: (value) {
-              setState(() {
-                _requiresBox = value ?? false;
-              });
-            },
-          ),
-          if (_requiresBox) ...[
-            DropdownButtonFormField<BoxType>(
-              value: _selectedBoxType,
-              decoration: InputDecoration(labelText: UITextConstants.boxType, border: const OutlineInputBorder()),
-              items: BoxType.values.map((type) {
-                return DropdownMenuItem(value: type, child: Text(type.name.toUpperCase()));
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedBoxType = value ?? BoxType.folding;
-                });
-              },
+                if (formProvider.requiresPrinting) ...[
+                  SizedBox(height: AppConfig.defaultPadding),
+                  TextFormField(
+                    controller: formProvider.printingCostController,
+                    decoration: InputDecoration(
+                      labelText: UITextConstants.printingCost,
+                      hintText: UITextConstants.printingCostHint,
+                      border: const OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ],
+                SizedBox(height: AppConfig.defaultPadding),
+                ButtonUtils.successButton(
+                  onPressed: isLoading ? null : () => _handleAddItem(context),
+                  label: UITextConstants.addOrderItem,
+                  icon: Icons.add,
+                ),
+              ],
             ),
-            SizedBox(height: AppConfig.defaultPadding),
-            TextFormField(
-              controller: _boxCostController,
-              decoration: InputDecoration(
-                labelText: UITextConstants.boxCost,
-                hintText: UITextConstants.boxCostHint,
-                border: const OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-            ),
-          ],
-          CheckboxListTile(
-            title: Text(UITextConstants.requiresPrinting),
-            value: _requiresPrinting,
-            onChanged: (value) {
-              setState(() {
-                _requiresPrinting = value ?? false;
-              });
-            },
-          ),
-          if (_requiresPrinting) ...[
-            SizedBox(height: AppConfig.defaultPadding),
-            TextFormField(
-              controller: _printingCostController,
-              decoration: InputDecoration(
-                labelText: UITextConstants.printingCost,
-                hintText: UITextConstants.printingCostHint,
-                border: const OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-            ),
-          ],
-          SizedBox(height: AppConfig.defaultPadding),
-          ButtonUtils.successButton(onPressed: widget.isLoading ? null : _handleAddItem, label: UITextConstants.addOrderItem, icon: Icons.add),
-        ],
+          );
+        },
       ),
     );
-  }
-
-  void reset() {
-    _resetForm();
-    _formKey.currentState?.reset();
   }
 }

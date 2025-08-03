@@ -9,7 +9,7 @@ import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/features/customers/presentation/providers/customer_provider.dart';
-import 'package:vsc_app/features/orders/presentation/providers/order_provider.dart';
+import 'package:vsc_app/features/orders/presentation/providers/order_create_provider.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 
 class CustomerSearchPage extends StatefulWidget {
@@ -23,7 +23,6 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
   final _nameController = TextEditingController();
-  bool _isCreatingCustomer = false;
 
   @override
   void dispose() {
@@ -36,7 +35,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
     if (!_formKey.currentState!.validate()) return;
 
     final customerProvider = context.read<CustomerProvider>();
-    final orderProvider = context.read<OrderProvider>();
+    final orderProvider = context.read<OrderCreateProvider>();
 
     final customer = await customerProvider.searchCustomerByPhone(_phoneController.text.trim());
 
@@ -62,7 +61,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
     if (!_formKey.currentState!.validate()) return;
 
     final customerProvider = context.read<CustomerProvider>();
-    final orderProvider = context.read<OrderProvider>();
+    final orderProvider = context.read<OrderCreateProvider>();
 
     final success = await customerProvider.createCustomer(name: _nameController.text.trim(), phone: _phoneController.text.trim());
 
@@ -91,7 +90,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
         title: const Text(UITextConstants.customerSearchTitle),
         leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.orders)),
       ),
-      body: Consumer2<CustomerProvider, OrderProvider>(
+      body: Consumer2<CustomerProvider, OrderCreateProvider>(
         builder: (context, customerProvider, orderProvider, child) {
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -129,7 +128,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(_isCreatingCustomer ? 'Create Customer' : 'Search Customer', style: ResponsiveText.getTitle(context)),
+              Text(customerProvider.isCreatingCustomer ? 'Create Customer' : 'Search Customer', style: ResponsiveText.getTitle(context)),
               SizedBox(height: AppConfig.defaultPadding),
 
               // Phone field (always visible)
@@ -150,7 +149,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
               ),
 
               // Name field (only visible when creating)
-              if (_isCreatingCustomer) ...[
+              if (customerProvider.isCreatingCustomer) ...[
                 SizedBox(height: AppConfig.defaultPadding),
                 TextFormField(
                   controller: _nameController,
@@ -178,7 +177,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
                     children: [
                       SizedBox(
                         width: double.infinity,
-                        child: _isCreatingCustomer
+                        child: customerProvider.isCreatingCustomer
                             ? ButtonUtils.primaryButton(
                                 onPressed: customerProvider.isLoading ? null : _createCustomer,
                                 label: UITextConstants.createCustomer,
@@ -195,17 +194,15 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
                         width: double.infinity,
                         child: ButtonUtils.secondaryButton(
                           onPressed: () {
-                            setState(() {
-                              _isCreatingCustomer = !_isCreatingCustomer;
-                              if (!_isCreatingCustomer) {
-                                // Reset form when switching back to search
-                                _nameController.clear();
-                                _formKey.currentState?.reset();
-                              }
-                            });
+                            customerProvider.toggleCreatingCustomer();
+                            if (!customerProvider.isCreatingCustomer) {
+                              // Reset form when switching back to search
+                              _nameController.clear();
+                              _formKey.currentState?.reset();
+                            }
                           },
-                          label: _isCreatingCustomer ? UITextConstants.cancel : UITextConstants.createCustomer,
-                          icon: _isCreatingCustomer ? Icons.cancel : Icons.add,
+                          label: customerProvider.isCreatingCustomer ? UITextConstants.cancel : UITextConstants.createCustomer,
+                          icon: customerProvider.isCreatingCustomer ? Icons.cancel : Icons.add,
                         ),
                       ),
                     ],
@@ -216,7 +213,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
                 Row(
                   children: [
                     Expanded(
-                      child: _isCreatingCustomer
+                      child: customerProvider.isCreatingCustomer
                           ? ButtonUtils.primaryButton(
                               onPressed: customerProvider.isLoading ? null : _createCustomer,
                               label: UITextConstants.createCustomer,
@@ -232,17 +229,15 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
                     Expanded(
                       child: ButtonUtils.secondaryButton(
                         onPressed: () {
-                          setState(() {
-                            _isCreatingCustomer = !_isCreatingCustomer;
-                            if (!_isCreatingCustomer) {
-                              // Reset form when switching back to search
-                              _nameController.clear();
-                              _formKey.currentState?.reset();
-                            }
-                          });
+                          customerProvider.toggleCreatingCustomer();
+                          if (!customerProvider.isCreatingCustomer) {
+                            // Reset form when switching back to search
+                            _nameController.clear();
+                            _formKey.currentState?.reset();
+                          }
                         },
-                        label: _isCreatingCustomer ? UITextConstants.cancel : UITextConstants.createCustomer,
-                        icon: _isCreatingCustomer ? Icons.cancel : Icons.add,
+                        label: customerProvider.isCreatingCustomer ? UITextConstants.cancel : UITextConstants.createCustomer,
+                        icon: customerProvider.isCreatingCustomer ? Icons.cancel : Icons.add,
                       ),
                     ),
                   ],

@@ -2,11 +2,9 @@ import 'package:vsc_app/core/providers/base_provider.dart';
 import 'package:vsc_app/core/models/api_response.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
 import '../../data/services/order_service.dart';
-import '../services/order_mapper_service.dart';
 import 'package:vsc_app/features/production/data/services/production_service.dart';
 import 'package:vsc_app/features/production/presentation/models/box_maker_view_model.dart';
 import 'package:vsc_app/features/production/presentation/models/box_order_update_form_model.dart';
-import 'package:vsc_app/features/production/presentation/services/production_mapper_service.dart';
 import 'package:vsc_app/features/production/presentation/models/printing_job_update_form_model.dart';
 import 'package:vsc_app/features/production/presentation/models/printer_view_model.dart';
 import 'package:vsc_app/features/production/presentation/models/tracing_studio_view_model.dart';
@@ -20,6 +18,11 @@ class OrderListProvider extends BaseProvider {
   final List<OrderViewModel> _orders = [];
   PaginationData? _pagination;
   OrderViewModel? _currentOrder;
+
+  // UI state for orders page
+  String _searchQuery = '';
+  String _statusFilter = 'all';
+  bool _isPageLoading = false;
 
   // Production service for box order operations
   // State for box makers
@@ -50,6 +53,11 @@ class OrderListProvider extends BaseProvider {
   PaginationData? get pagination => _pagination;
   OrderViewModel? get currentOrder => _currentOrder;
 
+  // Getters for UI state
+  String get searchQuery => _searchQuery;
+  String get statusFilter => _statusFilter;
+  bool get isPageLoading => _isPageLoading;
+
   // Getters for production data
   bool get isLoadingBoxMakers => _isLoadingBoxMakers;
   List<BoxMakerViewModel> get boxMakers => List.unmodifiable(_boxMakers);
@@ -71,65 +79,48 @@ class OrderListProvider extends BaseProvider {
 
   // Order fetching methods
   Future<bool> fetchOrders({int page = 1, int pageSize = 10}) async {
-    try {
-      setLoading(true);
-      clearMessages();
-
-      final response = await _orderService.getOrders(page: page, pageSize: pageSize);
-
-      if (response.success) {
+    final result = await executeApiOperation(
+      apiCall: () => _orderService.getOrders(page: page, pageSize: pageSize),
+      onSuccess: (response) {
         _orders.clear();
-        // Use the mapper to convert OrderResponse to OrderViewModel
-        final orderViewModels = (response.data ?? []).map((orderResponse) => OrderMapperService.orderResponseToViewModel(orderResponse)).toList();
+        // Use the fromApiResponse method to convert OrderResponse to OrderViewModel
+        final orderViewModels = (response.data ?? []).map((orderResponse) => OrderViewModel.fromApiResponse(orderResponse)).toList();
         _orders.addAll(orderViewModels);
         _pagination = response.pagination;
         notifyListeners();
         return true;
-      } else {
-        setError(response.error?.message ?? 'Failed to fetch orders');
-        return false;
-      }
-    } catch (e) {
-      setError('Error fetching orders: $e');
-      return false;
-    } finally {
-      setLoading(false);
-    }
+      },
+      showSnackbar: false, // No snackbar for frequent API calls
+      errorMessage: 'Failed to fetch orders',
+    );
+    return result ?? false;
   }
 
-  Future<bool> loadNextPage() async {
+  Future<void> loadNextPage() async {
     if (_pagination?.hasNext == true) {
-      return await fetchOrders(page: (_pagination?.currentPage ?? 1) + 1);
+      await fetchOrders(page: (_pagination?.currentPage ?? 1) + 1);
     }
-    return false;
   }
 
-  Future<bool> refreshOrders() async {
-    return await fetchOrders();
+  Future<void> loadPreviousPage() async {
+    if (_pagination?.hasPrevious == true) {
+      await fetchOrders(page: (_pagination?.currentPage ?? 1) - 1);
+    }
   }
 
   // Order detail methods
   Future<bool> fetchOrderById(String orderId) async {
-    try {
-      setLoading(true);
-      clearMessages();
-
-      final response = await _orderService.getOrderById(orderId);
-
-      if (response.success) {
-        _currentOrder = OrderMapperService.orderResponseToViewModel(response.data!);
+    final result = await executeApiOperation(
+      apiCall: () => _orderService.getOrderById(orderId),
+      onSuccess: (response) {
+        _currentOrder = OrderViewModel.fromApiResponse(response.data!);
         notifyListeners();
-        return true;
-      } else {
-        setError(response.error?.message ?? 'Failed to fetch order details');
-        return false;
-      }
-    } catch (e) {
-      setError('Error fetching order details: $e');
-      return false;
-    } finally {
-      setLoading(false);
-    }
+        return response.data!; // Return the OrderResponse
+      },
+      showSnackbar: false, // No snackbar for detail fetching
+      errorMessage: 'Failed to fetch order details',
+    );
+    return result != null; // Convert to boolean
   }
 
   void clearCurrentOrder() {
@@ -144,164 +135,133 @@ class OrderListProvider extends BaseProvider {
     notifyListeners();
   }
 
+  // UI state management methods
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
+
+  void setStatusFilter(String filter) {
+    _statusFilter = filter;
+    notifyListeners();
+  }
+
+  void setPageLoading(bool loading) {
+    _isPageLoading = loading;
+    notifyListeners();
+  }
+
+  void clearFilters() {
+    _searchQuery = '';
+    _statusFilter = 'all';
+    notifyListeners();
+  }
+
   // Production methods for box orders
   /// Fetch box makers
   Future<void> fetchBoxMakers({int page = 1, int pageSize = 10}) async {
-    try {
-      setLoading(true);
-      _isLoadingBoxMakers = true;
-      _lastBoxMakersError = null;
-      clearMessages();
-      notifyListeners();
+    _isLoadingBoxMakers = true;
+    _lastBoxMakersError = null;
+    notifyListeners();
 
-      final response = await _productionService.getBoxMakers(page: page, pageSize: pageSize);
-
-      if (response.success) {
+    await executeApiOperation(
+      apiCall: () => _productionService.getBoxMakers(page: page, pageSize: pageSize),
+      onSuccess: (response) {
         _boxMakers = BoxMakerViewModel.fromResponseList(response.data!);
-      } else {
-        _lastBoxMakersError = response.error?.message ?? 'Failed to fetch box makers';
-        setError(_lastBoxMakersError!);
-      }
-    } catch (e) {
-      _lastBoxMakersError = e.toString();
-      setError('Error fetching box makers: $e');
-    } finally {
-      setLoading(false);
-      _isLoadingBoxMakers = false;
-      notifyListeners();
-    }
+        notifyListeners();
+        return response.data!;
+      },
+      showLoading: false, // Use custom loading state
+      showSnackbar: false, // No snackbar for data fetching
+      errorMessage: 'Failed to fetch box makers',
+    );
+
+    _isLoadingBoxMakers = false;
+    notifyListeners();
   }
 
   // Production methods for printing jobs
   /// Fetch printers
   Future<void> fetchPrinters({int page = 1, int pageSize = 10}) async {
-    try {
-      setLoading(true);
-      _isLoadingPrinters = true;
-      _lastPrintersError = null;
-      clearMessages();
-      notifyListeners();
+    _isLoadingPrinters = true;
+    _lastPrintersError = null;
+    notifyListeners();
 
-      final response = await _productionService.getPrinters(page: page, pageSize: pageSize);
-
-      if (response.success) {
+    await executeApiOperation(
+      apiCall: () => _productionService.getPrinters(page: page, pageSize: pageSize),
+      onSuccess: (response) {
         _printers = PrinterViewModel.fromResponseList(response.data!);
-      } else {
-        _lastPrintersError = response.error?.message ?? 'Failed to fetch printers';
-        setError(_lastPrintersError!);
-      }
-    } catch (e) {
-      _lastPrintersError = e.toString();
-      setError('Error fetching printers: $e');
-    } finally {
-      setLoading(false);
-      _isLoadingPrinters = false;
-      notifyListeners();
-    }
+        notifyListeners();
+        return response.data!;
+      },
+      showLoading: false, // Use custom loading state
+      showSnackbar: false, // No snackbar for data fetching
+      errorMessage: 'Failed to fetch printers',
+    );
+
+    _isLoadingPrinters = false;
+    notifyListeners();
   }
 
   /// Fetch tracing studios
   Future<void> fetchTracingStudios({int page = 1, int pageSize = 10}) async {
-    try {
-      setLoading(true);
-      _isLoadingTracingStudios = true;
-      _lastTracingStudiosError = null;
-      clearMessages();
-      notifyListeners();
+    _isLoadingTracingStudios = true;
+    _lastTracingStudiosError = null;
+    notifyListeners();
 
-      final response = await _productionService.getTracingStudios(page: page, pageSize: pageSize);
-
-      if (response.success) {
+    await executeApiOperation(
+      apiCall: () => _productionService.getTracingStudios(page: page, pageSize: pageSize),
+      onSuccess: (response) {
         _tracingStudios = TracingStudioViewModel.fromResponseList(response.data!);
-      } else {
-        _lastTracingStudiosError = response.error?.message ?? 'Failed to fetch tracing studios';
-        setError(_lastTracingStudiosError!);
-      }
-    } catch (e) {
-      _lastTracingStudiosError = e.toString();
-      setError('Error fetching tracing studios: $e');
-    } finally {
-      setLoading(false);
-      _isLoadingTracingStudios = false;
-      notifyListeners();
-    }
+        notifyListeners();
+        return response.data!;
+      },
+      showLoading: false, // Use custom loading state
+      showSnackbar: false, // No snackbar for data fetching
+      errorMessage: 'Failed to fetch tracing studios',
+    );
+
+    _isLoadingTracingStudios = false;
+    notifyListeners();
   }
 
   /// Update printing job status and details
   Future<void> updatePrintingJob({required String printingJobId, required PrintingJobUpdateFormModel formModel}) async {
-    try {
-      setLoading(true);
-      _isUpdatingPrintingJob = true;
-      _lastPrintingJobUpdateError = null;
-      clearMessages();
-      notifyListeners();
+    _isUpdatingPrintingJob = true;
+    _lastPrintingJobUpdateError = null;
+    notifyListeners();
 
-      // Use mapper service to convert form model to request
-      final request = ProductionMapperService.printingJobUpdateFormModelToRequest(formModel);
-
-      // If no changes detected, show warning and return
-      if (request == null) {
-        setError('No changes detected');
-        return;
-      }
-
-      // Debug: Log what fields are being sent
-      print('Printing Job Update - Request data: ${request.toJson()}');
-
-      final response = await _productionService.updatePrintingJob(printingJobId: printingJobId, request: request);
-
-      if (response.success) {
+    await executeApiOperation(
+      apiCall: () => _productionService.updatePrintingJob(printingJobId: printingJobId, request: formModel.toApiRequest()!),
+      onSuccess: (response) {
         setSuccess('Printing job updated successfully');
-      } else {
-        _lastPrintingJobUpdateError = response.error?.message ?? 'Failed to update printing job';
-        setError(_lastPrintingJobUpdateError!);
-      }
-    } catch (e) {
-      _lastPrintingJobUpdateError = e.toString();
-      setError('Error updating printing job: $e');
-    } finally {
-      setLoading(false);
-      _isUpdatingPrintingJob = false;
-      notifyListeners();
-    }
+        return response.data!;
+      },
+      showLoading: false, // Use custom loading state
+      errorMessage: 'Failed to update printing job',
+    );
+
+    _isUpdatingPrintingJob = false;
+    notifyListeners();
   }
 
   /// Update box order status and details
   Future<void> updateBoxOrder({required String boxOrderId, required BoxOrderUpdateFormModel formModel}) async {
-    try {
-      setLoading(true);
-      _isUpdatingBoxOrder = true;
-      _lastBoxOrderUpdateError = null;
-      clearMessages();
-      notifyListeners();
+    _isUpdatingBoxOrder = true;
+    _lastBoxOrderUpdateError = null;
+    notifyListeners();
 
-      // Use mapper service to convert form model to request
-      final request = ProductionMapperService.formModelToRequest(formModel);
-
-      // If no changes detected, show warning and return
-      if (request == null) {
-        setError('No changes detected');
-        return;
-      }
-
-      // Debug: Log what fields are being sent
-      print('Box Order Update - Request data: ${request.toJson()}');
-
-      final response = await _productionService.updateBoxOrder(boxOrderId: boxOrderId, request: request);
-
-      if (response.success) {
+    await executeApiOperation(
+      apiCall: () => _productionService.updateBoxOrder(boxOrderId: boxOrderId, request: formModel.toApiRequest()!),
+      onSuccess: (response) {
         setSuccess('Box order updated successfully');
-      } else {
-        _lastBoxOrderUpdateError = response.error?.message ?? 'Failed to update box order';
-        setError(_lastBoxOrderUpdateError!);
-      }
-    } catch (e) {
-      _lastBoxOrderUpdateError = e.toString();
-      setError('Error updating box order: $e');
-    } finally {
-      setLoading(false);
-      _isUpdatingBoxOrder = false;
-      notifyListeners();
-    }
+        return response.data!;
+      },
+      showLoading: false, // Use custom loading state
+      errorMessage: 'Failed to update box order',
+    );
+
+    _isUpdatingBoxOrder = false;
+    notifyListeners();
   }
 }

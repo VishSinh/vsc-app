@@ -5,7 +5,7 @@ import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'order_widgets.dart';
-import 'package:vsc_app/features/orders/presentation/providers/order_provider.dart';
+import 'package:vsc_app/features/orders/presentation/providers/order_create_provider.dart';
 
 /// Widget for displaying the list of order items
 class OrderItemList extends StatelessWidget {
@@ -15,7 +15,7 @@ class OrderItemList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<OrderProvider>(
+    return Consumer<OrderCreateProvider>(
       builder: (context, orderProvider, child) {
         return Card(
           child: Padding(

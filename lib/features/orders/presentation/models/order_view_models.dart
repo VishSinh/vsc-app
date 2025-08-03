@@ -1,6 +1,7 @@
 // ViewModel classes for Order Response
 
 import 'package:vsc_app/core/enums/order_box_type.dart';
+import 'package:vsc_app/features/orders/data/models/order_responses.dart';
 
 class OrderViewModel {
   final String id;
@@ -28,6 +29,22 @@ class OrderViewModel {
     required this.specialInstruction,
     required this.orderItems,
   });
+
+  factory OrderViewModel.fromApiResponse(OrderResponse response) {
+    return OrderViewModel(
+      id: response.id,
+      name: response.name,
+      customerId: response.customerId,
+      customerName: response.customerName,
+      staffId: response.staffId,
+      staffName: response.staffName,
+      orderDate: DateTime.parse(response.orderDate),
+      deliveryDate: DateTime.parse(response.deliveryDate),
+      orderStatus: response.orderStatus,
+      specialInstruction: response.specialInstruction,
+      orderItems: response.orderItems.map((item) => OrderItemViewModel.fromApiResponse(item)).toList(),
+    );
+  }
 }
 
 class OrderItemViewModel {
@@ -56,6 +73,22 @@ class OrderItemViewModel {
     required this.boxOrders,
     required this.printingJobs,
   });
+
+  factory OrderItemViewModel.fromApiResponse(OrderItemResponse response) {
+    return OrderItemViewModel(
+      id: response.id,
+      orderId: response.orderId,
+      orderName: response.orderName,
+      cardId: response.cardId,
+      quantity: response.quantity,
+      pricePerItem: response.pricePerItem,
+      discountAmount: response.discountAmount,
+      requiresBox: response.requiresBox,
+      requiresPrinting: response.requiresPrinting,
+      boxOrders: response.boxOrders?.map((box) => BoxOrderViewModel.fromApiResponse(box)).toList(),
+      printingJobs: response.printingJobs?.map((job) => PrintingJobViewModel.fromApiResponse(job)).toList(),
+    );
+  }
 }
 
 class BoxOrderViewModel {
@@ -80,6 +113,20 @@ class BoxOrderViewModel {
     required this.boxStatus,
     this.estimatedCompletion,
   });
+
+  factory BoxOrderViewModel.fromApiResponse(BoxOrderResponse response) {
+    return BoxOrderViewModel(
+      id: response.id,
+      orderItemId: response.orderItemId,
+      boxMakerId: response.boxMakerId,
+      boxMakerName: response.boxMakerName,
+      boxType: OrderBoxTypeExtension.fromApiString(response.boxType) ?? OrderBoxType.folding,
+      boxQuantity: response.boxQuantity,
+      totalBoxCost: response.totalBoxCost,
+      boxStatus: response.boxStatus,
+      estimatedCompletion: response.estimatedCompletion != null ? DateTime.parse(response.estimatedCompletion!) : null,
+    );
+  }
 }
 
 class PrintingJobViewModel {
@@ -106,4 +153,19 @@ class PrintingJobViewModel {
     required this.printingStatus,
     this.estimatedCompletion,
   });
+
+  factory PrintingJobViewModel.fromApiResponse(PrintingJobResponse response) {
+    return PrintingJobViewModel(
+      id: response.id,
+      orderItemId: response.orderItemId,
+      printerId: response.printerId,
+      printerName: response.printerName,
+      tracingStudioId: response.tracingStudioId,
+      tracingStudioName: response.tracingStudioName,
+      printQuantity: response.printQuantity,
+      totalPrintingCost: response.totalPrintingCost,
+      printingStatus: response.printingStatus,
+      estimatedCompletion: response.estimatedCompletion != null ? DateTime.parse(response.estimatedCompletion!) : null,
+    );
+  }
 }

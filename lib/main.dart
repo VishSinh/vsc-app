@@ -9,7 +9,7 @@ import 'package:vsc_app/features/auth/presentation/providers/permission_provider
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
 import 'package:vsc_app/features/customers/presentation/providers/customer_provider.dart';
-import 'package:vsc_app/features/orders/presentation/providers/order_provider.dart';
+import 'package:vsc_app/features/orders/presentation/providers/order_create_provider.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
 
 void main() {
@@ -29,7 +29,7 @@ class VSCApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => VendorProvider()),
         ChangeNotifierProvider(create: (context) => CardProvider()),
         ChangeNotifierProvider(create: (context) => CustomerProvider()),
-        ChangeNotifierProvider(create: (context) => OrderProvider()),
+        ChangeNotifierProvider(create: (context) => OrderCreateProvider()),
         ChangeNotifierProvider(create: (context) => OrderListProvider()),
         ChangeNotifierProxyProvider<PermissionProvider, AuthProvider>(
           create: (context) => AuthProvider(permissionProvider: context.read<PermissionProvider>()),

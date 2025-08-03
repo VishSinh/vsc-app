@@ -1,9 +1,9 @@
 import 'package:vsc_app/core/enums/box_status.dart';
 import 'package:vsc_app/core/enums/order_box_type.dart';
+import 'package:vsc_app/features/production/data/models/box_order_requests.dart';
 
-/// Form model for updating box orders
 class BoxOrderUpdateFormModel {
-  // Original values (populated from current box order data)
+  // Original values
   String? boxMakerId;
   String? totalBoxCost;
   BoxStatus? boxStatus;
@@ -11,7 +11,7 @@ class BoxOrderUpdateFormModel {
   int? boxQuantity;
   DateTime? estimatedCompletion;
 
-  // Current values (user input)
+  // Current values
   String? currentBoxMakerId;
   String? currentTotalBoxCost;
   BoxStatus? currentBoxStatus;
@@ -19,9 +19,6 @@ class BoxOrderUpdateFormModel {
   int? currentBoxQuantity;
   DateTime? currentEstimatedCompletion;
 
-  BoxOrderUpdateFormModel({this.boxMakerId, this.totalBoxCost, this.boxStatus, this.boxType, this.boxQuantity, this.estimatedCompletion});
-
-  /// Create from current box order data
   factory BoxOrderUpdateFormModel.fromCurrentData({
     String? boxMakerId,
     String? totalBoxCost,
@@ -30,17 +27,27 @@ class BoxOrderUpdateFormModel {
     int? boxQuantity,
     String? estimatedCompletion,
   }) {
-    return BoxOrderUpdateFormModel(
-      boxMakerId: boxMakerId,
-      totalBoxCost: totalBoxCost,
-      boxStatus: BoxStatusExtension.fromApiString(boxStatus),
-      boxType: OrderBoxTypeExtension.fromApiString(boxType),
-      boxQuantity: boxQuantity,
-      estimatedCompletion: estimatedCompletion != null ? DateTime.tryParse(estimatedCompletion) : null,
-    );
+    final model = BoxOrderUpdateFormModel._();
+    model.boxMakerId = boxMakerId;
+    model.totalBoxCost = totalBoxCost;
+    model.boxStatus = BoxStatusExtension.fromApiString(boxStatus);
+    model.boxType = OrderBoxTypeExtension.fromApiString(boxType);
+    model.boxQuantity = boxQuantity;
+    model.estimatedCompletion = estimatedCompletion != null ? DateTime.tryParse(estimatedCompletion) : null;
+
+    // Initialize current values with original values
+    model.currentBoxMakerId = model.boxMakerId;
+    model.currentTotalBoxCost = model.totalBoxCost;
+    model.currentBoxStatus = model.boxStatus;
+    model.currentBoxType = model.boxType;
+    model.currentBoxQuantity = model.boxQuantity;
+    model.currentEstimatedCompletion = model.estimatedCompletion;
+
+    return model;
   }
 
-  /// Check if form has any changes
+  BoxOrderUpdateFormModel._();
+
   bool get hasChanges {
     return _isValueChanged(boxMakerId, currentBoxMakerId) ||
         _isValueChanged(totalBoxCost, currentTotalBoxCost) ||
@@ -50,7 +57,43 @@ class BoxOrderUpdateFormModel {
         _isValueChanged(estimatedCompletion, currentEstimatedCompletion);
   }
 
-  /// Compare two values, treating null and empty string as same
+  BoxOrderUpdateRequest? toApiRequest() {
+    final request = <String, dynamic>{};
+    bool hasAnyChanges = false;
+
+    if (_isValueChanged(boxMakerId, currentBoxMakerId)) {
+      request['box_maker_id'] = currentBoxMakerId;
+      hasAnyChanges = true;
+    }
+
+    if (_isValueChanged(totalBoxCost, currentTotalBoxCost)) {
+      request['total_box_cost'] = currentTotalBoxCost;
+      hasAnyChanges = true;
+    }
+
+    if (_isValueChanged(boxStatus, currentBoxStatus)) {
+      request['box_status'] = currentBoxStatus?.toApiString();
+      hasAnyChanges = true;
+    }
+
+    if (_isValueChanged(boxType, currentBoxType)) {
+      request['box_type'] = currentBoxType?.toApiString();
+      hasAnyChanges = true;
+    }
+
+    if (_isValueChanged(boxQuantity, currentBoxQuantity)) {
+      request['box_quantity'] = currentBoxQuantity;
+      hasAnyChanges = true;
+    }
+
+    if (_isValueChanged(estimatedCompletion, currentEstimatedCompletion)) {
+      request['estimated_completion'] = currentEstimatedCompletion?.toIso8601String();
+      hasAnyChanges = true;
+    }
+
+    return hasAnyChanges ? BoxOrderUpdateRequest.fromJson(request) : null;
+  }
+
   bool _isValueChanged(dynamic original, dynamic current) {
     if (original == null && current == null) return false;
     if (original == null && current != null && current.toString().isEmpty) return false;
@@ -58,23 +101,5 @@ class BoxOrderUpdateFormModel {
     if (original == null && current != null && current.toString().isNotEmpty) return true;
     if (current == null && original != null && original.toString().isNotEmpty) return true;
     return original != current;
-  }
-
-  /// Clear all form data
-  void clear() {
-    boxMakerId = null;
-    totalBoxCost = null;
-    boxStatus = null;
-    boxType = null;
-    boxQuantity = null;
-    estimatedCompletion = null;
-
-    // Reset current values
-    currentBoxMakerId = null;
-    currentTotalBoxCost = null;
-    currentBoxStatus = null;
-    currentBoxType = null;
-    currentBoxQuantity = null;
-    currentEstimatedCompletion = null;
   }
 }

@@ -1,8 +1,8 @@
 import 'package:vsc_app/core/enums/printing_status.dart';
+import 'package:vsc_app/features/production/data/models/printing_job_requests.dart';
 
-/// Form model for updating printing jobs
 class PrintingJobUpdateFormModel {
-  // Original values (populated from current printing job data)
+  // Original values
   String? printerId;
   String? tracingStudioId;
   String? totalPrintingCost;
@@ -10,7 +10,7 @@ class PrintingJobUpdateFormModel {
   int? printQuantity;
   DateTime? estimatedCompletion;
 
-  // Current values (user input)
+  // Current values
   String? currentPrinterId;
   String? currentTracingStudioId;
   String? currentTotalPrintingCost;
@@ -18,16 +18,6 @@ class PrintingJobUpdateFormModel {
   int? currentPrintQuantity;
   DateTime? currentEstimatedCompletion;
 
-  PrintingJobUpdateFormModel({
-    this.printerId,
-    this.tracingStudioId,
-    this.totalPrintingCost,
-    this.printingStatus,
-    this.printQuantity,
-    this.estimatedCompletion,
-  });
-
-  /// Create from current printing job data
   factory PrintingJobUpdateFormModel.fromCurrentData({
     String? printerId,
     String? tracingStudioId,
@@ -36,17 +26,27 @@ class PrintingJobUpdateFormModel {
     int? printQuantity,
     String? estimatedCompletion,
   }) {
-    return PrintingJobUpdateFormModel(
-      printerId: printerId,
-      tracingStudioId: tracingStudioId,
-      totalPrintingCost: totalPrintingCost,
-      printingStatus: PrintingStatusExtension.fromApiString(printingStatus),
-      printQuantity: printQuantity,
-      estimatedCompletion: estimatedCompletion != null ? DateTime.tryParse(estimatedCompletion) : null,
-    );
+    final model = PrintingJobUpdateFormModel._();
+    model.printerId = printerId;
+    model.tracingStudioId = tracingStudioId;
+    model.totalPrintingCost = totalPrintingCost;
+    model.printingStatus = PrintingStatusExtension.fromApiString(printingStatus);
+    model.printQuantity = printQuantity;
+    model.estimatedCompletion = estimatedCompletion != null ? DateTime.tryParse(estimatedCompletion) : null;
+
+    // Initialize current values with original values
+    model.currentPrinterId = model.printerId;
+    model.currentTracingStudioId = model.tracingStudioId;
+    model.currentTotalPrintingCost = model.totalPrintingCost;
+    model.currentPrintingStatus = model.printingStatus;
+    model.currentPrintQuantity = model.printQuantity;
+    model.currentEstimatedCompletion = model.estimatedCompletion;
+
+    return model;
   }
 
-  /// Check if form has any changes
+  PrintingJobUpdateFormModel._();
+
   bool get hasChanges {
     return _isValueChanged(printerId, currentPrinterId) ||
         _isValueChanged(tracingStudioId, currentTracingStudioId) ||
@@ -56,7 +56,43 @@ class PrintingJobUpdateFormModel {
         _isValueChanged(estimatedCompletion, currentEstimatedCompletion);
   }
 
-  /// Compare two values, treating null and empty string as same
+  PrintingJobUpdateRequest? toApiRequest() {
+    final request = <String, dynamic>{};
+    bool hasAnyChanges = false;
+
+    if (_isValueChanged(printerId, currentPrinterId)) {
+      request['printer_id'] = currentPrinterId;
+      hasAnyChanges = true;
+    }
+
+    if (_isValueChanged(tracingStudioId, currentTracingStudioId)) {
+      request['tracing_studio_id'] = currentTracingStudioId;
+      hasAnyChanges = true;
+    }
+
+    if (_isValueChanged(totalPrintingCost, currentTotalPrintingCost)) {
+      request['total_printing_cost'] = currentTotalPrintingCost;
+      hasAnyChanges = true;
+    }
+
+    if (_isValueChanged(printingStatus, currentPrintingStatus)) {
+      request['printing_status'] = currentPrintingStatus?.toApiString();
+      hasAnyChanges = true;
+    }
+
+    if (_isValueChanged(printQuantity, currentPrintQuantity)) {
+      request['print_quantity'] = currentPrintQuantity;
+      hasAnyChanges = true;
+    }
+
+    if (_isValueChanged(estimatedCompletion, currentEstimatedCompletion)) {
+      request['estimated_completion'] = currentEstimatedCompletion?.toIso8601String();
+      hasAnyChanges = true;
+    }
+
+    return hasAnyChanges ? PrintingJobUpdateRequest.fromJson(request) : null;
+  }
+
   bool _isValueChanged(dynamic original, dynamic current) {
     if (original == null && current == null) return false;
     if (original == null && current != null && current.toString().isEmpty) return false;
@@ -64,23 +100,5 @@ class PrintingJobUpdateFormModel {
     if (original == null && current != null && current.toString().isNotEmpty) return true;
     if (current == null && original != null && original.toString().isNotEmpty) return true;
     return original != current;
-  }
-
-  /// Clear all form data
-  void clear() {
-    printerId = null;
-    tracingStudioId = null;
-    totalPrintingCost = null;
-    printingStatus = null;
-    printQuantity = null;
-    estimatedCompletion = null;
-
-    // Reset current values
-    currentPrinterId = null;
-    currentTracingStudioId = null;
-    currentTotalPrintingCost = null;
-    currentPrintingStatus = null;
-    currentPrintQuantity = null;
-    currentEstimatedCompletion = null;
   }
 }

@@ -3,9 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:vsc_app/core/enums/printing_status.dart';
 import 'package:vsc_app/features/production/presentation/models/printing_job_update_form_model.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
+import 'package:vsc_app/features/orders/presentation/providers/printing_job_edit_form_provider.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
 
-class PrintingJobEditDialog extends StatefulWidget {
+class PrintingJobEditDialog extends StatelessWidget {
   final String printingJobId;
   final String currentPrinterId;
   final String currentTracingStudioId;
@@ -28,100 +29,75 @@ class PrintingJobEditDialog extends StatefulWidget {
   });
 
   @override
-  State<PrintingJobEditDialog> createState() => _PrintingJobEditDialogState();
-}
-
-class _PrintingJobEditDialogState extends State<PrintingJobEditDialog> {
-  late PrintingJobUpdateFormModel _formModel;
-  final _formKey = GlobalKey<FormState>();
-  final _totalPrintingCostController = TextEditingController();
-  final _printQuantityController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _formModel = PrintingJobUpdateFormModel.fromCurrentData(
-      printerId: widget.currentPrinterId.isNotEmpty ? widget.currentPrinterId : null,
-      tracingStudioId: widget.currentTracingStudioId.isNotEmpty ? widget.currentTracingStudioId : null,
-      totalPrintingCost: widget.currentTotalPrintingCost,
-      printingStatus: widget.currentPrintingStatus,
-      printQuantity: widget.currentPrintQuantity,
-      estimatedCompletion: widget.currentEstimatedCompletion,
-    );
-
-    // Populate current values with original values
-    _formModel.currentPrinterId = _formModel.printerId;
-    _formModel.currentTracingStudioId = _formModel.tracingStudioId;
-    _formModel.currentTotalPrintingCost = _formModel.totalPrintingCost;
-    _formModel.currentPrintingStatus = _formModel.printingStatus;
-    _formModel.currentPrintQuantity = _formModel.printQuantity;
-    _formModel.currentEstimatedCompletion = _formModel.estimatedCompletion;
-
-    // Set initial text for text controllers
-    _totalPrintingCostController.text = _formModel.currentTotalPrintingCost ?? '';
-    _printQuantityController.text = _formModel.currentPrintQuantity?.toString() ?? '';
-
-    // Fetch printers and tracing studios when dialog opens
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<OrderListProvider>().fetchPrinters();
-      context.read<OrderListProvider>().fetchTracingStudios();
-    });
-  }
-
-  @override
-  void dispose() {
-    _totalPrintingCostController.dispose();
-    _printQuantityController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Dialog(
-      child: Container(
-        width: 500,
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.print, color: Colors.green),
-                const SizedBox(width: 8),
-                const Text('Edit Printing Job', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                const Spacer(),
-                IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.close)),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Form(
-              key: _formKey,
+    return ChangeNotifierProvider(
+      create: (context) {
+        final provider = PrintingJobEditFormProvider();
+        provider.initializeForm(
+          currentPrinterId: currentPrinterId,
+          currentTracingStudioId: currentTracingStudioId,
+          currentTotalPrintingCost: currentTotalPrintingCost,
+          currentPrintingStatus: currentPrintingStatus,
+          currentPrintQuantity: currentPrintQuantity,
+          currentEstimatedCompletion: currentEstimatedCompletion,
+        );
+        return provider;
+      },
+      child: Consumer2<PrintingJobEditFormProvider, OrderListProvider>(
+        builder: (context, formProvider, orderProvider, child) {
+          // Fetch printers and tracing studios when dialog opens
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            orderProvider.fetchPrinters();
+            orderProvider.fetchTracingStudios();
+          });
+
+          return Dialog(
+            child: Container(
+              width: 500,
+              padding: const EdgeInsets.all(24),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildPrinterSection(),
-                  const SizedBox(height: 16),
-                  _buildTracingStudioSection(),
-                  const SizedBox(height: 16),
-                  _buildPrintingStatusSection(),
-                  const SizedBox(height: 16),
-                  _buildTotalPrintingCostSection(),
-                  const SizedBox(height: 16),
-                  _buildPrintQuantitySection(),
-                  const SizedBox(height: 16),
-                  _buildEstimatedCompletionSection(),
+                  Row(
+                    children: [
+                      const Icon(Icons.edit, color: Colors.green),
+                      const SizedBox(width: 8),
+                      const Text('Edit Printing Job', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      const Spacer(),
+                      IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.close)),
+                    ],
+                  ),
                   const SizedBox(height: 24),
-                  _buildActionButtons(),
+                  Form(
+                    child: Column(
+                      children: [
+                        _buildPrinterSection(context, formProvider, orderProvider),
+                        const SizedBox(height: 16),
+                        _buildTracingStudioSection(context, formProvider, orderProvider),
+                        const SizedBox(height: 16),
+                        _buildPrintingStatusSection(context, formProvider),
+                        const SizedBox(height: 16),
+                        _buildTotalPrintingCostSection(context, formProvider),
+                        const SizedBox(height: 16),
+                        _buildPrintQuantitySection(context, formProvider),
+                        const SizedBox(height: 16),
+                        _buildEstimatedCompletionSection(context, formProvider),
+                        const SizedBox(height: 24),
+                        _buildActionButtons(context, formProvider, orderProvider),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildPrinterSection() {
+  Widget _buildPrinterSection(BuildContext context, PrintingJobEditFormProvider formProvider, OrderListProvider orderProvider) {
     return Consumer<OrderListProvider>(
       builder: (context, provider, child) {
         if (provider.isLoadingPrinters) {
@@ -134,15 +110,13 @@ class _PrintingJobEditDialogState extends State<PrintingJobEditDialog> {
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: 'Printer', border: OutlineInputBorder(), hintText: 'Select a printer'),
-              value: _formModel.currentPrinterId,
+              value: formProvider.formModel.currentPrinterId,
               items: [
                 const DropdownMenuItem<String>(value: null, child: Text('--')),
                 ...provider.printers.map((printer) => DropdownMenuItem<String>(value: printer.id, child: Text(printer.name))),
               ],
               onChanged: (value) {
-                setState(() {
-                  _formModel.currentPrinterId = value;
-                });
+                formProvider.updatePrinterId(value);
               },
             ),
           ],
@@ -151,7 +125,7 @@ class _PrintingJobEditDialogState extends State<PrintingJobEditDialog> {
     );
   }
 
-  Widget _buildTracingStudioSection() {
+  Widget _buildTracingStudioSection(BuildContext context, PrintingJobEditFormProvider formProvider, OrderListProvider orderProvider) {
     return Consumer<OrderListProvider>(
       builder: (context, provider, child) {
         if (provider.isLoadingTracingStudios) {
@@ -164,15 +138,13 @@ class _PrintingJobEditDialogState extends State<PrintingJobEditDialog> {
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(labelText: 'Tracing Studio', border: OutlineInputBorder(), hintText: 'Select a tracing studio'),
-              value: _formModel.currentTracingStudioId,
+              value: formProvider.formModel.currentTracingStudioId,
               items: [
                 const DropdownMenuItem<String>(value: null, child: Text('--')),
                 ...provider.tracingStudios.map((studio) => DropdownMenuItem<String>(value: studio.id, child: Text(studio.name))),
               ],
               onChanged: (value) {
-                setState(() {
-                  _formModel.currentTracingStudioId = value;
-                });
+                formProvider.updateTracingStudioId(value);
               },
             ),
           ],
@@ -181,66 +153,60 @@ class _PrintingJobEditDialogState extends State<PrintingJobEditDialog> {
     );
   }
 
-  Widget _buildPrintingStatusSection() {
+  Widget _buildPrintingStatusSection(BuildContext context, PrintingJobEditFormProvider formProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
         DropdownButtonFormField<PrintingStatus>(
           decoration: const InputDecoration(labelText: 'Printing Status', border: OutlineInputBorder(), hintText: 'Select status'),
-          value: _formModel.currentPrintingStatus,
+          value: formProvider.formModel.currentPrintingStatus,
           items: PrintingStatus.values
               .map((status) => DropdownMenuItem<PrintingStatus>(value: status, child: Text(_formatPrintingStatus(status))))
               .toList(),
           onChanged: (value) {
-            setState(() {
-              _formModel.currentPrintingStatus = value;
-            });
+            formProvider.updatePrintingStatus(value);
           },
         ),
       ],
     );
   }
 
-  Widget _buildTotalPrintingCostSection() {
+  Widget _buildTotalPrintingCostSection(BuildContext context, PrintingJobEditFormProvider formProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
         TextFormField(
-          controller: _totalPrintingCostController,
+          controller: formProvider.totalPrintingCostController,
           decoration: const InputDecoration(labelText: 'Total Printing Cost', border: OutlineInputBorder()),
           keyboardType: TextInputType.number,
           onChanged: (value) {
-            setState(() {
-              _formModel.currentTotalPrintingCost = value.isNotEmpty ? value : null;
-            });
+            formProvider.updateTotalPrintingCost(value);
           },
         ),
       ],
     );
   }
 
-  Widget _buildPrintQuantitySection() {
+  Widget _buildPrintQuantitySection(BuildContext context, PrintingJobEditFormProvider formProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
         TextFormField(
-          controller: _printQuantityController,
+          controller: formProvider.printQuantityController,
           decoration: const InputDecoration(labelText: 'Print Quantity', border: OutlineInputBorder()),
           keyboardType: TextInputType.number,
           onChanged: (value) {
-            setState(() {
-              _formModel.currentPrintQuantity = int.tryParse(value);
-            });
+            formProvider.updatePrintQuantity(value);
           },
         ),
       ],
     );
   }
 
-  Widget _buildEstimatedCompletionSection() {
+  Widget _buildEstimatedCompletionSection(BuildContext context, PrintingJobEditFormProvider formProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -249,16 +215,14 @@ class _PrintingJobEditDialogState extends State<PrintingJobEditDialog> {
           onTap: () async {
             final date = await showDatePicker(
               context: context,
-              initialDate: _formModel.currentEstimatedCompletion ?? DateTime.now(),
+              initialDate: formProvider.formModel.currentEstimatedCompletion ?? DateTime.now(),
               firstDate: DateTime.now(),
               lastDate: DateTime.now().add(const Duration(days: 365)),
             );
             if (date != null) {
               final time = await showTimePicker(context: context, initialTime: TimeOfDay.now());
               if (time != null) {
-                setState(() {
-                  _formModel.currentEstimatedCompletion = DateTime(date.year, date.month, date.day, time.hour, time.minute);
-                });
+                formProvider.updateEstimatedCompletion(date, time);
               }
             }
           },
@@ -266,13 +230,13 @@ class _PrintingJobEditDialogState extends State<PrintingJobEditDialog> {
             decoration: InputDecoration(
               labelText: 'Estimated Completion',
               border: const OutlineInputBorder(),
-              hintText: _formModel.currentEstimatedCompletion != null
-                  ? '${_formModel.currentEstimatedCompletion!.day}/${_formModel.currentEstimatedCompletion!.month}/${_formModel.currentEstimatedCompletion!.year} ${_formModel.currentEstimatedCompletion!.hour}:${_formModel.currentEstimatedCompletion!.minute.toString().padLeft(2, '0')}'
+              hintText: formProvider.formModel.currentEstimatedCompletion != null
+                  ? '${formProvider.formModel.currentEstimatedCompletion!.day}/${formProvider.formModel.currentEstimatedCompletion!.month}/${formProvider.formModel.currentEstimatedCompletion!.year} ${formProvider.formModel.currentEstimatedCompletion!.hour}:${formProvider.formModel.currentEstimatedCompletion!.minute.toString().padLeft(2, '0')}'
                   : 'Select date and time',
             ),
             child: Text(
-              _formModel.currentEstimatedCompletion != null
-                  ? '${_formModel.currentEstimatedCompletion!.day}/${_formModel.currentEstimatedCompletion!.month}/${_formModel.currentEstimatedCompletion!.year} ${_formModel.currentEstimatedCompletion!.hour}:${_formModel.currentEstimatedCompletion!.minute.toString().padLeft(2, '0')}'
+              formProvider.formModel.currentEstimatedCompletion != null
+                  ? '${formProvider.formModel.currentEstimatedCompletion!.day}/${formProvider.formModel.currentEstimatedCompletion!.month}/${formProvider.formModel.currentEstimatedCompletion!.year} ${formProvider.formModel.currentEstimatedCompletion!.hour}:${formProvider.formModel.currentEstimatedCompletion!.minute.toString().padLeft(2, '0')}'
                   : 'Select date and time',
             ),
           ),
@@ -281,7 +245,7 @@ class _PrintingJobEditDialogState extends State<PrintingJobEditDialog> {
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(BuildContext context, PrintingJobEditFormProvider formProvider, OrderListProvider orderProvider) {
     return Consumer<OrderListProvider>(
       builder: (context, provider, child) {
         return Row(
@@ -290,7 +254,7 @@ class _PrintingJobEditDialogState extends State<PrintingJobEditDialog> {
             TextButton(onPressed: provider.isUpdatingPrintingJob ? null : () => Navigator.of(context).pop(), child: const Text('Cancel')),
             const SizedBox(width: 16),
             ElevatedButton(
-              onPressed: provider.isUpdatingPrintingJob ? null : _handleSubmit,
+              onPressed: provider.isUpdatingPrintingJob ? null : () => _handleSubmit(context, formProvider.formModel),
               child: provider.isUpdatingPrintingJob
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                   : const Text('Update'),
@@ -301,22 +265,19 @@ class _PrintingJobEditDialogState extends State<PrintingJobEditDialog> {
     );
   }
 
-  Future<void> _handleSubmit() async {
-    if (!_formModel.hasChanges) {
+  Future<void> _handleSubmit(BuildContext context, PrintingJobUpdateFormModel formModel) async {
+    if (!formModel.hasChanges) {
       SnackbarUtils.showWarning(context, 'No changes made');
       return;
     }
 
     final provider = context.read<OrderListProvider>();
-    await provider.updatePrintingJob(printingJobId: widget.printingJobId, formModel: _formModel);
+    await provider.updatePrintingJob(printingJobId: printingJobId, formModel: formModel);
 
-    if (provider.successMessage != null) {
-      SnackbarUtils.showSuccess(context, provider.successMessage!);
-      widget.onSuccess();
-      Navigator.of(context).pop();
-    } else if (provider.errorMessage != null) {
-      SnackbarUtils.showError(context, provider.errorMessage!);
-    }
+    // ✅ Success/error handling is now automatic via executeApiOperation
+    // If we reach here without error, it was successful
+    onSuccess();
+    Navigator.of(context).pop();
   }
 
   String _formatPrintingStatus(PrintingStatus status) {

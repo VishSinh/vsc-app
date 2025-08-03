@@ -1,21 +1,26 @@
+import 'package:flutter/material.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
 import 'package:vsc_app/features/cards/data/services/card_service.dart';
 import '../../data/services/order_service.dart';
-import '../services/order_mapper_service.dart';
 import '../models/order_form_models.dart';
+import 'package:vsc_app/core/validation/validation_result.dart';
 
 import 'package:vsc_app/features/cards/data/models/card_responses.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/core/models/customer_model.dart';
 
 /// Provider for managing order creation state and operations
-class OrderProvider extends BaseProvider {
+class OrderCreateProvider extends BaseProvider {
   final OrderService _orderService = OrderService();
 
   final OrderCreationFormViewModel _orderCreationForm = OrderCreationFormViewModel(orderItems: []);
 
   Customer? _selectedCustomer;
   CardViewModel? _currentCard;
+
+  // Delivery date/time state
+  DateTime? _selectedDeliveryDate;
+  TimeOfDay? _selectedDeliveryTime;
 
   final Map<String, CardResponse> _cardDetails = {};
 
@@ -27,6 +32,10 @@ class OrderProvider extends BaseProvider {
   String? get specialInstruction => _orderCreationForm.specialInstruction;
   Customer? get selectedCustomer => _selectedCustomer;
   CardViewModel? get currentCardViewModel => _currentCard;
+
+  // Getters for delivery date/time
+  DateTime? get selectedDeliveryDate => _selectedDeliveryDate;
+  TimeOfDay? get selectedDeliveryTime => _selectedDeliveryTime;
 
   // Getters for fetched data
   Map<String, CardResponse> get cardDetails => Map.unmodifiable(_cardDetails);
@@ -74,15 +83,11 @@ class OrderProvider extends BaseProvider {
   }
 
   // Card search method
-  Future<void> searchCardByBarcode(String barcode) async {
-    try {
-      setLoading(true);
-      clearMessages();
-
-      final response = await CardService().getCardByBarcode(barcode);
-
-      if (response.success) {
-        CardResponse card = response.data!;
+  Future<void> searchCardByBarcode(String barcode, {BuildContext? context}) async {
+    await executeApiOperation(
+      apiCall: () => CardService().getCardByBarcode(barcode),
+      onSuccess: (response) {
+        final card = response.data!;
         _currentCard = CardViewModel(
           id: card.id,
           vendorId: card.vendorId,
@@ -102,15 +107,12 @@ class OrderProvider extends BaseProvider {
         );
         addCardDetails(card.id, card);
         notifyListeners();
-        setSuccess('Card found: ${response.data!.barcode}');
-      } else {
-        setError(response.error?.message ?? 'Failed to search for card');
-      }
-    } catch (e) {
-      setError('Error searching for card: $e');
-    } finally {
-      setLoading(false);
-    }
+        return card;
+      },
+      context: context,
+      successMessage: 'Card found successfully',
+      errorMessage: 'Failed to search for card',
+    );
   }
 
   CardViewModel? getCardViewModelById(String cardId) {
@@ -146,27 +148,18 @@ class OrderProvider extends BaseProvider {
     return sellPrice * quantity;
   }
 
-  Future<bool> createOrder() async {
-    try {
-      setLoading(true);
-      clearMessages();
-
-      final response = await _orderService.createOrder(request: OrderMapperService.orderCreationFormToRequest(_orderCreationForm));
-
-      if (response.success) {
-        setSuccess('Order created successfully');
+  Future<bool> createOrder({BuildContext? context}) async {
+    final result = await executeApiOperation(
+      apiCall: () => _orderService.createOrder(request: _orderCreationForm.toApiRequest()),
+      onSuccess: (response) {
         reset();
-        return true;
-      } else {
-        setError(response.error?.message ?? 'Failed to create order');
-        return false;
-      }
-    } catch (e) {
-      setError('Error creating order: $e');
-      return false;
-    } finally {
-      setLoading(false);
-    }
+        return response.data!; // Return the MessageData
+      },
+      context: context,
+      successMessage: 'Order created successfully',
+      errorMessage: 'Failed to create order',
+    );
+    return result != null; // Convert to boolean
   }
 
   // Utility methods
@@ -180,16 +173,59 @@ class OrderProvider extends BaseProvider {
     _orderCreationForm.specialInstruction = null;
     _selectedCustomer = null;
     _currentCard = null;
+    _selectedDeliveryDate = null;
+    _selectedDeliveryTime = null;
     super.reset();
-  }
-
-  void setDeliveryDate(String deliveryDate) {
-    _orderCreationForm.deliveryDate = deliveryDate;
-    notifyListeners();
   }
 
   void setOrderName(String orderName) {
     _orderCreationForm.name = orderName;
     notifyListeners();
+  }
+
+  // Delivery date/time management methods
+  void setDeliveryDate(DateTime? date) {
+    _selectedDeliveryDate = date;
+    if (date != null && _selectedDeliveryTime != null) {
+      final deliveryDateTime = DateTime(date.year, date.month, date.day, _selectedDeliveryTime!.hour, _selectedDeliveryTime!.minute);
+      _orderCreationForm.deliveryDate = deliveryDateTime.toIso8601String();
+    }
+    notifyListeners();
+  }
+
+  void setDeliveryTime(TimeOfDay? time) {
+    _selectedDeliveryTime = time;
+    if (_selectedDeliveryDate != null && time != null) {
+      final deliveryDateTime = DateTime(
+        _selectedDeliveryDate!.year,
+        _selectedDeliveryDate!.month,
+        _selectedDeliveryDate!.day,
+        time.hour,
+        time.minute,
+      );
+      _orderCreationForm.deliveryDate = deliveryDateTime.toIso8601String();
+    }
+    notifyListeners();
+  }
+
+  void setDefaultDeliveryDateTime() {
+    _selectedDeliveryDate = DateTime.now().add(const Duration(days: 1));
+    _selectedDeliveryTime = const TimeOfDay(hour: 10, minute: 0);
+    if (_selectedDeliveryDate != null && _selectedDeliveryTime != null) {
+      final deliveryDateTime = DateTime(
+        _selectedDeliveryDate!.year,
+        _selectedDeliveryDate!.month,
+        _selectedDeliveryDate!.day,
+        _selectedDeliveryTime!.hour,
+        _selectedDeliveryTime!.minute,
+      );
+      _orderCreationForm.deliveryDate = deliveryDateTime.toIso8601String();
+    }
+    notifyListeners();
+  }
+
+  /// Validate the order creation form
+  ValidationResult validateOrderCreation() {
+    return _orderCreationForm.validate();
   }
 }
