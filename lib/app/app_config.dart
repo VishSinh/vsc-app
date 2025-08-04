@@ -81,29 +81,22 @@ class AppConfig {
   static TextStyle get buttonStyle => TextStyle(fontFamily: fontFamily, fontSize: fontSizeMd, fontWeight: fontWeightMedium, color: textColorPrimary);
 
   // Responsive Text Styles (Recommended for new code)
-  static TextStyle getResponsiveHeadline(BuildContext context) {
-    return Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: fontWeightBold, color: textColorPrimary) ?? headlineStyle;
-  }
+  static TextStyle getResponsiveHeadline(BuildContext context) =>
+      Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: fontWeightBold, color: textColorPrimary) ?? headlineStyle;
 
-  static TextStyle getResponsiveTitle(BuildContext context) {
-    return Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: fontWeightSemiBold, color: textColorPrimary) ?? titleStyle;
-  }
+  static TextStyle getResponsiveTitle(BuildContext context) =>
+      Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: fontWeightSemiBold, color: textColorPrimary) ?? titleStyle;
 
-  static TextStyle getResponsiveSubtitle(BuildContext context) {
-    return Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: fontWeightMedium, color: textColorSecondary) ?? subtitleStyle;
-  }
+  static TextStyle getResponsiveSubtitle(BuildContext context) =>
+      Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: fontWeightMedium, color: textColorSecondary) ?? subtitleStyle;
 
-  static TextStyle getResponsiveBody(BuildContext context) {
-    return Theme.of(context).textTheme.bodyMedium?.copyWith(color: textColorPrimary) ?? bodyStyle;
-  }
+  static TextStyle getResponsiveBody(BuildContext context) => Theme.of(context).textTheme.bodyMedium?.copyWith(color: textColorPrimary) ?? bodyStyle;
 
-  static TextStyle getResponsiveCaption(BuildContext context) {
-    return Theme.of(context).textTheme.bodySmall?.copyWith(color: textColorMuted) ?? captionStyle;
-  }
+  static TextStyle getResponsiveCaption(BuildContext context) =>
+      Theme.of(context).textTheme.bodySmall?.copyWith(color: textColorMuted) ?? captionStyle;
 
-  static TextStyle getResponsiveButton(BuildContext context) {
-    return Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: fontWeightMedium, color: textColorPrimary) ?? buttonStyle;
-  }
+  static TextStyle getResponsiveButton(BuildContext context) =>
+      Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: fontWeightMedium, color: textColorPrimary) ?? buttonStyle;
 
   // ================================ UI CONSTANTS ================================
 

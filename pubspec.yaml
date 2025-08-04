@@ -65,7 +65,8 @@ dependencies:
   # Utilities
   intl: ^0.20.2
   uuid: ^4.3.3
-  logger: ^2.6.1
+  logging: ^1.3.0
+  
   
   # Image Picker
   image_picker: ^1.0.7
@@ -80,6 +81,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  very_good_analysis: ^9.0.0
   
   # Code Generation
   build_runner: ^2.4.8

@@ -8,18 +8,14 @@ class VendorService extends ApiService {
   VendorService({super.dio, super.secureStorage});
 
   /// Get all vendors with pagination
-  Future<VendorListResponse> getVendors({int page = 1, int pageSize = AppConstants.defaultPageSize}) async {
-    return await executeRequest(() => get(AppConstants.vendorsEndpoint, queryParameters: {'page': page, 'page_size': pageSize}), (json) {
-      // The API returns { success: true, data: [...], error: {...} }
-      // handleResponse already extracts the data field, so json is the data array
-      if (json is List) {
-        return json.map((item) => Vendor.fromJson(item as Map<String, dynamic>)).toList();
-      } else {
-        // If data is not a list, return empty list
-        return <Vendor>[];
-      }
-    });
-  }
+  Future<VendorListResponse> getVendors({int page = 1, int pageSize = AppConstants.defaultPageSize}) async =>
+      await executeRequest(() => get(AppConstants.vendorsEndpoint, queryParameters: {'page': page, 'page_size': pageSize}), (json) {
+        if (json is List) {
+          return json.map((item) => Vendor.fromJson(item as Map<String, dynamic>)).toList();
+        } else {
+          return <Vendor>[];
+        }
+      });
 
   /// Create a new vendor
   Future<CreateVendorResponse> createVendor({required String name, required String phone}) async {
@@ -42,9 +38,8 @@ class VendorService extends ApiService {
   }
 
   /// Delete a vendor
-  Future<CreateVendorResponse> deleteVendor({required String id}) async {
-    return await executeRequest(() => delete('${AppConstants.vendorsEndpoint}$id/'), (json) => MessageData.fromJson(json as Map<String, dynamic>));
-  }
+  Future<CreateVendorResponse> deleteVendor({required String id}) async =>
+      await executeRequest(() => delete('${AppConstants.vendorsEndpoint}$id/'), (json) => MessageData.fromJson(json as Map<String, dynamic>));
 
   /// Get vendor by ID
   Future<ApiResponse<Vendor>> getVendorById(String id) async {

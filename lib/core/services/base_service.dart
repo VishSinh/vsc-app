@@ -68,9 +68,7 @@ abstract class ApiService {
   Dio get dio => _dio;
 
   /// HTTP GET request
-  Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) {
-    return _dio.get(path, queryParameters: queryParameters);
-  }
+  Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) => _dio.get(path, queryParameters: queryParameters);
 
   /// Filter out null values from request data
   dynamic _filterNullValues(dynamic data) {
@@ -87,24 +85,16 @@ abstract class ApiService {
   }
 
   /// HTTP POST request
-  Future<Response> post(String path, {dynamic data}) {
-    return _dio.post(path, data: _filterNullValues(data));
-  }
+  Future<Response> post(String path, {dynamic data}) => _dio.post(path, data: _filterNullValues(data));
 
   /// HTTP PUT request
-  Future<Response> put(String path, {dynamic data}) {
-    return _dio.put(path, data: _filterNullValues(data));
-  }
+  Future<Response> put(String path, {dynamic data}) => _dio.put(path, data: _filterNullValues(data));
 
   /// HTTP PATCH request
-  Future<Response> patch(String path, {dynamic data}) {
-    return _dio.patch(path, data: _filterNullValues(data));
-  }
+  Future<Response> patch(String path, {dynamic data}) => _dio.patch(path, data: _filterNullValues(data));
 
   /// HTTP DELETE request
-  Future<Response> delete(String path) {
-    return _dio.delete(path);
-  }
+  Future<Response> delete(String path) => _dio.delete(path);
 
   /// Execute a request and handle the response
   Future<ApiResponse<T>> executeRequest<T>(Future<Response> Function() request, T Function(dynamic json) fromJson) async {
@@ -239,9 +229,7 @@ abstract class ApiService {
   }
 
   /// Get stored user role
-  Future<String?> getUserRole() async {
-    return await _secureStorage.read(key: AppConstants.userRoleKey);
-  }
+  Future<String?> getUserRole() async => await _secureStorage.read(key: AppConstants.userRoleKey);
 
   /// Clear all stored data
   Future<void> clearAllData() async {

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:nested/nested.dart';
 import 'package:provider/provider.dart';
+import 'package:logging/logging.dart';
 
 import 'package:vsc_app/app/app_router.dart';
 import 'package:vsc_app/app/app_theme.dart';
+import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
@@ -13,6 +16,9 @@ import 'package:vsc_app/features/orders/presentation/providers/order_create_prov
 import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
 
 void main() {
+  // Initialize the logger
+  AppLogger.initialize(level: Level.ALL);
+
   // Initialize the app router
   AppRouter.initialize();
   runApp(const VSCApp());
@@ -22,27 +28,25 @@ class VSCApp extends StatelessWidget {
   const VSCApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => PermissionProvider()),
-        ChangeNotifierProvider(create: (context) => VendorProvider()),
-        ChangeNotifierProvider(create: (context) => CardProvider()),
-        ChangeNotifierProvider(create: (context) => CustomerProvider()),
-        ChangeNotifierProvider(create: (context) => OrderCreateProvider()),
-        ChangeNotifierProvider(create: (context) => OrderListProvider()),
-        ChangeNotifierProvider(create: (context) => AuthProvider()),
-      ],
-      child: AuthInitializer(child: _buildApp()),
-    );
-  }
+  Widget build(BuildContext context) => MultiProvider(
+    providers: <SingleChildWidget>[
+      ChangeNotifierProvider(create: (BuildContext context) => PermissionProvider()),
+      ChangeNotifierProvider(create: (BuildContext context) => VendorProvider()),
+      ChangeNotifierProvider(create: (BuildContext context) => CardProvider()),
+      ChangeNotifierProvider(create: (BuildContext context) => CustomerProvider()),
+      ChangeNotifierProvider(create: (BuildContext context) => OrderCreateProvider()),
+      ChangeNotifierProvider(create: (BuildContext context) => OrderListProvider()),
+      ChangeNotifierProvider(create: (BuildContext context) => AuthProvider()),
+    ],
+    child: AuthInitializer(child: _buildApp()),
+  );
 
   Widget _buildApp() {
     return ScreenUtilInit(
       designSize: const Size(375, 812), // iPhone X design size
       minTextAdapt: true,
       splitScreenMode: true,
-      builder: (context, child) {
+      builder: (BuildContext context, Widget? child) {
         return MaterialApp.router(
           title: 'Dashboard',
           theme: AppTheme.darkTheme,

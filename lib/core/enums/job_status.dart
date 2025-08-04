@@ -8,7 +8,5 @@ enum JobStatus {
   const JobStatus(this.value);
   final String value;
 
-  static JobStatus fromString(String value) {
-    return JobStatus.values.firstWhere((status) => status.value == value, orElse: () => JobStatus.pending);
-  }
+  static JobStatus fromString(String value) => JobStatus.values.firstWhere((status) => status.value == value, orElse: () => JobStatus.pending);
 }

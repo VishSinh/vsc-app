@@ -7,9 +7,7 @@ class OrderCalculationService {
   }
 
   /// Calculate total value (price * quantity)
-  static double calculateTotalValue(double sellPrice, int quantity) {
-    return sellPrice * quantity;
-  }
+  static double calculateTotalValue(double sellPrice, int quantity) => sellPrice * quantity;
 
   /// Calculate line item total for creation flow
   static double calculateLineItemTotalForCreation(
@@ -45,25 +43,19 @@ class OrderCalculationService {
   }
 
   /// Calculate total discount for creation flow
-  static double calculateTotalDiscountForCreation(List<Map<String, dynamic>> items) {
-    return items.fold(0.0, (total, item) {
-      final discountAmount = double.tryParse(item['discount_amount'] ?? '0') ?? 0.0;
-      final quantity = item['quantity'] ?? 0;
-      return total + (discountAmount * quantity);
-    });
-  }
+  static double calculateTotalDiscountForCreation(List<Map<String, dynamic>> items) => items.fold(0.0, (total, item) {
+    final discountAmount = double.tryParse(item['discount_amount'] ?? '0') ?? 0.0;
+    final quantity = item['quantity'] ?? 0;
+    return total + (discountAmount * quantity);
+  });
 
   /// Calculate total additional costs for creation flow
-  static double calculateTotalAdditionalCostsForCreation(List<Map<String, dynamic>> items) {
-    return items.fold(0.0, (total, item) {
-      final boxCost = double.tryParse(item['total_box_cost'] ?? '0') ?? 0.0;
-      final printingCost = double.tryParse(item['total_printing_cost'] ?? '0') ?? 0.0;
-      return total + boxCost + printingCost;
-    });
-  }
+  static double calculateTotalAdditionalCostsForCreation(List<Map<String, dynamic>> items) => items.fold(0.0, (total, item) {
+    final boxCost = double.tryParse(item['total_box_cost'] ?? '0') ?? 0.0;
+    final printingCost = double.tryParse(item['total_printing_cost'] ?? '0') ?? 0.0;
+    return total + boxCost + printingCost;
+  });
 
   /// Get order item count
-  static int getOrderItemCount(List<Map<String, dynamic>> items) {
-    return items.fold(0, (total, item) => total + (item['quantity'] as int? ?? 0));
-  }
+  static int getOrderItemCount(List<Map<String, dynamic>> items) => items.fold(0, (total, item) => total + (item['quantity'] as int? ?? 0));
 }

@@ -42,43 +42,25 @@ class LoggingConstants {
   static const String emojiPerformance = '⚡';
 
   // Log Templates
-  static String apiRequest(String endpoint, {String? method, Map<String, dynamic>? params}) {
-    return '$emojiApi $msgApiRequest: ${method ?? 'GET'} $endpoint${params != null ? ' with params: $params' : ''}';
-  }
+  static String apiRequest(String endpoint, {String? method, Map<String, dynamic>? params}) =>
+      '$emojiApi $msgApiRequest: ${method ?? 'GET'} $endpoint${params != null ? ' with params: $params' : ''}';
 
-  static String apiResponse(String endpoint, {bool success = true, String? data}) {
-    return '$emojiApi $msgApiResponse: ${success ? 'Success' : 'Error'} for $endpoint${data != null ? ' - $data' : ''}';
-  }
+  static String apiResponse(String endpoint, {bool success = true, String? data}) =>
+      '$emojiApi $msgApiResponse: ${success ? 'Success' : 'Error'} for $endpoint${data != null ? ' - $data' : ''}';
 
-  static String apiError(String endpoint, String error) {
-    return '$emojiError $msgApiError: $endpoint - $error';
-  }
+  static String apiError(String endpoint, String error) => '$emojiError $msgApiError: $endpoint - $error';
 
-  static String uiAction(String action, {String? details}) {
-    return '$emojiUi $msgUiAction: $action${details != null ? ' - $details' : ''}';
-  }
+  static String uiAction(String action, {String? details}) => '$emojiUi $msgUiAction: $action${details != null ? ' - $details' : ''}';
 
-  static String navigation(String from, String to) {
-    return '$emojiNavigation $msgNavigation: $from → $to';
-  }
+  static String navigation(String from, String to) => '$emojiNavigation $msgNavigation: $from → $to';
 
-  static String stateChange(String provider, String state) {
-    return '$emojiInfo $msgStateChange: $provider - $state';
-  }
+  static String stateChange(String provider, String state) => '$emojiInfo $msgStateChange: $provider - $state';
 
-  static String errorCaught(String context, String error) {
-    return '$emojiError $msgErrorCaught: $context - $error';
-  }
+  static String errorCaught(String context, String error) => '$emojiError $msgErrorCaught: $context - $error';
 
-  static String nullCheck(String context, String variable) {
-    return '$emojiWarning $msgNullCheck: $context - $variable is null';
-  }
+  static String nullCheck(String context, String variable) => '$emojiWarning $msgNullCheck: $context - $variable is null';
 
-  static String validation(String context, String result) {
-    return '$emojiInfo $msgValidation: $context - $result';
-  }
+  static String validation(String context, String result) => '$emojiInfo $msgValidation: $context - $result';
 
-  static String performance(String operation, String duration) {
-    return '$emojiPerformance $msgPerformance: $operation took $duration';
-  }
+  static String performance(String operation, String duration) => '$emojiPerformance $msgPerformance: $operation took $duration';
 }

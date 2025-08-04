@@ -65,58 +65,56 @@ class _CreateVendorDialogState extends State<CreateVendorDialog> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(widget.isEditing ? 'Edit Vendor' : 'Add New Vendor'),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Vendor Name', prefixIcon: Icon(Icons.business), hintText: 'Enter vendor name'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter vendor name';
-                }
-                if (value.length < AppConstants.minNameLength) {
-                  return 'Name must be at least ${AppConstants.minNameLength} characters';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: AppConfig.defaultPadding),
-            TextFormField(
-              controller: _phoneController,
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(labelText: 'Phone Number', prefixIcon: Icon(Icons.phone), hintText: 'Enter phone number'),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter phone number';
-                }
-                if (value.length < AppConstants.minPhoneLength) {
-                  return 'Please enter a valid phone number';
-                }
-                return null;
-              },
-            ),
-          ],
-        ),
+  Widget build(BuildContext context) => AlertDialog(
+    title: Text(widget.isEditing ? 'Edit Vendor' : 'Add New Vendor'),
+    content: Form(
+      key: _formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            controller: _nameController,
+            decoration: const InputDecoration(labelText: 'Vendor Name', prefixIcon: Icon(Icons.business), hintText: 'Enter vendor name'),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter vendor name';
+              }
+              if (value.length < AppConstants.minNameLength) {
+                return 'Name must be at least ${AppConstants.minNameLength} characters';
+              }
+              return null;
+            },
+          ),
+          SizedBox(height: AppConfig.defaultPadding),
+          TextFormField(
+            controller: _phoneController,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(labelText: 'Phone Number', prefixIcon: Icon(Icons.phone), hintText: 'Enter phone number'),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter phone number';
+              }
+              if (value.length < AppConstants.minPhoneLength) {
+                return 'Please enter a valid phone number';
+              }
+              return null;
+            },
+          ),
+        ],
       ),
-      actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(UITextConstants.cancel)),
-        Consumer<VendorProvider>(
-          builder: (context, vendorProvider, child) {
-            return ActionButton(
-              label: widget.isEditing ? 'Update' : UITextConstants.create,
-              icon: widget.isEditing ? Icons.edit : Icons.add,
-              onPressed: vendorProvider.isLoading ? null : _handleSubmit,
-              isLoading: vendorProvider.isLoading,
-            );
-          },
-        ),
-      ],
-    );
-  }
+    ),
+    actions: [
+      TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(UITextConstants.cancel)),
+      Consumer<VendorProvider>(
+        builder: (context, vendorProvider, child) {
+          return ActionButton(
+            label: widget.isEditing ? 'Update' : UITextConstants.create,
+            icon: widget.isEditing ? Icons.edit : Icons.add,
+            onPressed: vendorProvider.isLoading ? null : _handleSubmit,
+            isLoading: vendorProvider.isLoading,
+          );
+        },
+      ),
+    ],
+  );
 }

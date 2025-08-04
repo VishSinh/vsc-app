@@ -22,7 +22,201 @@ linter:
   # producing the lint.
   rules:
     # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+    prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+    prefer_expression_function_bodies: true # Makes functions more readable by using expression bodies
 
 # Additional information about this file can be found ata
 # https://dart.dev/guides/language/analysis-options
+
+# # ──────────────────────────────────────────────
+# # 🔍 Flutter Project Analysis Options
+# # 🔧 Strict + Highly Commented Template
+# # ──────────────────────────────────────────────
+
+# # This includes the official Flutter lint rules.
+# # You can replace it with `very_good_analysis` or others for stricter setups.
+# include: package:flutter_lints/flutter.yaml
+
+# analyzer:
+#   # Enable stricter type and generics checking
+#   language:
+#     strict-inference: true     # Require explicit type inference
+#     strict-raw-types: true     # Disallow untyped generics like List or Map
+
+#   # Exclude generated and irrelevant files
+#   exclude:
+#     - "**/*.g.dart"            # JSON serializable, Freezed, etc.
+#     - "**/*.freezed.dart"
+#     - "**/*.gen.dart"
+#     - "lib/generated_plugin_registrant.dart"
+#     - "**/*.config.dart"      # e.g., environment config
+#     - "**/*.injectable.dart"  # DI-generated files
+
+#   # Customize analyzer warnings/errors
+#   errors:
+#     unused_import: error
+#     unused_local_variable: warning
+#     dead_code: warning
+#     missing_return: error
+#     parameter_assignments: error
+#     always_specify_types: warning
+#     avoid_print: error
+#     prefer_final_locals: warning
+#     avoid_dynamic_calls: warning
+#     annotate_overrides: warning
+#     invalid_assignment: error
+#     implicit_dynamic_variable: warning
+#     implicit_dynamic_parameter: warning
+#     implicit_dynamic_method: warning
+#     implicit_dynamic_function: warning
+
+# linter:
+#   rules:
+#     # ────────────────
+#     # ✅ Code Style
+#     # ────────────────
+#     always_declare_return_types: true      # Require return types on functions
+#     always_specify_types: true             # No `var` unless obvious
+#     prefer_single_quotes: true             # Enforce single quotes
+#     file_names: true                       # file_name.dart, not FileName.dart
+#     sort_constructors_first: true
+#     sort_unnamed_constructors_first: true
+#     use_super_parameters: true             # Use `super.key` in constructors
+#     unnecessary_brace_in_string_interps: true
+
+#     # ────────────────
+#     # ✅ Safety Rules
+#     # ────────────────
+#     avoid_empty_else: true
+#     avoid_init_to_null: true
+#     avoid_null_checks_in_equality_operators: true
+#     avoid_returning_null: true
+#     avoid_returning_null_for_future: true
+#     avoid_slow_async_io: true
+#     null_closures: true
+#     prefer_final_fields: true
+#     prefer_final_locals: true
+#     prefer_const_constructors: true
+#     prefer_const_declarations: true
+#     prefer_const_literals_to_create_immutables: true
+
+#     # ────────────────
+#     # ❗ Error Prevention
+#     # ────────────────
+#     cancel_subscriptions: true             # Streams should always be closed
+#     close_sinks: true                      # Close StreamControllers
+#     control_flow_in_finally: true
+#     throw_in_finally: true
+#     empty_statements: true
+#     no_duplicate_case_values: true
+#     avoid_catches_without_on_clauses: true
+
+#     # ────────────────
+#     # 🧼 Clean Code
+#     # ────────────────
+#     unnecessary_lambdas: true
+#     prefer_expression_function_bodies: true
+#     prefer_interpolation_to_compose_strings: true
+#     prefer_typing_uninitialized_variables: true
+#     avoid_positional_boolean_parameters: true
+#     type_annotate_public_apis: true
+#     camel_case_types: true
+
+#     # ────────────────
+#     # 🐞 Flutter Specific
+#     # ────────────────
+#     avoid_print: true                      # Use logger instead
+#     use_key_in_widget_constructors: true
+#     sized_box_for_whitespace: true
+#     use_full_hex_values_for_flutter_colors: true
+#     unnecessary_null_checks: true
+#     prefer_const_constructors_in_immutables: true
+
+#     # ────────────────
+#     # 🧪 Test Rules
+#     # ────────────────
+#     test_types_in_equals: true
+#     avoid_redundant_argument_values: true
+
+#     # ────────────────
+#     # Optional Relaxations
+#     # ────────────────
+#     omit_local_variable_types: false       # Avoid `var` if unsure
+#     avoid_types_on_closure_parameters: false
+
+# # ──────────────────────────────────────────────
+# # 📦 Optional: Use strict community rulesets
+# # ──────────────────────────────────────────────
+
+# # include: package:very_good_analysis/analysis_options.yaml
+# # include: package:pedantic/analysis_options.yaml
+
+# # ──────────────────────────────────────────────
+# # 🚧 Optional (Commented Out): dart_code_metrics
+# # ──────────────────────────────────────────────
+
+# # dart_code_metrics:
+# #   metrics:
+# #     cyclomatic-complexity: 20
+# #     maximum-nesting-level: 5
+# #     number-of-parameters: 4
+# #     source-lines-of-code: 50
+# #   rules:
+# #     - prefer-final-fields
+# #     - avoid-non-null-assertion
+# #     - no-equal-then-else
+# #     - prefer-trailing-comma
+# #     - member-ordering-extended
+# #   anti-patterns:
+# #     - long-method
+# #     - god-class
+# #   directories:
+# #     - lib/data
+# #     - lib/presentation
+
+# # ──────────────────────────────────────────────
+# # 🛡️ Optional (Commented Out): custom_lint
+# # ──────────────────────────────────────────────
+
+# # Add dependency to pubspec.yaml:
+# # dependencies:
+# #   custom_lint:
+# #   your_custom_lint_plugin: # you must implement one
+
+# # Then:
+# # custom_lint:
+# #   enable_all_lint_rules: false
+# #   rules:
+# #     - enforce-presentation-layer-no-data-import
+# #     - enforce-formmodel-in-forms-only
+# #     - enforce-naming-conventions
+
+# # ──────────────────────────────────────────────
+# # 🗂️ (Optional) Custom Layer-Based Rules for Your Project
+# # ──────────────────────────────────────────────
+
+# # ❗ These are just ideas — to actually enforce these, you'd need `custom_lint`, `dart_code_metrics`, or a CI script.
+
+# # - lib/presentation:
+# #     - Should not import from lib/data/**
+# #     - Should only use ViewModels, FormModels, and widgets
+# #     - Should not use repositories directly (unless justified)
+# #     - Should avoid complex logic (flag methods > X lines)
+
+# # - lib/data:
+# #     - Should contain API models, services, repositories
+# #     - Should NOT contain Widgets or Flutter imports
+# #     - Should map to FormModel or ViewModel only through mappers
+# #     - Can only expose DTOs and request/response models
+
+# # Custom rule ideas:
+# # - flag if `lib/presentation` imports `lib/data/models/request/`
+# # - warn if `FormModel` used in widget's build method directly
+# # - enforce naming: `MyFormModel`, `MyViewModel`, `MyResponseModel`
+
+# # ──────────────────────────────────────────────
+# # ✅ Final Note
+# # ──────────────────────────────────────────────
+# # Start with this file fully commented, and uncomment line-by-line as you validate.
+# # This gives you total control without surprises during initial integration.
+

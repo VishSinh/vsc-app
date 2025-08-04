@@ -6,13 +6,11 @@ import 'package:vsc_app/core/services/base_service.dart';
 class PermissionService extends ApiService {
   PermissionService({super.dio, super.secureStorage});
 
-  Future<AllPermissionsResponse> getAllPermissions() async {
-    return await executeRequest(() => get(AppConstants.allPermissionsEndpoint), (json) => AllPermissionsData.fromJson(json as Map<String, dynamic>));
-  }
+  Future<AllPermissionsResponse> getAllPermissions() async =>
+      await executeRequest(() => get(AppConstants.allPermissionsEndpoint), (json) => AllPermissionsData.fromJson(json as Map<String, dynamic>));
 
-  Future<StaffPermissionsResponse> getStaffPermissions() async {
-    return await executeRequest(() => get(AppConstants.permissionsEndpoint), (json) => StaffPermissionsData.fromJson(json as Map<String, dynamic>));
-  }
+  Future<StaffPermissionsResponse> getStaffPermissions() async =>
+      await executeRequest(() => get(AppConstants.permissionsEndpoint), (json) => StaffPermissionsData.fromJson(json as Map<String, dynamic>));
 
   Future<void> cacheStaffPermissions(List<String> permissions) async {
     await secureStorage.write(key: AppConstants.staffPermissionsKey, value: jsonEncode(permissions));

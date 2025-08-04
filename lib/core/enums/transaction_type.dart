@@ -8,7 +8,6 @@ enum TransactionType {
   const TransactionType(this.value);
   final String value;
 
-  static TransactionType fromString(String value) {
-    return TransactionType.values.firstWhere((type) => type.value == value, orElse: () => TransactionType.adjustment);
-  }
+  static TransactionType fromString(String value) =>
+      TransactionType.values.firstWhere((type) => type.value == value, orElse: () => TransactionType.adjustment);
 }

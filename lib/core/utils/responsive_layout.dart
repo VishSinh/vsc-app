@@ -54,69 +54,63 @@ class ResponsiveLayout extends StatelessWidget {
     }
   }
 
-  Widget _buildDrawer(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  pageTitle ?? AppConfig.appName,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
-                ),
-                SizedBox(height: AppConfig.spacingSmall),
-                Text(
-                  destinations[selectedIndex].label,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8)),
-                ),
-              ],
-            ),
+  Widget _buildDrawer(BuildContext context) => Drawer(
+    child: ListView(
+      padding: EdgeInsets.zero,
+      children: [
+        DrawerHeader(
+          decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                pageTitle ?? AppConfig.appName,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+              ),
+              SizedBox(height: AppConfig.spacingSmall),
+              Text(
+                destinations[selectedIndex].label,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8)),
+              ),
+            ],
           ),
-          ...destinations.asMap().entries.map((entry) {
-            final index = entry.key;
-            final destination = entry.value;
-            return ListTile(
-              leading: destination.icon,
-              title: Text(destination.label),
-              selected: selectedIndex == index,
-              onTap: () => onDestinationSelected(index),
-            );
-          }),
-        ],
-      ),
-    );
-  }
+        ),
+        ...destinations.asMap().entries.map((entry) {
+          final index = entry.key;
+          final destination = entry.value;
+          return ListTile(
+            leading: destination.icon,
+            title: Text(destination.label),
+            selected: selectedIndex == index,
+            onTap: () => onDestinationSelected(index),
+          );
+        }),
+      ],
+    ),
+  );
 
-  Widget _buildNavigationRail(BuildContext context) {
-    return NavigationRail(
-      selectedIndex: selectedIndex,
-      onDestinationSelected: onDestinationSelected,
-      labelType: NavigationRailLabelType.all,
-      destinations: destinations.map((destination) {
-        return NavigationRailDestination(icon: destination.icon, selectedIcon: destination.icon, label: Text(destination.label));
-      }).toList(),
-    );
-  }
+  Widget _buildNavigationRail(BuildContext context) => NavigationRail(
+    selectedIndex: selectedIndex,
+    onDestinationSelected: onDestinationSelected,
+    labelType: NavigationRailLabelType.all,
+    destinations: destinations
+        .map((destination) => NavigationRailDestination(icon: destination.icon, selectedIcon: destination.icon, label: Text(destination.label)))
+        .toList(),
+  );
 
-  Widget _buildAppBar(BuildContext context) {
-    return Container(
-      height: 64,
-      padding: EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: Border(bottom: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.2))),
-      ),
-      child: Row(
-        children: [
-          Text(pageTitle ?? AppConfig.appName, style: Theme.of(context).textTheme.headlineSmall),
-          const Spacer(),
-          if (actions != null) ...actions!,
-        ],
-      ),
-    );
-  }
+  Widget _buildAppBar(BuildContext context) => Container(
+    height: 64,
+    padding: EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surface,
+      border: Border(bottom: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.2))),
+    ),
+    child: Row(
+      children: [
+        Text(pageTitle ?? AppConfig.appName, style: Theme.of(context).textTheme.headlineSmall),
+        const Spacer(),
+        if (actions != null) ...actions!,
+      ],
+    ),
+  );
 }

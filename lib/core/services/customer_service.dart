@@ -5,20 +5,15 @@ import 'package:vsc_app/core/constants/app_constants.dart';
 
 class CustomerService extends ApiService {
   /// Get customer by phone number
-  Future<ApiResponse<Customer>> getCustomerByPhone(String phone) async {
-    return await executeRequest(
-      () => get('${AppConstants.customersEndpoint}?phone=$phone'),
-      (json) => Customer.fromJson(json as Map<String, dynamic>),
-    );
-  }
+  Future<ApiResponse<Customer>> getCustomerByPhone(String phone) async =>
+      await executeRequest(() => get('${AppConstants.customersEndpoint}?phone=$phone'), (json) => Customer.fromJson(json as Map<String, dynamic>));
 
   /// Create a new customer
-  Future<ApiResponse<MessageData>> createCustomer({required String name, required String phone}) async {
-    final request = CreateCustomerRequest(name: name, phone: phone);
-
-    return await executeRequest(
-      () => post(AppConstants.customersEndpoint, data: request.toJson()),
-      (json) => MessageData.fromJson(json as Map<String, dynamic>),
-    );
-  }
+  Future<ApiResponse<MessageData>> createCustomer({required String name, required String phone}) async => await executeRequest(
+    () => post(
+      AppConstants.customersEndpoint,
+      data: CreateCustomerRequest(name: name, phone: phone).toJson(),
+    ),
+    (json) => MessageData.fromJson(json as Map<String, dynamic>),
+  );
 }
