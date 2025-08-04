@@ -14,6 +14,12 @@ class PrintingJobUpdateRequest {
   @JsonKey(name: 'total_printing_cost')
   final String? totalPrintingCost;
 
+  @JsonKey(name: 'total_printing_expense')
+  final String? totalPrintingExpense;
+
+  @JsonKey(name: 'total_tracing_expense')
+  final String? totalTracingExpense;
+
   @JsonKey(name: 'printing_status')
   final String? printingStatus;
 
@@ -27,6 +33,8 @@ class PrintingJobUpdateRequest {
     this.printerId,
     this.tracingStudioId,
     this.totalPrintingCost,
+    this.totalPrintingExpense,
+    this.totalTracingExpense,
     this.printingStatus,
     this.printQuantity,
     this.estimatedCompletion,

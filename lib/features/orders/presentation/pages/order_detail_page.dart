@@ -8,6 +8,8 @@ import 'package:vsc_app/features/orders/presentation/models/order_view_models.da
 import 'package:vsc_app/features/orders/presentation/widgets/box_order_edit_dialog.dart';
 import 'package:vsc_app/features/orders/presentation/widgets/printing_job_edit_dialog.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:vsc_app/features/production/presentation/models/box_order_view_model.dart';
+import 'package:vsc_app/features/production/presentation/models/printing_job_view_model.dart';
 
 class OrderDetailPage extends StatefulWidget {
   final String orderId;
@@ -421,7 +423,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       child: Row(
         children: [
           SizedBox(
-            width: 80,
+            width: 120,
             child: Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
           ),
           Text(value, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500)),
@@ -560,12 +562,12 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         boxOrderId: box.id,
         currentBoxMakerId: box.boxMakerId ?? '',
         currentTotalBoxCost: box.totalBoxCost,
+        currentTotalBoxExpense: box.totalBoxExpense,
         currentBoxStatus: box.boxStatus,
         currentBoxType: box.boxType.toString().split('.').last,
         currentBoxQuantity: box.boxQuantity,
         currentEstimatedCompletion: box.estimatedCompletion?.toIso8601String(),
         onSuccess: () {
-          // Reload order details after successful update
           _loadOrderDetails();
         },
       ),
@@ -580,6 +582,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         currentPrinterId: job.printerId ?? '',
         currentTracingStudioId: job.tracingStudioId ?? '',
         currentTotalPrintingCost: job.totalPrintingCost,
+        currentTotalPrintingExpense: job.totalPrintingExpense,
+        currentTotalTracingExpense: job.totalTracingExpense,
         currentPrintingStatus: job.printingStatus,
         currentPrintQuantity: job.printQuantity,
         currentEstimatedCompletion: job.estimatedCompletion?.toIso8601String(),

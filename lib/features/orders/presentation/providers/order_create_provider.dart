@@ -5,7 +5,6 @@ import '../../data/services/order_service.dart';
 import '../models/order_form_models.dart';
 import '../services/order_calculation_service.dart';
 
-import 'package:vsc_app/features/cards/data/models/card_responses.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/core/models/customer_model.dart';
 
@@ -22,7 +21,8 @@ class OrderCreateProvider extends BaseProvider {
   DateTime? _selectedDeliveryDate;
   TimeOfDay? _selectedDeliveryTime;
 
-  final Map<String, CardResponse> _cardDetails = {};
+  // Change _cardDetails to store CardViewModel
+  final Map<String, CardViewModel> _cardDetails = {};
 
   // Getters for form data
   List<OrderItemCreationFormViewModel> get orderItems => _orderCreationForm.orderItems ?? [];
@@ -38,7 +38,7 @@ class OrderCreateProvider extends BaseProvider {
   TimeOfDay? get selectedDeliveryTime => _selectedDeliveryTime;
 
   // Getters for fetched data
-  Map<String, CardResponse> get cardDetails => Map.unmodifiable(_cardDetails);
+  Map<String, CardViewModel> get cardDetails => Map.unmodifiable(_cardDetails);
 
   /// Add order item to the form
   void addOrderItem(OrderItemCreationFormViewModel item) {
@@ -70,7 +70,7 @@ class OrderCreateProvider extends BaseProvider {
   }
 
   /// Add card details to the cache
-  void addCardDetails(String cardId, CardResponse card) {
+  void addCardDetails(String cardId, CardViewModel card) {
     _cardDetails[cardId] = card;
     notifyListeners();
   }
@@ -92,54 +92,38 @@ class OrderCreateProvider extends BaseProvider {
   Future<void> searchCardByBarcode(String barcode) async {
     await executeApiOperation(
       apiCall: () => CardService().getCardByBarcode(barcode),
-      onSuccess: (response) {
-        final card = response.data!;
+      onSuccess: (dynamic response) {
+        final cardData = response.data as dynamic;
+        final double sellPriceNum = (cardData.sellPriceAsDouble as double?) ?? 0.0;
+        final double costPriceNum = (cardData.costPriceAsDouble as double?) ?? 0.0;
+        final double maxDiscountNum = (cardData.maxDiscountAsDouble as double?) ?? 0.0;
+        final int quantityNum = (cardData.quantity as int?) ?? 0;
         _currentCard = CardViewModel(
-          id: card.id,
-          vendorId: card.vendorId,
-          barcode: card.barcode,
-          sellPrice: card.sellPrice,
-          costPrice: card.costPrice,
-          maxDiscount: card.maxDiscount,
-          quantity: card.quantity,
-          image: card.image,
-          perceptualHash: card.perceptualHash,
-          isActive: card.isActive,
-          sellPriceAsDouble: card.sellPriceAsDouble,
-          costPriceAsDouble: card.costPriceAsDouble,
-          maxDiscountAsDouble: card.maxDiscountAsDouble,
-          profitMargin: OrderCalculationService.calculateProfitMargin(card.sellPriceAsDouble, card.costPriceAsDouble),
-          totalValue: OrderCalculationService.calculateTotalValue(card.sellPriceAsDouble, card.quantity),
+          id: (cardData.id as String?) ?? '',
+          vendorId: (cardData.vendorId as String?) ?? '',
+          barcode: (cardData.barcode as String?) ?? '',
+          sellPrice: sellPriceNum.toStringAsFixed(2),
+          costPrice: costPriceNum.toStringAsFixed(2),
+          maxDiscount: maxDiscountNum.toStringAsFixed(2),
+          quantity: quantityNum,
+          image: cardData.image as String,
+          perceptualHash: cardData.perceptualHash as String,
+          isActive: (cardData.isActive as bool?) ?? true,
+          sellPriceAsDouble: sellPriceNum,
+          costPriceAsDouble: costPriceNum,
+          maxDiscountAsDouble: maxDiscountNum,
+          profitMargin: OrderCalculationService.calculateProfitMargin(sellPriceNum, costPriceNum),
+          totalValue: OrderCalculationService.calculateTotalValue(sellPriceNum, quantityNum),
         );
-        addCardDetails(card.id, card);
-        notifyListeners();
-        return card;
+        addCardDetails(cardData.id as String, _currentCard!);
       },
       errorMessage: 'Failed to search for card',
     );
   }
 
+  // Simplify getCardViewModelById since we now store ViewModels
   CardViewModel? getCardViewModelById(String cardId) {
-    final cardResponse = _cardDetails[cardId];
-    if (cardResponse == null) return null;
-
-    return CardViewModel(
-      id: cardResponse.id,
-      vendorId: cardResponse.vendorId,
-      barcode: cardResponse.barcode,
-      sellPrice: cardResponse.sellPrice,
-      costPrice: cardResponse.costPrice,
-      maxDiscount: cardResponse.maxDiscount,
-      quantity: cardResponse.quantity,
-      image: cardResponse.image,
-      perceptualHash: cardResponse.perceptualHash,
-      isActive: cardResponse.isActive,
-      sellPriceAsDouble: cardResponse.sellPriceAsDouble,
-      costPriceAsDouble: cardResponse.costPriceAsDouble,
-      maxDiscountAsDouble: cardResponse.maxDiscountAsDouble,
-      profitMargin: OrderCalculationService.calculateProfitMargin(cardResponse.sellPriceAsDouble, cardResponse.costPriceAsDouble),
-      totalValue: OrderCalculationService.calculateTotalValue(cardResponse.sellPriceAsDouble, cardResponse.quantity),
-    );
+    return _cardDetails[cardId];
   }
 
   /// Create order with current form data

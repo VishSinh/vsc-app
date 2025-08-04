@@ -1,4 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:vsc_app/features/production/data/models/box_order_response.dart';
+import 'package:vsc_app/features/production/data/models/printing_job_response.dart';
 
 part 'order_responses.g.dart';
 
@@ -82,79 +84,4 @@ class OrderItemResponse {
 
   factory OrderItemResponse.fromJson(Map<String, dynamic> json) => _$OrderItemResponseFromJson(json);
   Map<String, dynamic> toJson() => _$OrderItemResponseToJson(this);
-}
-
-@JsonSerializable()
-class BoxOrderResponse {
-  final String id;
-  @JsonKey(name: 'order_item_id')
-  final String orderItemId;
-  @JsonKey(name: 'box_maker_id')
-  final String? boxMakerId;
-  @JsonKey(name: 'box_maker_name')
-  final String? boxMakerName;
-  @JsonKey(name: 'box_type')
-  final String boxType;
-  @JsonKey(name: 'box_quantity')
-  final int boxQuantity;
-  @JsonKey(name: 'total_box_cost')
-  final String totalBoxCost;
-  @JsonKey(name: 'box_status')
-  final String boxStatus;
-  @JsonKey(name: 'estimated_completion')
-  final String? estimatedCompletion;
-
-  const BoxOrderResponse({
-    required this.id,
-    required this.orderItemId,
-    this.boxMakerId,
-    this.boxMakerName,
-    required this.boxType,
-    required this.boxQuantity,
-    required this.totalBoxCost,
-    required this.boxStatus,
-    this.estimatedCompletion,
-  });
-
-  factory BoxOrderResponse.fromJson(Map<String, dynamic> json) => _$BoxOrderResponseFromJson(json);
-  Map<String, dynamic> toJson() => _$BoxOrderResponseToJson(this);
-}
-
-@JsonSerializable()
-class PrintingJobResponse {
-  final String id;
-  @JsonKey(name: 'order_item_id')
-  final String orderItemId;
-  @JsonKey(name: 'printer_id')
-  final String? printerId;
-  @JsonKey(name: 'printer_name')
-  final String? printerName;
-  @JsonKey(name: 'tracing_studio_id')
-  final String? tracingStudioId;
-  @JsonKey(name: 'tracing_studio_name')
-  final String? tracingStudioName;
-  @JsonKey(name: 'print_quantity')
-  final int printQuantity;
-  @JsonKey(name: 'total_printing_cost')
-  final String totalPrintingCost;
-  @JsonKey(name: 'printing_status')
-  final String printingStatus;
-  @JsonKey(name: 'estimated_completion')
-  final String? estimatedCompletion;
-
-  const PrintingJobResponse({
-    required this.id,
-    required this.orderItemId,
-    this.printerId,
-    this.printerName,
-    this.tracingStudioId,
-    this.tracingStudioName,
-    required this.printQuantity,
-    required this.totalPrintingCost,
-    required this.printingStatus,
-    this.estimatedCompletion,
-  });
-
-  factory PrintingJobResponse.fromJson(Map<String, dynamic> json) => _$PrintingJobResponseFromJson(json);
-  Map<String, dynamic> toJson() => _$PrintingJobResponseToJson(this);
 }

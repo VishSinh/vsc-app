@@ -11,6 +11,8 @@ class PrintingJobEditDialog extends StatelessWidget {
   final String currentPrinterId;
   final String currentTracingStudioId;
   final String currentTotalPrintingCost;
+  final String currentTotalPrintingExpense;
+  final String currentTotalTracingExpense;
   final String currentPrintingStatus;
   final int currentPrintQuantity;
   final String? currentEstimatedCompletion;
@@ -22,6 +24,8 @@ class PrintingJobEditDialog extends StatelessWidget {
     required this.currentPrinterId,
     required this.currentTracingStudioId,
     required this.currentTotalPrintingCost,
+    required this.currentTotalPrintingExpense,
+    required this.currentTotalTracingExpense,
     required this.currentPrintingStatus,
     required this.currentPrintQuantity,
     this.currentEstimatedCompletion,
@@ -37,6 +41,8 @@ class PrintingJobEditDialog extends StatelessWidget {
           currentPrinterId: currentPrinterId,
           currentTracingStudioId: currentTracingStudioId,
           currentTotalPrintingCost: currentTotalPrintingCost,
+          currentTotalPrintingExpense: currentTotalPrintingExpense,
+          currentTotalTracingExpense: currentTotalTracingExpense,
           currentPrintingStatus: currentPrintingStatus,
           currentPrintQuantity: currentPrintQuantity,
           currentEstimatedCompletion: currentEstimatedCompletion,
@@ -81,6 +87,10 @@ class PrintingJobEditDialog extends StatelessWidget {
                           _buildPrintingStatusSection(context, formProvider),
                           const SizedBox(height: 16),
                           _buildTotalPrintingCostSection(context, formProvider),
+                          const SizedBox(height: 16),
+                          _buildTotalPrintingExpenseSection(context, formProvider),
+                          const SizedBox(height: 16),
+                          _buildTotalTracingExpenseSection(context, formProvider),
                           const SizedBox(height: 16),
                           _buildPrintQuantitySection(context, formProvider),
                           const SizedBox(height: 16),
@@ -186,6 +196,40 @@ class PrintingJobEditDialog extends StatelessWidget {
           keyboardType: TextInputType.number,
           onChanged: (value) {
             formProvider.updateTotalPrintingCost(value);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTotalPrintingExpenseSection(BuildContext context, PrintingJobEditFormProvider formProvider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: formProvider.totalPrintingExpenseController,
+          decoration: const InputDecoration(labelText: 'Total Printing Expense', border: OutlineInputBorder()),
+          keyboardType: TextInputType.number,
+          onChanged: (value) {
+            formProvider.updateTotalPrintingExpense(value);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTotalTracingExpenseSection(BuildContext context, PrintingJobEditFormProvider formProvider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: formProvider.totalTracingExpenseController,
+          decoration: const InputDecoration(labelText: 'Total Tracing Expense', border: OutlineInputBorder()),
+          keyboardType: TextInputType.number,
+          onChanged: (value) {
+            formProvider.updateTotalTracingExpense(value);
           },
         ),
       ],

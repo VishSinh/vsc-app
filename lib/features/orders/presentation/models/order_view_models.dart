@@ -1,7 +1,8 @@
 // ViewModel classes for Order Response
 
-import 'package:vsc_app/core/enums/order_box_type.dart';
 import 'package:vsc_app/features/orders/data/models/order_responses.dart';
+import 'package:vsc_app/features/production/presentation/models/box_order_view_model.dart';
+import 'package:vsc_app/features/production/presentation/models/printing_job_view_model.dart';
 
 class OrderViewModel {
   final String id;
@@ -87,85 +88,6 @@ class OrderItemViewModel {
       requiresPrinting: response.requiresPrinting,
       boxOrders: response.boxOrders?.map((box) => BoxOrderViewModel.fromApiResponse(box)).toList(),
       printingJobs: response.printingJobs?.map((job) => PrintingJobViewModel.fromApiResponse(job)).toList(),
-    );
-  }
-}
-
-class BoxOrderViewModel {
-  final String id;
-  final String orderItemId;
-  final String? boxMakerId;
-  final String? boxMakerName;
-  final OrderBoxType boxType;
-  final int boxQuantity;
-  final String totalBoxCost;
-  final String boxStatus;
-  final DateTime? estimatedCompletion;
-
-  BoxOrderViewModel({
-    required this.id,
-    required this.orderItemId,
-    this.boxMakerId,
-    this.boxMakerName,
-    required this.boxType,
-    required this.boxQuantity,
-    required this.totalBoxCost,
-    required this.boxStatus,
-    this.estimatedCompletion,
-  });
-
-  factory BoxOrderViewModel.fromApiResponse(BoxOrderResponse response) {
-    return BoxOrderViewModel(
-      id: response.id,
-      orderItemId: response.orderItemId,
-      boxMakerId: response.boxMakerId,
-      boxMakerName: response.boxMakerName,
-      boxType: OrderBoxTypeExtension.fromApiString(response.boxType) ?? OrderBoxType.folding,
-      boxQuantity: response.boxQuantity,
-      totalBoxCost: response.totalBoxCost,
-      boxStatus: response.boxStatus,
-      estimatedCompletion: response.estimatedCompletion != null ? DateTime.parse(response.estimatedCompletion!) : null,
-    );
-  }
-}
-
-class PrintingJobViewModel {
-  final String id;
-  final String orderItemId;
-  final String? printerId;
-  final String? printerName;
-  final String? tracingStudioId;
-  final String? tracingStudioName;
-  final int printQuantity;
-  final String totalPrintingCost;
-  final String printingStatus;
-  final DateTime? estimatedCompletion;
-
-  PrintingJobViewModel({
-    required this.id,
-    required this.orderItemId,
-    this.printerId,
-    this.printerName,
-    this.tracingStudioId,
-    this.tracingStudioName,
-    required this.printQuantity,
-    required this.totalPrintingCost,
-    required this.printingStatus,
-    this.estimatedCompletion,
-  });
-
-  factory PrintingJobViewModel.fromApiResponse(PrintingJobResponse response) {
-    return PrintingJobViewModel(
-      id: response.id,
-      orderItemId: response.orderItemId,
-      printerId: response.printerId,
-      printerName: response.printerName,
-      tracingStudioId: response.tracingStudioId,
-      tracingStudioName: response.tracingStudioName,
-      printQuantity: response.printQuantity,
-      totalPrintingCost: response.totalPrintingCost,
-      printingStatus: response.printingStatus,
-      estimatedCompletion: response.estimatedCompletion != null ? DateTime.parse(response.estimatedCompletion!) : null,
     );
   }
 }

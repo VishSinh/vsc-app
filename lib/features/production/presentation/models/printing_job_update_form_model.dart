@@ -6,6 +6,8 @@ class PrintingJobUpdateFormModel {
   String? printerId;
   String? tracingStudioId;
   String? totalPrintingCost;
+  String? totalPrintingExpense;
+  String? totalTracingExpense;
   PrintingStatus? printingStatus;
   int? printQuantity;
   DateTime? estimatedCompletion;
@@ -14,6 +16,8 @@ class PrintingJobUpdateFormModel {
   String? currentPrinterId;
   String? currentTracingStudioId;
   String? currentTotalPrintingCost;
+  String? currentTotalPrintingExpense;
+  String? currentTotalTracingExpense;
   PrintingStatus? currentPrintingStatus;
   int? currentPrintQuantity;
   DateTime? currentEstimatedCompletion;
@@ -22,6 +26,8 @@ class PrintingJobUpdateFormModel {
     String? printerId,
     String? tracingStudioId,
     String? totalPrintingCost,
+    String? totalPrintingExpense,
+    String? totalTracingExpense,
     String? printingStatus,
     int? printQuantity,
     String? estimatedCompletion,
@@ -30,6 +36,8 @@ class PrintingJobUpdateFormModel {
     model.printerId = printerId;
     model.tracingStudioId = tracingStudioId;
     model.totalPrintingCost = totalPrintingCost;
+    model.totalPrintingExpense = totalPrintingExpense;
+    model.totalTracingExpense = totalTracingExpense;
     model.printingStatus = PrintingStatusExtension.fromApiString(printingStatus);
     model.printQuantity = printQuantity;
     model.estimatedCompletion = estimatedCompletion != null ? DateTime.tryParse(estimatedCompletion) : null;
@@ -38,6 +46,8 @@ class PrintingJobUpdateFormModel {
     model.currentPrinterId = model.printerId;
     model.currentTracingStudioId = model.tracingStudioId;
     model.currentTotalPrintingCost = model.totalPrintingCost;
+    model.currentTotalPrintingExpense = model.totalPrintingExpense;
+    model.currentTotalTracingExpense = model.totalTracingExpense;
     model.currentPrintingStatus = model.printingStatus;
     model.currentPrintQuantity = model.printQuantity;
     model.currentEstimatedCompletion = model.estimatedCompletion;
@@ -51,6 +61,8 @@ class PrintingJobUpdateFormModel {
     return _isValueChanged(printerId, currentPrinterId) ||
         _isValueChanged(tracingStudioId, currentTracingStudioId) ||
         _isValueChanged(totalPrintingCost, currentTotalPrintingCost) ||
+        _isValueChanged(totalPrintingExpense, currentTotalPrintingExpense) ||
+        _isValueChanged(totalTracingExpense, currentTotalTracingExpense) ||
         _isValueChanged(printingStatus, currentPrintingStatus) ||
         _isValueChanged(printQuantity, currentPrintQuantity) ||
         _isValueChanged(estimatedCompletion, currentEstimatedCompletion);
@@ -72,6 +84,16 @@ class PrintingJobUpdateFormModel {
 
     if (_isValueChanged(totalPrintingCost, currentTotalPrintingCost)) {
       request['total_printing_cost'] = currentTotalPrintingCost;
+      hasAnyChanges = true;
+    }
+
+    if (_isValueChanged(totalPrintingExpense, currentTotalPrintingExpense)) {
+      request['total_printing_expense'] = currentTotalPrintingExpense;
+      hasAnyChanges = true;
+    }
+
+    if (_isValueChanged(totalTracingExpense, currentTotalTracingExpense)) {
+      request['total_tracing_expense'] = currentTotalTracingExpense;
       hasAnyChanges = true;
     }
 

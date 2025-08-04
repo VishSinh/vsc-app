@@ -11,6 +11,9 @@ class BoxOrderUpdateRequest {
   @JsonKey(name: 'total_box_cost')
   final String? totalBoxCost;
 
+  @JsonKey(name: 'total_box_expense')
+  final String? totalBoxExpense;
+
   @JsonKey(name: 'box_status')
   final String? boxStatus;
 
@@ -23,7 +26,15 @@ class BoxOrderUpdateRequest {
   @JsonKey(name: 'estimated_completion')
   final String? estimatedCompletion;
 
-  const BoxOrderUpdateRequest({this.boxMakerId, this.totalBoxCost, this.boxStatus, this.boxType, this.boxQuantity, this.estimatedCompletion});
+  const BoxOrderUpdateRequest({
+    this.boxMakerId,
+    this.totalBoxCost,
+    this.totalBoxExpense,
+    this.boxStatus,
+    this.boxType,
+    this.boxQuantity,
+    this.estimatedCompletion,
+  });
 
   factory BoxOrderUpdateRequest.fromJson(Map<String, dynamic> json) => _$BoxOrderUpdateRequestFromJson(json);
 

@@ -1,0 +1,94 @@
+Flutter Codebase Audit Report
+=============================
+
+Date: 2025-08-04
+Audited by: Automated Clean-Architecture Auditor
+Target repo: vsc_app (2-layer Clean Architecture)
+
+------------------------------------------------------------------------
+Structure Violations
+------------------------------------------------------------------------
+1. Presentation-level classes importing Data-layer DTOs directly (violates separation of layers):
+   • lib/features/orders/presentation/services/order_utility_service.dart – line 0
+   • lib/features/orders/presentation/services/order_price_calculator_service.dart – lines 0-2
+   • lib/features/orders/presentation/models/order_form_models.dart – line 1 (FormModel allowed, but still accesses DTO directly)
+   • lib/features/orders/presentation/models/order_view_models.dart – line 2 (ViewModel allowed, ok)
+   • lib/features/orders/presentation/providers/order_create_provider.dart – line 7 ← Provider must not depend on DTOs; map through ViewModel instead.
+   • All production presentation *view_model* files (printer_view_model.dart, box_maker_view_model.dart, etc.) import response DTOs directly – OK for ViewModel, but confirm no other presentation classes use those DTOs downstream.
+   • production_provider.dart – commented imports (lines 3-4) still reference DTOs → remove or move logic to data layer.
+
+   Fix:  Providers / services inside presentation should receive already-mapped ViewModels / FormModels. Keep DTO usage inside models only.
+
+2. Service-like utilities placed in presentation layer:
+   • order_price_calculator_service.dart, order_utility_service.dart (in presentation/services) contain heavy business logic and reference DTOs.  These belong in data layer or a separate shared service layer; presentation should only orchestrate.
+
+3. Mapping logic leakage:
+   • Several ViewModel/FormModel files perform mapping but external helpers (`*_calculation_service.dart`) repeat mapping logic. Consolidate mapping in model files’ `.fromResponse()` / `.toRequest()`.
+
+------------------------------------------------------------------------
+Constants Violations
+------------------------------------------------------------------------
+Hard-coded paddings / colors / strings found (sample):
+   • lib/features/orders/presentation/widgets/box_order_edit_dialog.dart – line 62 `EdgeInsets.all(24)`
+   • lib/features/orders/presentation/pages/order_detail_page.dart – multiple lines (89, 104, 114, 123, 148, 173, 228, 316, 376) `EdgeInsets.all(16 / 12)` & `Colors.blue`
+   • lib/features/cards/presentation/pages/inventory_page.dart – line 271 `EdgeInsets.all(16.0)`
+   • Similar hard-coded values across pages.
+
+   Fix:  Replace literals with AppConfig.spacing*, AppColors.*, UITextConstants.*. Create new constants if missing.
+
+------------------------------------------------------------------------
+Provider Problems
+------------------------------------------------------------------------
+1. Single provider handling multiple responsibilities:
+   • order_create_provider.dart (>400 LOC) handles search, validation, price calc & submission – split into smaller providers (e.g., OrderFormProvider, PriceProvider).
+
+2. Unused / commented code:
+   • production_provider.dart lines 3-4 – outdated imports.
+   • Search indicates several providers export methods never referenced outside (e.g., _resetFlags in card_provider.dart). Run `dart analyze` & remove.
+
+3. Providers importing DTOs (see Structure section) – relocate conversion logic into models.
+
+------------------------------------------------------------------------
+Unused Code
+------------------------------------------------------------------------
+• Commented imports (production_provider.dart)
+• Dead Guide file deleted (orders/CLEAN_ARCHITECTURE_GUIDE.md) still referenced in README → update links.
+• Likely orphan widgets (e.g., `similar_card_tile.dart` duplicates list item code but unused).  Run coverage to confirm.
+
+------------------------------------------------------------------------
+Code Duplication
+------------------------------------------------------------------------
+• Duplicate price / tax calculation in both `card_calculation_service.dart` and `order_price_calculator_service.dart` – extract to shared `core/services/price_utils.dart`.
+• Repeated customer info rows across order & card pages – promote to reusable widget in `core/widgets/`.
+• Multiple identical loading buttons across features – unify into `LoadingIconButton` inside shared widgets.
+
+------------------------------------------------------------------------
+UI Anti-patterns
+------------------------------------------------------------------------
+1. setState() usage – violates stateless widget policy:
+   • administration_page.dart (lines 100,128,221)
+   • production_page.dart (81,176,191)
+   • cards/create_card_page.dart (405)
+   • orders/orders_page.dart (71,99)
+   • auth/login_page.dart (125) etc.
+   Fix:  Replace with Provider / ChangeNotifier or pass callbacks + watched state.
+
+2. SpinnerKit DoubleBounce used directly with hard-coded colors:
+   • order_detail_page.dart line 84 `Colors.blue`
+   • Prefer centralized SharedWidgets.loadingIndicator() already exists.
+
+3. Missing `const` constructors & widgets in many list builders – affects perf.
+
+------------------------------------------------------------------------
+Suggestions & Refactor Recommendations
+------------------------------------------------------------------------
+• Enforce lints: enable `prefer_const_constructors`, `avoid_set_state` in analysis_options.yaml.
+• Create `Spacing` extension or constants to replace raw EdgeInsets.
+• Move *_calculation_service.dart files to `core/services/` (or data layer if they rely on DTOs) and inject them into providers.
+• Introduce `BaseFormProvider` abstract class to share form validation / submission patterns.
+• Generate freezed/JsonSerializable DTOs & ViewModels to reduce manual mapping & duplication.
+• Write unit tests for each provider; current coverage is low.
+• Run `dart pub run dependency_validator` to find unused dependencies & imports.
+
+------------------------------------------------------------------------
+END OF REPORT

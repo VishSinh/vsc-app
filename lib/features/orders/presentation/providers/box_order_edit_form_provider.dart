@@ -7,6 +7,7 @@ import 'package:vsc_app/features/production/presentation/models/box_order_update
 class BoxOrderEditFormProvider extends ChangeNotifier {
   late BoxOrderUpdateFormModel _formModel;
   final TextEditingController totalBoxCostController = TextEditingController();
+  final TextEditingController totalBoxExpenseController = TextEditingController();
   final TextEditingController boxQuantityController = TextEditingController();
 
   BoxOrderUpdateFormModel get formModel => _formModel;
@@ -14,6 +15,7 @@ class BoxOrderEditFormProvider extends ChangeNotifier {
   void initializeForm({
     required String currentBoxMakerId,
     required String currentTotalBoxCost,
+    required String currentTotalBoxExpense,
     required String currentBoxStatus,
     required String currentBoxType,
     required int currentBoxQuantity,
@@ -22,6 +24,7 @@ class BoxOrderEditFormProvider extends ChangeNotifier {
     _formModel = BoxOrderUpdateFormModel.fromCurrentData(
       boxMakerId: currentBoxMakerId.isNotEmpty ? currentBoxMakerId : null,
       totalBoxCost: currentTotalBoxCost,
+      totalBoxExpense: currentTotalBoxExpense,
       boxStatus: currentBoxStatus,
       boxType: currentBoxType,
       boxQuantity: currentBoxQuantity,
@@ -30,6 +33,7 @@ class BoxOrderEditFormProvider extends ChangeNotifier {
 
     // Set initial text for text controllers
     totalBoxCostController.text = _formModel.currentTotalBoxCost ?? '';
+    totalBoxExpenseController.text = _formModel.currentTotalBoxExpense ?? '';
     boxQuantityController.text = _formModel.currentBoxQuantity?.toString() ?? '';
   }
 
@@ -50,6 +54,11 @@ class BoxOrderEditFormProvider extends ChangeNotifier {
 
   void updateTotalBoxCost(String value) {
     _formModel.currentTotalBoxCost = value.isNotEmpty ? value : null;
+    notifyListeners();
+  }
+
+  void updateTotalBoxExpense(String value) {
+    _formModel.currentTotalBoxExpense = value.isNotEmpty ? value : null;
     notifyListeners();
   }
 

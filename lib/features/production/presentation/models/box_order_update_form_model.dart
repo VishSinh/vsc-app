@@ -6,6 +6,7 @@ class BoxOrderUpdateFormModel {
   // Original values
   String? boxMakerId;
   String? totalBoxCost;
+  String? totalBoxExpense;
   BoxStatus? boxStatus;
   OrderBoxType? boxType;
   int? boxQuantity;
@@ -14,6 +15,7 @@ class BoxOrderUpdateFormModel {
   // Current values
   String? currentBoxMakerId;
   String? currentTotalBoxCost;
+  String? currentTotalBoxExpense;
   BoxStatus? currentBoxStatus;
   OrderBoxType? currentBoxType;
   int? currentBoxQuantity;
@@ -22,6 +24,7 @@ class BoxOrderUpdateFormModel {
   factory BoxOrderUpdateFormModel.fromCurrentData({
     String? boxMakerId,
     String? totalBoxCost,
+    String? totalBoxExpense,
     String? boxStatus,
     String? boxType,
     int? boxQuantity,
@@ -30,6 +33,7 @@ class BoxOrderUpdateFormModel {
     final model = BoxOrderUpdateFormModel._();
     model.boxMakerId = boxMakerId;
     model.totalBoxCost = totalBoxCost;
+    model.totalBoxExpense = totalBoxExpense;
     model.boxStatus = BoxStatusExtension.fromApiString(boxStatus);
     model.boxType = OrderBoxTypeExtension.fromApiString(boxType);
     model.boxQuantity = boxQuantity;
@@ -38,6 +42,7 @@ class BoxOrderUpdateFormModel {
     // Initialize current values with original values
     model.currentBoxMakerId = model.boxMakerId;
     model.currentTotalBoxCost = model.totalBoxCost;
+    model.currentTotalBoxExpense = model.totalBoxExpense;
     model.currentBoxStatus = model.boxStatus;
     model.currentBoxType = model.boxType;
     model.currentBoxQuantity = model.boxQuantity;
@@ -51,6 +56,7 @@ class BoxOrderUpdateFormModel {
   bool get hasChanges {
     return _isValueChanged(boxMakerId, currentBoxMakerId) ||
         _isValueChanged(totalBoxCost, currentTotalBoxCost) ||
+        _isValueChanged(totalBoxExpense, currentTotalBoxExpense) ||
         _isValueChanged(boxStatus, currentBoxStatus) ||
         _isValueChanged(boxType, currentBoxType) ||
         _isValueChanged(boxQuantity, currentBoxQuantity) ||
@@ -68,6 +74,11 @@ class BoxOrderUpdateFormModel {
 
     if (_isValueChanged(totalBoxCost, currentTotalBoxCost)) {
       request['total_box_cost'] = currentTotalBoxCost;
+      hasAnyChanges = true;
+    }
+
+    if (_isValueChanged(totalBoxExpense, currentTotalBoxExpense)) {
+      request['total_box_expense'] = currentTotalBoxExpense;
       hasAnyChanges = true;
     }
 

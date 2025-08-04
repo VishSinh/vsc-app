@@ -11,6 +11,7 @@ class BoxOrderEditDialog extends StatelessWidget {
   final String boxOrderId;
   final String currentBoxMakerId;
   final String currentTotalBoxCost;
+  final String currentTotalBoxExpense;
   final String currentBoxStatus;
   final String currentBoxType;
   final int currentBoxQuantity;
@@ -22,6 +23,7 @@ class BoxOrderEditDialog extends StatelessWidget {
     required this.boxOrderId,
     required this.currentBoxMakerId,
     required this.currentTotalBoxCost,
+    required this.currentTotalBoxExpense,
     required this.currentBoxStatus,
     required this.currentBoxType,
     required this.currentBoxQuantity,
@@ -37,6 +39,7 @@ class BoxOrderEditDialog extends StatelessWidget {
         provider.initializeForm(
           currentBoxMakerId: currentBoxMakerId,
           currentTotalBoxCost: currentTotalBoxCost,
+          currentTotalBoxExpense: currentTotalBoxExpense,
           currentBoxStatus: currentBoxStatus,
           currentBoxType: currentBoxType,
           currentBoxQuantity: currentBoxQuantity,
@@ -82,6 +85,8 @@ class BoxOrderEditDialog extends StatelessWidget {
                             _buildBoxTypeSection(context, formProvider),
                             const SizedBox(height: 16),
                             _buildTotalBoxCostSection(context, formProvider),
+                            const SizedBox(height: 16),
+                            _buildTotalBoxExpenseSection(context, formProvider),
                             const SizedBox(height: 16),
                             _buildBoxQuantitySection(context, formProvider),
                             const SizedBox(height: 16),
@@ -175,6 +180,23 @@ class BoxOrderEditDialog extends StatelessWidget {
           keyboardType: TextInputType.number,
           onChanged: (value) {
             formProvider.updateTotalBoxCost(value);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTotalBoxExpenseSection(BuildContext context, BoxOrderEditFormProvider formProvider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: formProvider.totalBoxExpenseController,
+          decoration: const InputDecoration(labelText: 'Total Box Expense', border: OutlineInputBorder()),
+          keyboardType: TextInputType.number,
+          onChanged: (value) {
+            formProvider.updateTotalBoxExpense(value);
           },
         ),
       ],

@@ -7,6 +7,8 @@ class PrintingJobEditFormProvider extends ChangeNotifier {
   late PrintingJobUpdateFormModel _formModel;
   final TextEditingController totalPrintingCostController = TextEditingController();
   final TextEditingController printQuantityController = TextEditingController();
+  final TextEditingController totalPrintingExpenseController = TextEditingController();
+  final TextEditingController totalTracingExpenseController = TextEditingController();
 
   PrintingJobUpdateFormModel get formModel => _formModel;
 
@@ -14,6 +16,8 @@ class PrintingJobEditFormProvider extends ChangeNotifier {
     required String currentPrinterId,
     required String currentTracingStudioId,
     required String currentTotalPrintingCost,
+    required String currentTotalPrintingExpense,
+    required String currentTotalTracingExpense,
     required String currentPrintingStatus,
     required int currentPrintQuantity,
     String? currentEstimatedCompletion,
@@ -22,6 +26,8 @@ class PrintingJobEditFormProvider extends ChangeNotifier {
       printerId: currentPrinterId.isNotEmpty ? currentPrinterId : null,
       tracingStudioId: currentTracingStudioId.isNotEmpty ? currentTracingStudioId : null,
       totalPrintingCost: currentTotalPrintingCost,
+      totalPrintingExpense: currentTotalPrintingExpense,
+      totalTracingExpense: currentTotalTracingExpense,
       printingStatus: currentPrintingStatus,
       printQuantity: currentPrintQuantity,
       estimatedCompletion: currentEstimatedCompletion,
@@ -30,6 +36,8 @@ class PrintingJobEditFormProvider extends ChangeNotifier {
     // Set initial text for text controllers
     totalPrintingCostController.text = _formModel.currentTotalPrintingCost ?? '';
     printQuantityController.text = _formModel.currentPrintQuantity?.toString() ?? '';
+    totalPrintingExpenseController.text = _formModel.currentTotalPrintingExpense ?? '';
+    totalTracingExpenseController.text = _formModel.currentTotalTracingExpense ?? '';
   }
 
   void updatePrinterId(String? value) {
@@ -49,6 +57,16 @@ class PrintingJobEditFormProvider extends ChangeNotifier {
 
   void updateTotalPrintingCost(String value) {
     _formModel.currentTotalPrintingCost = value.isNotEmpty ? value : null;
+    notifyListeners();
+  }
+
+  void updateTotalPrintingExpense(String value) {
+    _formModel.currentTotalPrintingExpense = value.isNotEmpty ? value : null;
+    notifyListeners();
+  }
+
+  void updateTotalTracingExpense(String value) {
+    _formModel.currentTotalTracingExpense = value.isNotEmpty ? value : null;
     notifyListeners();
   }
 
