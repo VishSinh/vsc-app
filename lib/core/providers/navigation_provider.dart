@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:vsc_app/core/constants/navigation_items.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
+import 'package:vsc_app/core/utils/app_logger.dart';
 
 class NavigationProvider extends ChangeNotifier {
   int _selectedIndex = 0;
@@ -117,12 +118,23 @@ class NavigationProvider extends ChangeNotifier {
 
   /// Initialize navigation state based on current route
   void initializeNavigationForRoute(String route, BuildContext context) {
+    AppLogger.debug('NavigationProvider: initializeNavigationForRoute called with route: $route');
     final destinations = _getDestinations(context);
     final index = _getIndexForRoute(route, destinations);
+
+    AppLogger.debug('NavigationProvider: Found index: $index for route: $route');
+    AppLogger.debug('NavigationProvider: Available destinations: ${destinations.map((d) => d.label).toList()}');
 
     if (index != -1) {
       _selectedIndex = index;
       _updateCurrentPage(index, context);
+      AppLogger.debug('NavigationProvider: Set selectedIndex to $index');
+      notifyListeners();
+    } else if (route == RouteConstants.dashboard) {
+      // If we can't find the route but it's dashboard, default to index 0
+      _selectedIndex = 0;
+      _currentPage = 'dashboard';
+      AppLogger.debug('NavigationProvider: Defaulting to dashboard (index 0)');
       notifyListeners();
     }
   }

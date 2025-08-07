@@ -10,6 +10,7 @@ import '../widgets/order_widgets.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_create_provider.dart';
+import 'package:vsc_app/core/providers/navigation_provider.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 
 class CreateOrderReviewPage extends StatefulWidget {
@@ -73,7 +74,9 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
     orderProvider.setContext(context);
     final success = await orderProvider.createOrder();
 
-    if (success && mounted) context.go(RouteConstants.dashboard); // Redirect to dashboard after successful order creation
+    if (success && mounted) {
+      context.go(RouteConstants.dashboard);
+    }
   }
 
   @override
@@ -85,14 +88,6 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
       ),
       body: Consumer<OrderCreateProvider>(
         builder: (context, orderProvider, child) {
-          // Check if customer and order items exist, if not redirect to order items
-          if (orderProvider.selectedCustomer == null || orderProvider.orderItems.isEmpty) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              context.go(RouteConstants.orderItems);
-            });
-            return const Center(child: CircularProgressIndicator());
-          }
-
           return LayoutBuilder(
             builder: (context, constraints) {
               if (constraints.maxWidth < AppConfig.mobileBreakpoint) {

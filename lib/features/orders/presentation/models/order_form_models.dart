@@ -72,7 +72,7 @@ class OrderItemCreationFormViewModel {
       quantity: quantity,
       requiresBox: requiresBox,
       requiresPrinting: requiresPrinting,
-      boxType: boxType?.toApiString(),
+      boxType: requiresBox ? boxType?.toApiString() : null,
       totalBoxCost: totalBoxCost ?? '0.00',
       totalPrintingCost: totalPrintingCost ?? '0.00',
     );

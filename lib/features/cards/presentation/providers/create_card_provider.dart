@@ -1,10 +1,8 @@
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
-import 'package:vsc_app/core/models/api_response.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:vsc_app/features/cards/data/services/card_service.dart';
-
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_form_models.dart';
 import 'package:vsc_app/features/cards/presentation/services/card_validators.dart';
@@ -61,21 +59,23 @@ class CreateCardProvider extends BaseProvider {
   }
 
   /// Create a new card
-  Future<void> createCard() async {
+  Future<String?> createCard() async {
     AppLogger.service('CreateCardProvider', 'Creating new card');
 
     // Validate form using the form model's validate method
     final validationResult = _formModel.validate();
     if (!validationResult.isValid) {
-      return;
+      return null;
     }
 
-    await executeApiOperation(
+    return await executeApiOperation(
       apiCall: () => _cardService.createCard(imageFile: _formModel.image!, request: _formModel.toApiRequest()),
       onSuccess: (response) {
+        final createCardResponse = response.data!;
         setSuccess('Card created successfully');
-        reset();
-        return response.data!;
+
+        // Return the barcode for navigation
+        return createCardResponse.barcode;
       },
       errorMessage: 'Failed to create card',
     );

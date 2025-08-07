@@ -3,17 +3,18 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
-import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
+import 'package:vsc_app/features/orders/presentation/providers/order_detail_provider.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
 import 'package:vsc_app/features/orders/presentation/widgets/box_order_edit_dialog.dart';
 import 'package:vsc_app/features/orders/presentation/widgets/printing_job_edit_dialog.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/features/production/presentation/models/box_order_view_model.dart';
 import 'package:vsc_app/features/production/presentation/models/printing_job_view_model.dart';
+import 'package:vsc_app/app/app_config.dart';
 
 class OrderDetailPage extends StatefulWidget {
   final String orderId;
-  final OrderListProvider? orderProvider;
+  final OrderDetailProvider? orderProvider;
 
   const OrderDetailPage({super.key, required this.orderId, this.orderProvider});
 
@@ -22,25 +23,27 @@ class OrderDetailPage extends StatefulWidget {
 }
 
 class _OrderDetailPageState extends State<OrderDetailPage> {
+  late final OrderDetailProvider _orderProvider;
+
   @override
   void initState() {
     super.initState();
-    _loadOrderDetails();
+    _orderProvider = widget.orderProvider ?? OrderDetailProvider();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadOrderDetails();
+      }
+    });
   }
 
   void _loadOrderDetails() {
-    final orderProvider = context.read<OrderListProvider>();
-    orderProvider.setContext(context);
-    orderProvider.fetchOrderById(widget.orderId);
+    _orderProvider.getOrderById(widget.orderId);
   }
 
   @override
   Widget build(BuildContext context) {
-    // If provider was passed, use it; otherwise create a new one
-    final provider = widget.orderProvider ?? OrderListProvider();
-
     return ChangeNotifierProvider.value(
-      value: provider,
+      value: _orderProvider,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Order Details'),
@@ -59,7 +62,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   }
 
   Widget _buildOrderDetailContent() {
-    return Consumer<OrderListProvider>(
+    return Consumer<OrderDetailProvider>(
       builder: (context, orderProvider, child) {
         if (orderProvider.isLoading) {
           return _buildLoadingSpinner();
@@ -137,7 +140,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                 Expanded(
                   child: Text(
                     order.name.isNotEmpty ? order.name : 'Order #${order.id.substring(0, 8)}',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: AppConfig.fontSize2xl, fontWeight: FontWeight.bold),
                   ),
                 ),
                 Container(
@@ -145,7 +148,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   decoration: BoxDecoration(color: _getStatusColor(order.orderStatus), borderRadius: BorderRadius.circular(16)),
                   child: Text(
                     _formatStatus(order.orderStatus),
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -162,7 +165,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                     Expanded(
                       child: Text(
                         order.specialInstruction,
-                        style: const TextStyle(color: Colors.orange, fontStyle: FontStyle.italic),
+                        style: TextStyle(color: Colors.orange, fontStyle: FontStyle.italic),
                       ),
                     ),
                   ],
@@ -182,7 +185,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Order Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(
+              'Order Information',
+              style: TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             _buildInfoRow('Order ID', order.id),
             _buildInfoRow('Customer', order.customerName),
@@ -207,11 +213,11 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             width: 120,
             child: Text(
               label,
-              style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.grey),
+              style: TextStyle(fontWeight: FontWeight.w500, color: Colors.grey),
             ),
           ),
           Expanded(
-            child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+            child: Text(value, style: TextStyle(fontWeight: FontWeight.w500)),
           ),
         ],
       ),
@@ -222,7 +228,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Order Items', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(
+          'Order Items',
+          style: TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 16),
         ...order.orderItems.map((item) => _buildOrderItemCard(item)),
       ],
@@ -240,23 +249,22 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             Row(
               children: [
                 Expanded(
-                  child: Text('Item ID: ${item.id.substring(0, 8)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                  child: Text(
-                    'Order: ${item.orderName}',
-                    style: const TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.w500),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      _buildItemInfoRow('Quantity', '${item.quantity}'),
+                      _buildItemInfoRow('Price per Item', '₹${item.pricePerItem}'),
+                      _buildItemInfoRow('Discount Amount', '₹${item.discountAmount}'),
+                      _buildItemInfoRow('Line Total', '₹${_calculateLineTotal(item)}'),
+                    ],
                   ),
                 ),
+                // Display card image on the right side
+                if (item.card != null && item.card!.image.isNotEmpty) ...[const SizedBox(width: 12), _buildCardImage(item.card!)],
               ],
             ),
-            const SizedBox(height: 12),
-            _buildItemInfoRow('Quantity', '${item.quantity}'),
-            _buildItemInfoRow('Price per Item', '₹${item.pricePerItem}'),
-            _buildItemInfoRow('Discount Amount', '₹${item.discountAmount}'),
-            _buildItemInfoRow('Line Total', '₹${_calculateLineTotal(item)}'),
+
             const SizedBox(height: 12),
             Row(
               children: [
@@ -264,9 +272,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                    child: const Text(
+                    child: Text(
                       'Box Required',
-                      style: TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.w500),
+                      style: TextStyle(fontSize: AppConfig.fontSizeSm, color: Colors.blue, fontWeight: FontWeight.w500),
                     ),
                   ),
                 if (item.requiresBox && item.requiresPrinting) const SizedBox(width: 8),
@@ -274,9 +282,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                    child: const Text(
+                    child: Text(
                       'Printing Required',
-                      style: TextStyle(fontSize: 12, color: Colors.green, fontWeight: FontWeight.w500),
+                      style: TextStyle(fontSize: AppConfig.fontSizeSm, color: Colors.green, fontWeight: FontWeight.w500),
                     ),
                   ),
               ],
@@ -289,16 +297,34 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     );
   }
 
+  Widget _buildCardImage(OrderCardViewModel card) {
+    return Container(
+      width: 180,
+      height: 180,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.withOpacity(0.3)),
+        image: DecorationImage(image: NetworkImage(card.image), fit: BoxFit.cover),
+      ),
+    );
+  }
+
   Widget _buildItemInfoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
           SizedBox(
-            width: 100,
-            child: Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            width: 200,
+            child: Text(
+              label,
+              style: TextStyle(fontSize: AppConfig.fontSizeMd, color: Colors.grey),
+            ),
           ),
-          Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+          Text(
+            value,
+            style: TextStyle(fontSize: AppConfig.fontSizeMd, fontWeight: FontWeight.w500),
+          ),
         ],
       ),
     );
@@ -308,7 +334,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Box Orders',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
         ),
@@ -333,14 +359,14 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           Row(
             children: [
               Expanded(
-                child: Text('Box ID: ${box.id.substring(0, 8)}', style: const TextStyle(fontWeight: FontWeight.w500)),
+                child: Text('Box ID: ${box.id.substring(0, 8)}', style: TextStyle(fontWeight: FontWeight.w500)),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(color: _getBoxStatusColor(box.boxStatus), borderRadius: BorderRadius.circular(8)),
                 child: Text(
                   _formatBoxStatus(box.boxStatus),
-                  style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: Colors.white, fontSize: AppConfig.fontSizeXs, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(width: 8),
@@ -368,7 +394,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Printing Jobs',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
         ),
@@ -393,14 +419,14 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           Row(
             children: [
               Expanded(
-                child: Text('Job ID: ${job.id.substring(0, 8)}', style: const TextStyle(fontWeight: FontWeight.w500)),
+                child: Text('Job ID: ${job.id.substring(0, 8)}', style: TextStyle(fontWeight: FontWeight.w500)),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(color: _getPrintingStatusColor(job.printingStatus), borderRadius: BorderRadius.circular(8)),
                 child: Text(
                   _formatPrintingStatus(job.printingStatus),
-                  style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: Colors.white, fontSize: AppConfig.fontSizeXs, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(width: 8),
@@ -431,9 +457,15 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         children: [
           SizedBox(
             width: 120,
-            child: Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+            child: Text(
+              label,
+              style: TextStyle(fontSize: AppConfig.fontSizeXs, color: Colors.grey),
+            ),
           ),
-          Text(value, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500)),
+          Text(
+            value,
+            style: TextStyle(fontSize: AppConfig.fontSizeXs, fontWeight: FontWeight.w500),
+          ),
         ],
       ),
     );
@@ -446,9 +478,15 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         children: [
           SizedBox(
             width: 80,
-            child: Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+            child: Text(
+              label,
+              style: TextStyle(fontSize: AppConfig.fontSizeXs, color: Colors.grey),
+            ),
           ),
-          Text(value, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500)),
+          Text(
+            value,
+            style: TextStyle(fontSize: AppConfig.fontSizeXs, fontWeight: FontWeight.w500),
+          ),
         ],
       ),
     );

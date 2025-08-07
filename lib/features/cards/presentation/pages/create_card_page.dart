@@ -9,14 +9,15 @@ import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/cards/presentation/providers/create_card_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
 import 'package:vsc_app/app/app_config.dart';
-import 'package:vsc_app/core/providers/navigation_provider.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 
 class CreateCardPage extends StatefulWidget {
-  const CreateCardPage({super.key});
+  final CreateCardProvider? createCardProvider;
+
+  const CreateCardPage({super.key, this.createCardProvider});
 
   @override
   State<CreateCardPage> createState() => _CreateCardPageState();
@@ -50,8 +51,10 @@ class _CreateCardPageState extends State<CreateCardPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => CreateCardProvider(),
+    final cardProvider = widget.createCardProvider ?? CreateCardProvider();
+
+    return ChangeNotifierProvider.value(
+      value: cardProvider,
       child: Scaffold(
         appBar: AppBar(
           title: Text(UITextConstants.createCard),
@@ -481,7 +484,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final cardProvider = context.read<CreateCardProvider>();
+    final cardProvider = widget.createCardProvider ?? context.read<CreateCardProvider>();
 
     // Check if image is selected
     if (cardProvider.formModel.image == null) {
@@ -504,16 +507,20 @@ class _CreateCardPageState extends State<CreateCardPage> {
 
     if (cardProvider.similarCards.isNotEmpty && mounted) {
       // Show dialog with similar cards found
-      final shouldProceed = await _showSimilarCardsDialog(cardProvider.similarCards.length);
-      if (!shouldProceed) return;
+      final shouldViewSimilar = await _showSimilarCardsDialog(cardProvider.similarCards.length);
+      if (shouldViewSimilar) {
+        // User chose to view similar cards, so return early
+        return;
+      }
+      // User chose to continue creating, so proceed with card creation
     }
 
     // Create the card
-    await cardProvider.createCard();
+    final barcode = await cardProvider.createCard();
 
-    // Navigate to dashboard and clear the entire navigation stack
-    if (mounted) {
-      context.read<NavigationProvider>().clearStackAndGoToDashboard(context);
+    // Handle navigation in UI layer
+    if (barcode != null && mounted) {
+      context.push('${RouteConstants.bluetoothPrint}?barcode=$barcode');
     }
   }
 
@@ -528,7 +535,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
               ButtonUtils.primaryButton(
                 onPressed: () {
                   Navigator.of(context).pop(true);
-                  final cardProvider = context.read<CreateCardProvider>();
+                  final cardProvider = widget.createCardProvider ?? context.read<CreateCardProvider>();
                   context.push(RouteConstants.similarCards, extra: cardProvider);
                 },
                 label: 'View $count Similar Cards',
@@ -550,7 +557,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
     if (cardProvider.similarCards.isNotEmpty && mounted) {
       final shouldView = await _showSimilarCardsDialog(cardProvider.similarCards.length);
       if (shouldView) {
-        final cardProvider = context.read<CreateCardProvider>();
+        final cardProvider = widget.createCardProvider ?? context.read<CreateCardProvider>();
         context.go(RouteConstants.similarCards, extra: cardProvider);
       }
     } else if (mounted) {

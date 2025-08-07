@@ -10,6 +10,7 @@ import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import '../widgets/order_widgets.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 import 'package:vsc_app/features/orders/presentation/providers/order_create_provider.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
@@ -78,6 +79,53 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
     orderProvider.addOrderItem(item);
     orderProvider.setSuccessWithSnackBar('Item added to order', context);
     AppLogger.debug('OrderItemsPage: Item added to order: ${item.cardId}');
+  }
+
+  void _showBarcodeScanner() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          appBar: AppBar(
+            title: const Text('Scan Barcode'),
+            leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.of(context).pop()),
+          ),
+          body: MobileScanner(
+            onDetect: (capture) {
+              final List<Barcode> barcodes = capture.barcodes;
+              if (barcodes.isNotEmpty) {
+                final String barcode = barcodes.first.rawValue ?? '';
+                if (barcode.isNotEmpty) {
+                  AppLogger.info('Barcode scanned: $barcode', category: 'BARCODE_SCAN');
+                  _barcodeController.text = barcode;
+                  Navigator.of(context).pop();
+
+                  // Automatically search for the card after scanning
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _searchCard();
+                  });
+                }
+              }
+            },
+            errorBuilder: (context, error) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error, size: 64, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text('Camera Error', style: ResponsiveText.getTitle(context)),
+                    const SizedBox(height: 8),
+                    Text(error.errorDetails?.message ?? 'Unknown error occurred'),
+                    const SizedBox(height: 16),
+                    ElevatedButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Go Back')),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -171,22 +219,43 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextFormField(
-              controller: _barcodeController,
-              decoration: InputDecoration(
-                labelText: UITextConstants.barcode,
-                hintText: UITextConstants.barcodeHint,
-                border: const OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return UITextConstants.pleaseEnterBarcode;
-                }
-                return null;
-              },
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _barcodeController,
+                    decoration: InputDecoration(
+                      labelText: UITextConstants.barcode,
+                      hintText: UITextConstants.barcodeHint,
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.qr_code_scanner),
+                        onPressed: () => _showBarcodeScanner(),
+                        tooltip: 'Scan Barcode',
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return UITextConstants.pleaseEnterBarcode;
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+              ],
             ),
             SizedBox(height: AppConfig.defaultPadding),
-            ButtonUtils.primaryButton(onPressed: orderProvider.isLoading ? null : _searchCard, label: 'Search Card', icon: Icons.search),
+            Row(
+              children: [
+                Expanded(
+                  child: ButtonUtils.primaryButton(onPressed: orderProvider.isLoading ? null : _searchCard, label: 'Search Card', icon: Icons.search),
+                ),
+                SizedBox(width: AppConfig.defaultPadding),
+                Expanded(
+                  child: ButtonUtils.secondaryButton(onPressed: () => _showBarcodeScanner(), label: 'Scan Barcode', icon: Icons.qr_code_scanner),
+                ),
+              ],
+            ),
           ],
         ),
       ),

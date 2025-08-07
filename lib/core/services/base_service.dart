@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -33,7 +34,15 @@ abstract class ApiService {
 
     // Add pretty logger interceptor
     dio.interceptors.add(
-      PrettyDioLogger(requestHeader: true, requestBody: true, responseBody: true, responseHeader: false, error: true, compact: true),
+      PrettyDioLogger(
+        requestHeader: true,
+        requestBody: true,
+        responseBody: true,
+        responseHeader: false,
+        error: true,
+        compact: true,
+        logPrint: (obj) => AppLogger.debug(obj.toString()),
+      ),
     );
 
     // Add auth token interceptor
@@ -70,28 +79,74 @@ abstract class ApiService {
   /// HTTP GET request
   Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) => _dio.get(path, queryParameters: queryParameters);
 
+  /// Convert objects to JSON for better logging
+  dynamic _convertToJsonForLogging(dynamic data) {
+    AppLogger.debug('BaseService: _convertToJsonForLogging called with data type: ${data.runtimeType}');
+
+    if (data == null) return data;
+
+    // If it's already a Map, return as is
+    if (data is Map<String, dynamic>) {
+      AppLogger.debug('BaseService: _convertToJsonForLogging - data is already Map, returning as is');
+      return data;
+    }
+
+    // If it's a List, convert each item
+    if (data is List) {
+      AppLogger.debug('BaseService: _convertToJsonForLogging - data is List, converting items');
+      return data.map((item) => _convertToJsonForLogging(item)).toList();
+    }
+
+    // If it has a toJson method, use it
+    if (data is Object && data.runtimeType.toString().contains('Request')) {
+      AppLogger.debug('BaseService: _convertToJsonForLogging - converting Request object to JSON');
+      try {
+        final jsonData = (data as dynamic).toJson();
+        AppLogger.debug('BaseService: _convertToJsonForLogging - conversion successful, result type: ${jsonData.runtimeType}');
+        return jsonData;
+      } catch (e) {
+        AppLogger.debug('BaseService: _convertToJsonForLogging - conversion failed: $e');
+        // If toJson fails, return the original data
+        return data;
+      }
+    }
+
+    AppLogger.debug('BaseService: _convertToJsonForLogging - no conversion needed, returning original data');
+    return data;
+  }
+
   /// Filter out null values from request data
   dynamic _filterNullValues(dynamic data) {
+    AppLogger.debug('BaseService: _filterNullValues called with data type: ${data.runtimeType}');
+
     if (data is Map<String, dynamic>) {
       final filtered = <String, dynamic>{};
       data.forEach((key, value) {
         if (value != null) {
-          filtered[key] = value;
+          // Recursively filter nested objects
+          filtered[key] = _filterNullValues(value);
+        } else {
+          AppLogger.debug('BaseService: _filterNullValues found null value for key: $key');
         }
       });
       return filtered;
     }
+
+    if (data is List) {
+      return data.map((item) => _filterNullValues(item)).toList();
+    }
+
     return data;
   }
 
   /// HTTP POST request
-  Future<Response> post(String path, {dynamic data}) => _dio.post(path, data: _filterNullValues(data));
+  Future<Response> post(String path, {dynamic data}) => _dio.post(path, data: _filterNullValues(_convertToJsonForLogging(data)));
 
   /// HTTP PUT request
-  Future<Response> put(String path, {dynamic data}) => _dio.put(path, data: _filterNullValues(data));
+  Future<Response> put(String path, {dynamic data}) => _dio.put(path, data: _filterNullValues(_convertToJsonForLogging(data)));
 
   /// HTTP PATCH request
-  Future<Response> patch(String path, {dynamic data}) => _dio.patch(path, data: _filterNullValues(data));
+  Future<Response> patch(String path, {dynamic data}) => _dio.patch(path, data: _filterNullValues(_convertToJsonForLogging(data)));
 
   /// HTTP DELETE request
   Future<Response> delete(String path) => _dio.delete(path);

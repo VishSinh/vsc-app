@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_detail_provider.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_list_provider.dart';
+import 'package:vsc_app/features/cards/presentation/providers/create_card_provider.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
@@ -85,7 +86,10 @@ class _InventoryPageState extends State<InventoryPage> {
                       builder: (context, permissionProvider, child) {
                         if (permissionProvider.canCreate('card')) {
                           return FloatingActionButton.extended(
-                            onPressed: () => context.push(RouteConstants.createCard),
+                            onPressed: () {
+                              final createCardProvider = CreateCardProvider();
+                              context.push(RouteConstants.createCard, extra: createCardProvider);
+                            },
                             backgroundColor: AppConfig.primaryColor,
                             heroTag: 'add',
                             icon: const Icon(Icons.add, color: Colors.white),
@@ -305,7 +309,7 @@ class InventoryCardItem extends StatelessWidget {
       child: InkWell(
         onTap: () {
           final cardDetailProvider = context.read<CardDetailProvider>();
-          context.goNamed(RouteConstants.cardDetailRouteName, pathParameters: {'id': card.id}, extra: cardDetailProvider);
+          context.pushNamed(RouteConstants.cardDetailRouteName, pathParameters: {'id': card.id}, extra: cardDetailProvider);
         },
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildImageSection(context), _buildContentSection(context)]),
       ),

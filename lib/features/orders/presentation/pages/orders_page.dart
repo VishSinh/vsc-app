@@ -7,6 +7,7 @@ import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
+import 'package:vsc_app/features/orders/presentation/providers/order_detail_provider.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
@@ -195,8 +196,9 @@ class _OrdersPageState extends State<OrdersPage> {
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           child: InkWell(
             onTap: () {
-              final orderProvider = context.read<OrderListProvider>();
-              context.go(RouteConstants.orderDetail.replaceAll(':id', order.id), extra: orderProvider);
+              final orderDetailProvider = OrderDetailProvider();
+              orderDetailProvider.selectOrder(order);
+              context.go(RouteConstants.orderDetail.replaceAll(':id', order.id), extra: orderDetailProvider);
             },
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -425,8 +427,9 @@ class _OrdersPageState extends State<OrdersPage> {
   Widget _buildDesktopRow(OrderViewModel order, double rowHeight) {
     return InkWell(
       onTap: () {
-        final orderProvider = context.read<OrderListProvider>();
-        context.go(RouteConstants.orderDetail.replaceAll(':id', order.id), extra: orderProvider);
+        final orderDetailProvider = OrderDetailProvider();
+        orderDetailProvider.selectOrder(order);
+        context.go(RouteConstants.orderDetail.replaceAll(':id', order.id), extra: orderDetailProvider);
       },
       child: Container(
         height: rowHeight,

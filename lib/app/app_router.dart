@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vsc_app/core/services/navigation_service.dart';
 import 'package:vsc_app/features/auth/data/services/auth_service.dart';
@@ -9,11 +10,14 @@ import 'package:vsc_app/features/vendors/presentation/pages/vendor_detail_page.d
 import 'package:vsc_app/features/cards/presentation/pages/card_detail_page.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_detail_provider.dart';
 import 'package:vsc_app/features/cards/presentation/pages/create_card_page.dart';
+import 'package:vsc_app/features/cards/presentation/providers/create_card_provider.dart';
 import 'package:vsc_app/features/cards/presentation/pages/similar_cards_page.dart';
+import 'package:vsc_app/features/cards/presentation/pages/bluetooth_print_page.dart';
 import 'package:vsc_app/features/orders/presentation/pages/create_order_customer_search_page.dart';
 import 'package:vsc_app/features/orders/presentation/pages/create_order_page.dart';
 import 'package:vsc_app/features/orders/presentation/pages/create_order_review_page.dart';
 import 'package:vsc_app/features/orders/presentation/pages/order_detail_page.dart';
+import 'package:vsc_app/features/orders/presentation/providers/order_detail_provider.dart';
 import 'package:vsc_app/features/bills/presentation/pages/bill_page.dart';
 
 class AppRouter {
@@ -65,8 +69,48 @@ class AppRouter {
           },
         ),
 
-        GoRoute(path: RouteConstants.createCard, name: RouteConstants.createCardRouteName, builder: (context, state) => const CreateCardPage()),
+        GoRoute(
+          path: RouteConstants.createCard,
+          name: RouteConstants.createCardRouteName,
+          builder: (context, state) {
+            final createCardProvider = state.extra as CreateCardProvider?;
+            return CreateCardPage(createCardProvider: createCardProvider);
+          },
+        ),
         GoRoute(path: RouteConstants.similarCards, builder: (context, state) => const SimilarCardsPage()),
+        GoRoute(
+          path: RouteConstants.bluetoothPrint,
+          name: RouteConstants.bluetoothPrintRouteName,
+          builder: (context, state) {
+            final barcodeData = state.uri.queryParameters['barcode'] ?? '';
+            print('BluetoothPrintPage - barcodeData: "$barcodeData"');
+            print('BluetoothPrintPage - all query params: ${state.uri.queryParameters}');
+
+            if (barcodeData.isEmpty) {
+              // Redirect to dashboard if no barcode is provided
+              return Scaffold(
+                appBar: AppBar(
+                  title: const Text('Error'),
+                  leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.dashboard)),
+                ),
+                body: const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error, size: 64, color: Colors.red),
+                      SizedBox(height: 16),
+                      Text('No barcode provided', style: TextStyle(fontSize: 18)),
+                      SizedBox(height: 8),
+                      Text('Redirecting to dashboard...'),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            return BluetoothPrintPage(barcodeData: barcodeData);
+          },
+        ),
         GoRoute(
           path: RouteConstants.cardDetail,
           name: RouteConstants.cardDetailRouteName,
@@ -92,7 +136,8 @@ class AppRouter {
           name: RouteConstants.orderDetailRouteName,
           builder: (context, state) {
             final orderId = state.pathParameters['id']!;
-            return OrderDetailPage(orderId: orderId);
+            final orderProvider = state.extra as OrderDetailProvider?;
+            return OrderDetailPage(orderId: orderId, orderProvider: orderProvider);
           },
         ),
 

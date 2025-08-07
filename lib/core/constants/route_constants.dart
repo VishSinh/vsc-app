@@ -15,6 +15,7 @@ class RouteConstants {
   static const String cardDetail = '/cards/:id';
   static const String createCard = '/cards/create';
   static const String similarCards = '/cards/similar';
+  static const String bluetoothPrint = '/cards/bluetooth-print';
   static const String customerSearch = '/orders/new/customer';
   static const String orderItems = '/orders/new/items';
   static const String orderReview = '/orders/new/review';
@@ -36,6 +37,7 @@ class RouteConstants {
 
   static const String cardDetailRouteName = 'card-detail';
   static const String createCardRouteName = 'create-card';
+  static const String bluetoothPrintRouteName = 'bluetooth-print';
   static const String customerSearchRouteName = 'customer-search';
   static const String orderItemsRouteName = 'order-items';
   static const String orderReviewRouteName = 'order-review';
@@ -56,6 +58,7 @@ class RouteConstants {
 
     cardDetail,
     createCard,
+    bluetoothPrint,
     customerSearch,
     orderItems,
     orderReview,

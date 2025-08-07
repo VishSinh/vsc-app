@@ -45,6 +45,53 @@ class CardResponse {
   double get maxDiscountAsDouble => double.tryParse(maxDiscount) ?? 0.0;
 }
 
+/// API response model for card creation with full card details
+@JsonSerializable()
+class CreateCardResponse {
+  final String id;
+  @JsonKey(name: 'vendor_id')
+  final String vendorId;
+  @JsonKey(name: 'vendor_name')
+  final String vendorName;
+  final String barcode;
+  @JsonKey(name: 'sell_price')
+  final String sellPrice;
+  @JsonKey(name: 'cost_price')
+  final String costPrice;
+  @JsonKey(name: 'max_discount')
+  final String maxDiscount;
+  final int quantity;
+  final String image;
+  @JsonKey(name: 'perceptual_hash')
+  final String perceptualHash;
+  @JsonKey(name: 'is_active')
+  final bool isActive;
+  final String message;
+
+  const CreateCardResponse({
+    required this.id,
+    required this.vendorId,
+    required this.vendorName,
+    required this.barcode,
+    required this.sellPrice,
+    required this.costPrice,
+    required this.maxDiscount,
+    required this.quantity,
+    required this.image,
+    required this.perceptualHash,
+    required this.isActive,
+    required this.message,
+  });
+
+  factory CreateCardResponse.fromJson(Map<String, dynamic> json) => _$CreateCardResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$CreateCardResponseToJson(this);
+
+  // Helper methods to convert string prices to double
+  double get sellPriceAsDouble => double.tryParse(sellPrice) ?? 0.0;
+  double get costPriceAsDouble => double.tryParse(costPrice) ?? 0.0;
+  double get maxDiscountAsDouble => double.tryParse(maxDiscount) ?? 0.0;
+}
+
 /// API response model for similar card data
 @JsonSerializable()
 class SimilarCardResponse {
@@ -90,4 +137,4 @@ class SimilarCardResponse {
 // Type aliases for better readability
 typedef CardListResponse = ApiResponse<List<CardResponse>>;
 typedef SimilarCardListResponse = ApiResponse<List<SimilarCardResponse>>;
-typedef CreateCardResponse = ApiResponse<MessageData>;
+typedef CreateCardApiResponse = ApiResponse<CreateCardResponse>;

@@ -13,6 +13,7 @@ abstract class BaseProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   String? get successMessage => _successMessage;
+  BuildContext? get context => _context;
 
   /// Set the context for centralized snackbar management
   void setContext(BuildContext context) {

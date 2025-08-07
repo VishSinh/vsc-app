@@ -24,9 +24,12 @@ class CardDetailPage extends StatefulWidget {
 }
 
 class _CardDetailPageState extends State<CardDetailPage> {
+  late final CardDetailProvider _cardProvider;
+
   @override
   void initState() {
     super.initState();
+    _cardProvider = widget.cardProvider ?? CardDetailProvider();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _loadCardDetails();
@@ -35,8 +38,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
   }
 
   void _loadCardDetails() {
-    final cardProvider = context.read<CardDetailProvider>();
-    cardProvider.getCardById(widget.cardId);
+    _cardProvider.getCardById(widget.cardId);
   }
 
   // Printing is handled by BluetoothPrintService
@@ -44,7 +46,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
-      value: widget.cardProvider ?? CardDetailProvider(),
+      value: _cardProvider,
       child: Scaffold(
         appBar: AppBar(
           title: Text(UITextConstants.cardDetails),
@@ -150,14 +152,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
                   icon: const Icon(Icons.print),
                   tooltip: 'Print Barcode',
                   onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => BluetoothPrintPage(
-                          barcodeData: card.barcode,
-                          cardName: card.barcode, // Using barcode as card name for now
-                        ),
-                      ),
-                    );
+                    context.go('${RouteConstants.bluetoothPrint}?barcode=${card.barcode}');
                   },
                 ),
               ],

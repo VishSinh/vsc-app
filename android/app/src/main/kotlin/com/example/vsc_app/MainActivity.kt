@@ -35,8 +35,8 @@ class MainActivity : FlutterActivity() {
         val opened = lpapi?.openPrinter(null as String?)
         Log.d("LPAPI", "Printer opened? $opened")
     
-        lpapi?.startJob(60.0, 40.0, 0)
-        Log.d("LPAPI", "Job started with size 60x40")
+        lpapi?.startJob(40.0, 20.0, 0)
+        Log.d("LPAPI", "Job started with size 40x20")
     
         val safeData = barcode.ifBlank { "1234567890" }
         val type = 28
@@ -46,11 +46,11 @@ class MainActivity : FlutterActivity() {
         lpapi?.draw1DBarcode(
             safeData,
             type,
-            10.0,
-            10.0,
-            40.0,
-            20.0,
-            2.0
+            1.0,
+            1.0,
+            30.0,
+            15.0,
+            5.0
         )
     
         Log.d("LPAPI", "draw1DBarcode completed")

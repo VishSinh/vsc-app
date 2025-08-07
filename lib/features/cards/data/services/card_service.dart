@@ -48,7 +48,7 @@ class CardService extends ApiService {
   }
 
   /// Create a new card with image upload
-  Future<ApiResponse<MessageData>> createCard({required XFile imageFile, required CreateCardRequest request}) async {
+  Future<CreateCardApiResponse> createCard({required XFile imageFile, required CreateCardRequest request}) async {
     return await executeRequest(() async {
       final multipartFile = await FileUploadUtils.createMultipartFileFromXFile(imageFile);
       final formData = FormData.fromMap({
@@ -60,7 +60,7 @@ class CardService extends ApiService {
         'vendor_id': request.vendorId,
       });
       return post(AppConstants.cardsEndpoint, data: formData);
-    }, (json) => MessageData.fromJson(json as Map<String, dynamic>));
+    }, (json) => CreateCardResponse.fromJson(json as Map<String, dynamic>));
   }
 
   /// Purchase card stock

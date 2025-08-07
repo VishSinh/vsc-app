@@ -268,7 +268,7 @@ feature_name/
 
 ```dart
 // 1. User submits form
-CardEntryForm(onSubmit: () => cardProvider.createCard())
+// Form submission handled directly in CreateCardPage
 
 // 2. Provider delegates to business service
 class CardProvider {
