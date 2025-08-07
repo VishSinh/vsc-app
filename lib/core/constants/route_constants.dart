@@ -3,6 +3,8 @@ class RouteConstants {
   // ================================ ROUTE PATHS ================================
   static const String login = '/login';
   static const String dashboard = '/';
+  static const String bills = '/bills';
+  static const String billDetail = '/bills/:id';
   static const String orders = '/orders';
   static const String newOrder = '/orders/new';
   static const String inventory = '/inventory';
@@ -22,6 +24,8 @@ class RouteConstants {
   // ================================ ROUTE NAMES ================================
   static const String loginRouteName = 'login';
   static const String dashboardRouteName = 'dashboard';
+  static const String billsRouteName = 'bills';
+  static const String billDetailRouteName = 'bill-detail';
   static const String ordersRouteName = 'orders';
   static const String newOrderRouteName = 'new-order';
   static const String inventoryRouteName = 'inventory';
@@ -41,6 +45,7 @@ class RouteConstants {
   // ================================ ROUTE GROUPS ================================
   static const List<String> protectedRoutes = [
     dashboard,
+    bills,
     orders,
     newOrder,
     inventory,
@@ -56,6 +61,7 @@ class RouteConstants {
     orderReview,
     orderDetail,
     register,
+    billDetail,
   ];
 
   static const List<String> publicRoutes = [login];

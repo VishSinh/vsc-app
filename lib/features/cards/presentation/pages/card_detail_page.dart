@@ -9,12 +9,15 @@ import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
-import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
+import 'package:vsc_app/features/cards/presentation/providers/card_detail_provider.dart';
+import 'package:vsc_app/features/cards/presentation/services/bluetooth_print_service.dart';
+import 'package:vsc_app/features/cards/presentation/pages/bluetooth_print_page.dart';
 
 class CardDetailPage extends StatefulWidget {
   final String cardId;
+  final CardDetailProvider? cardProvider;
 
-  const CardDetailPage({super.key, required this.cardId});
+  const CardDetailPage({super.key, required this.cardId, this.cardProvider});
 
   @override
   State<CardDetailPage> createState() => _CardDetailPageState();
@@ -24,28 +27,37 @@ class _CardDetailPageState extends State<CardDetailPage> {
   @override
   void initState() {
     super.initState();
-    _loadCardDetails();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadCardDetails();
+      }
+    });
   }
 
   void _loadCardDetails() {
-    final cardProvider = context.read<CardProvider>();
+    final cardProvider = context.read<CardDetailProvider>();
     cardProvider.getCardById(widget.cardId);
   }
 
+  // Printing is handled by BluetoothPrintService
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(UITextConstants.cardDetails),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.inventory)),
-        actions: [_buildActionButtons()],
+    return ChangeNotifierProvider.value(
+      value: widget.cardProvider ?? CardDetailProvider(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(UITextConstants.cardDetails),
+          leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
+          actions: [_buildActionButtons()],
+        ),
+        body: _buildCardDetailContent(),
       ),
-      body: _buildCardDetailContent(),
     );
   }
 
   Widget _buildCardDetailContent() {
-    return Consumer<CardProvider>(
+    return Consumer<CardDetailProvider>(
       builder: (context, cardProvider, child) {
         if (cardProvider.isLoading) {
           return const Center(child: CircularProgressIndicator());
@@ -117,7 +129,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
   }
 
   Widget _buildActionButtons() {
-    return Consumer<CardProvider>(
+    return Consumer<CardDetailProvider>(
       builder: (context, cardProvider, child) {
         final card = cardProvider.currentCard;
         if (card == null) return const SizedBox.shrink();
@@ -133,6 +145,21 @@ class _CardDetailPageState extends State<CardDetailPage> {
                 if (canEdit) IconButton(icon: const Icon(Icons.edit), onPressed: _showEditCardDialog, tooltip: UITextConstants.edit),
                 if (canEdit && canDelete) SizedBox(width: AppConfig.smallPadding),
                 if (canDelete) IconButton(icon: const Icon(Icons.delete), onPressed: _showDeleteCardDialog, tooltip: UITextConstants.delete),
+                // Print button
+                IconButton(
+                  icon: const Icon(Icons.print),
+                  tooltip: 'Print Barcode',
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => BluetoothPrintPage(
+                          barcodeData: card.barcode,
+                          cardName: card.barcode, // Using barcode as card name for now
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ],
             );
           },
@@ -280,7 +307,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
   }
 
   void _showDeleteCardDialog() {
-    final cardProvider = context.read<CardProvider>();
+    final cardProvider = context.read<CardDetailProvider>();
     final card = cardProvider.currentCard;
     if (card == null) return;
 

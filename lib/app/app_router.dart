@@ -3,21 +3,18 @@ import 'package:vsc_app/core/services/navigation_service.dart';
 import 'package:vsc_app/features/auth/data/services/auth_service.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/features/auth/presentation/pages/login_page.dart';
-import 'package:vsc_app/features/auth/presentation/pages/dashboard_page.dart';
-import 'package:vsc_app/features/orders/presentation/pages/orders_page.dart';
-import 'package:vsc_app/features/cards/presentation/pages/inventory_page.dart';
-import 'package:vsc_app/features/production/presentation/pages/production_page.dart';
-import 'package:vsc_app/features/administration/presentation/pages/administration_page.dart';
+import 'package:vsc_app/core/utils/main_layout.dart';
 import 'package:vsc_app/features/auth/presentation/pages/register_page.dart';
-import 'package:vsc_app/features/vendors/presentation/pages/vendors_page.dart';
 import 'package:vsc_app/features/vendors/presentation/pages/vendor_detail_page.dart';
 import 'package:vsc_app/features/cards/presentation/pages/card_detail_page.dart';
+import 'package:vsc_app/features/cards/presentation/providers/card_detail_provider.dart';
 import 'package:vsc_app/features/cards/presentation/pages/create_card_page.dart';
 import 'package:vsc_app/features/cards/presentation/pages/similar_cards_page.dart';
 import 'package:vsc_app/features/orders/presentation/pages/create_order_customer_search_page.dart';
 import 'package:vsc_app/features/orders/presentation/pages/create_order_page.dart';
 import 'package:vsc_app/features/orders/presentation/pages/create_order_review_page.dart';
 import 'package:vsc_app/features/orders/presentation/pages/order_detail_page.dart';
+import 'package:vsc_app/features/bills/presentation/pages/bill_page.dart';
 
 class AppRouter {
   static late final GoRouter router;
@@ -43,17 +40,22 @@ class AppRouter {
       },
       routes: [
         GoRoute(path: RouteConstants.login, name: RouteConstants.loginRouteName, builder: (context, state) => const LoginPage()),
-        GoRoute(path: RouteConstants.dashboard, name: RouteConstants.dashboardRouteName, builder: (context, state) => const DashboardPage()),
-        GoRoute(path: RouteConstants.orders, name: RouteConstants.ordersRouteName, builder: (context, state) => const OrdersPage()),
-        GoRoute(path: RouteConstants.newOrder, name: RouteConstants.newOrderRouteName, builder: (context, state) => const OrdersPage()),
-        GoRoute(path: RouteConstants.inventory, name: RouteConstants.inventoryRouteName, builder: (context, state) => const InventoryPage()),
-        GoRoute(path: RouteConstants.production, name: RouteConstants.productionRouteName, builder: (context, state) => const ProductionPage()),
+        GoRoute(path: RouteConstants.dashboard, name: RouteConstants.dashboardRouteName, builder: (context, state) => const MainLayout()),
+        GoRoute(path: RouteConstants.orders, name: RouteConstants.ordersRouteName, builder: (context, state) => const MainLayout()),
+        GoRoute(path: RouteConstants.bills, name: RouteConstants.billsRouteName, builder: (context, state) => const MainLayout()),
+        GoRoute(path: RouteConstants.newOrder, name: RouteConstants.newOrderRouteName, builder: (context, state) => const MainLayout()),
+        GoRoute(path: RouteConstants.inventory, name: RouteConstants.inventoryRouteName, builder: (context, state) => const MainLayout()),
         GoRoute(
-          path: RouteConstants.administration,
-          name: RouteConstants.administrationRouteName,
-          builder: (context, state) => const AdministrationPage(),
+          path: RouteConstants.billDetail,
+          name: RouteConstants.billDetailRouteName,
+          builder: (context, state) {
+            final billId = state.pathParameters['id']!;
+            return BillPage(billId: billId);
+          },
         ),
-        GoRoute(path: RouteConstants.vendors, name: RouteConstants.vendorsRouteName, builder: (context, state) => const VendorsPage()),
+        GoRoute(path: RouteConstants.production, name: RouteConstants.productionRouteName, builder: (context, state) => const MainLayout()),
+        GoRoute(path: RouteConstants.administration, name: RouteConstants.administrationRouteName, builder: (context, state) => const MainLayout()),
+        GoRoute(path: RouteConstants.vendors, name: RouteConstants.vendorsRouteName, builder: (context, state) => const MainLayout()),
         GoRoute(
           path: RouteConstants.vendorDetail,
           name: RouteConstants.vendorDetailRouteName,
@@ -70,7 +72,8 @@ class AppRouter {
           name: RouteConstants.cardDetailRouteName,
           builder: (context, state) {
             final cardId = state.pathParameters['id']!;
-            return CardDetailPage(cardId: cardId);
+            final cardProvider = state.extra as CardDetailProvider?;
+            return CardDetailPage(cardId: cardId, cardProvider: cardProvider);
           },
         ),
         GoRoute(

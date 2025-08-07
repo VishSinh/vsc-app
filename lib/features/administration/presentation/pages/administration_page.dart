@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/enums/user_role.dart';
-import 'package:vsc_app/core/utils/responsive_layout.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 
 import 'package:vsc_app/core/widgets/button_utils.dart';
@@ -11,7 +10,6 @@ import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart'
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
-import 'package:vsc_app/core/constants/navigation_items.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 
 class AdministrationPage extends StatefulWidget {
@@ -22,7 +20,6 @@ class AdministrationPage extends StatefulWidget {
 }
 
 class _AdministrationPageState extends State<AdministrationPage> with SingleTickerProviderStateMixin {
-  int _selectedIndex = 0; // Will be set based on permissions
   late TabController _tabController;
   String _searchQuery = '';
 
@@ -88,7 +85,6 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _setSelectedIndex();
   }
 
   @override
@@ -97,41 +93,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     super.dispose();
   }
 
-  void _onDestinationSelected(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
 
-    final destinations = _getDestinations();
-    final route = NavigationItems.getRouteForIndex(index, destinations);
-    if (route != RouteConstants.administration) {
-      context.go(route);
-    }
-  }
-
-  List<NavigationDestination> _getDestinations() {
-    final permissionProvider = context.read<PermissionProvider>();
-    return NavigationItems.getDestinationsForPermissions(
-      canManageOrders: permissionProvider.canManageOrders,
-      canManageInventory: permissionProvider.canManageInventory,
-      canManageProduction: permissionProvider.canManageProduction,
-      canManageVendors: permissionProvider.canManageVendors,
-      canManageSystem: permissionProvider.canManageSystem,
-      canViewAuditLogs: permissionProvider.canViewAuditLogs,
-    );
-  }
-
-  void _setSelectedIndex() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final destinations = _getDestinations();
-        final index = NavigationItems.getSelectedIndexForPage('administration', destinations);
-        setState(() {
-          _selectedIndex = index;
-        });
-      }
-    });
-  }
 
   List<Map<String, dynamic>> get _filteredStaff {
     return _staff.where((staff) {
@@ -156,12 +118,10 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveLayout(
-      selectedIndex: _selectedIndex,
-      destinations: _getDestinations(),
-      onDestinationSelected: _onDestinationSelected,
-      pageTitle: UITextConstants.administration,
-      child: _buildAdministrationContent(),
+    return Consumer<PermissionProvider>(
+      builder: (context, permissionProvider, child) {
+        return _buildAdministrationContent();
+      },
     );
   }
 
@@ -181,7 +141,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   const Spacer(),
                   if (isAdmin)
                     ButtonUtils.primaryButton(
-                      onPressed: () => context.go(RouteConstants.register),
+                      onPressed: () => context.push(RouteConstants.register),
                       label: UITextConstants.registerStaff,
                       icon: Icons.person_add,
                     ),

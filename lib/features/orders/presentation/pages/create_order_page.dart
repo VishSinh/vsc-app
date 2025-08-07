@@ -60,7 +60,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
       orderProvider.setErrorWithSnackBar('Please add at least one item to the order', context);
       return;
     }
-    context.go(RouteConstants.orderReview);
+    context.push(RouteConstants.orderReview, extra: orderProvider);
   }
 
   void _handleAddOrderItem(OrderItemCreationFormViewModel item) {
@@ -85,7 +85,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(UITextConstants.orderCreationTitle),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.customerSearch)),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
       ),
       body: Consumer<OrderCreateProvider>(
         builder: (context, orderProvider, child) {
@@ -373,11 +373,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
     return Row(
       children: [
         Expanded(
-          child: ButtonUtils.secondaryButton(
-            onPressed: () => context.go(RouteConstants.customerSearch),
-            label: UITextConstants.back,
-            icon: Icons.arrow_back,
-          ),
+          child: ButtonUtils.secondaryButton(onPressed: () => context.pop(), label: UITextConstants.back, icon: Icons.arrow_back),
         ),
         SizedBox(width: AppConfig.defaultPadding),
         Expanded(

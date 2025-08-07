@@ -6,9 +6,10 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
-import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
+import 'package:vsc_app/features/cards/presentation/providers/create_card_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
 import 'package:vsc_app/app/app_config.dart';
+import 'package:vsc_app/core/providers/navigation_provider.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
@@ -49,61 +50,64 @@ class _CreateCardPageState extends State<CreateCardPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(UITextConstants.createCard),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.inventory)),
-      ),
-      body: Consumer<CardProvider>(
-        builder: (context, cardProvider, child) {
-          return SingleChildScrollView(
-            padding: context.responsivePadding,
-            child: Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: context.responsiveMaxWidth),
-                child: Card(
-                  elevation: 4,
-                  child: Padding(
-                    padding: context.responsivePadding,
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Header Section
-                          SizedBox(height: context.responsiveSpacing),
+    return ChangeNotifierProvider(
+      create: (context) => CreateCardProvider(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(UITextConstants.createCard),
+          leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
+        ),
+        body: Consumer<CreateCardProvider>(
+          builder: (context, cardProvider, child) {
+            return SingleChildScrollView(
+              padding: context.responsivePadding,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: context.responsiveMaxWidth),
+                  child: Card(
+                    elevation: 4,
+                    child: Padding(
+                      padding: context.responsivePadding,
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Header Section
+                            SizedBox(height: context.responsiveSpacing),
 
-                          // Content Layout
-                          if (context.isDesktop) ...[
-                            // Desktop: Side-by-side layout
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(flex: 1, child: _buildImageSection(cardProvider)),
-                                SizedBox(width: context.responsiveSpacing),
-                                Expanded(flex: 1, child: _buildFormSection(cardProvider)),
-                              ],
-                            ),
-                          ] else ...[
-                            // Mobile/Tablet: Stacked layout
-                            _buildImageSection(cardProvider),
-                            SizedBox(height: context.isMobile ? AppConfig.defaultPadding : context.responsiveSpacing),
-                            _buildFormSection(cardProvider),
+                            // Content Layout
+                            if (context.isDesktop) ...[
+                              // Desktop: Side-by-side layout
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(flex: 1, child: _buildImageSection(cardProvider)),
+                                  SizedBox(width: context.responsiveSpacing),
+                                  Expanded(flex: 1, child: _buildFormSection(cardProvider)),
+                                ],
+                              ),
+                            ] else ...[
+                              // Mobile/Tablet: Stacked layout
+                              _buildImageSection(cardProvider),
+                              SizedBox(height: context.isMobile ? AppConfig.defaultPadding : context.responsiveSpacing),
+                              _buildFormSection(cardProvider),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildFormSection(CardProvider cardProvider) {
+  Widget _buildFormSection(CreateCardProvider cardProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -114,7 +118,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
     );
   }
 
-  Widget _buildImageSection(CardProvider cardProvider) {
+  Widget _buildImageSection(CreateCardProvider cardProvider) {
     return Card(
       elevation: 2,
       child: Padding(
@@ -422,7 +426,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
     );
   }
 
-  Widget _buildSubmitButton(CardProvider cardProvider) {
+  Widget _buildSubmitButton(CreateCardProvider cardProvider) {
     return ButtonUtils.fullWidthPrimaryButton(
       onPressed: _handleSubmit,
       label: UITextConstants.addCard,
@@ -431,7 +435,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
     );
   }
 
-  void _showImagePickerDialog(CardProvider cardProvider) {
+  void _showImagePickerDialog(CreateCardProvider cardProvider) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -461,7 +465,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
     );
   }
 
-  Future<void> _pickImage(CardProvider cardProvider, ImageSource source) async {
+  Future<void> _pickImage(CreateCardProvider cardProvider, ImageSource source) async {
     try {
       final ImagePicker picker = ImagePicker();
       final XFile? image = await picker.pickImage(source: source, maxWidth: 1024, maxHeight: 1024, imageQuality: 85);
@@ -477,7 +481,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final cardProvider = context.read<CardProvider>();
+    final cardProvider = context.read<CreateCardProvider>();
 
     // Check if image is selected
     if (cardProvider.formModel.image == null) {
@@ -507,9 +511,9 @@ class _CreateCardPageState extends State<CreateCardPage> {
     // Create the card
     await cardProvider.createCard();
 
-    // Navigate back to cards page
+    // Navigate to dashboard and clear the entire navigation stack
     if (mounted) {
-      context.go(RouteConstants.inventory);
+      context.read<NavigationProvider>().clearStackAndGoToDashboard(context);
     }
   }
 
@@ -524,7 +528,8 @@ class _CreateCardPageState extends State<CreateCardPage> {
               ButtonUtils.primaryButton(
                 onPressed: () {
                   Navigator.of(context).pop(true);
-                  context.go(RouteConstants.similarCards);
+                  final cardProvider = context.read<CreateCardProvider>();
+                  context.push(RouteConstants.similarCards, extra: cardProvider);
                 },
                 label: 'View $count Similar Cards',
               ),
@@ -534,7 +539,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
         false;
   }
 
-  Future<void> _checkSimilarCards(CardProvider cardProvider) async {
+  Future<void> _checkSimilarCards(CreateCardProvider cardProvider) async {
     if (cardProvider.formModel.image == null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please upload an image first'), backgroundColor: AppConfig.errorColor));
       return;
@@ -545,7 +550,8 @@ class _CreateCardPageState extends State<CreateCardPage> {
     if (cardProvider.similarCards.isNotEmpty && mounted) {
       final shouldView = await _showSimilarCardsDialog(cardProvider.similarCards.length);
       if (shouldView) {
-        context.go(RouteConstants.similarCards);
+        final cardProvider = context.read<CreateCardProvider>();
+        context.go(RouteConstants.similarCards, extra: cardProvider);
       }
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('No similar cards found'), backgroundColor: AppConfig.successColor));

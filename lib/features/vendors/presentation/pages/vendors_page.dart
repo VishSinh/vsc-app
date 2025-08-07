@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/models/vendor_model.dart';
-import 'package:vsc_app/core/utils/responsive_layout.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/core/widgets/shimmer_widgets.dart';
@@ -12,7 +11,6 @@ import 'package:vsc_app/features/auth/presentation/providers/permission_provider
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/widgets/create_vendor_dialog.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
-import 'package:vsc_app/core/constants/navigation_items.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 
 class VendorsPage extends StatefulWidget {
@@ -23,17 +21,21 @@ class VendorsPage extends StatefulWidget {
 }
 
 class _VendorsPageState extends State<VendorsPage> {
-  int _selectedIndex = 0; // Will be set based on permissions
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
+    _initializePage();
+  }
+
+  void _initializePage() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      AppLogger.service('VendorsPage', 'Loading vendors...');
-      context.read<VendorProvider>().loadVendors();
-      _setSelectedIndex();
+      if (mounted) {
+        AppLogger.service('VendorsPage', 'Loading vendors...');
+        context.read<VendorProvider>().loadVendors();
+      }
     });
   }
 
@@ -45,23 +47,7 @@ class _VendorsPageState extends State<VendorsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveLayout(
-      selectedIndex: _selectedIndex,
-      destinations: _getDestinations(),
-      onDestinationSelected: (index) {
-        setState(() {
-          _selectedIndex = index;
-        });
-
-        final destinations = _getDestinations();
-        final route = NavigationItems.getRouteForIndex(index, destinations);
-        if (route != '/vendors') {
-          context.go(route);
-        }
-      },
-      pageTitle: UITextConstants.vendors,
-      child: _buildVendorsContent(),
-    );
+    return _buildVendorsContent();
   }
 
   Widget _buildVendorsContent() {
@@ -181,29 +167,5 @@ class _VendorsPageState extends State<VendorsPage> {
         return const ShimmerWrapper(child: ListItemSkeleton());
       },
     );
-  }
-
-  List<NavigationDestination> _getDestinations() {
-    final permissionProvider = context.read<PermissionProvider>();
-    return NavigationItems.getDestinationsForPermissions(
-      canManageOrders: permissionProvider.canManageOrders,
-      canManageInventory: permissionProvider.canManageInventory,
-      canManageProduction: permissionProvider.canManageProduction,
-      canManageVendors: permissionProvider.canManageVendors,
-      canManageSystem: permissionProvider.canManageSystem,
-      canViewAuditLogs: permissionProvider.canViewAuditLogs,
-    );
-  }
-
-  void _setSelectedIndex() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final destinations = _getDestinations();
-        final index = NavigationItems.getSelectedIndexForPage('vendors', destinations);
-        setState(() {
-          _selectedIndex = index;
-        });
-      }
-    });
   }
 }

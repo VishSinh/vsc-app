@@ -13,8 +13,9 @@ import 'package:vsc_app/features/production/presentation/models/printing_job_vie
 
 class OrderDetailPage extends StatefulWidget {
   final String orderId;
+  final OrderListProvider? orderProvider;
 
-  const OrderDetailPage({super.key, required this.orderId});
+  const OrderDetailPage({super.key, required this.orderId, this.orderProvider});
 
   @override
   State<OrderDetailPage> createState() => _OrderDetailPageState();
@@ -35,18 +36,24 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Order Details'),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.orders)),
-      ),
-      body: _buildOrderDetailContent(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _loadOrderDetails(),
-        backgroundColor: Colors.orange,
-        heroTag: 'reload',
-        icon: const Icon(Icons.refresh, color: Colors.white),
-        label: const Text('Refresh', style: TextStyle(color: Colors.white)),
+    // If provider was passed, use it; otherwise create a new one
+    final provider = widget.orderProvider ?? OrderListProvider();
+
+    return ChangeNotifierProvider.value(
+      value: provider,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Order Details'),
+          leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.orders)),
+        ),
+        body: _buildOrderDetailContent(),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => _loadOrderDetails(),
+          backgroundColor: Colors.orange,
+          heroTag: 'reload',
+          icon: const Icon(Icons.refresh, color: Colors.white),
+          label: const Text('Refresh', style: TextStyle(color: Colors.white)),
+        ),
       ),
     );
   }

@@ -57,7 +57,7 @@ dependencies:
   flutter_secure_storage: ^9.0.0
   
   # UI Components
-  flutter_svg: ^2.0.9
+  flutter_svg: ^2.2.0
   cached_network_image: ^3.3.1
   barcode_widget: ^2.0.4
   flutter_screenutil: ^5.9.0
@@ -70,6 +70,21 @@ dependencies:
   
   # Image Picker
   image_picker: ^1.0.7
+  
+  # Barcode Scanner
+  mobile_scanner: ^7.0.1
+  
+  # Bluetooth Printing Plugins
+  blue_thermal_printer: ^1.2.3
+  print_bluetooth_thermal: ^1.1.6
+  flutter_blue_plus: ^1.35.5
+  flutter_bluetooth_printer: ^2.19.0
+  
+  # Utilities
+  barcode: ^2.2.9
+  image: ^4.5.4
+  android_intent_plus: ^5.3.0
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:

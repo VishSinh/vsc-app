@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 
-import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
+import 'package:vsc_app/features/cards/presentation/providers/create_card_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
 
 /// Form widget for entering card details
@@ -43,7 +43,7 @@ class _CardEntryFormState extends State<CardEntryForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<CardProvider, VendorProvider>(
+    return Consumer2<CreateCardProvider, VendorProvider>(
       builder: (context, cardProvider, vendorProvider, child) {
         return Form(
           key: _formKey,
@@ -150,7 +150,7 @@ class _CardEntryFormState extends State<CardEntryForm> {
 
   /// Update form field in provider
   void _updateFormField(String fieldName, String value) {
-    final cardProvider = context.read<CardProvider>();
+    final cardProvider = context.read<CreateCardProvider>();
 
     switch (fieldName) {
       case 'costPrice':
@@ -172,7 +172,7 @@ class _CardEntryFormState extends State<CardEntryForm> {
   }
 
   /// Handle form submission
-  void _handleSubmit(CardProvider cardProvider) async {
+  void _handleSubmit(CreateCardProvider cardProvider) async {
     if (_formKey.currentState?.validate() ?? false) {
       await cardProvider.createCard();
       if (widget.onSubmit != null) {

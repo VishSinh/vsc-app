@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vsc_app/app/app_config.dart';
-import 'package:vsc_app/core/utils/responsive_layout.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
-import 'package:vsc_app/core/constants/navigation_items.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
@@ -21,7 +19,26 @@ class OrdersPage extends StatefulWidget {
 }
 
 class _OrdersPageState extends State<OrdersPage> {
-  int _selectedIndex = 0;
+  @override
+  void initState() {
+    super.initState();
+    _initializePage();
+  }
+
+  void _initializePage() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadOrdersIfNeeded();
+      }
+    });
+  }
+
+  void _loadOrdersIfNeeded() {
+    final orderProvider = context.read<OrderListProvider>();
+    if (orderProvider.orders.isEmpty) {
+      _loadOrders();
+    }
+  }
 
   List<OrderViewModel> get _filteredOrders {
     final orderProvider = context.read<OrderListProvider>();
@@ -48,19 +65,6 @@ class _OrdersPageState extends State<OrdersPage> {
     return orders;
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _setSelectedIndex();
-    // Delay the initial load to ensure Scaffold is built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final orderProvider = context.read<OrderListProvider>();
-      if (mounted && orderProvider.orders.isEmpty) {
-        _loadOrders();
-      }
-    });
-  }
-
   void _loadOrders() {
     // Fetch orders from API - BaseProvider handles errors automatically
     final orderProvider = context.read<OrderListProvider>();
@@ -68,70 +72,40 @@ class _OrdersPageState extends State<OrdersPage> {
     orderProvider.fetchOrders();
   }
 
-  void _onDestinationSelected(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    final destinations = _getDestinations();
-    final route = NavigationItems.getRouteForIndex(index, destinations);
-    if (route != RouteConstants.orders) {
-      context.go(route);
-    }
-  }
-
-  List<NavigationDestination> _getDestinations() {
-    final permissionProvider = context.read<PermissionProvider>();
-    return NavigationItems.getDestinationsForPermissions(
-      canManageOrders: permissionProvider.canManageOrders,
-      canManageInventory: permissionProvider.canManageInventory,
-      canManageProduction: permissionProvider.canManageProduction,
-      canManageVendors: permissionProvider.canManageVendors,
-      canManageSystem: permissionProvider.canManageSystem,
-      canViewAuditLogs: permissionProvider.canViewAuditLogs,
-    );
-  }
-
-  void _setSelectedIndex() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final destinations = _getDestinations();
-        final index = NavigationItems.getSelectedIndexForPage('orders', destinations);
-        setState(() {
-          _selectedIndex = index;
-        });
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return ResponsiveLayout(
-      selectedIndex: _selectedIndex,
-      destinations: _getDestinations(),
-      onDestinationSelected: _onDestinationSelected,
-      pageTitle: UITextConstants.orders,
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton.extended(
-            onPressed: () => _loadOrders(),
-            backgroundColor: Colors.orange,
-            heroTag: 'reload',
-            icon: const Icon(Icons.refresh, color: Colors.white),
-            label: const Text('Refresh', style: TextStyle(color: Colors.white)),
-          ),
-          const SizedBox(height: 16),
-          FloatingActionButton.extended(
-            onPressed: () => context.go(RouteConstants.customerSearch),
-            backgroundColor: AppConfig.primaryColor,
-            heroTag: 'add',
-            icon: const Icon(Icons.add, color: Colors.white),
-            label: const Text('New Order', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-      child: _buildOrdersContent(),
+    return Consumer<OrderListProvider>(
+      builder: (context, orderProvider, child) {
+        return Column(
+          children: [
+            Expanded(child: _buildOrdersContent()),
+            // Floating action buttons
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  FloatingActionButton.extended(
+                    onPressed: () => _loadOrders(),
+                    backgroundColor: Colors.orange,
+                    heroTag: 'reload',
+                    icon: const Icon(Icons.refresh, color: Colors.white),
+                    label: const Text('Refresh', style: TextStyle(color: Colors.white)),
+                  ),
+                  const SizedBox(width: 16),
+                  FloatingActionButton.extended(
+                    onPressed: () => context.go(RouteConstants.customerSearch),
+                    backgroundColor: AppConfig.primaryColor,
+                    heroTag: 'add',
+                    icon: const Icon(Icons.add, color: Colors.white),
+                    label: const Text('New Order', style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -220,7 +194,10 @@ class _OrdersPageState extends State<OrdersPage> {
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           child: InkWell(
-            onTap: () => context.go(RouteConstants.orderDetail.replaceAll(':id', order.id)),
+            onTap: () {
+              final orderProvider = context.read<OrderListProvider>();
+              context.go(RouteConstants.orderDetail.replaceAll(':id', order.id), extra: orderProvider);
+            },
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -447,7 +424,10 @@ class _OrdersPageState extends State<OrdersPage> {
 
   Widget _buildDesktopRow(OrderViewModel order, double rowHeight) {
     return InkWell(
-      onTap: () => context.go(RouteConstants.orderDetail.replaceAll(':id', order.id)),
+      onTap: () {
+        final orderProvider = context.read<OrderListProvider>();
+        context.go(RouteConstants.orderDetail.replaceAll(':id', order.id), extra: orderProvider);
+      },
       child: Container(
         height: rowHeight,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

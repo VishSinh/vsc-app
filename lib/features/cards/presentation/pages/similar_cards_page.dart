@@ -6,11 +6,14 @@ import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
-import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
+import 'package:vsc_app/features/cards/presentation/providers/create_card_provider.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
+import 'package:vsc_app/core/providers/navigation_provider.dart';
 
 class SimilarCardsPage extends StatefulWidget {
-  const SimilarCardsPage({super.key});
+  final CreateCardProvider? cardProvider;
+
+  const SimilarCardsPage({super.key, this.cardProvider});
 
   @override
   State<SimilarCardsPage> createState() => _SimilarCardsPageState();
@@ -27,7 +30,7 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
   }
 
   Future<void> _loadSimilarCards() async {
-    final cardProvider = context.read<CardProvider>();
+    final cardProvider = context.read<CreateCardProvider>();
 
     // Use the similar cards from provider
     setState(() => _isLoading = true);
@@ -38,7 +41,7 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
   }
 
   Future<void> _purchaseCard(SimilarCardViewModel card) async {
-    context.read<CardProvider>();
+    context.read<CreateCardProvider>();
 
     // Show quantity dialog
     final quantity = await _showQuantityDialog();
@@ -48,7 +51,9 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Successfully purchased $quantity units of ${card.barcode}'), backgroundColor: AppConfig.successColor));
-        context.go(RouteConstants.inventory);
+
+        // Navigate to dashboard and clear the entire navigation stack
+        context.read<NavigationProvider>().clearStackAndGoToDashboard(context);
       }
     }
   }
@@ -83,45 +88,51 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Similar Cards'),
-        leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.createCard)),
-      ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : _similarCards.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.search_off, size: AppConfig.iconSizeLarge, color: AppConfig.grey400),
-                  SizedBox(height: AppConfig.defaultPadding),
-                  Text('No similar cards found', style: ResponsiveText.getHeadline(context).copyWith(color: AppConfig.grey400)),
-                ],
-              ),
-            )
-          : Padding(
-              padding: EdgeInsets.all(AppConfig.defaultPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Similar Cards Found', style: ResponsiveText.getHeadline(context)),
-                  SizedBox(height: AppConfig.defaultPadding),
-                  Text('${_similarCards.length} similar cards found. Select one to purchase stock:', style: ResponsiveText.getBody(context)),
-                  SizedBox(height: AppConfig.largePadding),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: _similarCards.length,
-                      itemBuilder: (context, index) {
-                        final card = _similarCards[index];
-                        return _buildSimilarCardItem(card);
-                      },
+    // If provider was passed, use it; otherwise create a new one
+    final provider = widget.cardProvider ?? CreateCardProvider();
+
+    return ChangeNotifierProvider.value(
+      value: provider,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Similar Cards'),
+          leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () => context.pop()),
+        ),
+        body: _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : _similarCards.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.search_off, size: AppConfig.iconSizeLarge, color: AppConfig.grey400),
+                    SizedBox(height: AppConfig.defaultPadding),
+                    Text('No similar cards found', style: ResponsiveText.getHeadline(context).copyWith(color: AppConfig.grey400)),
+                  ],
+                ),
+              )
+            : Padding(
+                padding: EdgeInsets.all(AppConfig.defaultPadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Similar Cards Found', style: ResponsiveText.getHeadline(context)),
+                    SizedBox(height: AppConfig.defaultPadding),
+                    Text('${_similarCards.length} similar cards found. Select one to purchase stock:', style: ResponsiveText.getBody(context)),
+                    SizedBox(height: AppConfig.largePadding),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: _similarCards.length,
+                        itemBuilder: (context, index) {
+                          final card = _similarCards[index];
+                          return _buildSimilarCardItem(card);
+                        },
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 

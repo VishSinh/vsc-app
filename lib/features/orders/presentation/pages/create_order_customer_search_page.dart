@@ -45,7 +45,7 @@ class _CreateOrderCustomerSearchPageState extends State<CreateOrderCustomerSearc
         orderProvider.setSelectedCustomerData(customer);
         AppLogger.debug('CustomerSearchPage: Customer set in OrderProvider, navigating to order items');
         SnackbarUtils.showSuccess(context, UITextConstants.customerFoundSuccess);
-        context.go(RouteConstants.orderItems);
+        context.push(RouteConstants.orderItems, extra: orderProvider);
       } else {
         // Customer not found - show actual API error and suggest creating
         AppLogger.debug('CustomerSearchPage: Customer not found, showing API error');
@@ -71,7 +71,7 @@ class _CreateOrderCustomerSearchPageState extends State<CreateOrderCustomerSearc
         if (customer != null) {
           orderProvider.setSelectedCustomerData(customer);
           SnackbarUtils.showSuccess(context, UITextConstants.customerCreatedSuccessfully);
-          context.go(RouteConstants.orderItems);
+          context.go(RouteConstants.orderItems, extra: orderProvider);
         } else {
           SnackbarUtils.showError(context, UITextConstants.customerRetrieveFailed);
         }

@@ -2,6 +2,7 @@
 class UITextConstants {
   // ================================ NAVIGATION LABELS ================================
   static const String dashboard = 'Dashboard';
+  static const String bills = 'Bills';
   static const String orders = 'Orders';
   static const String inventory = 'Inventory';
   static const String production = 'Production';

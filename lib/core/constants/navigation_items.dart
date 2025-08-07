@@ -21,11 +21,16 @@ class NavigationItems {
     required bool canManageVendors,
     required bool canManageSystem,
     required bool canViewAuditLogs,
+    required bool canManageBilling,
+    required bool canManagePayments,
   }) {
     final destinations = <NavigationDestination>[const NavigationDestination(icon: Icon(Icons.dashboard), label: UITextConstants.dashboard)];
 
     if (canManageOrders) {
       destinations.add(const NavigationDestination(icon: Icon(Icons.shopping_cart), label: UITextConstants.orders));
+    }
+    if (canManageBilling || canManagePayments) {
+      destinations.add(const NavigationDestination(icon: Icon(Icons.receipt_long), label: UITextConstants.bills));
     }
 
     if (canManageInventory) {
@@ -54,6 +59,8 @@ class NavigationItems {
         return 0;
       case 'orders':
         return destinations.indexWhere((d) => d.label == UITextConstants.orders);
+      case 'bills':
+        return destinations.indexWhere((d) => d.label == UITextConstants.bills);
       case 'inventory':
         return destinations.indexWhere((d) => d.label == UITextConstants.inventory);
       case 'production':
@@ -77,6 +84,8 @@ class NavigationItems {
         return RouteConstants.dashboard;
       case UITextConstants.orders:
         return RouteConstants.orders;
+      case UITextConstants.bills:
+        return RouteConstants.bills;
       case UITextConstants.inventory:
         return RouteConstants.inventory;
       case UITextConstants.production:

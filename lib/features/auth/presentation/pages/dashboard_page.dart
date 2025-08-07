@@ -3,13 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/enums/user_role.dart';
-import 'package:vsc_app/core/utils/responsive_layout.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
-import 'package:vsc_app/core/constants/navigation_items.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -20,12 +18,15 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  int _selectedIndex = 0;
   bool _isLoading = true; // Show shimmer while permissions load
 
   @override
   void initState() {
     super.initState();
+    _initializePage();
+  }
+
+  void _initializePage() {
     // Check if permissions are loaded, if not show shimmer
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final permissionProvider = context.read<PermissionProvider>();
@@ -66,45 +67,9 @@ class _DashboardPageState extends State<DashboardPage> {
     return Consumer2<AuthProvider, PermissionProvider>(
       builder: (context, authProvider, permissionProvider, child) {
         final userRole = authProvider.userRole ?? UserRole.sales;
-        final destinations = NavigationItems.getDestinationsForPermissions(
-          canManageOrders: permissionProvider.canManageOrders,
-          canManageInventory: permissionProvider.canManageInventory,
-          canManageProduction: permissionProvider.canManageProduction,
-          canManageVendors: permissionProvider.canManageVendors,
-          canManageSystem: permissionProvider.canManageSystem,
-          canViewAuditLogs: permissionProvider.canViewAuditLogs,
-        );
-
-        return ResponsiveLayout(
-          selectedIndex: _selectedIndex,
-          destinations: destinations,
-          onDestinationSelected: (index) => _onDestinationSelected(index, destinations),
-          actions: [IconButton(icon: const Icon(Icons.logout), onPressed: _handleLogout)],
-          pageTitle: UITextConstants.dashboard,
-          child: _buildDashboardContent(userRole, permissionProvider),
-        );
+        return _buildDashboardContent(userRole, permissionProvider);
       },
     );
-  }
-
-  void _onDestinationSelected(int index, List<NavigationDestination> destinations) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    if (index >= destinations.length) return;
-
-    final route = NavigationItems.getRouteForIndex(index, destinations);
-    if (route != '/') {
-      context.go(route);
-    }
-  }
-
-  Future<void> _handleLogout() async {
-    final authProvider = context.read<AuthProvider>();
-    authProvider.setContext(context);
-    await authProvider.logout();
-    if (mounted) context.go(RouteConstants.login);
   }
 
   Widget _buildDashboardContent(UserRole userRole, PermissionProvider permissionProvider) {
@@ -324,7 +289,7 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => context.go(RouteConstants.customerSearch),
+          onTap: () => context.push(RouteConstants.customerSearch),
           borderRadius: BorderRadius.circular(AppConfig.defaultRadius),
           child: Padding(
             padding: EdgeInsets.all(AppConfig.largePadding),

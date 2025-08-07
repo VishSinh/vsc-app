@@ -7,17 +7,16 @@ class AppConstants {
   // API Configuration
   // Dynamically determine the correct API base URL based on platform
   static String get apiBaseUrl {
+    bool isLocal = true;
     if (kIsWeb) {
-      // For web, use localhost
-      // return 'https://vsc-be.onrender.com/api/v1';
-      return 'http://localhost:8000/api/v1';
+      return isLocal ? 'http://localhost:8000/api/v1' : 'https://vsc-be.onrender.com/api/v1';
     } else if (Platform.isAndroid) {
-      // return 'https://vsc-be.onrender.com/api/v1';
+      return
       // For Android emulator, use 10.0.2.2 to reach host machine's localhost
-      return 'http://10.0.2.2:8000/api/v1';
+      isLocal ? 'http://10.0.2.2:8000/api/v1' : 'https://vsc-be.onrender.com/api/v1';
     } else {
       // For iOS simulator and other platforms, use localhost
-      return 'http://localhost:8000/api/v1';
+      return isLocal ? 'http://localhost:8000/api/v1' : 'https://vsc-be.onrender.com/api/v1';
     }
   }
 
@@ -50,6 +49,9 @@ class AppConstants {
   static const String printersEndpoint = '/printers/';
   static const String tracingStudiosEndpoint = '/tracing-studios/';
   static const String boxMakersEndpoint = '/box-makers/';
+  // Bills
+  static const String billsEndpoint = '/bills/';
+
   // ==========================================================================
 
   // Pagination

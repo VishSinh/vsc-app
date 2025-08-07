@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vsc_app/app/app_config.dart';
-import 'package:vsc_app/core/utils/responsive_layout.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
-import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
+import 'package:vsc_app/features/cards/presentation/providers/card_detail_provider.dart';
+import 'package:vsc_app/features/cards/presentation/providers/card_list_provider.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
-import 'package:vsc_app/core/constants/navigation_items.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 
 class InventoryPage extends StatefulWidget {
@@ -22,129 +21,98 @@ class InventoryPage extends StatefulWidget {
 }
 
 class _InventoryPageState extends State<InventoryPage> {
-  final TextEditingController _searchController = TextEditingController();
-
-  void _onDestinationSelected(int index) {
-    final cardProvider = context.read<CardProvider>();
-    cardProvider.setSelectedIndex(index);
-
-    final destinations = _getDestinations();
-    final route = NavigationItems.getRouteForIndex(index, destinations);
-    if (route != '/inventory') {
-      context.go(route);
-    }
-  }
-
-  List<NavigationDestination> _getDestinations() {
-    final permissionProvider = context.read<PermissionProvider>();
-    return NavigationItems.getDestinationsForPermissions(
-      canManageOrders: permissionProvider.canManageOrders,
-      canManageInventory: permissionProvider.canManageInventory,
-      canManageProduction: permissionProvider.canManageProduction,
-      canManageVendors: permissionProvider.canManageVendors,
-      canManageSystem: permissionProvider.canManageSystem,
-      canViewAuditLogs: permissionProvider.canViewAuditLogs,
-    );
-  }
-
-  void _setSelectedIndex() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final destinations = _getDestinations();
-        final index = NavigationItems.getSelectedIndexForPage('inventory', destinations);
-        final cardProvider = context.read<CardProvider>();
-        cardProvider.setSelectedIndex(index);
-      }
-    });
-  }
-
   @override
   void initState() {
     super.initState();
+    _initializePage();
+  }
 
+  void _initializePage() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final cardProvider = context.read<CardProvider>();
-      if (mounted && cardProvider.cards.isEmpty) {
-        _loadCards();
+      if (mounted) {
+        _loadCardsIfNeeded();
+        _initializePermissions();
       }
     });
+  }
 
-    _initializePermissions();
-    _setSelectedIndex();
+  void _loadCardsIfNeeded() {
+    final cardProvider = context.read<CardListProvider>();
+    if (cardProvider.cards.isEmpty) {
+      _loadCards();
+    }
   }
 
   void _loadCards() {
-    final cardProvider = context.read<CardProvider>();
+    final cardProvider = context.read<CardListProvider>();
     cardProvider.setContext(context);
     cardProvider.loadCards();
   }
 
   void _initializePermissions() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final permissionProvider = context.read<PermissionProvider>();
-      if (!permissionProvider.isInitialized) {
-        permissionProvider.initializePermissions().catchError((error) {
-          // Handle error if needed
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
+    final permissionProvider = context.read<PermissionProvider>();
+    if (!permissionProvider.isInitialized) {
+      permissionProvider.initializePermissions().catchError((error) {
+        // Handle error if needed
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CardProvider>(
-      builder: (context, cardProvider, child) {
-        return ResponsiveLayout(
-          selectedIndex: cardProvider.selectedIndex,
-          destinations: _getDestinations(),
-          onDestinationSelected: _onDestinationSelected,
-          pageTitle: UITextConstants.inventory,
-          floatingActionButton: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
+    return ChangeNotifierProvider(
+      create: (context) => CardDetailProvider(),
+      child: Consumer<CardListProvider>(
+        builder: (context, cardProvider, child) {
+          return Column(
             children: [
-              FloatingActionButton.extended(
-                onPressed: () => _loadCards(),
-                backgroundColor: Colors.orange,
-                heroTag: 'reload',
-                icon: const Icon(Icons.refresh, color: Colors.white),
-                label: const Text('Refresh', style: TextStyle(color: Colors.white)),
-              ),
-              const SizedBox(height: 16),
-              Consumer<PermissionProvider>(
-                builder: (context, permissionProvider, child) {
-                  if (permissionProvider.canCreate('card')) {
-                    return FloatingActionButton.extended(
-                      onPressed: () => context.go(RouteConstants.createCard),
-                      backgroundColor: AppConfig.primaryColor,
-                      heroTag: 'add',
-                      icon: const Icon(Icons.add, color: Colors.white),
-                      label: const Text('New Card', style: TextStyle(color: Colors.white)),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
+              Expanded(child: _buildInventoryContent()),
+              // Floating action buttons
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    FloatingActionButton.extended(
+                      onPressed: _loadCards,
+                      backgroundColor: Colors.orange,
+                      heroTag: 'reload',
+                      icon: const Icon(Icons.refresh, color: Colors.white),
+                      label: const Text('Refresh', style: TextStyle(color: Colors.white)),
+                    ),
+                    const SizedBox(width: 16),
+                    Consumer<PermissionProvider>(
+                      builder: (context, permissionProvider, child) {
+                        if (permissionProvider.canCreate('card')) {
+                          return FloatingActionButton.extended(
+                            onPressed: () => context.push(RouteConstants.createCard),
+                            backgroundColor: AppConfig.primaryColor,
+                            heroTag: 'add',
+                            icon: const Icon(Icons.add, color: Colors.white),
+                            label: const Text('New Card', style: TextStyle(color: Colors.white)),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ],
+                ),
               ),
             ],
-          ),
-          child: _buildInventoryContent(),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
   Widget _buildInventoryContent() {
     return Padding(
-      padding: context.responsivePadding,
+      padding: const EdgeInsets.all(8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Cards List Section
+          const InventoryActionButtons(),
+          const SizedBox(height: 16),
           Expanded(child: _buildCardsListSection()),
         ],
       ),
@@ -152,7 +120,7 @@ class _InventoryPageState extends State<InventoryPage> {
   }
 
   Widget _buildCardsListSection() {
-    return Consumer<CardProvider>(
+    return Consumer<CardListProvider>(
       builder: (context, cardProvider, child) {
         if (cardProvider.isLoading) {
           return const LoadingWidget(message: 'Loading cards...');
@@ -161,7 +129,7 @@ class _InventoryPageState extends State<InventoryPage> {
         return Column(
           children: [
             Expanded(child: _buildCardsList()),
-            _buildPagination(cardProvider),
+            InventoryPagination(cardProvider: cardProvider),
           ],
         );
       },
@@ -169,7 +137,7 @@ class _InventoryPageState extends State<InventoryPage> {
   }
 
   Widget _buildCardsList() {
-    return Consumer<CardProvider>(
+    return Consumer<CardListProvider>(
       builder: (context, cardProvider, child) {
         final filteredCards = cardProvider.getFilteredCards(cardProvider.searchQuery);
 
@@ -179,26 +147,21 @@ class _InventoryPageState extends State<InventoryPage> {
 
         return LayoutBuilder(
           builder: (context, constraints) {
-            // Calculate responsive grid parameters to maintain consistent card sizes
-            final availableWidth = constraints.maxWidth;
-            final cardWidth = context.isDesktop ? 280.0 : 160.0; // Fixed card width
-            final crossAxisCount = (availableWidth / (cardWidth + AppConfig.defaultPadding)).floor();
-            final actualCrossAxisCount = crossAxisCount.clamp(1, context.isDesktop ? 6 : 2); // Max 6 on desktop, 2 on mobile
-            final childAspectRatio = 0.8; // Fixed aspect ratio for consistent card proportions
+            final gridConfig = _calculateGridConfig(constraints.maxWidth);
 
             return GridView.builder(
               shrinkWrap: true,
               physics: const ClampingScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: actualCrossAxisCount,
-                childAspectRatio: childAspectRatio,
+                crossAxisCount: gridConfig.crossAxisCount,
+                childAspectRatio: gridConfig.childAspectRatio,
                 crossAxisSpacing: AppConfig.defaultPadding,
                 mainAxisSpacing: AppConfig.defaultPadding,
               ),
               itemCount: filteredCards.length,
               itemBuilder: (context, index) {
                 final card = filteredCards[index];
-                return _buildCardItem(card);
+                return InventoryCardItem(card: card);
               },
             );
           },
@@ -207,66 +170,213 @@ class _InventoryPageState extends State<InventoryPage> {
     );
   }
 
-  Widget _buildCardItem(CardViewModel card) {
-    return Card(
-      child: InkWell(
-        onTap: () => context.goNamed(RouteConstants.cardDetailRouteName, pathParameters: {'id': card.id}),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image section - more prominent, especially on mobile
-            Expanded(
-              flex: context.isMobile ? 4 : 3, // Much more space for image on mobile
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(borderRadius: BorderRadius.vertical(top: Radius.circular(AppConfig.defaultRadius))),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(AppConfig.defaultRadius)),
-                  child: Image.network(
-                    card.image,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      color: AppConfig.grey300,
-                      child: Icon(Icons.image_not_supported, color: AppConfig.grey400, size: AppConfig.iconSizeLarge),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // Content section - more compact and image-focused
-            Expanded(
-              flex: context.isMobile ? 2 : 2, // Reduced content space to give more to image
-              child: Padding(
-                padding: EdgeInsets.all(context.isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    // Price and Stock - compact layout
-                    Text(
-                      '₹${card.sellPrice}',
-                      style: context.isMobile
-                          ? ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.bold)
-                          : ResponsiveText.getTitle(context),
-                    ),
-                    Text('-₹${card.maxDiscount}', style: ResponsiveText.getBody(context).copyWith(color: AppConfig.errorColor)),
-                    Text(
-                      'Stock: ${card.quantity}',
-                      style: context.isMobile ? ResponsiveText.getCaption(context) : ResponsiveText.getCaption(context),
-                    ),
-                    // Max Discount - compact display
-                  ],
-                ),
-              ),
-            ),
-          ],
+  GridConfig _calculateGridConfig(double availableWidth) {
+    const cardWidth = 280.0; // Fixed card width for desktop
+    const mobileCardWidth = 160.0; // Fixed card width for mobile
+    const childAspectRatio = 0.8;
+
+    final effectiveCardWidth = context.isDesktop ? cardWidth : mobileCardWidth;
+    final crossAxisCount = (availableWidth / (effectiveCardWidth + AppConfig.defaultPadding)).floor();
+    final maxCrossAxisCount = context.isDesktop ? 6 : 2;
+    final actualCrossAxisCount = crossAxisCount.clamp(1, maxCrossAxisCount);
+
+    return GridConfig(crossAxisCount: actualCrossAxisCount, childAspectRatio: childAspectRatio);
+  }
+}
+
+class GridConfig {
+  final int crossAxisCount;
+  final double childAspectRatio;
+
+  const GridConfig({required this.crossAxisCount, required this.childAspectRatio});
+}
+
+class InventoryActionButtons extends StatelessWidget {
+  const InventoryActionButtons({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (context.isMobile) {
+      return _buildMobileButtons(context);
+    } else {
+      return _buildDesktopButtons(context);
+    }
+  }
+
+  Widget _buildMobileButtons(BuildContext context) {
+    return Row(
+      children: [
+        _buildActionButton(context, icon: Icons.image_search, color: Colors.blue[600]!, onPressed: () => _onSearchByImage(context)),
+        const SizedBox(width: 8),
+        _buildActionButton(context, icon: Icons.qr_code_scanner, color: Colors.green[600]!, onPressed: () => _onScanBarcode(context)),
+        const SizedBox(width: 8),
+        _buildActionButton(context, icon: Icons.filter_list, color: Colors.orange[600]!, onPressed: () => _onFilters(context)),
+      ],
+    );
+  }
+
+  Widget _buildDesktopButtons(BuildContext context) {
+    return Row(
+      children: [
+        _buildActionButtonWithText(
+          context,
+          icon: Icons.image_search,
+          label: 'Search by Image',
+          color: Colors.blue[600]!,
+          onPressed: () => _onSearchByImage(context),
+        ),
+        const SizedBox(width: 8),
+        _buildActionButtonWithText(
+          context,
+          icon: Icons.qr_code_scanner,
+          label: 'Scan Barcode',
+          color: Colors.green[600]!,
+          onPressed: () => _onScanBarcode(context),
+        ),
+        const SizedBox(width: 8),
+        _buildActionButtonWithText(
+          context,
+          icon: Icons.filter_list,
+          label: 'Filters',
+          color: Colors.orange[600]!,
+          onPressed: () => _onFilters(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton(BuildContext context, {required IconData icon, required Color color, required VoidCallback onPressed}) {
+    return Expanded(
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        child: Icon(icon, size: 24),
+      ),
+    );
+  }
+
+  Widget _buildActionButtonWithText(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return Expanded(
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon),
+        label: Text(label),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         ),
       ),
     );
   }
 
-  Widget _buildPagination(CardProvider cardProvider) {
-    if (cardProvider.pagination == null) return const SizedBox.shrink();
+  void _onSearchByImage(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Search by Image functionality coming soon!')));
+  }
+
+  void _onScanBarcode(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Barcode scanning functionality coming soon!')));
+  }
+
+  void _onFilters(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Filters functionality coming soon!')));
+  }
+}
+
+class InventoryCardItem extends StatelessWidget {
+  final CardViewModel card;
+
+  const InventoryCardItem({super.key, required this.card});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: InkWell(
+        onTap: () {
+          final cardDetailProvider = context.read<CardDetailProvider>();
+          context.goNamed(RouteConstants.cardDetailRouteName, pathParameters: {'id': card.id}, extra: cardDetailProvider);
+        },
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildImageSection(context), _buildContentSection(context)]),
+      ),
+    );
+  }
+
+  Widget _buildImageSection(BuildContext context) {
+    final imageFlex = context.isMobile ? 4 : 3;
+
+    return Expanded(
+      flex: imageFlex,
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(borderRadius: BorderRadius.vertical(top: Radius.circular(AppConfig.defaultRadius))),
+        child: ClipRRect(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppConfig.defaultRadius)),
+          child: Image.network(
+            card.image,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => Container(
+              color: AppConfig.grey300,
+              child: Icon(Icons.image_not_supported, color: AppConfig.grey400, size: AppConfig.iconSizeLarge),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContentSection(BuildContext context) {
+    final contentFlex = context.isMobile ? 2 : 2;
+    final padding = context.isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding;
+
+    return Expanded(
+      flex: contentFlex,
+      child: Padding(
+        padding: EdgeInsets.all(padding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [_buildPriceText(context), _buildDiscountText(context), _buildStockText(context)],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPriceText(BuildContext context) {
+    final textStyle = context.isMobile ? ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.bold) : ResponsiveText.getTitle(context);
+
+    return Text('₹${card.sellPrice}', style: textStyle);
+  }
+
+  Widget _buildDiscountText(BuildContext context) {
+    return Text('-₹${card.maxDiscount}', style: ResponsiveText.getBody(context).copyWith(color: AppConfig.errorColor));
+  }
+
+  Widget _buildStockText(BuildContext context) {
+    return Text('Stock: ${card.quantity}', style: ResponsiveText.getCaption(context));
+  }
+}
+
+class InventoryPagination extends StatelessWidget {
+  final CardListProvider cardProvider;
+
+  const InventoryPagination({super.key, required this.cardProvider});
+
+  @override
+  Widget build(BuildContext context) {
+    if (cardProvider.pagination == null) {
+      return const SizedBox.shrink();
+    }
 
     return Padding(
       padding: const EdgeInsets.all(16.0),

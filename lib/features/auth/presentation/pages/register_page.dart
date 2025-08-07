@@ -77,7 +77,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
       title: Text(UITextConstants.registerTitle),
-      leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.administration)),
+      leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
     ),
     body: SingleChildScrollView(
       padding: ResponsiveUtils.getResponsivePadding(context),

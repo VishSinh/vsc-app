@@ -76,7 +76,7 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(UITextConstants.vendorDetails),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.vendors)),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
         actions: _buildActionButtons(),
       ),
       body: _isLoading

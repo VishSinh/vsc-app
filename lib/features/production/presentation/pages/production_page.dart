@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/enums/job_status.dart';
-import 'package:vsc_app/core/utils/responsive_layout.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
+import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 
 class ProductionPage extends StatefulWidget {
   const ProductionPage({super.key});
@@ -16,7 +17,6 @@ class ProductionPage extends StatefulWidget {
 }
 
 class _ProductionPageState extends State<ProductionPage> with SingleTickerProviderStateMixin {
-  int _selectedIndex = 3; // Production tab
   late TabController _tabController;
   String _searchQuery = '';
   String _statusFilter = 'All';
@@ -58,14 +58,6 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
     },
   ];
 
-  final List<NavigationDestination> _destinations = [
-    const NavigationDestination(icon: Icon(Icons.dashboard), label: UITextConstants.dashboard),
-    const NavigationDestination(icon: Icon(Icons.shopping_cart), label: UITextConstants.orders),
-    const NavigationDestination(icon: Icon(Icons.inventory), label: UITextConstants.inventory),
-    const NavigationDestination(icon: Icon(Icons.print), label: UITextConstants.production),
-    const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: UITextConstants.administration),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -76,28 +68,6 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
   void dispose() {
     _tabController.dispose();
     super.dispose();
-  }
-
-  void _onDestinationSelected(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    switch (index) {
-      case 0:
-        context.go(RouteConstants.dashboard);
-        break;
-      case 1:
-        context.go(RouteConstants.orders);
-        break;
-      case 2:
-        context.go(RouteConstants.inventory);
-        break;
-      case 3:
-        break; // Already on production
-      case 4:
-        context.go(RouteConstants.administration);
-        break;
-    }
   }
 
   List<Map<String, dynamic>> get _filteredPrintingJobs {
@@ -122,12 +92,10 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveLayout(
-      selectedIndex: _selectedIndex,
-      destinations: _destinations,
-      onDestinationSelected: _onDestinationSelected,
-      pageTitle: UITextConstants.production,
-      child: _buildProductionContent(),
+    return Consumer<PermissionProvider>(
+      builder: (context, permissionProvider, child) {
+        return _buildProductionContent();
+      },
     );
   }
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:nested/nested.dart';
 import 'package:provider/provider.dart';
 import 'package:logging/logging.dart';
 
@@ -10,10 +9,13 @@ import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
-import 'package:vsc_app/features/cards/presentation/providers/card_provider.dart';
+
 import 'package:vsc_app/features/customers/presentation/providers/customer_provider.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_create_provider.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
+import 'package:vsc_app/features/bills/presentation/provider/bill_provider.dart';
+import 'package:vsc_app/core/providers/navigation_provider.dart';
+import 'package:vsc_app/features/cards/presentation/providers/card_list_provider.dart';
 
 void main() {
   // Initialize the logger
@@ -29,14 +31,16 @@ class VSCApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MultiProvider(
-    providers: <SingleChildWidget>[
+    providers: [
       ChangeNotifierProvider(create: (BuildContext context) => PermissionProvider()),
       ChangeNotifierProvider(create: (BuildContext context) => VendorProvider()),
-      ChangeNotifierProvider(create: (BuildContext context) => CardProvider()),
       ChangeNotifierProvider(create: (BuildContext context) => CustomerProvider()),
-      ChangeNotifierProvider(create: (BuildContext context) => OrderCreateProvider()),
-      ChangeNotifierProvider(create: (BuildContext context) => OrderListProvider()),
       ChangeNotifierProvider(create: (BuildContext context) => AuthProvider()),
+      ChangeNotifierProvider(create: (context) => BillProvider()),
+      ChangeNotifierProvider(create: (context) => NavigationProvider()),
+      ChangeNotifierProvider(create: (context) => OrderListProvider()),
+      ChangeNotifierProvider(create: (context) => CardListProvider()),
+      ChangeNotifierProvider(create: (context) => OrderCreateProvider()),
     ],
     child: AuthInitializer(child: _buildApp()),
   );
