@@ -85,21 +85,7 @@ class _BillSearchPageState extends State<BillSearchPage> {
             child: provider.isLoading
                 ? const LoadingWidget(message: 'Searching bills...')
                 : provider.bills.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.receipt_long, size: 64, color: Colors.grey[600]),
-                        SizedBox(height: AppConfig.defaultPadding),
-                        Text('No bills found', style: Theme.of(context).textTheme.titleLarge?.copyWith(color: Colors.grey[600])),
-                        SizedBox(height: AppConfig.smallPadding),
-                        Text(
-                          'Try searching with a different phone number',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[500]),
-                        ),
-                      ],
-                    ),
-                  )
+                ? const EmptyStateWidget(message: 'Search for bills by phone number', icon: Icons.receipt_long)
                 : ListView.builder(
                     itemCount: provider.bills.length,
                     itemBuilder: (context, index) {

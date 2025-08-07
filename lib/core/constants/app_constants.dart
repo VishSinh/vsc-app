@@ -51,6 +51,7 @@ class AppConstants {
   static const String boxMakersEndpoint = '/box-makers/';
   // Bills
   static const String billsEndpoint = '/bills/';
+  static const String paymentsEndpoint = '/payments/';
 
   // ==========================================================================
 
