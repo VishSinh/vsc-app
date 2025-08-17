@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/app/app_config.dart';
-import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
@@ -159,7 +158,7 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Vendor ID: ${card.vendorId}'),
+            Text('Vendor: ${card.vendorId}'),
             Text('Price: ₹${card.sellPrice}'),
             Text('Quantity: ${card.quantity}'),
             Text('Max Discount: ${card.maxDiscount}%'),

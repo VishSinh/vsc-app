@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/core/constants/navigation_items.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
-import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
+import 'package:vsc_app/features/home/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 
 class NavigationProvider extends ChangeNotifier {
@@ -58,9 +58,7 @@ class NavigationProvider extends ChangeNotifier {
     final destinations = _getDestinations(context);
     final route = NavigationItems.getRouteForIndex(index, destinations);
 
-    if (route != null) {
-      context.go(route);
-    }
+    context.go(route);
   }
 
   /// Navigate to a specific route and update selected index

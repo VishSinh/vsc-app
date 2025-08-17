@@ -43,7 +43,7 @@ class VendorService extends ApiService {
 
   /// Get vendor by ID
   Future<ApiResponse<Vendor>> getVendorById(String id) async {
-    AppLogger.service('VendorService', 'Getting vendor by ID: $id');
+    AppLogger.service('VendorService', 'Getting vendor details');
     AppLogger.debug('VendorService: Endpoint: ${AppConstants.vendorsEndpoint}$id/');
 
     final response = await executeRequest(() => get('${AppConstants.vendorsEndpoint}$id/'), (json) {

@@ -4,13 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 
-import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_detail_provider.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
-import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
+import 'package:vsc_app/core/widgets/pagination_widget.dart';
 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
@@ -77,35 +76,7 @@ class _OrdersPageState extends State<OrdersPage> {
   Widget build(BuildContext context) {
     return Consumer<OrderListProvider>(
       builder: (context, orderProvider, child) {
-        return Column(
-          children: [
-            Expanded(child: _buildOrdersContent()),
-            // Floating action buttons
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  FloatingActionButton.extended(
-                    onPressed: () => _loadOrders(),
-                    backgroundColor: Colors.orange,
-                    heroTag: 'reload',
-                    icon: const Icon(Icons.refresh, color: Colors.white),
-                    label: const Text('Refresh', style: TextStyle(color: Colors.white)),
-                  ),
-                  const SizedBox(width: 16),
-                  FloatingActionButton.extended(
-                    onPressed: () => context.go(RouteConstants.customerSearch),
-                    backgroundColor: AppConfig.primaryColor,
-                    heroTag: 'add',
-                    icon: const Icon(Icons.add, color: Colors.white),
-                    label: const Text('New Order', style: TextStyle(color: Colors.white)),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
+        return _buildOrdersContent();
       },
     );
   }
@@ -117,14 +88,7 @@ class _OrdersPageState extends State<OrdersPage> {
           return const LoadingWidget(message: 'Loading orders...');
         }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildFilters(),
-            SizedBox(height: AppConfig.defaultPadding),
-            Expanded(child: _buildOrdersList(orderProvider)),
-          ],
-        );
+        return _buildOrdersList(orderProvider);
       },
     );
   }
@@ -179,10 +143,11 @@ class _OrdersPageState extends State<OrdersPage> {
       return const Center(child: Text('No orders found'));
     }
 
-    return Column(
+    return Stack(
+      alignment: Alignment.bottomCenter,
       children: [
-        Expanded(child: context.isMobile ? _buildMobileList() : _buildDesktopTable()),
-        _buildPagination(orderProvider),
+        context.isMobile ? _buildMobileList() : _buildDesktopTable(),
+        if (orderProvider.pagination != null) Positioned(bottom: 10, child: _buildPagination(orderProvider)),
       ],
     );
   }
@@ -322,7 +287,7 @@ class _OrdersPageState extends State<OrdersPage> {
     const double headerHeight = 50.0; // Height of the header row
 
     return SizedBox(
-      height: MediaQuery.of(context).size.height - 200, // Account for header, padding, etc.
+      height: MediaQuery.of(context).size.height, // Account for header, padding, etc.
       child: Column(
         children: [
           // Header Row
@@ -576,18 +541,18 @@ class _OrdersPageState extends State<OrdersPage> {
   Widget _buildPagination(OrderListProvider orderProvider) {
     if (orderProvider.pagination == null) return const SizedBox.shrink();
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (orderProvider.pagination!.hasPrevious) ElevatedButton(onPressed: () => orderProvider.loadPreviousPage(), child: const Text('Previous')),
-          const SizedBox(width: 16),
-          Text('Page ${orderProvider.pagination?.currentPage ?? 1} of ${orderProvider.pagination?.totalPages ?? 1}'),
-          const SizedBox(width: 16),
-          if (orderProvider.hasMoreOrders) ElevatedButton(onPressed: () => orderProvider.loadNextPage(), child: const Text('Next')),
-        ],
-      ),
+    final currentPage = orderProvider.pagination?.currentPage ?? 1;
+    final totalPages = orderProvider.pagination?.totalPages ?? 1;
+    final hasPrevious = orderProvider.pagination!.hasPrevious;
+    final hasNext = orderProvider.hasMoreOrders;
+
+    return PaginationWidget(
+      currentPage: currentPage,
+      totalPages: totalPages,
+      hasPrevious: hasPrevious,
+      hasNext: hasNext,
+      onPreviousPage: hasPrevious ? () => orderProvider.loadPreviousPage() : null,
+      onNextPage: hasNext ? () => orderProvider.loadNextPage() : null,
     );
   }
 

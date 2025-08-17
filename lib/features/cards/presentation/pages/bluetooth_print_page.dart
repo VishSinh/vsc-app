@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart'; // Added for Clipboard
 import 'dart:io';
-import 'dart:typed_data';
-import 'dart:convert'; // Added for base64Encode
 import 'package:blue_thermal_printer/blue_thermal_printer.dart' as blue_thermal;
-import 'package:barcode/barcode.dart'; // Re-added for barcode generation
 import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
@@ -224,17 +221,6 @@ class _BluetoothPrintPageState extends State<BluetoothPrintPage> {
       }
       AppLogger.methodExit('_connectToDevice', className: 'BluetoothPrintPage', result: 'Success after error recovery');
       return;
-
-      setState(() {
-        _isLoading = false;
-        _isConnected = false;
-        _currentStep = 'Connection failed: $e';
-      });
-      if (mounted) {
-        SnackbarUtils.showError(context, 'Connection failed: $e');
-      }
-
-      AppLogger.methodExit('_connectToDevice', className: 'BluetoothPrintPage', result: 'Error: $e');
     }
   }
 

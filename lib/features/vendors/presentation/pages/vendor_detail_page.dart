@@ -5,7 +5,7 @@ import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/models/vendor_model.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
-import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
+import 'package:vsc_app/features/home/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/features/vendors/presentation/widgets/create_vendor_dialog.dart';
@@ -41,7 +41,7 @@ class _VendorDetailPageState extends State<VendorDetailPage> {
         _errorMessage = null;
       });
 
-      AppLogger.service('VendorDetailPage', 'Loading vendor details for ID: ${widget.vendorId}');
+      AppLogger.service('VendorDetailPage', 'Loading vendor details');
 
       final vendorProvider = context.read<VendorProvider>();
       final vendor = await vendorProvider.getVendorById(widget.vendorId);

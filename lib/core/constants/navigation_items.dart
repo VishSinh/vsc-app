@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
+import 'package:vsc_app/features/home/presentation/providers/permission_provider.dart';
+import 'package:vsc_app/features/cards/presentation/providers/card_list_provider.dart';
+import 'package:vsc_app/features/cards/presentation/providers/create_card_provider.dart';
+import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
 
 class NavigationItems {
   // All available navigation destinations
@@ -12,6 +19,96 @@ class NavigationItems {
     NavigationDestination(icon: Icon(Icons.people), label: UITextConstants.vendors),
     NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: UITextConstants.administration),
   ];
+
+  // Get floating action button for a specific page
+  static Widget? getFloatingActionButtonForPage(String pageName, BuildContext context) {
+    switch (pageName.toLowerCase()) {
+      case 'inventory':
+        return Consumer<PermissionProvider>(
+          builder: (context, permissionProvider, child) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16.0, right: 16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: FloatingActionButton(
+                      onPressed: () {
+                        final cardProvider = context.read<CardListProvider>();
+                        cardProvider.loadCards();
+                      },
+                      backgroundColor: Colors.orange,
+                      heroTag: 'reload_inventory',
+                      mini: true,
+                      child: const Icon(Icons.refresh, color: Colors.white, size: 18),
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+                  if (permissionProvider.canCreate('card'))
+                    SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: FloatingActionButton(
+                        onPressed: () {
+                          final createCardProvider = CreateCardProvider();
+                          context.push(RouteConstants.createCard, extra: createCardProvider);
+                        },
+                        backgroundColor: AppConfig.primaryColor,
+                        heroTag: 'add_card',
+                        mini: true,
+                        child: const Icon(Icons.add, color: Colors.white, size: 18),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
+        );
+      case 'orders':
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16.0, right: 16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: FloatingActionButton(
+                  onPressed: () {
+                    final orderProvider = context.read<OrderListProvider>();
+                    orderProvider.fetchOrders();
+                  },
+                  backgroundColor: Colors.orange,
+                  heroTag: 'reload_orders',
+                  mini: true,
+                  child: const Icon(Icons.refresh, color: Colors.white, size: 18),
+                ),
+              ),
+
+              const SizedBox(height: 8),
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: FloatingActionButton(
+                  onPressed: () => context.go(RouteConstants.customerSearch),
+                  backgroundColor: AppConfig.primaryColor,
+                  heroTag: 'add_order',
+                  mini: true,
+                  child: const Icon(Icons.add, color: Colors.white, size: 18),
+                ),
+              ),
+            ],
+          ),
+        );
+      default:
+        return null;
+    }
+  }
 
   // Get destinations based on permissions
   static List<NavigationDestination> getDestinationsForPermissions({

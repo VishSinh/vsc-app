@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/app/app_config.dart';
-import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/enums/user_role.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
-import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:vsc_app/features/home/presentation/providers/auth_provider.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});

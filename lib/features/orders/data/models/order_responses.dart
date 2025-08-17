@@ -85,3 +85,27 @@ class OrderItemResponse {
   factory OrderItemResponse.fromJson(Map<String, dynamic> json) => _$OrderItemResponseFromJson(json);
   Map<String, dynamic> toJson() => _$OrderItemResponseToJson(this);
 }
+
+@JsonSerializable()
+class OrderCreateResponse extends OrderResponse {
+  @JsonKey(name: 'bill_id')
+  final String billId;
+
+  const OrderCreateResponse({
+    required super.id,
+    required super.name,
+    required super.customerId,
+    required super.customerName,
+    required super.staffId,
+    required super.staffName,
+    required super.orderDate,
+    required super.deliveryDate,
+    required super.orderStatus,
+    required super.specialInstruction,
+    required super.orderItems,
+    required this.billId,
+  });
+
+  factory OrderCreateResponse.fromJson(Map<String, dynamic> json) => _$OrderCreateResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$OrderCreateResponseToJson(this);
+}

@@ -26,8 +26,11 @@ class OrderService extends ApiService {
   }
 
   /// Create a new order
-  Future<ApiResponse<MessageData>> createOrder({required CreateOrderRequest request}) async {
-    return await executeRequest(() => post(AppConstants.ordersEndpoint, data: request), (json) => MessageData.fromJson(json as Map<String, dynamic>));
+  Future<ApiResponse<OrderCreateResponse>> createOrder({required CreateOrderRequest request}) async {
+    return await executeRequest(
+      () => post(AppConstants.ordersEndpoint, data: request),
+      (json) => OrderCreateResponse.fromJson(json as Map<String, dynamic>),
+    );
   }
 
   /// Get order by ID

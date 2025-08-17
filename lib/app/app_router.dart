@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vsc_app/core/services/navigation_service.dart';
-import 'package:vsc_app/features/auth/data/services/auth_service.dart';
+import 'package:vsc_app/features/home/data/services/auth_service.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
-import 'package:vsc_app/features/auth/presentation/pages/login_page.dart';
+import 'package:vsc_app/features/home/presentation/pages/login_page.dart';
 import 'package:vsc_app/core/utils/main_layout.dart';
-import 'package:vsc_app/features/auth/presentation/pages/register_page.dart';
+import 'package:vsc_app/features/home/presentation/pages/register_page.dart';
 import 'package:vsc_app/features/vendors/presentation/pages/vendor_detail_page.dart';
 import 'package:vsc_app/features/cards/presentation/pages/card_detail_page.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_detail_provider.dart';
@@ -54,7 +54,9 @@ class AppRouter {
           name: RouteConstants.billDetailRouteName,
           builder: (context, state) {
             final billId = state.pathParameters['id']!;
-            return BillPage(billId: billId);
+            final extra = state.extra as Map<String, dynamic>?;
+            final fromOrderCreation = extra?['fromOrderCreation'] as bool? ?? false;
+            return BillPage(billId: billId, fromOrderCreation: fromOrderCreation);
           },
         ),
         GoRoute(path: RouteConstants.production, name: RouteConstants.productionRouteName, builder: (context, state) => const MainLayout()),

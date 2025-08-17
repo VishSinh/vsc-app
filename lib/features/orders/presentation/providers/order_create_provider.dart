@@ -127,24 +127,26 @@ class OrderCreateProvider extends BaseProvider {
   }
 
   /// Create order with current form data
-  Future<bool> createOrder() async {
+  Future<String> createOrder() async {
     // Validate order creation
     final validationResult = _orderCreationForm.validate();
     if (!validationResult.isValid) {
       setError(validationResult.firstMessage ?? 'Please check your input');
-      return false;
+      return '';
     }
 
     final result = await executeApiOperation(
       apiCall: () => _orderService.createOrder(request: _orderCreationForm.toApiRequest()),
       onSuccess: (response) {
         reset();
-        return response.data!; // Return the MessageData
+        String billId = response.data!.billId;
+
+        return billId;
       },
       successMessage: 'Order created successfully',
       errorMessage: 'Failed to create order',
     );
-    return result != null; // Convert to boolean
+    return result ?? '';
   }
 
   /// Reset the provider state

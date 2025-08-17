@@ -7,7 +7,7 @@ import 'package:vsc_app/core/models/vendor_model.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/core/widgets/shimmer_widgets.dart';
-import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
+import 'package:vsc_app/features/home/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/widgets/create_vendor_dialog.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
@@ -150,7 +150,7 @@ class _VendorsPageState extends State<VendorsPage> {
       trailing: StatusBadge(text: vendor.isActive ? 'Active' : 'Inactive', isActive: vendor.isActive),
       onTap: () {
         // Navigate to vendor details page
-        AppLogger.uiAction('Tapped vendor card', details: 'ID: ${vendor.id}, Name: ${vendor.name}');
+        AppLogger.uiAction('Tapped vendor card', details: 'Name: ${vendor.name}');
         context.goNamed(RouteConstants.vendorDetailRouteName, pathParameters: {'id': vendor.id});
       },
     );

@@ -48,15 +48,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         appBar: AppBar(
           title: const Text('Order Details'),
           leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.orders)),
+          actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: () => _loadOrderDetails(), tooltip: 'Refresh')],
         ),
         body: _buildOrderDetailContent(),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => _loadOrderDetails(),
-          backgroundColor: Colors.orange,
-          heroTag: 'reload',
-          icon: const Icon(Icons.refresh, color: Colors.white),
-          label: const Text('Refresh', style: TextStyle(color: Colors.white)),
-        ),
       ),
     );
   }
@@ -139,7 +133,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               children: [
                 Expanded(
                   child: Text(
-                    order.name.isNotEmpty ? order.name : 'Order #${order.id.substring(0, 8)}',
+                    order.name.isNotEmpty ? order.name : 'Order',
                     style: TextStyle(fontSize: AppConfig.fontSize2xl, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -190,7 +184,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               style: TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            _buildInfoRow('Order ID', order.id),
+
             _buildInfoRow('Customer', order.customerName),
             _buildInfoRow('Staff', order.staffName),
             _buildInfoRow('Order Date', _formatDateTime(order.orderDate)),
@@ -246,24 +240,43 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
+            context.isMobile
+                ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      _buildItemInfoRow('Quantity', '${item.quantity}'),
-                      _buildItemInfoRow('Price per Item', '₹${item.pricePerItem}'),
-                      _buildItemInfoRow('Discount Amount', '₹${item.discountAmount}'),
-                      _buildItemInfoRow('Line Total', '₹${_calculateLineTotal(item)}'),
+                      // Display card image at the top for mobile
+                      if (item.card != null && item.card!.image.isNotEmpty)
+                        Container(margin: const EdgeInsets.only(bottom: 12), child: _buildCardImage(item.card!)),
+                      // Item details below the image on mobile
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildItemInfoRow('Quantity', '${item.quantity}'),
+                          _buildItemInfoRow('Price per Item', '₹${item.pricePerItem}'),
+                          _buildItemInfoRow('Discount Amount', '₹${item.discountAmount}'),
+                          _buildItemInfoRow('Line Total', '₹${_calculateLineTotal(item)}'),
+                        ],
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            _buildItemInfoRow('Quantity', '${item.quantity}'),
+                            _buildItemInfoRow('Price per Item', '₹${item.pricePerItem}'),
+                            _buildItemInfoRow('Discount Amount', '₹${item.discountAmount}'),
+                            _buildItemInfoRow('Line Total', '₹${_calculateLineTotal(item)}'),
+                          ],
+                        ),
+                      ),
+                      // Display card image on the right side for desktop
+                      if (item.card != null && item.card!.image.isNotEmpty) ...[const SizedBox(width: 12), _buildCardImage(item.card!)],
                     ],
                   ),
-                ),
-                // Display card image on the right side
-                if (item.card != null && item.card!.image.isNotEmpty) ...[const SizedBox(width: 12), _buildCardImage(item.card!)],
-              ],
-            ),
 
             const SizedBox(height: 12),
             Row(
@@ -299,12 +312,12 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
   Widget _buildCardImage(OrderCardViewModel card) {
     return Container(
-      width: 180,
-      height: 180,
+      width: context.isMobile ? double.infinity : 180,
+      height: context.isMobile ? 200 : 180,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey.withOpacity(0.3)),
-        image: DecorationImage(image: NetworkImage(card.image), fit: BoxFit.cover),
+        image: DecorationImage(image: NetworkImage(card.image), fit: BoxFit.contain),
       ),
     );
   }
@@ -359,7 +372,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           Row(
             children: [
               Expanded(
-                child: Text('Box ID: ${box.id.substring(0, 8)}', style: TextStyle(fontWeight: FontWeight.w500)),
+                child: Text('Box Order', style: TextStyle(fontWeight: FontWeight.w500)),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -419,7 +432,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           Row(
             children: [
               Expanded(
-                child: Text('Job ID: ${job.id.substring(0, 8)}', style: TextStyle(fontWeight: FontWeight.w500)),
+                child: Text('Printing Job', style: TextStyle(fontWeight: FontWeight.w500)),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -583,7 +596,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   double _calculateLineTotal(OrderItemViewModel item) {
     final pricePerItem = double.tryParse(item.pricePerItem) ?? 0.0;
     final discountAmount = double.tryParse(item.discountAmount) ?? 0.0;
-    return (pricePerItem * item.quantity) - discountAmount;
+    return (pricePerItem - discountAmount) * item.quantity;
   }
 
   double _calculateTotalAmount(List<OrderItemViewModel> orderItems) {

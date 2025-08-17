@@ -6,11 +6,11 @@ import 'package:vsc_app/core/enums/user_role.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 
 import 'package:vsc_app/core/widgets/button_utils.dart';
-import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:vsc_app/features/home/presentation/providers/auth_provider.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
-import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
+import 'package:vsc_app/features/home/presentation/providers/permission_provider.dart';
 
 class AdministrationPage extends StatefulWidget {
   const AdministrationPage({super.key});
@@ -92,8 +92,6 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     _tabController.dispose();
     super.dispose();
   }
-
-
 
   List<Map<String, dynamic>> get _filteredStaff {
     return _staff.where((staff) {

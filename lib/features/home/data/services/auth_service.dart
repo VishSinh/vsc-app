@@ -1,7 +1,7 @@
 import 'package:vsc_app/core/constants/app_constants.dart';
 import 'package:vsc_app/core/models/api_response.dart';
-import 'package:vsc_app/features/auth/data/models/auth_requests.dart';
-import 'package:vsc_app/features/auth/data/models/auth_responses.dart';
+import 'package:vsc_app/features/home/data/models/auth_requests.dart';
+import 'package:vsc_app/features/home/data/models/auth_responses.dart';
 import 'package:vsc_app/core/services/base_service.dart';
 
 class AuthService extends ApiService {

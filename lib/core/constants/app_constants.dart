@@ -7,7 +7,7 @@ class AppConstants {
   // API Configuration
   // Dynamically determine the correct API base URL based on platform
   static String get apiBaseUrl {
-    bool isLocal = false;
+    bool isLocal = true;
     if (kIsWeb) {
       return isLocal ? 'http://localhost:8000/api/v1' : 'https://vsc-be.onrender.com/api/v1';
     } else if (Platform.isAndroid) {
@@ -52,6 +52,8 @@ class AppConstants {
   // Bills
   static const String billsEndpoint = '/bills/';
   static const String paymentsEndpoint = '/payments/';
+  // Dashboard
+  static const String dashboardEndpoint = '/dashboard/';
 
   // ==========================================================================
 

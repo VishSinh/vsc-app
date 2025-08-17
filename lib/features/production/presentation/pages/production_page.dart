@@ -7,7 +7,7 @@ import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
-import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
+import 'package:vsc_app/features/home/presentation/providers/permission_provider.dart';
 
 class ProductionPage extends StatefulWidget {
   const ProductionPage({super.key});

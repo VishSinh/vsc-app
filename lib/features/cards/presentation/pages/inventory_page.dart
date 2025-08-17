@@ -5,12 +5,11 @@ import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
+import 'package:vsc_app/core/widgets/pagination_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
+import 'package:vsc_app/features/home/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_detail_provider.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_list_provider.dart';
-import 'package:vsc_app/features/cards/presentation/providers/create_card_provider.dart';
-import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 
@@ -65,45 +64,7 @@ class _InventoryPageState extends State<InventoryPage> {
       create: (context) => CardDetailProvider(),
       child: Consumer<CardListProvider>(
         builder: (context, cardProvider, child) {
-          return Column(
-            children: [
-              Expanded(child: _buildInventoryContent()),
-              // Floating action buttons
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    FloatingActionButton.extended(
-                      onPressed: _loadCards,
-                      backgroundColor: Colors.orange,
-                      heroTag: 'reload',
-                      icon: const Icon(Icons.refresh, color: Colors.white),
-                      label: const Text('Refresh', style: TextStyle(color: Colors.white)),
-                    ),
-                    const SizedBox(width: 16),
-                    Consumer<PermissionProvider>(
-                      builder: (context, permissionProvider, child) {
-                        if (permissionProvider.canCreate('card')) {
-                          return FloatingActionButton.extended(
-                            onPressed: () {
-                              final createCardProvider = CreateCardProvider();
-                              context.push(RouteConstants.createCard, extra: createCardProvider);
-                            },
-                            backgroundColor: AppConfig.primaryColor,
-                            heroTag: 'add',
-                            icon: const Icon(Icons.add, color: Colors.white),
-                            label: const Text('New Card', style: TextStyle(color: Colors.white)),
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
+          return _buildInventoryContent();
         },
       ),
     );
@@ -130,10 +91,22 @@ class _InventoryPageState extends State<InventoryPage> {
           return const LoadingWidget(message: 'Loading cards...');
         }
 
-        return Column(
+        return Stack(
+          alignment: Alignment.bottomCenter,
           children: [
-            Expanded(child: _buildCardsList()),
-            InventoryPagination(cardProvider: cardProvider),
+            _buildCardsList(),
+            if (cardProvider.pagination != null)
+              Positioned(
+                bottom: 10,
+                child: PaginationWidget(
+                  currentPage: cardProvider.pagination?.currentPage ?? 1,
+                  totalPages: cardProvider.pagination?.totalPages ?? 1,
+                  hasPrevious: cardProvider.pagination?.hasPrevious ?? false,
+                  hasNext: cardProvider.hasMoreCards,
+                  onPreviousPage: cardProvider.pagination?.hasPrevious ?? false ? () => cardProvider.loadPreviousPage() : null,
+                  onNextPage: cardProvider.hasMoreCards ? () => cardProvider.loadNextPage() : null,
+                ),
+              ),
           ],
         );
       },
@@ -167,6 +140,7 @@ class _InventoryPageState extends State<InventoryPage> {
                 final card = filteredCards[index];
                 return InventoryCardItem(card: card);
               },
+              padding: const EdgeInsets.only(bottom: 80),
             );
           },
         );
@@ -306,6 +280,9 @@ class InventoryCardItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
           final cardDetailProvider = context.read<CardDetailProvider>();
@@ -317,83 +294,216 @@ class InventoryCardItem extends StatelessWidget {
   }
 
   Widget _buildImageSection(BuildContext context) {
-    final imageFlex = context.isMobile ? 4 : 3;
+    // Adjust image height based on screen size
+    // Make desktop images more proportional to the card width
+    final imageHeight = context.isMobile ? 140.0 : 220.0;
 
-    return Expanded(
-      flex: imageFlex,
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(borderRadius: BorderRadius.vertical(top: Radius.circular(AppConfig.defaultRadius))),
-        child: ClipRRect(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppConfig.defaultRadius)),
-          child: Image.network(
-            card.image,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => Container(
-              color: AppConfig.grey300,
-              child: Icon(Icons.image_not_supported, color: AppConfig.grey400, size: AppConfig.iconSizeLarge),
+    return Stack(
+      children: [
+        AspectRatio(
+          aspectRatio: context.isMobile ? 16 / 9 : 4 / 3,
+          child: SizedBox(
+            height: imageHeight,
+            width: double.infinity,
+            child: Image.network(
+              card.image,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: AppConfig.grey300,
+                child: Icon(Icons.image_not_supported, color: AppConfig.grey400, size: AppConfig.iconSizeLarge),
+              ),
             ),
           ),
         ),
-      ),
+        if (card.quantity <= 5)
+          Positioned(
+            top: 8,
+            right: 8,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(color: Colors.red.withOpacity(0.8), borderRadius: BorderRadius.circular(12)),
+              child: const Text(
+                'LOW STOCK',
+                style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                colors: [Colors.black.withOpacity(0.7), Colors.transparent],
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (card.barcode.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.qr_code, color: Colors.white, size: 12),
+                        const SizedBox(width: 4),
+                        Text(
+                          card.barcode.length > 8 ? '${card.barcode.substring(0, 8)}...' : card.barcode,
+                          style: const TextStyle(color: Colors.white, fontSize: 10),
+                        ),
+                      ],
+                    ),
+                  ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(color: _getProfitMarginColor(card.profitMargin).withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
+                  child: Text(
+                    '${card.profitMargin.toStringAsFixed(1)}%',
+                    style: TextStyle(color: _getProfitMarginColor(card.profitMargin), fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildContentSection(BuildContext context) {
-    final contentFlex = context.isMobile ? 2 : 2;
-    final padding = context.isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding;
+    final padding = context.isMobile ? 8.0 : AppConfig.defaultPadding;
 
-    return Expanded(
-      flex: contentFlex,
-      child: Padding(
-        padding: EdgeInsets.all(padding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [_buildPriceText(context), _buildDiscountText(context), _buildStockText(context)],
-        ),
+    // Use more vertical space on desktop to balance the card
+    final verticalSpacing = context.isMobile ? 4.0 : 12.0;
+
+    return Padding(
+      padding: EdgeInsets.all(padding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildPriceText(context),
+                    SizedBox(height: context.isMobile ? 2.0 : 6.0),
+                    _buildDiscountText(context),
+                  ],
+                ),
+              ),
+              _buildStockIndicator(context),
+            ],
+          ),
+          SizedBox(height: verticalSpacing),
+          _buildInfoRow(context),
+          // Add extra space at the bottom on desktop
+          if (!context.isMobile) SizedBox(height: verticalSpacing),
+        ],
       ),
     );
   }
 
   Widget _buildPriceText(BuildContext context) {
-    final textStyle = context.isMobile ? ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.bold) : ResponsiveText.getTitle(context);
+    // Increase font size on desktop for better proportions
+    final textStyle = context.isMobile
+        ? ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.bold)
+        : ResponsiveText.getTitle(context).copyWith(fontSize: 22, fontWeight: FontWeight.bold);
 
     return Text('₹${card.sellPrice}', style: textStyle);
   }
 
   Widget _buildDiscountText(BuildContext context) {
-    return Text('-₹${card.maxDiscount}', style: ResponsiveText.getBody(context).copyWith(color: AppConfig.errorColor));
+    // Adjust font size for desktop
+    final fontSize = context.isMobile ? 10.0 : 14.0;
+
+    return Text(
+      context.isMobile ? 'Disc: ₹${card.maxDiscount}' : 'Max Discount: ₹${card.maxDiscount}',
+      style: ResponsiveText.getCaption(
+        context,
+      ).copyWith(color: AppConfig.errorColor, fontSize: fontSize, fontWeight: context.isMobile ? FontWeight.normal : FontWeight.w500),
+      overflow: TextOverflow.ellipsis,
+    );
   }
 
-  Widget _buildStockText(BuildContext context) {
-    return Text('Stock: ${card.quantity}', style: ResponsiveText.getCaption(context));
-  }
-}
+  Widget _buildStockIndicator(BuildContext context) {
+    final color = card.quantity > 10
+        ? Colors.green
+        : card.quantity > 5
+        ? Colors.orange
+        : Colors.red;
 
-class InventoryPagination extends StatelessWidget {
-  final CardListProvider cardProvider;
+    // Make stock indicator more prominent on desktop
+    final horizontalPadding = context.isMobile ? 6.0 : 12.0;
+    final verticalPadding = context.isMobile ? 2.0 : 6.0;
+    final fontSize = context.isMobile ? 12.0 : 16.0;
+    final borderRadius = context.isMobile ? 4.0 : 8.0;
 
-  const InventoryPagination({super.key, required this.cardProvider});
-
-  @override
-  Widget build(BuildContext context) {
-    if (cardProvider.pagination == null) {
-      return const SizedBox.shrink();
-    }
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (cardProvider.pagination!.hasPrevious) ElevatedButton(onPressed: () => cardProvider.loadPreviousPage(), child: const Text('Previous')),
-          const SizedBox(width: 16),
-          Text('Page ${cardProvider.pagination?.currentPage ?? 1} of ${cardProvider.pagination?.totalPages ?? 1}'),
-          const SizedBox(width: 16),
-          if (cardProvider.hasMoreCards) ElevatedButton(onPressed: () => cardProvider.loadNextPage(), child: const Text('Next')),
-        ],
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(borderRadius),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Text(
+        '${card.quantity}',
+        style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: fontSize),
       ),
     );
+  }
+
+  Widget _buildInfoRow(BuildContext context) {
+    // Adjust icon and text sizes for desktop
+    final iconSize = context.isMobile ? 12.0 : 18.0;
+    final fontSize = context.isMobile ? 10.0 : 14.0;
+    final spacing = context.isMobile ? 4.0 : 8.0;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.monetization_on_outlined, size: iconSize, color: AppConfig.secondaryColor),
+              SizedBox(width: spacing / 2),
+              Flexible(
+                child: Text(
+                  'Cost: ₹${card.costPrice}',
+                  style: ResponsiveText.getCaption(
+                    context,
+                  ).copyWith(fontSize: fontSize, fontWeight: context.isMobile ? FontWeight.normal : FontWeight.w500),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(width: spacing),
+        Text(
+          'Val: ₹${card.totalValue.toStringAsFixed(0)}',
+          style: ResponsiveText.getCaption(
+            context,
+          ).copyWith(fontWeight: FontWeight.bold, fontSize: fontSize, color: context.isMobile ? null : AppConfig.primaryColor),
+        ),
+      ],
+    );
+  }
+
+  Color _getProfitMarginColor(double margin) {
+    if (margin >= 30) return Colors.green;
+    if (margin >= 15) return Colors.orange;
+    return Colors.red;
   }
 }

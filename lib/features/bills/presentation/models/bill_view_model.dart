@@ -122,10 +122,10 @@ class CalculatedCostsViewModel {
   }
 
   // Formatted getters for UI
-  String get formattedBaseCost => '\$${baseCost.toStringAsFixed(2)}';
-  String get formattedBoxCost => '\$${boxCost.toStringAsFixed(2)}';
-  String get formattedPrintingCost => '\$${printingCost.toStringAsFixed(2)}';
-  String get formattedTotalCost => '\$${totalCost.toStringAsFixed(2)}';
+  String get formattedBaseCost => '₹${baseCost.toStringAsFixed(2)}';
+  String get formattedBoxCost => '₹${boxCost.toStringAsFixed(2)}';
+  String get formattedPrintingCost => '₹${printingCost.toStringAsFixed(2)}';
+  String get formattedTotalCost => '₹${totalCost.toStringAsFixed(2)}';
 }
 
 class BillSummaryViewModel {
@@ -160,11 +160,11 @@ class BillSummaryViewModel {
   }
 
   // Formatted getters for UI
-  String get formattedItemsSubtotal => '\$${itemsSubtotal.toStringAsFixed(2)}';
-  String get formattedTotalBoxCost => '\$${totalBoxCost.toStringAsFixed(2)}';
-  String get formattedTotalPrintingCost => '\$${totalPrintingCost.toStringAsFixed(2)}';
-  String get formattedGrandTotal => '\$${grandTotal.toStringAsFixed(2)}';
+  String get formattedItemsSubtotal => '₹${itemsSubtotal.toStringAsFixed(2)}';
+  String get formattedTotalBoxCost => '₹${totalBoxCost.toStringAsFixed(2)}';
+  String get formattedTotalPrintingCost => '₹${totalPrintingCost.toStringAsFixed(2)}';
+  String get formattedGrandTotal => '₹${grandTotal.toStringAsFixed(2)}';
   String get formattedTaxPercentage => '${taxPercentage.toStringAsFixed(2)}%';
-  String get formattedTaxAmount => '\$${taxAmount.toStringAsFixed(2)}';
-  String get formattedTotalWithTax => '\$${totalWithTax.toStringAsFixed(2)}';
+  String get formattedTaxAmount => '₹${taxAmount.toStringAsFixed(2)}';
+  String get formattedTotalWithTax => '₹${totalWithTax.toStringAsFixed(2)}';
 }

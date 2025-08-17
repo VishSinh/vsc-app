@@ -11,10 +11,13 @@ import 'package:vsc_app/features/bills/presentation/models/payment_view_model.da
 import 'package:vsc_app/features/bills/presentation/widgets/payment_create_dialog.dart';
 import 'package:vsc_app/core/enums/bill_status.dart';
 import 'package:vsc_app/core/enums/payment_mode.dart';
+import 'package:vsc_app/features/bills/presentation/models/bill_card_view_model.dart';
 
 class BillPage extends StatefulWidget {
   final String billId;
-  const BillPage({super.key, required this.billId});
+  final bool fromOrderCreation;
+
+  const BillPage({super.key, required this.billId, this.fromOrderCreation = false});
 
   @override
   State<BillPage> createState() => _BillPageState();
@@ -27,11 +30,18 @@ class _BillPageState extends State<BillPage> {
     _loadBillDetails();
   }
 
-  void _loadBillDetails() {
+  void _loadBillDetails() async {
     final billProvider = context.read<BillProvider>();
     billProvider.setContext(context);
-    billProvider.getBillByBillId(billId: widget.billId);
-    billProvider.getPaymentsByBillId(billId: widget.billId);
+    await billProvider.getBillByBillId(billId: widget.billId);
+    await billProvider.getPaymentsByBillId(billId: widget.billId);
+
+    // Load card images for each order item
+    if (billProvider.currentBill != null) {
+      for (var item in billProvider.currentBill!.order.orderItems) {
+        await billProvider.fetchCardImage(item.cardId);
+      }
+    }
   }
 
   @override
@@ -40,21 +50,19 @@ class _BillPageState extends State<BillPage> {
       appBar: AppBar(
         title: const Text('Bill Details'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(widget.fromOrderCreation ? Icons.home : Icons.arrow_back),
           onPressed: () {
             context.read<BillProvider>().clearBillData();
-            context.pop();
+            if (widget.fromOrderCreation) {
+              context.go(RouteConstants.dashboard);
+            } else {
+              context.pop();
+            }
           },
         ),
+        actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: () => _loadBillDetails(), tooltip: 'Refresh')],
       ),
       body: _buildBillDetailContent(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _loadBillDetails(),
-        backgroundColor: Colors.orange,
-        heroTag: 'reload',
-        icon: const Icon(Icons.refresh, color: Colors.white),
-        label: const Text('Refresh', style: TextStyle(color: Colors.white)),
-      ),
     );
   }
 
@@ -161,7 +169,6 @@ class _BillPageState extends State<BillPage> {
 
   Widget _buildBillHeader(BillViewModel bill) {
     return Card(
-      color: AppConfig.secondaryColor,
       elevation: AppConfig.elevationMedium,
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -182,9 +189,6 @@ class _BillPageState extends State<BillPage> {
               ],
             ),
             const SizedBox(height: 12),
-            Text('Bill ID: ${bill.id}', style: AppConfig.getResponsiveCaption(context)),
-            const SizedBox(height: 4),
-            Text('Order ID: ${bill.orderId}', style: AppConfig.getResponsiveCaption(context)),
           ],
         ),
       ),
@@ -241,7 +245,6 @@ class _BillPageState extends State<BillPage> {
 
   Widget _buildOrderInfo(BillViewModel bill) {
     return Card(
-      color: AppConfig.secondaryColor,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -293,25 +296,68 @@ class _BillPageState extends State<BillPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text('Card ID: ${item.cardId}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                  child: Text(
-                    'Qty: ${item.quantity}',
-                    style: const TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.w500),
+            context.isMobile
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Display card image at the top for mobile
+                      _buildCardImage(item.cardId),
+                      const SizedBox(height: 12),
+                      // Item details below the image on mobile
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text('Card', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                            child: Text(
+                              'Qty: ${item.quantity}',
+                              style: const TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      _buildItemInfoRow('Price per Item', '₹${item.pricePerItem}'),
+                      _buildItemInfoRow('Discount Amount', '₹${item.discountAmount}'),
+                      _buildItemInfoRow('Line Total', '₹${_calculateLineTotal(item)}'),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text('Card', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                                  child: Text(
+                                    'Qty: ${item.quantity}',
+                                    style: const TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.w500),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            _buildItemInfoRow('Price per Item', '₹${item.pricePerItem}'),
+                            _buildItemInfoRow('Discount Amount', '₹${item.discountAmount}'),
+                            _buildItemInfoRow('Line Total', '₹${_calculateLineTotal(item)}'),
+                          ],
+                        ),
+                      ),
+                      // Display card image on the right side for desktop
+                      const SizedBox(width: 12),
+                      _buildCardImage(item.cardId),
+                    ],
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _buildItemInfoRow('Price per Item', '₹${item.pricePerItem}'),
-            _buildItemInfoRow('Discount Amount', '₹${item.discountAmount}'),
-            _buildItemInfoRow('Line Total', '₹${_calculateLineTotal(item)}'),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -379,7 +425,7 @@ class _BillPageState extends State<BillPage> {
             const SizedBox(height: 16),
             Row(
               children: [
-                Expanded(child: _buildSummaryCard('Subtotal', bill.summary.formattedItemsSubtotal, Colors.grey[600]!)),
+                Expanded(child: _buildSummaryCard('Card total', bill.summary.formattedItemsSubtotal, Colors.grey[600]!)),
                 const SizedBox(width: 8),
                 Expanded(child: _buildSummaryCard('Tax', bill.summary.formattedTaxAmount, Colors.orange[600]!)),
                 const SizedBox(width: 8),
@@ -455,7 +501,6 @@ class _BillPageState extends State<BillPage> {
         final remainingAmount = bill.summary.totalWithTax - totalPaidAmount;
 
         return Card(
-          color: AppConfig.secondaryColor,
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -567,6 +612,38 @@ class _BillPageState extends State<BillPage> {
   double _calculateLineTotal(BillOrderItemViewModel item) {
     final pricePerItem = double.tryParse(item.pricePerItem) ?? 0.0;
     final discountAmount = double.tryParse(item.discountAmount) ?? 0.0;
-    return (pricePerItem * item.quantity) - discountAmount;
+    return (pricePerItem - discountAmount) * item.quantity;
+  }
+
+  Widget _buildCardImage(String cardId) {
+    return Consumer<BillProvider>(
+      builder: (context, billProvider, child) {
+        final card = billProvider.getCardImageById(cardId);
+
+        if (card == null) {
+          // Placeholder while loading or if image not found
+          return Container(
+            width: context.isMobile ? double.infinity : 180,
+            height: context.isMobile ? 200 : 180,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.withOpacity(0.3)),
+              color: Colors.grey.shade200,
+            ),
+            child: const Center(child: Icon(Icons.image_not_supported, size: 48, color: Colors.grey)),
+          );
+        }
+
+        return Container(
+          width: context.isMobile ? double.infinity : 180,
+          height: context.isMobile ? 200 : 180,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.withOpacity(0.3)),
+            image: DecorationImage(image: NetworkImage(card.image), fit: BoxFit.contain),
+          ),
+        );
+      },
+    );
   }
 }

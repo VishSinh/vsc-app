@@ -6,8 +6,9 @@ import 'package:logging/logging.dart';
 import 'package:vsc_app/app/app_router.dart';
 import 'package:vsc_app/app/app_theme.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
-import 'package:vsc_app/features/auth/presentation/providers/auth_provider.dart';
-import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
+import 'package:vsc_app/features/home/presentation/providers/auth_provider.dart';
+import 'package:vsc_app/features/home/presentation/providers/dashboard_provider.dart';
+import 'package:vsc_app/features/home/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
 
 import 'package:vsc_app/features/customers/presentation/providers/customer_provider.dart';
@@ -36,6 +37,7 @@ class VSCApp extends StatelessWidget {
       ChangeNotifierProvider(create: (BuildContext context) => VendorProvider()),
       ChangeNotifierProvider(create: (BuildContext context) => CustomerProvider()),
       ChangeNotifierProvider(create: (BuildContext context) => AuthProvider()),
+      ChangeNotifierProvider(create: (BuildContext context) => DashboardProvider()),
       ChangeNotifierProvider(create: (context) => BillProvider()),
       ChangeNotifierProvider(create: (context) => NavigationProvider()),
       ChangeNotifierProvider(create: (context) => OrderListProvider()),

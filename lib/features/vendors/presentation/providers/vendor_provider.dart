@@ -43,7 +43,7 @@ class VendorProvider extends BaseProvider with PaginationMixin {
   /// Get vendor by ID
   Future<Vendor?> getVendorById(String id) async {
     try {
-      AppLogger.service('VendorProvider', 'Getting vendor by ID: $id');
+      AppLogger.service('VendorProvider', 'Getting vendor details');
 
       final response = await _vendorService.getVendorById(id);
 

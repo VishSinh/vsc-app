@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vsc_app/core/utils/app_scaffold.dart';
 import 'package:vsc_app/core/providers/navigation_provider.dart';
-import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
-import 'package:vsc_app/features/auth/presentation/pages/dashboard_page.dart';
+import 'package:vsc_app/features/home/presentation/providers/permission_provider.dart';
+import 'package:vsc_app/features/home/presentation/pages/dashboard_page.dart';
 import 'package:vsc_app/features/orders/presentation/pages/orders_page.dart';
 import 'package:vsc_app/features/cards/presentation/pages/inventory_page.dart';
 import 'package:vsc_app/features/production/presentation/pages/production_page.dart';
@@ -59,7 +59,10 @@ class _MainLayoutState extends State<MainLayout> {
         final currentPage = _getCurrentPage(navigationProvider.selectedIndex, destinations);
         final pageTitle = destinations[navigationProvider.selectedIndex].label;
 
-        return AppScaffold(pageTitle: pageTitle, child: currentPage);
+        // Get the floating action button for the current page
+        final floatingActionButton = NavigationItems.getFloatingActionButtonForPage(pageTitle.toLowerCase(), context);
+
+        return AppScaffold(pageTitle: pageTitle, floatingActionButton: floatingActionButton, child: currentPage);
       },
     );
   }

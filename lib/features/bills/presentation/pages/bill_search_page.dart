@@ -2,12 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/app/app_config.dart';
-import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
-import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/features/bills/presentation/provider/bill_provider.dart';
-import 'package:vsc_app/features/bills/presentation/models/bill_view_model.dart';
 import 'package:vsc_app/core/enums/bill_status.dart';
 
 class BillSearchPage extends StatefulWidget {
@@ -59,8 +56,6 @@ class _BillSearchPageState extends State<BillSearchPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(UITextConstants.bills, style: Theme.of(context).textTheme.headlineMedium),
-          SizedBox(height: AppConfig.defaultPadding),
           Row(
             children: [
               Expanded(
@@ -91,7 +86,7 @@ class _BillSearchPageState extends State<BillSearchPage> {
                     itemBuilder: (context, index) {
                       final bill = provider.bills[index];
                       return GestureDetector(
-                        onTap: () => context.push('${RouteConstants.bills}/${bill.id}'),
+                        onTap: () => context.pushNamed(RouteConstants.billDetailRouteName, pathParameters: {'id': bill.id}),
                         child: Card(
                           margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
                           elevation: 2,
@@ -119,17 +114,9 @@ class _BillSearchPageState extends State<BillSearchPage> {
                                 SizedBox(height: AppConfig.smallPadding),
                                 Row(
                                   children: [
-                                    Icon(Icons.receipt, size: 16, color: Colors.grey[600]),
-                                    SizedBox(width: 4),
-                                    Text('Bill ID: ${bill.id}', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600])),
-                                  ],
-                                ),
-                                SizedBox(height: AppConfig.smallPadding),
-                                Row(
-                                  children: [
                                     Icon(Icons.shopping_cart, size: 16, color: Colors.grey[600]),
                                     SizedBox(width: 4),
-                                    Text('Order: ${bill.orderId}', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600])),
+                                    Text('Order', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600])),
                                   ],
                                 ),
                                 SizedBox(height: AppConfig.smallPadding),
@@ -153,7 +140,7 @@ class _BillSearchPageState extends State<BillSearchPage> {
                                           bill.summary.formattedTotalWithTax,
                                           style: Theme.of(
                                             context,
-                                          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
+                                          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: AppConfig.textColorPrimary),
                                         ),
                                         Text('Grand Total', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[600])),
                                       ],

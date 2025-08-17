@@ -10,7 +10,6 @@ import '../widgets/order_widgets.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_create_provider.dart';
-import 'package:vsc_app/core/providers/navigation_provider.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 
 class CreateOrderReviewPage extends StatefulWidget {
@@ -72,10 +71,12 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
     orderProvider.setOrderName(_orderNameController.text);
 
     orderProvider.setContext(context);
-    final success = await orderProvider.createOrder();
+    final billId = await orderProvider.createOrder();
 
-    if (success && mounted) {
-      context.go(RouteConstants.dashboard);
+    if (billId.isNotEmpty && mounted) {
+      // Navigate to bill detail with fromOrderCreation flag set to true
+      final billPath = RouteConstants.billDetail.replaceAll(':id', billId);
+      context.go(billPath, extra: {'fromOrderCreation': true});
     }
   }
 
@@ -84,7 +85,7 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(UITextConstants.orderReviewTitle),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.orderItems)),
+        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
       ),
       body: Consumer<OrderCreateProvider>(
         builder: (context, orderProvider, child) {

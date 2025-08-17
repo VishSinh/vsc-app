@@ -1,5 +1,5 @@
 import 'package:vsc_app/core/enums/user_role.dart';
-import 'package:vsc_app/features/auth/data/models/auth_responses.dart';
+import 'package:vsc_app/features/home/data/models/auth_responses.dart';
 
 /// View model for displaying user information
 class AuthUserViewModel {

@@ -1,11 +1,11 @@
 import 'package:vsc_app/core/enums/user_role.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
-import 'package:vsc_app/features/auth/data/services/auth_service.dart';
-import 'package:vsc_app/features/auth/data/models/auth_responses.dart';
-import 'package:vsc_app/features/auth/presentation/models/auth_form_models.dart';
-import 'package:vsc_app/features/auth/presentation/models/auth_view_models.dart';
-import 'package:vsc_app/features/auth/presentation/providers/permission_provider.dart';
-import 'package:vsc_app/features/auth/presentation/services/auth_validators.dart';
+import 'package:vsc_app/features/home/data/services/auth_service.dart';
+import 'package:vsc_app/features/home/data/models/auth_responses.dart';
+import 'package:vsc_app/features/home/presentation/models/auth_form_models.dart';
+import 'package:vsc_app/features/home/presentation/models/auth_view_models.dart';
+import 'package:vsc_app/features/home/presentation/providers/permission_provider.dart';
+import 'package:vsc_app/features/home/presentation/services/auth_validators.dart';
 
 /// Provider for managing authentication state and operations
 class AuthProvider extends BaseProvider {

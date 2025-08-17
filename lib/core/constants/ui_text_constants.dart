@@ -171,8 +171,8 @@ class UITextConstants {
   static const String activePartners = 'Active Partners';
 
   // ================================ STATISTICS SUBTITLES ================================
-  static const String ordersFromLastMonth = '+12% from last month';
-  static const String ordersRequireAttention = '5 require attention';
+  // static const String ordersFromLastMonth = '+12% from last month';
+  static const String ordersRequireAttention = 'Fewrequire attention';
   static const String jobsInProgress = '3 in progress';
   static const String needReorder = 'Need reorder';
   static const String revenueFromLastMonth = '+8% from last month';

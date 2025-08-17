@@ -1,6 +1,6 @@
 import 'package:vsc_app/core/enums/user_role.dart';
 import 'package:vsc_app/core/validation/validation_result.dart';
-import 'package:vsc_app/features/auth/data/models/auth_requests.dart';
+import 'package:vsc_app/features/home/data/models/auth_requests.dart';
 
 /// Form model for login form with validation
 class LoginFormViewModel {

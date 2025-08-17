@@ -70,11 +70,11 @@ class CardViewModel {
   }
 
   // Formatted getters for UI
-  String get formattedSellPrice => '\$${sellPriceAsDouble.toStringAsFixed(2)}';
-  String get formattedCostPrice => '\$${costPriceAsDouble.toStringAsFixed(2)}';
+  String get formattedSellPrice => '₹${sellPriceAsDouble.toStringAsFixed(2)}';
+  String get formattedCostPrice => '₹${costPriceAsDouble.toStringAsFixed(2)}';
   String get formattedMaxDiscount => '${maxDiscountAsDouble.toStringAsFixed(2)}%';
   String get formattedProfitMargin => '${profitMargin.toStringAsFixed(1)}%';
-  String get formattedTotalValue => '\$${totalValue.toStringAsFixed(2)}';
+  String get formattedTotalValue => '₹${totalValue.toStringAsFixed(2)}';
   String get formattedQuantity => quantity.toString();
   String get formattedSimilarity => ''; // Not applicable for regular cards
 }
@@ -151,11 +151,11 @@ class SimilarCardViewModel {
   }
 
   // Formatted getters for UI
-  String get formattedSellPrice => '\$${sellPriceAsDouble.toStringAsFixed(2)}';
-  String get formattedCostPrice => '\$${costPriceAsDouble.toStringAsFixed(2)}';
+  String get formattedSellPrice => '₹${sellPriceAsDouble.toStringAsFixed(2)}';
+  String get formattedCostPrice => '₹${costPriceAsDouble.toStringAsFixed(2)}';
   String get formattedMaxDiscount => '${maxDiscountAsDouble.toStringAsFixed(2)}%';
   String get formattedProfitMargin => '${profitMargin.toStringAsFixed(1)}%';
-  String get formattedTotalValue => '\$${totalValue.toStringAsFixed(2)}';
+  String get formattedTotalValue => '₹${totalValue.toStringAsFixed(2)}';
   String get formattedQuantity => quantity.toString();
   String get formattedSimilarity => CardCalculationService.formatSimilarityScore(similarity);
 }
