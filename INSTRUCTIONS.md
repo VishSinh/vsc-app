@@ -122,5 +122,3 @@ This project uses a simplified 2-layer architecture:
 7. Add comments only when necessary for clarity
 8. Check for existing implementations before creating new ones
 9. Avoid duplicating code across the application
-
-Following these guidelines will help maintain a clean, efficient, and maintainable codebase that can scale with the project's needs.

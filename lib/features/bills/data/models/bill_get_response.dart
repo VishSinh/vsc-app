@@ -68,6 +68,8 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:vsc_app/features/orders/data/models/order_responses.dart';
 
+// Follow naming convention of using Response and Request suffixes for API models
+
 part 'bill_get_response.g.dart';
 
 @JsonSerializable()

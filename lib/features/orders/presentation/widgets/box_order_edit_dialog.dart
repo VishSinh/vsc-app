@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/core/enums/box_status.dart';
 import 'package:vsc_app/core/enums/order_box_type.dart';
+import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/production/presentation/models/box_order_update_form_model.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
 import 'package:vsc_app/features/orders/presentation/providers/box_order_edit_form_provider.dart';
@@ -111,7 +112,7 @@ class BoxOrderEditDialog extends StatelessWidget {
     return Consumer<OrderListProvider>(
       builder: (context, provider, child) {
         if (provider.isLoadingBoxMakers) {
-          return const CircularProgressIndicator();
+          return const LoadingWidget(size: 24);
         }
 
         return Column(
@@ -269,9 +270,7 @@ class BoxOrderEditDialog extends StatelessWidget {
             const SizedBox(width: 16),
             ElevatedButton(
               onPressed: provider.isUpdatingBoxOrder ? null : () => _handleSubmit(context, formProvider.formModel),
-              child: provider.isUpdatingBoxOrder
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Update'),
+              child: provider.isUpdatingBoxOrder ? const LoadingWidget(size: 20) : const Text('Update'),
             ),
           ],
         );

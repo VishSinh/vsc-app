@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:vsc_app/core/models/api_response.dart';
+import 'package:vsc_app/core/models/message_data.dart';
 
 part 'vendor_model.g.dart';
 

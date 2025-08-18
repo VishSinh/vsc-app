@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
 import 'package:vsc_app/features/cards/data/services/card_service.dart';
+import 'package:vsc_app/features/orders/presentation/models/order_item_form_model.dart';
 import '../../data/services/order_service.dart';
 import '../models/order_form_models.dart';
 import '../services/order_calculation_service.dart';
@@ -12,7 +13,7 @@ import 'package:vsc_app/core/models/customer_model.dart';
 class OrderCreateProvider extends BaseProvider {
   final OrderService _orderService = OrderService();
 
-  final OrderCreationFormViewModel _orderCreationForm = OrderCreationFormViewModel(orderItems: []);
+  final OrderCreationFormModel _orderCreationForm = OrderCreationFormModel(orderItems: []);
 
   Customer? _selectedCustomer;
   CardViewModel? _currentCard;
@@ -25,7 +26,7 @@ class OrderCreateProvider extends BaseProvider {
   final Map<String, CardViewModel> _cardDetails = {};
 
   // Getters for form data
-  List<OrderItemCreationFormViewModel> get orderItems => _orderCreationForm.orderItems ?? [];
+  List<OrderItemCreationFormModel> get orderItems => _orderCreationForm.orderItems ?? [];
   String? get selectedCustomerId => _orderCreationForm.customerId;
   String? get orderName => _orderCreationForm.name;
   String? get deliveryDate => _orderCreationForm.deliveryDate;
@@ -41,7 +42,7 @@ class OrderCreateProvider extends BaseProvider {
   Map<String, CardViewModel> get cardDetails => Map.unmodifiable(_cardDetails);
 
   /// Add order item to the form
-  void addOrderItem(OrderItemCreationFormViewModel item) {
+  void addOrderItem(OrderItemCreationFormModel item) {
     _orderCreationForm.orderItems!.add(item);
     notifyListeners();
   }
@@ -62,7 +63,7 @@ class OrderCreateProvider extends BaseProvider {
   }
 
   /// Update order item at specified index
-  void updateOrderItem(int index, OrderItemCreationFormViewModel item) {
+  void updateOrderItem(int index, OrderItemCreationFormModel item) {
     if (_orderCreationForm.orderItems != null && index >= 0 && index < _orderCreationForm.orderItems!.length) {
       _orderCreationForm.orderItems![index] = item;
       notifyListeners();

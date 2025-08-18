@@ -8,10 +8,10 @@ import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/bills/presentation/provider/bill_provider.dart';
 import 'package:vsc_app/features/bills/presentation/models/bill_view_model.dart';
 import 'package:vsc_app/features/bills/presentation/models/payment_view_model.dart';
+import 'package:vsc_app/features/bills/presentation/services/bill_calculation_service.dart';
 import 'package:vsc_app/features/bills/presentation/widgets/payment_create_dialog.dart';
 import 'package:vsc_app/core/enums/bill_status.dart';
 import 'package:vsc_app/core/enums/payment_mode.dart';
-import 'package:vsc_app/features/bills/presentation/models/bill_card_view_model.dart';
 
 class BillPage extends StatefulWidget {
   final String billId;
@@ -201,10 +201,8 @@ class _BillPageState extends State<BillPage> {
         final bill = billProvider.currentBill;
         if (bill == null) return const SizedBox.shrink();
 
-        // Calculate total paid amount from payments
-        final totalPaidAmount = billProvider.payments.fold<double>(0.0, (sum, payment) => sum + payment.amount);
-        final remainingAmount = bill.summary.totalWithTax - totalPaidAmount;
-        final isFullyPaid = remainingAmount <= 0;
+        // Check if bill is fully paid using BillCalculationService
+        final isFullyPaid = BillCalculationService.isFullyPaid(bill.summary.totalWithTax, billProvider.payments);
 
         return SizedBox(
           width: double.infinity,
@@ -228,9 +226,8 @@ class _BillPageState extends State<BillPage> {
     final bill = billProvider.currentBill;
     if (bill == null) return;
 
-    // Calculate total paid amount from payments
-    final totalPaidAmount = billProvider.payments.fold<double>(0.0, (sum, payment) => sum + payment.amount);
-    final remainingAmount = bill.summary.totalWithTax - totalPaidAmount;
+    // Calculate remaining amount using BillCalculationService
+    final remainingAmount = BillCalculationService.calculateRemainingAmount(bill.summary.totalWithTax, billProvider.payments);
 
     showDialog(
       context: context,
@@ -464,25 +461,11 @@ class _BillPageState extends State<BillPage> {
   }
 
   Color _getStatusColor(BillStatus status) {
-    switch (status) {
-      case BillStatus.paid:
-        return Colors.green;
-      case BillStatus.partial:
-        return Colors.orange;
-      case BillStatus.pending:
-        return Colors.red;
-    }
+    return BillCalculationService.getStatusColor(status);
   }
 
   String _getStatusText(BillStatus status) {
-    switch (status) {
-      case BillStatus.paid:
-        return 'Paid';
-      case BillStatus.partial:
-        return 'Partial';
-      case BillStatus.pending:
-        return 'Pending';
-    }
+    return BillCalculationService.getStatusText(status);
   }
 
   String _formatDateTime(DateTime dateTime) {
@@ -497,8 +480,7 @@ class _BillPageState extends State<BillPage> {
 
         if (bill == null) return const SizedBox.shrink();
 
-        final totalPaidAmount = payments.fold<double>(0.0, (sum, payment) => sum + payment.amount);
-        final remainingAmount = bill.summary.totalWithTax - totalPaidAmount;
+        final remainingAmount = BillCalculationService.calculateRemainingAmount(bill.summary.totalWithTax, payments);
 
         return Card(
           child: Padding(
@@ -610,9 +592,7 @@ class _BillPageState extends State<BillPage> {
   }
 
   double _calculateLineTotal(BillOrderItemViewModel item) {
-    final pricePerItem = double.tryParse(item.pricePerItem) ?? 0.0;
-    final discountAmount = double.tryParse(item.discountAmount) ?? 0.0;
-    return (pricePerItem - discountAmount) * item.quantity;
+    return BillCalculationService.calculateLineTotal(item.pricePerItem, item.discountAmount, item.quantity);
   }
 
   Widget _buildCardImage(String cardId) {

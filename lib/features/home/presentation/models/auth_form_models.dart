@@ -9,52 +9,59 @@ class LoginFormViewModel {
 
   const LoginFormViewModel({required this.phone, required this.password});
 
-  /// Create from form data
-  factory LoginFormViewModel.fromFormData({required String phone, required String password}) {
-    return LoginFormViewModel(phone: phone, password: password);
-  }
-
   /// Validate login form
   ValidationResult validate() {
-    final errors = <String>[];
+    final errors = <ValidationError>[];
 
-    // UI validation
-    if (phone.trim().isEmpty) {
-      errors.add('Please enter phone number');
+    ValidationResult validatePhone() {
+      if (phone.trim().isEmpty) {
+        return ValidationResult.failureSingle('phone', 'Please enter phone number');
+      }
+
+      if (phone.trim().length < 10) {
+        return ValidationResult.failureSingle('phone', 'Phone number must be at least 10 digits');
+      }
+
+      if (!RegExp(r'^[0-9+\-\s()]+$').hasMatch(phone.trim())) {
+        return ValidationResult.failureSingle('phone', 'Phone number contains invalid characters');
+      }
+
+      return ValidationResult.success();
     }
 
-    if (password.isEmpty) {
-      errors.add('Please enter password');
-    }
+    ValidationResult validatePassword() {
+      if (password.isEmpty) {
+        return ValidationResult.failureSingle('password', 'Please enter password');
+      }
 
-    // Business validation
-    if (phone.trim().isNotEmpty && phone.trim().length < 10) {
-      errors.add('Phone number must be at least 10 digits');
-    }
+      if (password.length < 6) {
+        return ValidationResult.failureSingle('password', 'Password must be at least 6 characters');
+      }
 
-    if (phone.trim().isNotEmpty && !RegExp(r'^[0-9+\-\s()]+$').hasMatch(phone.trim())) {
-      errors.add('Phone number contains invalid characters');
-    }
+      if (password.length > 50) {
+        return ValidationResult.failureSingle('password', 'Password must be less than 50 characters');
+      }
 
-    if (password.isNotEmpty && password.length < 6) {
-      errors.add('Password must be at least 6 characters');
-    }
-
-    if (password.isNotEmpty && password.length > 50) {
-      errors.add('Password must be less than 50 characters');
-    }
-
-    if (password.isNotEmpty) {
       final hasLetter = RegExp(r'[a-zA-Z]').hasMatch(password);
       final hasNumber = RegExp(r'[0-9]').hasMatch(password);
       if (!hasLetter || !hasNumber) {
-        errors.add('Password must contain at least one letter and one number');
+        return ValidationResult.failureSingle('password', 'Password must contain at least one letter and one number');
       }
+
+      return ValidationResult.success();
     }
 
-    return errors.isEmpty
-        ? ValidationResult.success()
-        : ValidationResult.failure(errors.map((e) => ValidationError(field: 'login', message: e)).toList());
+    final phoneResult = validatePhone();
+    if (!phoneResult.isValid) {
+      errors.addAll(phoneResult.errors);
+    }
+
+    final passwordResult = validatePassword();
+    if (!passwordResult.isValid) {
+      errors.addAll(passwordResult.errors);
+    }
+
+    return errors.isEmpty ? ValidationResult.success() : ValidationResult.failure(errors);
   }
 
   /// Create empty form
@@ -64,10 +71,7 @@ class LoginFormViewModel {
 
   /// Create copy with updated values
   LoginFormViewModel copyWith({String? phone, String? password}) {
-    final newPhone = phone ?? this.phone;
-    final newPassword = password ?? this.password;
-
-    return LoginFormViewModel.fromFormData(phone: newPhone, password: newPassword);
+    return LoginFormViewModel(phone: phone ?? this.phone, password: password ?? this.password);
   }
 
   /// Convert to API request
@@ -86,93 +90,119 @@ class RegisterFormViewModel {
 
   const RegisterFormViewModel({required this.name, required this.phone, required this.password, required this.confirmPassword, required this.role});
 
-  /// Create from form data
-  factory RegisterFormViewModel.fromFormData({
-    required String name,
-    required String phone,
-    required String password,
-    required String confirmPassword,
-    required String role,
-  }) {
-    return RegisterFormViewModel(name: name, phone: phone, password: password, confirmPassword: confirmPassword, role: role);
-  }
-
   /// Validate register form
   ValidationResult validate() {
-    final errors = <String>[];
+    final errors = <ValidationError>[];
 
-    // UI validation
-    if (name.trim().isEmpty) {
-      errors.add('Please enter name');
+    ValidationResult validateName() {
+      if (name.trim().isEmpty) {
+        return ValidationResult.failureSingle('name', 'Please enter name');
+      }
+
+      if (name.trim().length < 2) {
+        return ValidationResult.failureSingle('name', 'Name must be at least 2 characters');
+      }
+
+      if (name.trim().length > 50) {
+        return ValidationResult.failureSingle('name', 'Name must be less than 50 characters');
+      }
+
+      if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(name.trim())) {
+        return ValidationResult.failureSingle('name', 'Name can only contain letters and spaces');
+      }
+
+      return ValidationResult.success();
     }
 
-    if (phone.trim().isEmpty) {
-      errors.add('Please enter phone number');
+    ValidationResult validatePhone() {
+      if (phone.trim().isEmpty) {
+        return ValidationResult.failureSingle('phone', 'Please enter phone number');
+      }
+
+      if (phone.trim().length < 10) {
+        return ValidationResult.failureSingle('phone', 'Phone number must be at least 10 digits');
+      }
+
+      if (!RegExp(r'^[0-9+\-\s()]+$').hasMatch(phone.trim())) {
+        return ValidationResult.failureSingle('phone', 'Phone number contains invalid characters');
+      }
+
+      return ValidationResult.success();
     }
 
-    if (password.isEmpty) {
-      errors.add('Please enter password');
-    }
+    ValidationResult validatePassword() {
+      if (password.isEmpty) {
+        return ValidationResult.failureSingle('password', 'Please enter password');
+      }
 
-    if (confirmPassword.isEmpty) {
-      errors.add('Please confirm password');
-    }
+      if (password.length < 6) {
+        return ValidationResult.failureSingle('password', 'Password must be at least 6 characters');
+      }
 
-    if (role.isEmpty) {
-      errors.add('Please select a role');
-    }
+      if (password.length > 50) {
+        return ValidationResult.failureSingle('password', 'Password must be less than 50 characters');
+      }
 
-    // Business validation
-    if (name.trim().isNotEmpty && name.trim().length < 2) {
-      errors.add('Name must be at least 2 characters');
-    }
-
-    if (name.trim().isNotEmpty && name.trim().length > 50) {
-      errors.add('Name must be less than 50 characters');
-    }
-
-    if (name.trim().isNotEmpty && !RegExp(r'^[a-zA-Z\s]+$').hasMatch(name.trim())) {
-      errors.add('Name can only contain letters and spaces');
-    }
-
-    if (phone.trim().isNotEmpty && phone.trim().length < 10) {
-      errors.add('Phone number must be at least 10 digits');
-    }
-
-    if (phone.trim().isNotEmpty && !RegExp(r'^[0-9+\-\s()]+$').hasMatch(phone.trim())) {
-      errors.add('Phone number contains invalid characters');
-    }
-
-    if (password.isNotEmpty && password.length < 6) {
-      errors.add('Password must be at least 6 characters');
-    }
-
-    if (password.isNotEmpty && password.length > 50) {
-      errors.add('Password must be less than 50 characters');
-    }
-
-    if (password.isNotEmpty) {
       final hasLetter = RegExp(r'[a-zA-Z]').hasMatch(password);
       final hasNumber = RegExp(r'[0-9]').hasMatch(password);
       if (!hasLetter || !hasNumber) {
-        errors.add('Password must contain at least one letter and one number');
+        return ValidationResult.failureSingle('password', 'Password must contain at least one letter and one number');
       }
+
+      return ValidationResult.success();
     }
 
-    if (password.isNotEmpty && confirmPassword.isNotEmpty && password != confirmPassword) {
-      errors.add('Passwords do not match');
+    ValidationResult validateConfirmPassword() {
+      if (confirmPassword.isEmpty) {
+        return ValidationResult.failureSingle('confirmPassword', 'Please confirm password');
+      }
+
+      if (password != confirmPassword) {
+        return ValidationResult.failureSingle('confirmPassword', 'Passwords do not match');
+      }
+
+      return ValidationResult.success();
     }
 
-    if (role.isNotEmpty) {
+    ValidationResult validateRole() {
+      if (role.isEmpty) {
+        return ValidationResult.failureSingle('role', 'Please select a role');
+      }
+
       final validRoles = ['ADMIN', 'MANAGER', 'SALES'];
       if (!validRoles.contains(role)) {
-        errors.add('Please select a valid role');
+        return ValidationResult.failureSingle('role', 'Please select a valid role');
       }
+
+      return ValidationResult.success();
     }
 
-    return errors.isEmpty
-        ? ValidationResult.success()
-        : ValidationResult.failure(errors.map((e) => ValidationError(field: 'register', message: e)).toList());
+    final nameResult = validateName();
+    if (!nameResult.isValid) {
+      errors.addAll(nameResult.errors);
+    }
+
+    final phoneResult = validatePhone();
+    if (!phoneResult.isValid) {
+      errors.addAll(phoneResult.errors);
+    }
+
+    final passwordResult = validatePassword();
+    if (!passwordResult.isValid) {
+      errors.addAll(passwordResult.errors);
+    }
+
+    final confirmPasswordResult = validateConfirmPassword();
+    if (!confirmPasswordResult.isValid) {
+      errors.addAll(confirmPasswordResult.errors);
+    }
+
+    final roleResult = validateRole();
+    if (!roleResult.isValid) {
+      errors.addAll(roleResult.errors);
+    }
+
+    return errors.isEmpty ? ValidationResult.success() : ValidationResult.failure(errors);
   }
 
   /// Create empty form
@@ -182,7 +212,7 @@ class RegisterFormViewModel {
 
   /// Create copy with updated values
   RegisterFormViewModel copyWith({String? name, String? phone, String? password, String? confirmPassword, String? role}) {
-    return RegisterFormViewModel.fromFormData(
+    return RegisterFormViewModel(
       name: name ?? this.name,
       phone: phone ?? this.phone,
       password: password ?? this.password,

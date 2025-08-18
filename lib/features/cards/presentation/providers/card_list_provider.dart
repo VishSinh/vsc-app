@@ -1,3 +1,4 @@
+import 'package:vsc_app/core/models/pagination_data.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
 import 'package:vsc_app/core/models/api_response.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';

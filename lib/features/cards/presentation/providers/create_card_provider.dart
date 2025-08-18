@@ -103,14 +103,7 @@ class CreateCardProvider extends BaseProvider {
   /// Clear selected image (for backward compatibility)
   void clearImage() {
     // Create a new form model without the image
-    _formModel = CardFormViewModel.fromFormData(
-      costPrice: _formModel.costPrice,
-      sellPrice: _formModel.sellPrice,
-      quantity: _formModel.quantity,
-      maxDiscount: _formModel.maxDiscount,
-      vendorId: _formModel.vendorId,
-      image: null,
-    );
+    _formModel = _formModel.copyWith(image: null);
     notifyListeners();
   }
 
@@ -171,7 +164,7 @@ class CreateCardProvider extends BaseProvider {
   }
 
   /// Check if form is valid
-  bool get isFormValid => _formModel.isValid;
+  bool get isFormValid => _formModel.validate().isValid;
 
   /// Check if any similar cards found
   bool get hasSimilarCards => _similarCards.isNotEmpty;

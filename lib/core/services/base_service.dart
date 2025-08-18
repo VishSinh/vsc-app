@@ -3,6 +3,8 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:vsc_app/core/constants/app_constants.dart';
 import 'package:vsc_app/core/models/api_response.dart';
+import 'package:vsc_app/core/models/error_data.dart';
+import 'package:vsc_app/core/models/pagination_data.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -84,48 +86,33 @@ abstract class ApiService {
 
     if (data == null) return data;
 
-    // If it's already a Map, return as is
     if (data is Map<String, dynamic>) {
-      AppLogger.debug('BaseService: _convertToJsonForLogging - data is already Map, returning as is');
       return data;
     }
 
-    // If it's a List, convert each item
     if (data is List) {
-      AppLogger.debug('BaseService: _convertToJsonForLogging - data is List, converting items');
       return data.map((item) => _convertToJsonForLogging(item)).toList();
     }
 
-    // If it has a toJson method, use it
     if (data is Object && data.runtimeType.toString().contains('Request')) {
-      AppLogger.debug('BaseService: _convertToJsonForLogging - converting Request object to JSON');
       try {
-        final jsonData = (data as dynamic).toJson();
-        AppLogger.debug('BaseService: _convertToJsonForLogging - conversion successful, result type: ${jsonData.runtimeType}');
-        return jsonData;
+        return (data as dynamic).toJson();
       } catch (e) {
         AppLogger.debug('BaseService: _convertToJsonForLogging - conversion failed: $e');
-        // If toJson fails, return the original data
         return data;
       }
     }
 
-    AppLogger.debug('BaseService: _convertToJsonForLogging - no conversion needed, returning original data');
     return data;
   }
 
   /// Filter out null values from request data
   dynamic _filterNullValues(dynamic data) {
-    AppLogger.debug('BaseService: _filterNullValues called with data type: ${data.runtimeType}');
-
     if (data is Map<String, dynamic>) {
       final filtered = <String, dynamic>{};
       data.forEach((key, value) {
         if (value != null) {
-          // Recursively filter nested objects
           filtered[key] = _filterNullValues(value);
-        } else {
-          AppLogger.debug('BaseService: _filterNullValues found null value for key: $key');
         }
       });
       return filtered;
@@ -165,8 +152,6 @@ abstract class ApiService {
   /// Handle API response and convert to ApiResponse<T> with built-in JSON parsing
   ApiResponse<T> handleResponse<T>(Response response, T Function(dynamic json) fromJson) {
     try {
-      // Dio automatically parses JSON, so response.data is already parsed
-
       if (response.data is! Map<String, dynamic>) {
         return ApiResponse(
           success: false,
@@ -176,25 +161,12 @@ abstract class ApiService {
       }
 
       final jsonData = response.data as Map<String, dynamic>;
-
-      // Check if this is a success or error response
       final bool success = jsonData['success'] as bool;
 
       if (success) {
-        // Success response: has data, no error
         final data = jsonData['data'];
-        T parsedData;
+        T parsedData = data == null ? fromJson({}) : fromJson(data);
 
-        if (data == null) {
-          // Handle case where data is null but success is true
-          parsedData = fromJson({});
-        } else {
-          AppLogger.debug('BaseService: handleResponse calling fromJson with data type: ${data.runtimeType}');
-          // AppLogger.debug('BaseService: handleResponse data value: $data');
-          parsedData = fromJson(data);
-        }
-
-        // Extract pagination data if present
         PaginationData? pagination;
         if (jsonData.containsKey('pagination')) {
           final paginationJson = jsonData['pagination'] as Map<String, dynamic>;
@@ -203,12 +175,8 @@ abstract class ApiService {
 
         return ApiResponse(success: true, data: parsedData, error: null, pagination: pagination);
       } else {
-        // Error response: has error, no data
         final errorJson = jsonData['error'] as Map<String, dynamic>;
-        AppLogger.debug('BaseService: Error JSON: $errorJson');
         final error = ErrorData.fromJson(errorJson);
-        AppLogger.debug('BaseService: Parsed Error - code: "${error.code}", message: "${error.message}", details: "${error.details}"');
-
         return ApiResponse(success: false, data: null, error: error);
       }
     } catch (e) {
@@ -218,10 +186,6 @@ abstract class ApiService {
 
   /// Handle Dio errors
   ApiResponse<T> handleDioError<T>(DioException error) {
-    AppLogger.debug('BaseService: handleDioError called with status: ${error.response?.statusCode}');
-    AppLogger.debug('BaseService: Error type: ${error.type}');
-    AppLogger.debug('BaseService: Response data: ${error.response?.data}');
-
     String errorMessage = 'Network error occurred';
 
     if (error.response != null) {
@@ -244,7 +208,6 @@ abstract class ApiService {
         default:
           if (responseData is Map<String, dynamic> && responseData.containsKey('error')) {
             final errorData = responseData['error'] as Map<String, dynamic>;
-            AppLogger.debug('BaseService: Error data from response: $errorData');
             errorMessage = errorData['details'] ?? errorData['message'] ?? 'Unknown error occurred';
           } else {
             errorMessage = 'Request failed with status code: $statusCode';
@@ -258,14 +221,7 @@ abstract class ApiService {
       errorMessage = 'Request timeout';
     }
 
-    AppLogger.debug('BaseService: Final error message: "$errorMessage"');
-
-    // Create proper ErrorData with details instead of using networkError factory
-    final errorData = ErrorData(
-      code: 'API_ERROR',
-      message: errorMessage,
-      details: errorMessage, // Use the same message for details
-    );
+    final errorData = ErrorData(code: 'API_ERROR', message: errorMessage, details: errorMessage);
 
     return ApiResponse(success: false, data: null, error: errorData);
   }

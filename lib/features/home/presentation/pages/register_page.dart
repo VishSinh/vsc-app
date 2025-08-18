@@ -5,6 +5,7 @@ import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/enums/user_role.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
+import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/home/presentation/providers/auth_provider.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -263,7 +264,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           foregroundColor: Colors.white,
                         ),
                         child: authProvider.isLoading
-                            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                            ? const LoadingWidget(size: 20)
                             : Text(UITextConstants.registerStaff, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                       ),
                     ),

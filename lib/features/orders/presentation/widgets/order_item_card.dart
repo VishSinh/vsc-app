@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_form_models.dart';
+import 'package:vsc_app/features/orders/presentation/models/order_item_form_model.dart';
+import 'package:vsc_app/features/orders/presentation/services/order_calculation_service.dart';
 
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
@@ -10,7 +12,7 @@ import 'image_display.dart';
 
 /// Reusable order item card widget
 class OrderItemCard extends StatelessWidget {
-  final OrderItemCreationFormViewModel item;
+  final OrderItemCreationFormModel item;
   final CardViewModel card;
   final int index;
   final VoidCallback? onRemove;
@@ -27,15 +29,15 @@ class OrderItemCard extends StatelessWidget {
     this.isReviewMode = false,
   });
 
-  /// Get line item total from view model
+  /// Get line item total from view model using OrderCalculationService
   double get lineItemTotal {
-    final basePrice = card.sellPriceAsDouble;
-    final discountAmount = double.tryParse(item.discountAmount) ?? 0.0;
-    final quantity = item.quantity;
-    final boxCost = item.requiresBox ? (double.tryParse(item.totalBoxCost ?? '0') ?? 0.0) : 0.0;
-    final printingCost = item.requiresPrinting ? (double.tryParse(item.totalPrintingCost ?? '0') ?? 0.0) : 0.0;
-
-    return (basePrice - discountAmount) * quantity + boxCost + printingCost;
+    return OrderCalculationService.calculateLineItemTotalForCreation(
+      item.discountAmount,
+      item.quantity,
+      item.requiresBox ? item.totalBoxCost : null,
+      item.requiresPrinting ? item.totalPrintingCost : null,
+      card.sellPriceAsDouble,
+    );
   }
 
   @override

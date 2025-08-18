@@ -20,8 +20,6 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  bool _isLoading = true; // Show shimmer while data loads
-
   @override
   void initState() {
     super.initState();
@@ -29,58 +27,31 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _initializePage() {
-    // Check if permissions are loaded, if not show shimmer
+    // Check if permissions are loaded, if not show loading
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final permissionProvider = context.read<PermissionProvider>();
+      final dashboardProvider = context.read<DashboardProvider>();
 
       if (!permissionProvider.isInitialized) {
-        // Show shimmer while permissions load
-        setState(() {
-          _isLoading = true;
-        });
-
         // Wait for permissions to load
         permissionProvider
             .initializePermissions()
             .then((_) {
               if (mounted) {
                 // After permissions load, fetch dashboard data
-                _loadDashboardData();
+                dashboardProvider.fetchDashboardData(showSnackbar: false);
               }
             })
             .catchError((error) {
               if (mounted) {
-                setState(() {
-                  _isLoading = false;
-                });
+                dashboardProvider.setLoading(false);
               }
             });
       } else {
         // Permissions already loaded, fetch dashboard data
-        _loadDashboardData();
+        dashboardProvider.fetchDashboardData(showSnackbar: false);
       }
     });
-  }
-
-  void _loadDashboardData() {
-    final dashboardProvider = context.read<DashboardProvider>();
-
-    dashboardProvider
-        .fetchDashboardData()
-        .then((_) {
-          if (mounted) {
-            setState(() {
-              _isLoading = false;
-            });
-          }
-        })
-        .catchError((error) {
-          if (mounted) {
-            setState(() {
-              _isLoading = false;
-            });
-          }
-        });
   }
 
   @override
@@ -108,7 +79,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ],
           // Stats Cards
           Expanded(
-            child: _isLoading
+            child: dashboardProvider.isLoading
                 ? const LoadingWidget(message: 'Loading dashboard...')
                 : _buildStatsGrid(userRole, permissionProvider, dashboardProvider),
           ),
@@ -123,7 +94,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
     // If no dashboard data is available, show a message
     if (dashboard == null) {
-      return const Center(child: Text('No dashboard data available'));
+      return const Center(child: CustomErrorWidget(message: 'No dashboard data available', onRetry: null));
     }
 
     // Orders stats - show if user can manage orders
@@ -196,11 +167,11 @@ class _DashboardPageState extends State<DashboardPage> {
     statsCards.add(
       _buildStatCard(
         context,
-        title: 'Today\'s Orders',
+        title: UITextConstants.todaysOrders,
         value: dashboard.todaysOrders.toString(),
         icon: Icons.today,
         color: AppConfig.primaryColor,
-        subtitle: 'Orders created today',
+        subtitle: UITextConstants.ordersCreatedToday,
       ),
     );
 
@@ -209,11 +180,11 @@ class _DashboardPageState extends State<DashboardPage> {
       statsCards.add(
         _buildStatCard(
           context,
-          title: 'Out of Stock',
+          title: UITextConstants.outOfStock,
           value: dashboard.outOfStockItems.toString(),
           icon: Icons.remove_shopping_cart,
           color: AppConfig.errorColor,
-          subtitle: 'Items need restocking',
+          subtitle: UITextConstants.itemsNeedRestocking,
         ),
       );
     }
@@ -223,22 +194,22 @@ class _DashboardPageState extends State<DashboardPage> {
       statsCards.add(
         _buildStatCard(
           context,
-          title: 'Pending Printing Jobs',
+          title: UITextConstants.pendingPrintingJobs,
           value: dashboard.pendingPrintingJobs.toString(),
           icon: Icons.print,
           color: AppConfig.accentColor,
-          subtitle: 'Jobs in printing queue',
+          subtitle: UITextConstants.jobsInPrintingQueue,
         ),
       );
 
       statsCards.add(
         _buildStatCard(
           context,
-          title: 'Pending Box Jobs',
+          title: UITextConstants.pendingBoxJobs,
           value: dashboard.pendingBoxJobs.toString(),
           icon: Icons.inventory_2,
           color: AppConfig.accentColor,
-          subtitle: 'Box orders in queue',
+          subtitle: UITextConstants.boxOrdersInQueue,
         ),
       );
     }
@@ -248,22 +219,22 @@ class _DashboardPageState extends State<DashboardPage> {
       statsCards.add(
         _buildStatCard(
           context,
-          title: 'Monthly Growth',
+          title: UITextConstants.monthlyGrowth,
           value: dashboard.formattedMonthlyOrderChangePercentage,
           icon: Icons.trending_up,
           color: AppConfig.successColor,
-          subtitle: 'Order growth this month',
+          subtitle: UITextConstants.orderGrowthThisMonth,
         ),
       );
 
       statsCards.add(
         _buildStatCard(
           context,
-          title: 'Pending Bills',
+          title: UITextConstants.pendingBills,
           value: dashboard.pendingBills.toString(),
           icon: Icons.receipt_long,
           color: AppConfig.warningColor,
-          subtitle: 'Bills awaiting payment',
+          subtitle: UITextConstants.billsAwaitingPayment,
         ),
       );
     }
@@ -273,11 +244,11 @@ class _DashboardPageState extends State<DashboardPage> {
       statsCards.add(
         _buildStatCard(
           context,
-          title: 'Expense Logging',
+          title: UITextConstants.expenseLogging,
           value: dashboard.ordersPendingExpenseLogging.toString(),
           icon: Icons.attach_money,
           color: AppConfig.warningColor,
-          subtitle: 'Orders pending expense logging',
+          subtitle: UITextConstants.ordersPendingExpenseLogging,
         ),
       );
     }
@@ -360,67 +331,67 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
-}
 
-Widget _buildCreateOrderButton(BuildContext context) {
-  final isMobile = MediaQuery.of(context).size.width < AppConfig.mobileBreakpoint;
+  Widget _buildCreateOrderButton(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < AppConfig.mobileBreakpoint;
 
-  return Container(
-    width: double.infinity,
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [AppConfig.primaryColor, AppConfig.primaryColor.withOpacity(0.8)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      borderRadius: BorderRadius.circular(isMobile ? 8 : AppConfig.defaultRadius),
-      boxShadow: [BoxShadow(color: AppConfig.primaryColor.withOpacity(0.3), blurRadius: isMobile ? 6 : 10, offset: Offset(0, isMobile ? 2 : 4))],
-    ),
-    child: Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => context.push(RouteConstants.customerSearch),
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppConfig.primaryColor, AppConfig.primaryColor.withOpacity(0.8)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(isMobile ? 8 : AppConfig.defaultRadius),
-        child: Padding(
-          padding: EdgeInsets.all(isMobile ? AppConfig.defaultPadding : AppConfig.largePadding),
-          child: Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(isMobile ? 6 : AppConfig.defaultRadius),
+        boxShadow: [BoxShadow(color: AppConfig.primaryColor.withOpacity(0.3), blurRadius: isMobile ? 6 : 10, offset: Offset(0, isMobile ? 2 : 4))],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => context.push(RouteConstants.customerSearch),
+          borderRadius: BorderRadius.circular(isMobile ? 8 : AppConfig.defaultRadius),
+          child: Padding(
+            padding: EdgeInsets.all(isMobile ? AppConfig.defaultPadding : AppConfig.largePadding),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(isMobile ? 6 : AppConfig.defaultRadius),
+                  ),
+                  child: Icon(Icons.shopping_cart, color: Colors.white, size: isMobile ? AppConfig.iconSizeMedium : AppConfig.iconSizeLarge),
                 ),
-                child: Icon(Icons.shopping_cart, color: Colors.white, size: isMobile ? AppConfig.iconSizeMedium : AppConfig.iconSizeLarge),
-              ),
-              SizedBox(width: isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Create New Order',
-                      style: isMobile
-                          ? ResponsiveText.getBody(context).copyWith(color: Colors.white, fontWeight: FontWeight.bold)
-                          : ResponsiveText.getTitle(context).copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: isMobile ? 2 : AppConfig.smallPadding),
-                    Text(
-                      isMobile ? 'Search for a customer' : 'Start the order creation process by searching for a customer',
-                      style: isMobile
-                          ? ResponsiveText.getCaption(context).copyWith(color: Colors.white.withOpacity(0.9))
-                          : ResponsiveText.getBody(context).copyWith(color: Colors.white.withOpacity(0.9)),
-                      maxLines: isMobile ? 1 : 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                SizedBox(width: isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        UITextConstants.createOrder,
+                        style: isMobile
+                            ? ResponsiveText.getBody(context).copyWith(color: Colors.white, fontWeight: FontWeight.bold)
+                            : ResponsiveText.getTitle(context).copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: isMobile ? 2 : AppConfig.smallPadding),
+                      Text(
+                        isMobile ? UITextConstants.searchCustomer : UITextConstants.orderCreationSubtitle,
+                        style: isMobile
+                            ? ResponsiveText.getCaption(context).copyWith(color: Colors.white.withOpacity(0.9))
+                            : ResponsiveText.getBody(context).copyWith(color: Colors.white.withOpacity(0.9)),
+                        maxLines: isMobile ? 1 : 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Icon(Icons.arrow_forward_ios, color: Colors.white.withOpacity(0.8), size: isMobile ? 16 : AppConfig.iconSizeMedium),
-            ],
+                Icon(Icons.arrow_forward_ios, color: Colors.white.withOpacity(0.8), size: isMobile ? 16 : AppConfig.iconSizeMedium),
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }

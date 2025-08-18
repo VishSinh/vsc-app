@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vsc_app/core/enums/order_box_type.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_form_models.dart';
 
 /// Provider for managing order item form state
@@ -10,11 +11,11 @@ class OrderItemFormProvider extends ChangeNotifier {
 
   bool _requiresBox = false;
   bool _requiresPrinting = false;
-  BoxType _selectedBoxType = BoxType.folding;
+  OrderBoxType _selectedBoxType = OrderBoxType.folding;
 
   bool get requiresBox => _requiresBox;
   bool get requiresPrinting => _requiresPrinting;
-  BoxType get selectedBoxType => _selectedBoxType;
+  OrderBoxType get selectedBoxType => _selectedBoxType;
 
   OrderItemFormProvider() {
     quantityController.text = '1';
@@ -33,7 +34,7 @@ class OrderItemFormProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setSelectedBoxType(BoxType value) {
+  void setSelectedBoxType(OrderBoxType value) {
     _selectedBoxType = value;
     notifyListeners();
   }
@@ -45,7 +46,7 @@ class OrderItemFormProvider extends ChangeNotifier {
     printingCostController.text = '0.00';
     _requiresBox = false;
     _requiresPrinting = false;
-    _selectedBoxType = BoxType.folding;
+    _selectedBoxType = OrderBoxType.folding;
     notifyListeners();
   }
 

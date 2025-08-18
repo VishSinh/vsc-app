@@ -69,7 +69,7 @@ class AuthProvider extends BaseProvider {
     final currentPhone = phone ?? _loginForm?.phone ?? '';
     final currentPassword = password ?? _loginForm?.password ?? '';
 
-    _loginForm = LoginFormViewModel.fromFormData(phone: currentPhone, password: currentPassword);
+    _loginForm = LoginFormViewModel(phone: currentPhone, password: currentPassword);
     notifyListeners();
   }
 
@@ -81,7 +81,7 @@ class AuthProvider extends BaseProvider {
     final currentConfirmPassword = confirmPassword ?? _registerForm?.confirmPassword ?? '';
     final currentRole = role ?? _registerForm?.role ?? '';
 
-    _registerForm = RegisterFormViewModel.fromFormData(
+    _registerForm = RegisterFormViewModel(
       name: currentName,
       phone: currentPhone,
       password: currentPassword,

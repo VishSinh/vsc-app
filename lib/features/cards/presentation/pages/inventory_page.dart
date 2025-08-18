@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
+import 'package:vsc_app/core/utils/snackbar_utils.dart';
 
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/core/widgets/pagination_widget.dart';
@@ -260,15 +261,15 @@ class InventoryActionButtons extends StatelessWidget {
   }
 
   void _onSearchByImage(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Search by Image functionality coming soon!')));
+    SnackbarUtils.showInfo(context, 'Search by Image functionality coming soon!');
   }
 
   void _onScanBarcode(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Barcode scanning functionality coming soon!')));
+    SnackbarUtils.showInfo(context, 'Barcode scanning functionality coming soon!');
   }
 
   void _onFilters(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Filters functionality coming soon!')));
+    SnackbarUtils.showInfo(context, 'Filters functionality coming soon!');
   }
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/core/enums/printing_status.dart';
+import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/production/presentation/models/printing_job_update_form_model.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
 import 'package:vsc_app/features/orders/presentation/providers/printing_job_edit_form_provider.dart';
@@ -114,7 +115,7 @@ class PrintingJobEditDialog extends StatelessWidget {
     return Consumer<OrderListProvider>(
       builder: (context, provider, child) {
         if (provider.isLoadingPrinters) {
-          return const CircularProgressIndicator();
+          return const LoadingWidget(size: 24);
         }
 
         return Column(
@@ -142,7 +143,7 @@ class PrintingJobEditDialog extends StatelessWidget {
     return Consumer<OrderListProvider>(
       builder: (context, provider, child) {
         if (provider.isLoadingTracingStudios) {
-          return const CircularProgressIndicator();
+          return const LoadingWidget(size: 24);
         }
 
         return Column(
@@ -302,9 +303,7 @@ class PrintingJobEditDialog extends StatelessWidget {
             const SizedBox(width: 16),
             ElevatedButton(
               onPressed: provider.isUpdatingPrintingJob ? null : () => _handleSubmit(context, formProvider.formModel),
-              child: provider.isUpdatingPrintingJob
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Update'),
+              child: provider.isUpdatingPrintingJob ? const LoadingWidget(size: 20) : const Text('Update'),
             ),
           ],
         );

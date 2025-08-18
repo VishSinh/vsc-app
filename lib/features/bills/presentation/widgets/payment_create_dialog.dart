@@ -7,6 +7,7 @@ import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/features/bills/presentation/models/payment_form_model.dart';
 import 'package:vsc_app/features/bills/presentation/provider/bill_provider.dart';
+import 'package:vsc_app/features/bills/presentation/services/payment_validators.dart';
 
 class PaymentCreateDialog extends StatefulWidget {
   final String billId;
@@ -114,17 +115,8 @@ class _PaymentCreateDialogState extends State<PaymentCreateDialog> {
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
           ),
           validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Amount is required';
-            }
-            final amount = double.tryParse(value);
-            if (amount == null || amount <= 0) {
-              return 'Amount must be greater than 0';
-            }
-            if (amount > widget.remainingAmount) {
-              return 'Amount cannot exceed remaining balance (₹${widget.remainingAmount.toStringAsFixed(2)})';
-            }
-            return null;
+            final result = PaymentValidators.validateAmount(value ?? '', maxAmount: widget.remainingAmount);
+            return result.isValid ? null : result.firstMessage;
           },
         ),
       ],

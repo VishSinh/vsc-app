@@ -7,6 +7,7 @@ import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
+import 'package:vsc_app/features/orders/presentation/models/order_item_form_model.dart';
 import '../widgets/order_widgets.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
@@ -64,7 +65,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
     context.push(RouteConstants.orderReview, extra: orderProvider);
   }
 
-  void _handleAddOrderItem(OrderItemCreationFormViewModel item) {
+  void _handleAddOrderItem(OrderItemCreationFormModel item) {
     AppLogger.debug('OrderItemsPage: Adding item with cardId: ${item.cardId}');
 
     final orderProvider = context.read<OrderCreateProvider>();

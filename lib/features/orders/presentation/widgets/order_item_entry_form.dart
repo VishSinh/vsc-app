@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
+import 'package:vsc_app/core/enums/order_box_type.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_form_models.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
+import 'package:vsc_app/features/orders/presentation/models/order_item_form_model.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_item_form_provider.dart';
 
 /// Widget for entering order item details
 class OrderItemEntryForm extends StatelessWidget {
-  final void Function(OrderItemCreationFormViewModel) onAddItem;
+  final void Function(OrderItemCreationFormModel) onAddItem;
   final bool isLoading;
 
   const OrderItemEntryForm({super.key, required this.onAddItem, this.isLoading = false});
@@ -21,7 +23,7 @@ class OrderItemEntryForm extends StatelessWidget {
     if (formProvider.quantityController.text.isNotEmpty) {
       AppLogger.debug('OrderItemEntryForm: Adding item without cardId');
       onAddItem(
-        OrderItemCreationFormViewModel(
+        OrderItemCreationFormModel(
           quantity: int.tryParse(formProvider.quantityController.text) ?? 1,
           discountAmount: formProvider.discountController.text,
           requiresBox: formProvider.requiresBox,
@@ -95,14 +97,14 @@ class OrderItemEntryForm extends StatelessWidget {
                   },
                 ),
                 if (formProvider.requiresBox) ...[
-                  DropdownButtonFormField<BoxType>(
+                  DropdownButtonFormField<OrderBoxType>(
                     value: formProvider.selectedBoxType,
                     decoration: InputDecoration(labelText: UITextConstants.boxType, border: const OutlineInputBorder()),
-                    items: BoxType.values.map((type) {
+                    items: OrderBoxType.values.map((type) {
                       return DropdownMenuItem(value: type, child: Text(type.name.toUpperCase()));
                     }).toList(),
                     onChanged: (value) {
-                      formProvider.setSelectedBoxType(value ?? BoxType.folding);
+                      formProvider.setSelectedBoxType(value ?? OrderBoxType.folding);
                     },
                   ),
                   SizedBox(height: AppConfig.defaultPadding),

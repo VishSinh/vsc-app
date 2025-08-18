@@ -169,14 +169,28 @@ class UITextConstants {
   static const String lowStockItems = 'Low Stock Items';
   static const String totalRevenue = 'Total Revenue';
   static const String activePartners = 'Active Partners';
+  static const String todaysOrders = 'Today\'s Orders';
+  static const String outOfStock = 'Out of Stock';
+  static const String pendingPrintingJobs = 'Pending Printing Jobs';
+  static const String pendingBoxJobs = 'Pending Box Jobs';
+  static const String monthlyGrowth = 'Monthly Growth';
+  static const String pendingBills = 'Pending Bills';
+  static const String expenseLogging = 'Expense Logging';
 
   // ================================ STATISTICS SUBTITLES ================================
   // static const String ordersFromLastMonth = '+12% from last month';
-  static const String ordersRequireAttention = 'Fewrequire attention';
-  static const String jobsInProgress = '3 in progress';
+  static const String ordersRequireAttention = 'Few require attention';
+  static const String jobsInProgress = 'Jobs in progress';
   static const String needReorder = 'Need reorder';
   static const String revenueFromLastMonth = '+8% from last month';
   static const String newPartnersThisMonth = '3 new this month';
+  static const String ordersCreatedToday = 'Orders created today';
+  static const String itemsNeedRestocking = 'Items need restocking';
+  static const String jobsInPrintingQueue = 'Jobs in printing queue';
+  static const String boxOrdersInQueue = 'Box orders in queue';
+  static const String orderGrowthThisMonth = 'Order growth this month';
+  static const String billsAwaitingPayment = 'Bills awaiting payment';
+  static const String ordersPendingExpenseLogging = 'Orders pending expense logging';
 
   // ================================ WELCOME MESSAGES ================================
   static const String welcomeBack = 'Welcome back!';

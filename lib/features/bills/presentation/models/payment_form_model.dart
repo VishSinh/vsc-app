@@ -16,14 +16,32 @@ class PaymentFormModel {
   }
 
   ValidationResult validate() {
-    final errors = <String>[];
+    final errors = <ValidationError>[];
 
-    if (amount <= 0) {
-      errors.add('Amount must be greater than 0');
+    ValidationResult validateAmount() {
+      final amountStr = amount.toString();
+
+      if (amountStr.trim().isEmpty) {
+        return ValidationResult.failureSingle('amount', 'Amount is required');
+      }
+
+      final amountValue = double.tryParse(amountStr);
+      if (amountValue == null) {
+        return ValidationResult.failureSingle('amount', 'Please enter a valid number');
+      }
+
+      if (amountValue <= 0) {
+        return ValidationResult.failureSingle('amount', 'Amount must be greater than 0');
+      }
+
+      return ValidationResult.success();
     }
 
-    return errors.isEmpty
-        ? ValidationResult.success()
-        : ValidationResult.failure(errors.map((e) => ValidationError(field: 'payment', message: e)).toList());
+    final amountResult = validateAmount();
+    if (!amountResult.isValid) {
+      errors.addAll(amountResult.errors);
+    }
+
+    return errors.isEmpty ? ValidationResult.success() : ValidationResult.failure(errors);
   }
 }
