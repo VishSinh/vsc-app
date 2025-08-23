@@ -15,7 +15,6 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 
 import 'package:vsc_app/features/orders/presentation/providers/order_create_provider.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
-import 'package:vsc_app/features/orders/presentation/models/order_form_models.dart';
 
 class CreateOrderPage extends StatefulWidget {
   const CreateOrderPage({super.key});
@@ -27,15 +26,16 @@ class CreateOrderPage extends StatefulWidget {
 class _CreateOrderPageState extends State<CreateOrderPage> {
   final _barcodeController = TextEditingController();
 
+  // Add a variable to track the last scanned barcode and time
+  String? _lastScannedBarcode;
+  DateTime? _lastScanTime;
+
   @override
   void initState() {
     super.initState();
-    // Clear order items but preserve selected customer when entering the page
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final orderProvider = context.read<OrderCreateProvider>();
-      final selectedCustomer = orderProvider.selectedCustomer; // Preserve customer
-      orderProvider.clearOrderItemsOnly(); // Only clear items, not customer
-      AppLogger.debug('OrderItemsPage: Cleared order items but preserved customer: ${selectedCustomer?.name}');
+      orderProvider.clearOrderItemsOnly();
     });
   }
 
@@ -48,7 +48,9 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
   void _searchCard() {
     final orderProvider = context.read<OrderCreateProvider>();
     orderProvider.setContext(context);
-    orderProvider.searchCardByBarcode(_barcodeController.text.trim());
+    Future.microtask(() async {
+      await orderProvider.searchCardByBarcode(_barcodeController.text.trim());
+    });
   }
 
   void _removeOrderItem(int index) {
@@ -66,8 +68,6 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
   }
 
   void _handleAddOrderItem(OrderItemCreationFormModel item) {
-    AppLogger.debug('OrderItemsPage: Adding item with cardId: ${item.cardId}');
-
     final orderProvider = context.read<OrderCreateProvider>();
     final currentCard = orderProvider.currentCardViewModel;
     if (currentCard == null) {
@@ -77,9 +77,14 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
 
     item.cardId = currentCard.id;
 
+    // Check if the item already exists in the order
+    if (orderProvider.orderItems.any((element) => element.cardId == item.cardId)) {
+      orderProvider.setErrorWithSnackBar('Item already exists in the order', context);
+      return;
+    }
+
     orderProvider.addOrderItem(item);
     orderProvider.setSuccessWithSnackBar('Item added to order', context);
-    AppLogger.debug('OrderItemsPage: Item added to order: ${item.cardId}');
   }
 
   void _showBarcodeScanner() {
@@ -96,13 +101,27 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
               if (barcodes.isNotEmpty) {
                 final String barcode = barcodes.first.rawValue ?? '';
                 if (barcode.isNotEmpty) {
+                  // Debounce logic: prevent multiple scans of the same barcode within 2 seconds
+                  final now = DateTime.now();
+                  if (_lastScannedBarcode == barcode && _lastScanTime != null && now.difference(_lastScanTime!).inSeconds < 2) {
+                    // Skip this scan - it's a duplicate within the debounce period
+                    return;
+                  }
+
+                  // Update the last scanned barcode and time
+                  _lastScannedBarcode = barcode;
+                  _lastScanTime = now;
+
                   AppLogger.info('Barcode scanned: $barcode', category: 'BARCODE_SCAN');
                   _barcodeController.text = barcode;
                   Navigator.of(context).pop();
 
                   // Automatically search for the card after scanning
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _searchCard();
+                  // Use microtask to avoid context issues
+                  Future.microtask(() {
+                    if (mounted) {
+                      _searchCard();
+                    }
                   });
                 }
               }
@@ -134,7 +153,13 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(UITextConstants.orderCreationTitle),
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            context.read<OrderCreateProvider>().clearCurrentCard();
+            context.pop();
+          },
+        ),
       ),
       body: Consumer<OrderCreateProvider>(
         builder: (context, orderProvider, child) {
@@ -394,9 +419,6 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
   }
 
   Widget _buildOrderItemsList(OrderCreateProvider orderProvider) {
-    AppLogger.debug('OrderItemsPage: Building order items list, count: ${orderProvider.orderItems.length}');
-    AppLogger.debug('OrderItemsPage: Order items: ${orderProvider.orderItems}');
-
     return Card(
       child: Padding(
         padding: EdgeInsets.all(AppConfig.defaultPadding),

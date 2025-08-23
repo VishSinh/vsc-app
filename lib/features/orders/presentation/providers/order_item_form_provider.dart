@@ -18,10 +18,10 @@ class OrderItemFormProvider extends ChangeNotifier {
   OrderBoxType get selectedBoxType => _selectedBoxType;
 
   OrderItemFormProvider() {
-    quantityController.text = '1';
-    discountController.text = '0.00';
-    boxCostController.text = '0.00';
-    printingCostController.text = '0.00';
+    quantityController.text = '';
+    discountController.text = '';
+    boxCostController.text = '';
+    printingCostController.text = '';
   }
 
   void setRequiresBox(bool value) {
@@ -40,10 +40,10 @@ class OrderItemFormProvider extends ChangeNotifier {
   }
 
   void reset() {
-    quantityController.text = '1';
-    discountController.text = '0.00';
-    boxCostController.text = '0.00';
-    printingCostController.text = '0.00';
+    quantityController.text = '';
+    discountController.text = '';
+    boxCostController.text = '';
+    printingCostController.text = '';
     _requiresBox = false;
     _requiresPrinting = false;
     _selectedBoxType = OrderBoxType.folding;

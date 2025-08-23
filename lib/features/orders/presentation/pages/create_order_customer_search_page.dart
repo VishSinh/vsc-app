@@ -10,7 +10,6 @@ import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/features/customers/presentation/providers/customer_provider.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_create_provider.dart';
-import 'package:vsc_app/core/utils/app_logger.dart';
 
 class CreateOrderCustomerSearchPage extends StatefulWidget {
   const CreateOrderCustomerSearchPage({super.key});
@@ -41,17 +40,12 @@ class _CreateOrderCustomerSearchPageState extends State<CreateOrderCustomerSearc
 
     if (mounted) {
       if (customer != null) {
-        AppLogger.debug('CustomerSearchPage: Customer found: ${customer.name}');
         orderProvider.setSelectedCustomerData(customer);
-        AppLogger.debug('CustomerSearchPage: Customer set in OrderProvider, navigating to order items');
         SnackbarUtils.showSuccess(context, UITextConstants.customerFoundSuccess);
         context.push(RouteConstants.orderItems, extra: orderProvider);
       } else {
-        // Customer not found - show actual API error and suggest creating
-        AppLogger.debug('CustomerSearchPage: Customer not found, showing API error');
         final apiErrorMessage = customerProvider.errorMessage ?? UITextConstants.customerNotFoundWithSuggestion;
         SnackbarUtils.showError(context, apiErrorMessage);
-        // Clear the provider error since we've handled it specifically
         customerProvider.setError(null);
       }
     }

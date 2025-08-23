@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
 import 'package:vsc_app/features/cards/data/services/card_service.dart';
+import 'package:vsc_app/features/cards/data/models/card_responses.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_item_form_model.dart';
 import '../../data/services/order_service.dart';
 import '../models/order_form_models.dart';
-import '../services/order_calculation_service.dart';
 
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/core/models/customer_model.dart';
@@ -93,30 +93,12 @@ class OrderCreateProvider extends BaseProvider {
   Future<void> searchCardByBarcode(String barcode) async {
     await executeApiOperation(
       apiCall: () => CardService().getCardByBarcode(barcode),
-      onSuccess: (dynamic response) {
-        final cardData = response.data as dynamic;
-        final double sellPriceNum = (cardData.sellPriceAsDouble as double?) ?? 0.0;
-        final double costPriceNum = (cardData.costPriceAsDouble as double?) ?? 0.0;
-        final double maxDiscountNum = (cardData.maxDiscountAsDouble as double?) ?? 0.0;
-        final int quantityNum = (cardData.quantity as int?) ?? 0;
-        _currentCard = CardViewModel(
-          id: (cardData.id as String?) ?? '',
-          vendorId: (cardData.vendorId as String?) ?? '',
-          barcode: (cardData.barcode as String?) ?? '',
-          sellPrice: sellPriceNum.toStringAsFixed(2),
-          costPrice: costPriceNum.toStringAsFixed(2),
-          maxDiscount: maxDiscountNum.toStringAsFixed(2),
-          quantity: quantityNum,
-          image: cardData.image as String,
-          perceptualHash: cardData.perceptualHash as String,
-          isActive: (cardData.isActive as bool?) ?? true,
-          sellPriceAsDouble: sellPriceNum,
-          costPriceAsDouble: costPriceNum,
-          maxDiscountAsDouble: maxDiscountNum,
-          profitMargin: OrderCalculationService.calculateProfitMargin(sellPriceNum, costPriceNum),
-          totalValue: OrderCalculationService.calculateTotalValue(sellPriceNum, quantityNum),
-        );
-        addCardDetails(cardData.id as String, _currentCard!);
+      onSuccess: (response) {
+        final cardResponse = response.data!;
+
+        _currentCard = CardViewModel.fromApiResponse(cardResponse);
+
+        addCardDetails(cardResponse.id, _currentCard!);
       },
       errorMessage: 'Failed to search for card',
     );
@@ -132,7 +114,7 @@ class OrderCreateProvider extends BaseProvider {
     // Validate order creation
     final validationResult = _orderCreationForm.validate();
     if (!validationResult.isValid) {
-      setError(validationResult.firstMessage ?? 'Please check your input');
+      setErrorWithSnackBar(validationResult.firstMessage ?? 'Please check your input', context!);
       return '';
     }
 
@@ -166,13 +148,11 @@ class OrderCreateProvider extends BaseProvider {
     super.reset();
   }
 
-  /// Set order name
   void setOrderName(String orderName) {
     _orderCreationForm.name = orderName;
     notifyListeners();
   }
 
-  /// Set delivery date
   void setDeliveryDate(DateTime? date) {
     _selectedDeliveryDate = date;
     if (date != null && _selectedDeliveryTime != null) {
@@ -182,7 +162,6 @@ class OrderCreateProvider extends BaseProvider {
     notifyListeners();
   }
 
-  /// Set delivery time
   void setDeliveryTime(TimeOfDay? time) {
     _selectedDeliveryTime = time;
     if (_selectedDeliveryDate != null && time != null) {
@@ -198,10 +177,10 @@ class OrderCreateProvider extends BaseProvider {
     notifyListeners();
   }
 
-  /// Set default delivery date and time (tomorrow at 10:00 AM)
+  /// Set default delivery date and time (4 days from now at 6:00 PM)
   void setDefaultDeliveryDateTime() {
-    _selectedDeliveryDate = DateTime.now().add(const Duration(days: 1));
-    _selectedDeliveryTime = const TimeOfDay(hour: 10, minute: 0);
+    _selectedDeliveryDate = DateTime.now().add(const Duration(days: 4));
+    _selectedDeliveryTime = const TimeOfDay(hour: 18, minute: 0);
     if (_selectedDeliveryDate != null && _selectedDeliveryTime != null) {
       final deliveryDateTime = DateTime(
         _selectedDeliveryDate!.year,
@@ -215,22 +194,19 @@ class OrderCreateProvider extends BaseProvider {
     notifyListeners();
   }
 
-  /// Check if order can be created (has required data)
-  bool get canCreateOrder {
-    return _orderCreationForm.customerId != null &&
-        _orderCreationForm.name != null &&
-        _orderCreationForm.deliveryDate != null &&
-        (_orderCreationForm.orderItems?.isNotEmpty ?? false);
-  }
+  // bool get canCreateOrder {
+  //   return _orderCreationForm.customerId != null &&
+  //       _orderCreationForm.name != null &&
+  //       _orderCreationForm.deliveryDate != null &&
+  //       (_orderCreationForm.orderItems?.isNotEmpty ?? false);
+  // }
 
-  /// Get order items count
-  int get orderItemsCount => _orderCreationForm.orderItems?.length ?? 0;
+  // int get orderItemsCount => _orderCreationForm.orderItems?.length ?? 0;
 
-  /// Check if form has any data
-  bool get hasFormData {
-    return _orderCreationForm.customerId != null ||
-        _orderCreationForm.name != null ||
-        _orderCreationForm.deliveryDate != null ||
-        (_orderCreationForm.orderItems?.isNotEmpty ?? false);
-  }
+  // bool get hasFormData {
+  //   return _orderCreationForm.customerId != null ||
+  //       _orderCreationForm.name != null ||
+  //       _orderCreationForm.deliveryDate != null ||
+  //       (_orderCreationForm.orderItems?.isNotEmpty ?? false);
+  // }
 }

@@ -4,7 +4,7 @@ import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/enums/order_box_type.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
-import 'package:vsc_app/features/orders/presentation/models/order_form_models.dart';
+
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_item_form_model.dart';
@@ -20,21 +20,30 @@ class OrderItemEntryForm extends StatelessWidget {
   void _handleAddItem(BuildContext context) {
     final formProvider = context.read<OrderItemFormProvider>();
 
-    if (formProvider.quantityController.text.isNotEmpty) {
-      AppLogger.debug('OrderItemEntryForm: Adding item without cardId');
-      onAddItem(
-        OrderItemCreationFormModel(
-          quantity: int.tryParse(formProvider.quantityController.text) ?? 1,
-          discountAmount: formProvider.discountController.text,
-          requiresBox: formProvider.requiresBox,
-          requiresPrinting: formProvider.requiresPrinting,
-          totalBoxCost: formProvider.requiresBox ? formProvider.boxCostController.text : null,
-          totalPrintingCost: formProvider.requiresPrinting ? formProvider.printingCostController.text : null,
-          boxType: formProvider.selectedBoxType,
-        ),
-      );
-      formProvider.reset();
-    }
+    // Always provide default values for empty fields
+    final quantity = formProvider.quantityController.text.isEmpty ? 1 : int.tryParse(formProvider.quantityController.text) ?? 1;
+
+    final discountAmount = formProvider.discountController.text.isEmpty ? '0' : formProvider.discountController.text;
+
+    final boxCost = formProvider.requiresBox && formProvider.boxCostController.text.isEmpty ? '0' : formProvider.boxCostController.text;
+
+    final printingCost = formProvider.requiresPrinting && formProvider.printingCostController.text.isEmpty
+        ? '0'
+        : formProvider.printingCostController.text;
+
+    AppLogger.debug('OrderItemEntryForm: Adding item without cardId');
+    onAddItem(
+      OrderItemCreationFormModel(
+        quantity: quantity,
+        discountAmount: discountAmount,
+        requiresBox: formProvider.requiresBox,
+        requiresPrinting: formProvider.requiresPrinting,
+        totalBoxCost: formProvider.requiresBox ? boxCost : null,
+        totalPrintingCost: formProvider.requiresPrinting ? printingCost : null,
+        boxType: formProvider.selectedBoxType,
+      ),
+    );
+    formProvider.reset();
   }
 
   @override

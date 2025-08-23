@@ -67,10 +67,19 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
 
   Future<void> _submitOrder() async {
     final orderProvider = context.read<OrderCreateProvider>();
+    print('Order name: ${_orderNameController.text}');
+
+    // Check if order name is provided
+    // if (_orderNameController.text.trim().isEmpty) {
+    //   orderProvider.setErrorWithSnackBar('Please enter an order name', context);
+    //   return;
+    // }
 
     orderProvider.setOrderName(_orderNameController.text);
-
     orderProvider.setContext(context);
+    print('Order name: ${orderProvider.orderName}');
+
+    // The loading state will be handled by the provider's isLoading flag
     final billId = await orderProvider.createOrder();
 
     if (billId.isNotEmpty && mounted) {
@@ -271,11 +280,17 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
   Widget _buildActionButtons(OrderCreateProvider orderProvider) {
     return Column(
       children: [
+        // Show a more prominent loading indicator at the top when loading
+        if (orderProvider.isLoading)
+          Padding(
+            padding: EdgeInsets.only(bottom: AppConfig.defaultPadding),
+            child: LoadingWidget(message: 'Creating order...'),
+          ),
         Row(
           children: [
             Expanded(
               child: ButtonUtils.secondaryButton(
-                onPressed: () => context.go(RouteConstants.orderItems),
+                onPressed: orderProvider.isLoading ? null : () => context.go(RouteConstants.orderItems),
                 label: UITextConstants.back,
                 icon: Icons.arrow_back,
               ),
@@ -284,13 +299,12 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
             Expanded(
               child: ButtonUtils.primaryButton(
                 onPressed: orderProvider.isLoading ? null : _submitOrder,
-                label: UITextConstants.submitOrder,
-                icon: Icons.check,
+                label: orderProvider.isLoading ? 'Processing...' : UITextConstants.submitOrder,
+                icon: orderProvider.isLoading ? Icons.hourglass_top : Icons.check,
               ),
             ),
           ],
         ),
-        if (orderProvider.isLoading) ...[SizedBox(height: AppConfig.defaultPadding), LoadingWidget(message: 'Creating order...')],
       ],
     );
   }
