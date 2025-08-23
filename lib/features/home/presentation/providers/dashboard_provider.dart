@@ -14,7 +14,7 @@ class DashboardProvider extends BaseProvider {
   bool get hasDashboardData => _dashboardData != null;
 
   /// Fetch dashboard data from the API
-  Future<void> fetchDashboardData({bool showSnackbar = false}) async {
+  Future<void> fetchDashboardData() async {
     await executeApiOperation(
       apiCall: () => _dashboardService.getDashboardData(),
       onSuccess: (response) {
@@ -22,7 +22,7 @@ class DashboardProvider extends BaseProvider {
         notifyListeners();
         return _dashboardData;
       },
-      showSnackbar: showSnackbar,
+      showSnackbar: true,
       showLoading: true,
       errorMessage: 'Failed to load dashboard data',
     );

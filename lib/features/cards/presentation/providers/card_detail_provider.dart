@@ -1,6 +1,4 @@
 import 'package:vsc_app/core/providers/base_provider.dart';
-import 'package:vsc_app/core/models/api_response.dart';
-import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:vsc_app/features/cards/data/services/card_service.dart';
 
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
@@ -19,6 +17,19 @@ class CardDetailProvider extends BaseProvider {
   Future<void> getCardById(String id) async {
     await executeApiOperation(
       apiCall: () => _cardService.getCardById(id),
+      onSuccess: (response) {
+        _currentCard = CardViewModel.fromApiResponse(response.data!);
+        return response.data!;
+      },
+      showSnackbar: false,
+      errorMessage: 'Card not found',
+    );
+  }
+
+  /// Get card by barcode
+  Future<void> getCardByBarcode(String barcode) async {
+    await executeApiOperation(
+      apiCall: () => _cardService.getCardByBarcode(barcode),
       onSuccess: (response) {
         _currentCard = CardViewModel.fromApiResponse(response.data!);
         return response.data!;

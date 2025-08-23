@@ -3,8 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
+import 'package:vsc_app/core/enums/box_status.dart';
+import 'package:vsc_app/core/enums/order_status.dart';
+import 'package:vsc_app/core/enums/printing_status.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_detail_provider.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
+import 'package:vsc_app/features/orders/presentation/services/order_calculation_service.dart';
 import 'package:vsc_app/features/orders/presentation/widgets/box_order_edit_dialog.dart';
 import 'package:vsc_app/features/orders/presentation/widgets/printing_job_edit_dialog.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -139,9 +143,12 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(color: _getStatusColor(order.orderStatus), borderRadius: BorderRadius.circular(16)),
+                  decoration: BoxDecoration(
+                    color: OrderStatusExtension.getColorFromString(order.orderStatus),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   child: Text(
-                    _formatStatus(order.orderStatus),
+                    OrderStatusExtension.getDisplayTextFromString(order.orderStatus),
                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -190,7 +197,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             _buildInfoRow('Order Date', _formatDateTime(order.orderDate)),
             _buildInfoRow('Delivery Date', _formatDateTime(order.deliveryDate)),
             _buildInfoRow('Total Items', '${order.orderItems.length}'),
-            _buildInfoRow('Total Amount', '₹${_calculateTotalAmount(order.orderItems).toStringAsFixed(2)}'),
+            _buildInfoRow('Total Amount', '₹${OrderCalculationService.calculateOrderTotal(order.orderItems).toStringAsFixed(2)}'),
           ],
         ),
       ),
@@ -254,7 +261,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                           _buildItemInfoRow('Quantity', '${item.quantity}'),
                           _buildItemInfoRow('Price per Item', '₹${item.pricePerItem}'),
                           _buildItemInfoRow('Discount Amount', '₹${item.discountAmount}'),
-                          _buildItemInfoRow('Line Total', '₹${_calculateLineTotal(item)}'),
+                          _buildItemInfoRow('Line Total', '₹${OrderCalculationService.calculateItemTotal(item).toStringAsFixed(2)}'),
                         ],
                       ),
                     ],
@@ -269,7 +276,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                             _buildItemInfoRow('Quantity', '${item.quantity}'),
                             _buildItemInfoRow('Price per Item', '₹${item.pricePerItem}'),
                             _buildItemInfoRow('Discount Amount', '₹${item.discountAmount}'),
-                            _buildItemInfoRow('Line Total', '₹${_calculateLineTotal(item)}'),
+                            _buildItemInfoRow('Line Total', '₹${OrderCalculationService.calculateItemTotal(item).toStringAsFixed(2)}'),
                           ],
                         ),
                       ),
@@ -376,9 +383,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(color: _getBoxStatusColor(box.boxStatus), borderRadius: BorderRadius.circular(8)),
+                decoration: BoxDecoration(color: BoxStatusExtension.getColorFromString(box.boxStatus), borderRadius: BorderRadius.circular(8)),
                 child: Text(
-                  _formatBoxStatus(box.boxStatus),
+                  BoxStatusExtension.getDisplayTextFromString(box.boxStatus),
                   style: TextStyle(color: Colors.white, fontSize: AppConfig.fontSizeXs, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -436,9 +443,12 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(color: _getPrintingStatusColor(job.printingStatus), borderRadius: BorderRadius.circular(8)),
+                decoration: BoxDecoration(
+                  color: PrintingStatusExtension.getColorFromString(job.printingStatus),
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 child: Text(
-                  _formatPrintingStatus(job.printingStatus),
+                  PrintingStatusExtension.getDisplayTextFromString(job.printingStatus),
                   style: TextStyle(color: Colors.white, fontSize: AppConfig.fontSizeXs, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -456,7 +466,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           _buildPrintingInfoRow('Quantity', '${job.printQuantity}'),
           _buildPrintingInfoRow('Cost', '₹${job.totalPrintingCost}'),
           if (job.printerId != null) _buildPrintingInfoRow('Printer', job.printerName ?? job.printerId!),
-          if (job.tracingStudioId != null) _buildPrintingInfoRow('Tracing Studio', job.tracingStudioId!),
+          if (job.tracingStudioId != null) _buildPrintingInfoRow('Tracing Studio', job.tracingStudioName ?? job.tracingStudioId!),
           if (job.estimatedCompletion != null) _buildPrintingInfoRow('Est. Completion', _formatDateTime(job.estimatedCompletion!)),
         ],
       ),
@@ -509,109 +519,19 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
-  String _formatStatus(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'PENDING';
-      case 'confirmed':
-        return 'CONFIRMED';
-      case 'in_progress':
-        return 'IN PROGRESS';
-      case 'completed':
-        return 'COMPLETED';
-      case 'cancelled':
-        return 'CANCELLED';
-      default:
-        return status.toUpperCase();
-    }
-  }
+  // Using OrderStatusExtension.getDisplayTextFromString instead of local formatting method
 
-  String _formatBoxStatus(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'PENDING';
-      case 'in_progress':
-        return 'IN PROGRESS';
-      case 'completed':
-        return 'COMPLETED';
-      default:
-        return status.toUpperCase();
-    }
-  }
+  // Using BoxStatusExtension.getDisplayTextFromString instead of local formatting method
 
-  String _formatPrintingStatus(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'PENDING';
-      case 'in_progress':
-        return 'IN PROGRESS';
-      case 'completed':
-        return 'COMPLETED';
-      default:
-        return status.toUpperCase();
-    }
-  }
+  // Using PrintingStatus enum instead of local formatting method
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return Colors.orange;
-      case 'confirmed':
-        return Colors.blue;
-      case 'completed':
-        return Colors.green;
-      case 'cancelled':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
+  // Using OrderStatusExtension.getColorFromString instead of local color mapping method
 
-  Color _getBoxStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return Colors.orange;
-      case 'in_progress':
-        return Colors.blue;
-      case 'completed':
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
-  }
+  // Using BoxStatusExtension.getColorFromString instead of local color mapping method
 
-  Color _getPrintingStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return Colors.orange;
-      case 'in_progress':
-        return Colors.blue;
-      case 'completed':
-        return Colors.green;
-      default:
-        return Colors.grey;
-    }
-  }
+  // Using PrintingStatus.getColorFromString instead of local color mapping method
 
-  double _calculateLineTotal(OrderItemViewModel item) {
-    final pricePerItem = double.tryParse(item.pricePerItem) ?? 0.0;
-    final discountAmount = double.tryParse(item.discountAmount) ?? 0.0;
-    return (pricePerItem - discountAmount) * item.quantity;
-  }
-
-  double _calculateTotalAmount(List<OrderItemViewModel> orderItems) {
-    return orderItems.fold(0.0, (total, item) {
-      final lineTotal = _calculateLineTotal(item);
-
-      // Add box costs
-      final boxCosts = (item.boxOrders ?? []).fold(0.0, (sum, box) => sum + (double.tryParse(box.totalBoxCost) ?? 0.0));
-
-      // Add printing costs
-      final printingCosts = (item.printingJobs ?? []).fold(0.0, (sum, job) => sum + (double.tryParse(job.totalPrintingCost) ?? 0.0));
-
-      return total + lineTotal + boxCosts + printingCosts;
-    });
-  }
+  // Using OrderCalculationService for all calculation methods
 
   void _showEditBoxOrderDialog(BoxOrderViewModel box) {
     showDialog(

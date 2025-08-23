@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
-import 'package:vsc_app/features/orders/presentation/models/order_form_models.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_item_form_model.dart';
 import 'package:vsc_app/features/orders/presentation/services/order_calculation_service.dart';
 
@@ -31,12 +30,12 @@ class OrderItemCard extends StatelessWidget {
 
   /// Get line item total from view model using OrderCalculationService
   double get lineItemTotal {
-    return OrderCalculationService.calculateLineItemTotalForCreation(
-      item.discountAmount,
-      item.quantity,
-      item.requiresBox ? item.totalBoxCost : null,
-      item.requiresPrinting ? item.totalPrintingCost : null,
-      card.sellPriceAsDouble,
+    return OrderCalculationService.calculateLineItemTotalWithParams(
+      basePrice: card.sellPriceAsDouble,
+      discountAmount: item.discountAmount,
+      quantity: item.quantity,
+      totalBoxCost: item.requiresBox ? item.totalBoxCost : null,
+      totalPrintingCost: item.requiresPrinting ? item.totalPrintingCost : null,
     );
   }
 

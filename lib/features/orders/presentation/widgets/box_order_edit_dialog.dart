@@ -61,42 +61,55 @@ class BoxOrderEditDialog extends StatelessWidget {
               return Dialog(
                 child: Container(
                   width: 500,
-                  padding: const EdgeInsets.all(24),
+                  constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.edit, color: Colors.blue),
-                          const SizedBox(width: 8),
-                          const Text('Edit Box Order', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                          const Spacer(),
-                          IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.close)),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      Form(
-                        child: Column(
+                      Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Row(
                           children: [
-                            _buildBoxMakerSection(context, formProvider, orderProvider),
-                            const SizedBox(height: 16),
-                            _buildBoxStatusSection(context, formProvider),
-                            const SizedBox(height: 16),
-                            _buildBoxTypeSection(context, formProvider),
-                            const SizedBox(height: 16),
-                            _buildTotalBoxCostSection(context, formProvider),
-                            const SizedBox(height: 16),
-                            _buildTotalBoxExpenseSection(context, formProvider),
-                            const SizedBox(height: 16),
-                            _buildBoxQuantitySection(context, formProvider),
-                            const SizedBox(height: 16),
-                            _buildEstimatedCompletionSection(context, formProvider),
-                            const SizedBox(height: 24),
-                            _buildActionButtons(context, formProvider, orderProvider),
+                            const Icon(Icons.edit, color: Colors.blue),
+                            const SizedBox(width: 8),
+                            const Text('Edit Box Order', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                            const Spacer(),
+                            IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.close)),
                           ],
                         ),
                       ),
+                      const Divider(height: 1),
+                      Expanded(
+                        child: Scrollbar(
+                          thumbVisibility: true,
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.all(24),
+                            child: Form(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildBoxMakerSection(context, formProvider, orderProvider),
+                                  const SizedBox(height: 16),
+                                  _buildBoxStatusSection(context, formProvider),
+                                  const SizedBox(height: 16),
+                                  _buildBoxTypeSection(context, formProvider),
+                                  const SizedBox(height: 16),
+                                  _buildTotalBoxCostSection(context, formProvider),
+                                  const SizedBox(height: 16),
+                                  _buildTotalBoxExpenseSection(context, formProvider),
+                                  const SizedBox(height: 16),
+                                  _buildBoxQuantitySection(context, formProvider),
+                                  const SizedBox(height: 16),
+                                  _buildEstimatedCompletionSection(context, formProvider),
+                                  const SizedBox(height: 24),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const Divider(height: 1),
+                      Padding(padding: const EdgeInsets.all(16), child: _buildActionButtons(context, formProvider, orderProvider)),
                     ],
                   ),
                 ),

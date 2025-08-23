@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 
 import 'package:vsc_app/core/constants/route_constants.dart';
+import 'package:vsc_app/core/enums/order_status.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_detail_provider.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
+import 'package:vsc_app/features/orders/presentation/services/order_calculation_service.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/core/widgets/pagination_widget.dart';
 
@@ -93,37 +94,7 @@ class _OrdersPageState extends State<OrdersPage> {
     );
   }
 
-  Widget _buildFilters() {
-    return Consumer<OrderListProvider>(
-      builder: (context, orderProvider, child) {
-        return Row(
-          children: [
-            Expanded(
-              child: TextField(
-                decoration: const InputDecoration(labelText: 'Search by name, customer, staff or order ID...', prefixIcon: Icon(Icons.search)),
-                onChanged: (value) {
-                  orderProvider.setSearchQuery(value);
-                },
-              ),
-            ),
-            const SizedBox(width: 16),
-            DropdownButton<String>(
-              value: orderProvider.statusFilter,
-              items: const [
-                DropdownMenuItem(value: 'all', child: Text('All Status')),
-                DropdownMenuItem(value: 'pending', child: Text('Pending')),
-                DropdownMenuItem(value: 'confirmed', child: Text('Confirmed')),
-                DropdownMenuItem(value: 'completed', child: Text('Completed')),
-              ],
-              onChanged: (value) {
-                orderProvider.setStatusFilter(value ?? 'all');
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // Removed unused _buildFilters method
 
   Widget _buildOrdersList(OrderListProvider orderProvider) {
     if (orderProvider.errorMessage != null) {
@@ -192,9 +163,12 @@ class _OrdersPageState extends State<OrdersPage> {
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(color: _getStatusColor(order.orderStatus), borderRadius: BorderRadius.circular(16)),
+                        decoration: BoxDecoration(
+                          color: OrderStatusExtension.getColorFromString(order.orderStatus),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                         child: Text(
-                          _formatStatus(order.orderStatus),
+                          OrderStatusExtension.getDisplayTextFromString(order.orderStatus),
                           style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -242,7 +216,7 @@ class _OrdersPageState extends State<OrdersPage> {
                       if (_hasPrintingRequirements(order)) ...[const SizedBox(width: 8), const Icon(Icons.print, size: 16, color: Colors.green)],
                       const Spacer(),
                       Text(
-                        '₹${_calculateTotalAmount(order.orderItems).toStringAsFixed(2)}',
+                        '₹${OrderCalculationService.calculateOrderTotal(order.orderItems).toStringAsFixed(2)}',
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                       ),
                     ],
@@ -443,9 +417,12 @@ class _OrdersPageState extends State<OrdersPage> {
               child: Center(
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(color: _getStatusColor(order.orderStatus), borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(
+                    color: OrderStatusExtension.getColorFromString(order.orderStatus),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: Text(
-                    _formatStatus(order.orderStatus),
+                    OrderStatusExtension.getDisplayTextFromString(order.orderStatus),
                     style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
@@ -526,7 +503,7 @@ class _OrdersPageState extends State<OrdersPage> {
               flex: 1,
               child: Center(
                 child: Text(
-                  '₹${_calculateTotalAmount(order.orderItems).toStringAsFixed(2)}',
+                  '₹${OrderCalculationService.calculateOrderTotal(order.orderItems).toStringAsFixed(2)}',
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                   textAlign: TextAlign.center,
                 ),
@@ -560,22 +537,7 @@ class _OrdersPageState extends State<OrdersPage> {
     return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 
-  String _formatStatus(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'PENDING';
-      case 'confirmed':
-        return 'CONFIRMED';
-      case 'in_progress':
-        return 'IN PROGRESS';
-      case 'completed':
-        return 'COMPLETED';
-      case 'cancelled':
-        return 'CANCELLED';
-      default:
-        return status.toUpperCase();
-    }
-  }
+  // Using OrderStatusExtension.getDisplayTextFromString instead of local formatting method
 
   bool _hasBoxRequirements(OrderViewModel order) {
     return order.orderItems.any((item) => item.requiresBox);
@@ -624,34 +586,7 @@ class _OrdersPageState extends State<OrdersPage> {
     return null;
   }
 
-  double _calculateTotalAmount(List<OrderItemViewModel> orderItems) {
-    return orderItems.fold(0.0, (total, item) {
-      final pricePerItem = double.tryParse(item.pricePerItem) ?? 0.0;
-      final discountAmount = double.tryParse(item.discountAmount) ?? 0.0;
-      final lineTotal = (pricePerItem * item.quantity) - discountAmount;
+  // Using OrderCalculationService.calculateOrderTotal instead of local method
 
-      // Add box costs
-      final boxCosts = (item.boxOrders ?? []).fold(0.0, (sum, box) => sum + (double.tryParse(box.totalBoxCost) ?? 0.0));
-
-      // Add printing costs
-      final printingCosts = (item.printingJobs ?? []).fold(0.0, (sum, job) => sum + (double.tryParse(job.totalPrintingCost) ?? 0.0));
-
-      return total + lineTotal + boxCosts + printingCosts;
-    });
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return Colors.orange;
-      case 'confirmed':
-        return Colors.blue;
-      case 'completed':
-        return Colors.green;
-      case 'cancelled':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
+  // Using OrderStatusExtension.getColorFromString instead of local color mapping method
 }

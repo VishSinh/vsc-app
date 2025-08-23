@@ -39,7 +39,7 @@ class _DashboardPageState extends State<DashboardPage> {
             .then((_) {
               if (mounted) {
                 // After permissions load, fetch dashboard data
-                dashboardProvider.fetchDashboardData(showSnackbar: false);
+                dashboardProvider.fetchDashboardData();
               }
             })
             .catchError((error) {
@@ -49,7 +49,7 @@ class _DashboardPageState extends State<DashboardPage> {
             });
       } else {
         // Permissions already loaded, fetch dashboard data
-        dashboardProvider.fetchDashboardData(showSnackbar: false);
+        dashboardProvider.fetchDashboardData();
       }
     });
   }
@@ -78,11 +78,7 @@ class _DashboardPageState extends State<DashboardPage> {
             SizedBox(height: isMobile ? AppConfig.defaultPadding : AppConfig.largePadding),
           ],
           // Stats Cards
-          Expanded(
-            child: dashboardProvider.isLoading
-                ? const LoadingWidget(message: 'Loading dashboard...')
-                : _buildStatsGrid(userRole, permissionProvider, dashboardProvider),
-          ),
+          Expanded(child: _buildStatsGrid(userRole, permissionProvider, dashboardProvider)),
         ],
       ),
     );
@@ -92,9 +88,34 @@ class _DashboardPageState extends State<DashboardPage> {
     final statsCards = <Widget>[];
     final dashboard = dashboardProvider.dashboardData;
 
-    // If no dashboard data is available, show a message
+    // If still loading with no data, show loading indicator
+    if (dashboard == null && dashboardProvider.isLoading) {
+      return const Center(child: LoadingWidget(message: 'Loading dashboard...'));
+    }
+
+    // If no dashboard data is available and not loading, just show pull-to-refresh
     if (dashboard == null) {
-      return const Center(child: CustomErrorWidget(message: 'No dashboard data available', onRetry: null));
+      return RefreshIndicator(
+        onRefresh: () => dashboardProvider.fetchDashboardData(),
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.7,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.refresh, size: 40, color: AppConfig.grey400),
+                    const SizedBox(height: 16),
+                    Text('Pull down to refresh', style: TextStyle(color: AppConfig.grey600)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
     // Orders stats - show if user can manage orders
@@ -268,12 +289,16 @@ class _DashboardPageState extends State<DashboardPage> {
         final crossAxisCount = (availableWidth / (cardWidth + (isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding))).floor();
         final actualCrossAxisCount = crossAxisCount.clamp(1, 4); // Max 4 columns
 
-        return GridView.count(
-          crossAxisCount: actualCrossAxisCount,
-          crossAxisSpacing: isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding,
-          mainAxisSpacing: isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding,
-          childAspectRatio: childAspectRatio,
-          children: statsCards,
+        return RefreshIndicator(
+          onRefresh: () => dashboardProvider.fetchDashboardData(),
+          child: GridView.count(
+            physics: const AlwaysScrollableScrollPhysics(), // Ensures scroll works even when content fits screen
+            crossAxisCount: actualCrossAxisCount,
+            crossAxisSpacing: isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding,
+            mainAxisSpacing: isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding,
+            childAspectRatio: childAspectRatio,
+            children: statsCards,
+          ),
         );
       },
     );

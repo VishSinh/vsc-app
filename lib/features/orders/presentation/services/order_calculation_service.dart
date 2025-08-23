@@ -1,15 +1,86 @@
 /// Service for order-related calculations
 class OrderCalculationService {
-  /// Calculate profit margin percentage
-  static double calculateProfitMargin(double sellPrice, double costPrice) {
-    if (costPrice == 0) return 0;
-    return ((sellPrice - costPrice) / costPrice) * 100;
+  static double parseDouble(String? value, [double defaultValue = 0.0]) {
+    if (value == null || value.isEmpty) return defaultValue;
+    return double.tryParse(value) ?? defaultValue;
   }
 
-  /// Calculate total value (price * quantity)
-  static double calculateTotalValue(double sellPrice, int quantity) => sellPrice * quantity;
+  // Order Item Calculations
 
-  /// Calculate line item total for creation flow
+  static double calculateBaseLineTotal(double price, double discount, int quantity) {
+    return (price - discount) * quantity;
+  }
+
+  static double calculateItemTotal(dynamic item) {
+    final price = parseDouble(item.pricePerItem);
+    final discount = parseDouble(item.discountAmount);
+    final quantity = item.quantity;
+
+    double total = calculateBaseLineTotal(price, discount, quantity);
+
+    if (item.boxOrders != null) {
+      for (final box in item.boxOrders) {
+        total += parseDouble(box.totalBoxCost);
+      }
+    }
+
+    if (item.printingJobs != null) {
+      for (final job in item.printingJobs) {
+        total += parseDouble(job.totalPrintingCost);
+      }
+    }
+
+    return total;
+  }
+
+  static double calculateLineItemTotalWithParams({
+    required double basePrice,
+    required String discountAmount,
+    required int quantity,
+    String? totalBoxCost,
+    String? totalPrintingCost,
+  }) {
+    final discount = parseDouble(discountAmount);
+    final boxCost = parseDouble(totalBoxCost);
+    final printingCost = parseDouble(totalPrintingCost);
+
+    return calculateBaseLineTotal(basePrice, discount, quantity) + boxCost + printingCost;
+  }
+
+  // Order Total Calculations
+
+  static double calculateOrderTotal(List<dynamic> orderItems) {
+    double total = 0.0;
+
+    for (final item in orderItems) {
+      total += calculateItemTotal(item);
+    }
+
+    return total;
+  }
+
+  static double calculateTotalDiscount(List<Map<String, dynamic>> items) {
+    return items.fold(0.0, (total, item) {
+      final discountAmount = parseDouble(item['discount_amount']);
+      final quantity = item['quantity'] as int? ?? 0;
+      return total + (discountAmount * quantity);
+    });
+  }
+
+  static double calculateTotalAdditionalCosts(List<Map<String, dynamic>> items) {
+    return items.fold(0.0, (total, item) {
+      final boxCost = parseDouble(item['total_box_cost']);
+      final printingCost = parseDouble(item['total_printing_cost']);
+      return total + boxCost + printingCost;
+    });
+  }
+
+  static int getOrderItemCount(List<Map<String, dynamic>> items) {
+    return items.fold(0, (total, item) => total + (item['quantity'] as int? ?? 0));
+  }
+
+  // Legacy Methods (Kept for backward compatibility)
+
   static double calculateLineItemTotalForCreation(
     String discountAmount,
     int quantity,
@@ -17,14 +88,15 @@ class OrderCalculationService {
     String? totalPrintingCost,
     double basePrice,
   ) {
-    final discount = double.tryParse(discountAmount) ?? 0.0;
-    final boxCost = double.tryParse(totalBoxCost ?? '0') ?? 0.0;
-    final printingCost = double.tryParse(totalPrintingCost ?? '0') ?? 0.0;
-
-    return ((basePrice - discount) * quantity) + boxCost + printingCost;
+    return calculateLineItemTotalWithParams(
+      basePrice: basePrice,
+      discountAmount: discountAmount,
+      quantity: quantity,
+      totalBoxCost: totalBoxCost,
+      totalPrintingCost: totalPrintingCost,
+    );
   }
 
-  /// Calculate line item total for fetched data
   static double calculateLineItemTotalForFetched(
     String pricePerItem,
     String discountAmount,
@@ -32,30 +104,20 @@ class OrderCalculationService {
     List<Map<String, dynamic>>? boxOrders,
     List<Map<String, dynamic>>? printingJobs,
   ) {
-    final price = double.tryParse(pricePerItem) ?? 0.0;
-    final discount = double.tryParse(discountAmount) ?? 0.0;
+    final price = parseDouble(pricePerItem);
+    final discount = parseDouble(discountAmount);
 
-    final boxCosts = (boxOrders ?? []).fold(0.0, (sum, box) => sum + (double.tryParse(box['total_box_cost'] ?? '0') ?? 0.0));
+    final boxCosts = (boxOrders ?? []).fold(0.0, (sum, box) => sum + parseDouble(box['total_box_cost']));
+    final printingCosts = (printingJobs ?? []).fold(0.0, (sum, job) => sum + parseDouble(job['total_printing_cost']));
 
-    final printingCosts = (printingJobs ?? []).fold(0.0, (sum, job) => sum + (double.tryParse(job['total_printing_cost'] ?? '0') ?? 0.0));
-
-    return ((price - discount) * quantity) + boxCosts + printingCosts;
+    return calculateBaseLineTotal(price, discount, quantity) + boxCosts + printingCosts;
   }
 
-  /// Calculate total discount for creation flow
-  static double calculateTotalDiscountForCreation(List<Map<String, dynamic>> items) => items.fold(0.0, (total, item) {
-    final discountAmount = double.tryParse(item['discount_amount'] ?? '0') ?? 0.0;
-    final quantity = item['quantity'] ?? 0;
-    return total + (discountAmount * quantity);
-  });
+  static double calculateTotalDiscountForCreation(List<Map<String, dynamic>> items) {
+    return calculateTotalDiscount(items);
+  }
 
-  /// Calculate total additional costs for creation flow
-  static double calculateTotalAdditionalCostsForCreation(List<Map<String, dynamic>> items) => items.fold(0.0, (total, item) {
-    final boxCost = double.tryParse(item['total_box_cost'] ?? '0') ?? 0.0;
-    final printingCost = double.tryParse(item['total_printing_cost'] ?? '0') ?? 0.0;
-    return total + boxCost + printingCost;
-  });
-
-  /// Get order item count
-  static int getOrderItemCount(List<Map<String, dynamic>> items) => items.fold(0, (total, item) => total + (item['quantity'] as int? ?? 0));
+  static double calculateTotalAdditionalCostsForCreation(List<Map<String, dynamic>> items) {
+    return calculateTotalAdditionalCosts(items);
+  }
 }

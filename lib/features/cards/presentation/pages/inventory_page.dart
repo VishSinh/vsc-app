@@ -4,6 +4,7 @@ import 'package:vsc_app/app/app_config.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
+import 'package:vsc_app/features/cards/presentation/widgets/barcode_dialog.dart';
 
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/core/widgets/pagination_widget.dart';
@@ -57,6 +58,11 @@ class _InventoryPageState extends State<InventoryPage> {
         // Handle error if needed
       });
     }
+  }
+
+  void setLoading(bool isLoading) {
+    final cardProvider = context.read<CardListProvider>();
+    cardProvider.setPageLoading(isLoading);
   }
 
   @override
@@ -170,9 +176,14 @@ class GridConfig {
   const GridConfig({required this.crossAxisCount, required this.childAspectRatio});
 }
 
-class InventoryActionButtons extends StatelessWidget {
+class InventoryActionButtons extends StatefulWidget {
   const InventoryActionButtons({super.key});
 
+  @override
+  State<InventoryActionButtons> createState() => _InventoryActionButtonsState();
+}
+
+class _InventoryActionButtonsState extends State<InventoryActionButtons> {
   @override
   Widget build(BuildContext context) {
     if (context.isMobile) {
@@ -182,12 +193,17 @@ class InventoryActionButtons extends StatelessWidget {
     }
   }
 
+  void setLoading(BuildContext context, bool isLoading) {
+    final cardProvider = Provider.of<CardListProvider>(context, listen: false);
+    cardProvider.setPageLoading(isLoading);
+  }
+
   Widget _buildMobileButtons(BuildContext context) {
     return Row(
       children: [
         _buildActionButton(context, icon: Icons.image_search, color: Colors.blue[600]!, onPressed: () => _onSearchByImage(context)),
         const SizedBox(width: 8),
-        _buildActionButton(context, icon: Icons.qr_code_scanner, color: Colors.green[600]!, onPressed: () => _onScanBarcode(context)),
+        _buildActionButton(context, icon: Icons.qr_code_scanner, color: Colors.green[600]!, onPressed: () => BarcodeDialog.show(context)),
         const SizedBox(width: 8),
         _buildActionButton(context, icon: Icons.filter_list, color: Colors.orange[600]!, onPressed: () => _onFilters(context)),
       ],
@@ -210,7 +226,7 @@ class InventoryActionButtons extends StatelessWidget {
           icon: Icons.qr_code_scanner,
           label: 'Scan Barcode',
           color: Colors.green[600]!,
-          onPressed: () => _onScanBarcode(context),
+          onPressed: () => BarcodeDialog.show(context),
         ),
         const SizedBox(width: 8),
         _buildActionButtonWithText(
@@ -264,10 +280,6 @@ class InventoryActionButtons extends StatelessWidget {
     SnackbarUtils.showInfo(context, 'Search by Image functionality coming soon!');
   }
 
-  void _onScanBarcode(BuildContext context) {
-    SnackbarUtils.showInfo(context, 'Barcode scanning functionality coming soon!');
-  }
-
   void _onFilters(BuildContext context) {
     SnackbarUtils.showInfo(context, 'Filters functionality coming soon!');
   }
@@ -297,12 +309,12 @@ class InventoryCardItem extends StatelessWidget {
   Widget _buildImageSection(BuildContext context) {
     // Adjust image height based on screen size
     // Make desktop images more proportional to the card width
-    final imageHeight = context.isMobile ? 140.0 : 220.0;
+    final imageHeight = context.isMobile ? 180.0 : 220.0;
 
     return Stack(
       children: [
         AspectRatio(
-          aspectRatio: context.isMobile ? 16 / 9 : 4 / 3,
+          aspectRatio: context.isMobile ? 4 / 3 : 4 / 3,
           child: SizedBox(
             height: imageHeight,
             width: double.infinity,
@@ -349,25 +361,11 @@ class InventoryCardItem extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.qr_code, color: Colors.white, size: 12),
-                        const SizedBox(width: 4),
-                        Text(
-                          card.barcode.length > 8 ? '${card.barcode.substring(0, 8)}...' : card.barcode,
-                          style: const TextStyle(color: Colors.white, fontSize: 10),
-                        ),
-                      ],
+                    child: Text(
+                      card.barcode.length > 8 ? card.barcode.substring(0, 10) : card.barcode,
+                      style: const TextStyle(color: Colors.white, fontSize: 10),
                     ),
                   ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(color: _getProfitMarginColor(card.profitMargin).withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
-                  child: Text(
-                    '${card.profitMargin.toStringAsFixed(1)}%',
-                    style: TextStyle(color: _getProfitMarginColor(card.profitMargin), fontSize: 10, fontWeight: FontWeight.bold),
-                  ),
-                ),
               ],
             ),
           ),
@@ -502,9 +500,5 @@ class InventoryCardItem extends StatelessWidget {
     );
   }
 
-  Color _getProfitMarginColor(double margin) {
-    if (margin >= 30) return Colors.green;
-    if (margin >= 15) return Colors.orange;
-    return Colors.red;
-  }
+  // Removed unused method
 }
