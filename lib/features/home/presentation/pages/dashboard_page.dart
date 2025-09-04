@@ -32,6 +32,8 @@ class _DashboardPageState extends State<DashboardPage> {
       final permissionProvider = context.read<PermissionProvider>();
       final dashboardProvider = context.read<DashboardProvider>();
 
+      dashboardProvider.setLoading(true);
+
       if (!permissionProvider.isInitialized) {
         // Wait for permissions to load
         permissionProvider
@@ -99,21 +101,7 @@ class _DashboardPageState extends State<DashboardPage> {
         onRefresh: () => dashboardProvider.fetchDashboardData(),
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          children: [
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.7,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.refresh, size: 40, color: AppConfig.grey400),
-                    const SizedBox(height: 16),
-                    Text('Pull down to refresh', style: TextStyle(color: AppConfig.grey600)),
-                  ],
-                ),
-              ),
-            ),
-          ],
+          children: [SizedBox(height: MediaQuery.of(context).size.height * 0.7)],
         ),
       );
     }

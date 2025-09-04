@@ -6,6 +6,7 @@ import 'package:vsc_app/features/cards/data/models/card_responses.dart';
 import 'package:vsc_app/core/constants/app_constants.dart';
 import 'package:vsc_app/core/utils/file_upload_utils.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:vsc_app/features/cards/data/models/card_update_request.dart';
 
 /// Data layer service for card API communication
 /// Handles all API calls related to cards using DTOs only
@@ -69,5 +70,39 @@ class CardService extends ApiService {
       () => post('${AppConstants.cardsEndpoint}$cardId/purchase/', data: {'quantity': quantity}),
       (json) => json as Map<String, dynamic>,
     );
+  }
+
+  /// Update a card
+  Future<ApiResponse<Map<String, dynamic>>> updateCard(String cardId, XFile? image, CardUpdateRequest request) async {
+    return await executeRequest(() async {
+      if (image != null) {
+        final multipartFile = await FileUploadUtils.createMultipartFileFromXFile(image);
+        final formDataMap = <String, dynamic>{'image': multipartFile};
+
+        // Add only non-null fields to FormData
+        if (request.costPrice != null) formDataMap['cost_price'] = request.costPrice;
+        if (request.sellPrice != null) formDataMap['sell_price'] = request.sellPrice;
+        if (request.maxDiscount != null) formDataMap['max_discount'] = request.maxDiscount;
+        if (request.quantity != null) formDataMap['quantity'] = request.quantity.toString();
+        if (request.vendorId != null) formDataMap['vendor_id'] = request.vendorId;
+
+        return patch('${AppConstants.cardsEndpoint}$cardId/', data: FormData.fromMap(formDataMap));
+      } else {
+        // Filter out null values for JSON request
+        final filteredData = <String, dynamic>{};
+        final requestJson = request.toJson();
+        requestJson.forEach((key, value) {
+          if (value != null) {
+            filteredData[key] = value;
+          }
+        });
+        return patch('${AppConstants.cardsEndpoint}$cardId/', data: filteredData);
+      }
+    }, (json) => json as Map<String, dynamic>);
+  }
+
+  /// Delete a card
+  Future<ApiResponse<Map<String, dynamic>>> deleteCard(String cardId) async {
+    return await executeRequest(() => delete('${AppConstants.cardsEndpoint}$cardId/'), (json) => json as Map<String, dynamic>);
   }
 }

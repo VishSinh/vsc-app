@@ -40,8 +40,9 @@ class _InventoryPageState extends State<InventoryPage> {
 
   void _loadCardsIfNeeded() {
     final cardProvider = context.read<CardListProvider>();
+
     if (cardProvider.cards.isEmpty) {
-      _loadCards();
+      _loadCards(); // Normal conditional loading
     }
   }
 

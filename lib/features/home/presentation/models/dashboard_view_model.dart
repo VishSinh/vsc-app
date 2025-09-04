@@ -49,6 +49,6 @@ class DashboardViewModel {
   String get formattedMonthlyProfit => '₹${monthlyProfit.toStringAsFixed(2)}';
 
   /// Format the monthly order change percentage
-  String get formattedMonthlyOrderChangePercentage => 
+  String get formattedMonthlyOrderChangePercentage =>
       '${monthlyOrderChangePercentage >= 0 ? '+' : ''}${monthlyOrderChangePercentage.toStringAsFixed(1)}%';
 }

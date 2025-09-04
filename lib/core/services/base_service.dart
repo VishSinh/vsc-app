@@ -129,7 +129,7 @@ abstract class ApiService {
   Future<Response> post(String path, {dynamic data}) => _dio.post(path, data: _filterNullValues(_convertToJsonForLogging(data)));
 
   /// HTTP PUT request
-  Future<Response> put(String path, {dynamic data}) => _dio.put(path, data: _filterNullValues(_convertToJsonForLogging(data)));
+  // Future<Response> put(String path, {dynamic data}) => _dio.put(path, data: _filterNullValues(_convertToJsonForLogging(data)));
 
   /// HTTP PATCH request
   Future<Response> patch(String path, {dynamic data}) => _dio.patch(path, data: _filterNullValues(_convertToJsonForLogging(data)));

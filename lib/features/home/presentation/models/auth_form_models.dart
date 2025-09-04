@@ -3,11 +3,11 @@ import 'package:vsc_app/core/validation/validation_result.dart';
 import 'package:vsc_app/features/home/data/models/auth_requests.dart';
 
 /// Form model for login form with validation
-class LoginFormViewModel {
+class LoginFormModel {
   final String phone;
   final String password;
 
-  const LoginFormViewModel({required this.phone, required this.password});
+  const LoginFormModel({required this.phone, required this.password});
 
   /// Validate login form
   ValidationResult validate() {
@@ -65,13 +65,13 @@ class LoginFormViewModel {
   }
 
   /// Create empty form
-  factory LoginFormViewModel.empty() {
-    return LoginFormViewModel(phone: '', password: '');
+  factory LoginFormModel.empty() {
+    return LoginFormModel(phone: '', password: '');
   }
 
   /// Create copy with updated values
-  LoginFormViewModel copyWith({String? phone, String? password}) {
-    return LoginFormViewModel(phone: phone ?? this.phone, password: password ?? this.password);
+  LoginFormModel copyWith({String? phone, String? password}) {
+    return LoginFormModel(phone: phone ?? this.phone, password: password ?? this.password);
   }
 
   /// Convert to API request
@@ -81,14 +81,14 @@ class LoginFormViewModel {
 }
 
 /// Form model for register form with validation
-class RegisterFormViewModel {
+class RegisterFormModel {
   final String name;
   final String phone;
   final String password;
   final String confirmPassword;
   final String role;
 
-  const RegisterFormViewModel({required this.name, required this.phone, required this.password, required this.confirmPassword, required this.role});
+  const RegisterFormModel({required this.name, required this.phone, required this.password, required this.confirmPassword, required this.role});
 
   /// Validate register form
   ValidationResult validate() {
@@ -206,13 +206,13 @@ class RegisterFormViewModel {
   }
 
   /// Create empty form
-  factory RegisterFormViewModel.empty() {
-    return RegisterFormViewModel(name: '', phone: '', password: '', confirmPassword: '', role: '');
+  factory RegisterFormModel.empty() {
+    return RegisterFormModel(name: '', phone: '', password: '', confirmPassword: '', role: '');
   }
 
   /// Create copy with updated values
-  RegisterFormViewModel copyWith({String? name, String? phone, String? password, String? confirmPassword, String? role}) {
-    return RegisterFormViewModel(
+  RegisterFormModel copyWith({String? name, String? phone, String? password, String? confirmPassword, String? role}) {
+    return RegisterFormModel(
       name: name ?? this.name,
       phone: phone ?? this.phone,
       password: password ?? this.password,

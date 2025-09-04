@@ -1,14 +1,19 @@
+import 'dart:async';
 import 'package:vsc_app/core/models/pagination_data.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
-import 'package:vsc_app/core/models/api_response.dart';
+import 'package:vsc_app/core/services/event_bus_service.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:vsc_app/features/cards/data/services/card_service.dart';
-
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 
 /// Provider for managing card listing, pagination, filtering, and search functionality
 class CardListProvider extends BaseProvider {
   final CardService _cardService = CardService();
+  final EventBusService _eventBus = EventBusService();
+
+  // Event subscriptions
+  late final StreamSubscription<CardDeletedEvent> _cardDeletedSubscription;
+  late final StreamSubscription<CardUpdatedEvent> _cardUpdatedSubscription;
 
   // Card listing and management
   final List<CardViewModel> _cards = [];
@@ -29,6 +34,54 @@ class CardListProvider extends BaseProvider {
   bool get isPageLoading => _isPageLoading;
   bool get showCardsList => _showCardsList;
   int get selectedIndex => _selectedIndex;
+
+  /// Constructor - sets up event subscriptions
+  CardListProvider() {
+    _subscribeToEvents();
+  }
+
+  /// Subscribe to card-related events for automatic state management
+  void _subscribeToEvents() {
+    // Listen for card deletion events
+    _cardDeletedSubscription = _eventBus.eventsOfType<CardDeletedEvent>().listen((event) {
+      _handleCardDeleted(event.cardId);
+    });
+
+    // Listen for card update events
+    _cardUpdatedSubscription = _eventBus.eventsOfType<CardUpdatedEvent>().listen((event) {
+      _handleCardUpdated(event.cardId);
+    });
+
+    AppLogger.service('CardListProvider', 'Subscribed to card events');
+  }
+
+  /// Handle card deleted event - remove from local list
+  void _handleCardDeleted(String cardId) {
+    AppLogger.service('CardListProvider', 'Handling card deleted event: $cardId');
+
+    final initialLength = _cards.length;
+    _cards.removeWhere((card) => card.id == cardId);
+
+    loadCards();
+
+    if (_cards.length != initialLength) {
+      notifyListeners();
+      AppLogger.service('CardListProvider', 'Removed deleted card from list. Cards count: ${_cards.length}');
+    }
+  }
+
+  /// Handle card updated event - refresh the updated card data
+  void _handleCardUpdated(String cardId) {
+    AppLogger.service('CardListProvider', 'Handling card updated event: $cardId');
+
+    // For updates, we could either:
+    // 1. Refresh just this card's data (more complex)
+    // 2. Or do nothing since the update will be reflected when user returns to list
+    // 3. Or refresh entire list for simplicity
+
+    // Option 2: Do nothing - the card will be up-to-date when user navigates back
+    // This is efficient and follows lazy loading principles
+  }
 
   /// Load cards with pagination
   Future<void> loadCards({int page = 1, int pageSize = 10}) async {
@@ -124,5 +177,27 @@ class CardListProvider extends BaseProvider {
   void setSelectedIndex(int index) {
     _selectedIndex = index;
     notifyListeners();
+  }
+
+  /// Refresh cards list (forces reload from API)
+  Future<void> refreshCards() async {
+    AppLogger.service('CardListProvider', 'Refreshing cards list');
+    await loadCards(page: 1); // This will clear existing cards and reload
+  }
+
+  /// Remove a specific card from the list (for optimistic updates)
+  void removeCard(String cardId) {
+    _cards.removeWhere((card) => card.id == cardId);
+    notifyListeners();
+    AppLogger.service('CardListProvider', 'Removed card $cardId from local list');
+  }
+
+  /// Dispose method to clean up event subscriptions
+  @override
+  void dispose() {
+    AppLogger.service('CardListProvider', 'Disposing provider and event subscriptions');
+    _cardDeletedSubscription.cancel();
+    _cardUpdatedSubscription.cancel();
+    super.dispose();
   }
 }

@@ -3,7 +3,7 @@ import 'package:vsc_app/core/validation/validation_result.dart';
 import 'package:vsc_app/features/cards/data/models/card_requests.dart';
 
 /// Form model for card creation with validation
-class CardFormViewModel {
+class CardFormModel {
   final String costPrice;
   final String sellPrice;
   final String quantity;
@@ -11,7 +11,7 @@ class CardFormViewModel {
   final String vendorId;
   final XFile? image;
 
-  CardFormViewModel({
+  CardFormModel({
     required this.costPrice,
     required this.sellPrice,
     required this.quantity,
@@ -21,13 +21,13 @@ class CardFormViewModel {
   });
 
   /// Create empty form
-  factory CardFormViewModel.empty() {
-    return CardFormViewModel(costPrice: '', sellPrice: '', quantity: '', maxDiscount: '', vendorId: '');
+  factory CardFormModel.empty() {
+    return CardFormModel(costPrice: '', sellPrice: '', quantity: '', maxDiscount: '', vendorId: '');
   }
 
   /// Create copy with updated fields
-  CardFormViewModel copyWith({String? costPrice, String? sellPrice, String? quantity, String? maxDiscount, String? vendorId, XFile? image}) {
-    return CardFormViewModel(
+  CardFormModel copyWith({String? costPrice, String? sellPrice, String? quantity, String? maxDiscount, String? vendorId, XFile? image}) {
+    return CardFormModel(
       costPrice: costPrice ?? this.costPrice,
       sellPrice: sellPrice ?? this.sellPrice,
       quantity: quantity ?? this.quantity,

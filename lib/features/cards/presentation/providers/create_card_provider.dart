@@ -16,14 +16,14 @@ class CreateCardProvider extends BaseProvider {
   bool _isSearchingSimilar = false;
 
   // Form state
-  CardFormViewModel _formModel = CardFormViewModel.empty();
+  CardFormModel _formModel = CardFormModel.empty();
 
   // Getters for similar cards
   List<SimilarCardViewModel> get similarCards => List.unmodifiable(_similarCards);
   bool get isSearchingSimilar => _isSearchingSimilar;
 
   // Getters for form data
-  CardFormViewModel get formModel => _formModel;
+  CardFormModel get formModel => _formModel;
 
   // Getters for backward compatibility
   String? get selectedImageUrl => _formModel.image?.path;
@@ -82,7 +82,7 @@ class CreateCardProvider extends BaseProvider {
   }
 
   /// Update form model
-  void updateFormModel(CardFormViewModel newFormModel) {
+  void updateFormModel(CardFormModel newFormModel) {
     _formModel = newFormModel;
     notifyListeners();
   }
@@ -121,7 +121,7 @@ class CreateCardProvider extends BaseProvider {
 
   /// Reset form
   void resetForm() {
-    _formModel = CardFormViewModel.empty();
+    _formModel = CardFormModel.empty();
     notifyListeners();
   }
 
@@ -130,7 +130,7 @@ class CreateCardProvider extends BaseProvider {
   void reset() {
     _similarCards.clear();
     _isSearchingSimilar = false;
-    _formModel = CardFormViewModel.empty();
+    _formModel = CardFormModel.empty();
     super.reset();
   }
 

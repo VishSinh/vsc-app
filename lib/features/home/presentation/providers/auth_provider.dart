@@ -13,8 +13,8 @@ class AuthProvider extends BaseProvider {
   final PermissionProvider _permissionProvider = PermissionProvider();
 
   LoginResponse? _currentUser;
-  LoginFormViewModel? _loginForm;
-  RegisterFormViewModel? _registerForm;
+  LoginFormModel? _loginForm;
+  RegisterFormModel? _registerForm;
 
   // Getters
   bool get isLoggedIn => _currentUser != null;
@@ -23,10 +23,10 @@ class AuthProvider extends BaseProvider {
   String? get token => _currentUser?.token;
 
   /// Get current login form
-  LoginFormViewModel? get loginForm => _loginForm;
+  LoginFormModel? get loginForm => _loginForm;
 
   /// Get current register form
-  RegisterFormViewModel? get registerForm => _registerForm;
+  RegisterFormModel? get registerForm => _registerForm;
 
   /// Get AuthUserViewModel for UI consumption
   AuthUserViewModel? get authUserViewModel {
@@ -35,7 +35,7 @@ class AuthProvider extends BaseProvider {
   }
 
   /// Get available roles for selection
-  List<String> get availableRoles => RegisterFormViewModel.availableRoles;
+  List<String> get availableRoles => RegisterFormModel.availableRoles;
 
   /// Check if user has a specific role
   bool hasRole(UserRole role) {
@@ -69,7 +69,7 @@ class AuthProvider extends BaseProvider {
     final currentPhone = phone ?? _loginForm?.phone ?? '';
     final currentPassword = password ?? _loginForm?.password ?? '';
 
-    _loginForm = LoginFormViewModel(phone: currentPhone, password: currentPassword);
+    _loginForm = LoginFormModel(phone: currentPhone, password: currentPassword);
     notifyListeners();
   }
 
@@ -81,7 +81,7 @@ class AuthProvider extends BaseProvider {
     final currentConfirmPassword = confirmPassword ?? _registerForm?.confirmPassword ?? '';
     final currentRole = role ?? _registerForm?.role ?? '';
 
-    _registerForm = RegisterFormViewModel(
+    _registerForm = RegisterFormModel(
       name: currentName,
       phone: currentPhone,
       password: currentPassword,
@@ -93,13 +93,13 @@ class AuthProvider extends BaseProvider {
 
   /// Initialize login form
   void initializeLoginForm() {
-    _loginForm = LoginFormViewModel.empty();
+    _loginForm = LoginFormModel.empty();
     notifyListeners();
   }
 
   /// Initialize register form
   void initializeRegisterForm() {
-    _registerForm = RegisterFormViewModel.empty();
+    _registerForm = RegisterFormModel.empty();
     notifyListeners();
   }
 

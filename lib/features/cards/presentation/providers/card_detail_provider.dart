@@ -1,11 +1,14 @@
 import 'package:vsc_app/core/providers/base_provider.dart';
+import 'package:vsc_app/core/services/event_bus_service.dart';
 import 'package:vsc_app/features/cards/data/services/card_service.dart';
-
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
+import 'package:vsc_app/features/cards/presentation/models/card_update_form_model.dart';
+import 'package:vsc_app/core/utils/app_logger.dart';
 
 /// Provider for managing card details, barcode generation, and edit/delete operations
 class CardDetailProvider extends BaseProvider {
   final CardService _cardService = CardService();
+  final EventBusService _eventBus = EventBusService();
 
   // Card detail state
   CardViewModel? _currentCard;
@@ -72,4 +75,56 @@ class CardDetailProvider extends BaseProvider {
 
   /// Check if a card is selected
   bool get hasSelectedCard => _currentCard != null;
+
+  /// Update an existing card
+  Future<bool> updateCard(String cardId, CardUpdateFormModel formModel) async {
+    AppLogger.service('CardDetailProvider', 'Updating card: $cardId');
+
+    // Validate form using the form model's validate method
+    final validationResult = formModel.validate();
+    if (!validationResult.isValid) {
+      // Show validation errors to user
+      final firstError = validationResult.errors.first;
+      setError(firstError.message);
+      return false;
+    }
+
+    final result = await executeApiOperation(
+      apiCall: () => _cardService.updateCard(cardId, formModel.image, formModel.toApiRequest()),
+      onSuccess: (response) {
+        setSuccess('Card updated successfully');
+        // Refresh current card data
+        getCardById(cardId);
+
+        // Emit event to notify other providers of the update
+        _eventBus.emit(CardUpdatedEvent(cardId));
+
+        return true;
+      },
+      errorMessage: 'Failed to update card',
+    );
+
+    return result ?? false;
+  }
+
+  /// Delete a card
+  Future<bool> deleteCard(String cardId) async {
+    AppLogger.service('CardDetailProvider', 'Deleting card: $cardId');
+
+    final result = await executeApiOperation(
+      apiCall: () => _cardService.deleteCard(cardId),
+      onSuccess: (response) {
+        setSuccess('Card deleted successfully');
+        clearCurrentCard();
+
+        // Emit event to notify other providers of the deletion
+        _eventBus.emit(CardDeletedEvent(cardId));
+
+        return true;
+      },
+      errorMessage: 'Failed to delete card',
+    );
+
+    return result ?? false;
+  }
 }

@@ -110,7 +110,7 @@ class _CreateVendorDialogState extends State<CreateVendorDialog> {
           return ActionButton(
             label: widget.isEditing ? 'Update' : UITextConstants.create,
             icon: widget.isEditing ? Icons.edit : Icons.add,
-            onPressed: vendorProvider.isLoading ? null : _handleSubmit,
+            onPressed: null, //vendorProvider.isLoading ? null : _handleSubmit,
             isLoading: vendorProvider.isLoading,
           );
         },

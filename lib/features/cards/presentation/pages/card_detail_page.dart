@@ -10,8 +10,8 @@ import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/features/home/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_detail_provider.dart';
-import 'package:vsc_app/features/cards/presentation/services/bluetooth_print_service.dart';
-import 'package:vsc_app/features/cards/presentation/pages/bluetooth_print_page.dart';
+import 'package:vsc_app/features/cards/presentation/widgets/edit_card_dialog.dart';
+import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
 
 class CardDetailPage extends StatefulWidget {
   final String cardId;
@@ -144,10 +144,17 @@ class _CardDetailPageState extends State<CardDetailPage> {
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (canEdit) IconButton(icon: const Icon(Icons.edit), onPressed: _showEditCardDialog, tooltip: UITextConstants.edit),
+                if (canEdit)
+                  IconButton(icon: const Icon(Icons.edit), onPressed: () => _showEditCardDialog(cardProvider, card), tooltip: UITextConstants.edit),
                 if (canEdit && canDelete) SizedBox(width: AppConfig.smallPadding),
-                if (canDelete) IconButton(icon: const Icon(Icons.delete), onPressed: _showDeleteCardDialog, tooltip: UITextConstants.delete),
+                if (canDelete)
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () => _showDeleteCardDialog(cardProvider, card),
+                    tooltip: UITextConstants.delete,
+                  ),
                 // Print button
+                SizedBox(width: AppConfig.smallPadding),
                 IconButton(
                   icon: const Icon(Icons.print),
                   tooltip: 'Print Barcode',
@@ -296,16 +303,19 @@ class _CardDetailPageState extends State<CardDetailPage> {
     );
   }
 
-  void _showEditCardDialog() {
-    // TODO: Implement edit card dialog
-    // SnackbarUtils.showInfo(context, 'Edit card functionality coming soon!'); // Removed as per new_code
+  void _showEditCardDialog(CardDetailProvider cardProvider, CardViewModel card) {
+    // Load vendors for dropdown
+    final vendorProvider = context.read<VendorProvider>();
+    vendorProvider.loadVendors();
+
+    showDialog(
+      context: context,
+      builder: (context) =>
+          EditCardDialog(card: card, cardProvider: cardProvider, vendorProvider: vendorProvider, onCardUpdated: () => _loadCardDetails()),
+    );
   }
 
-  void _showDeleteCardDialog() {
-    final cardProvider = context.read<CardDetailProvider>();
-    final card = cardProvider.currentCard;
-    if (card == null) return;
-
+  void _showDeleteCardDialog(CardDetailProvider cardProvider, CardViewModel card) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -314,26 +324,31 @@ class _CardDetailPageState extends State<CardDetailPage> {
         actions: [
           TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(UITextConstants.cancel)),
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _deleteCard();
-            },
+            onPressed: cardProvider.isLoading
+                ? null
+                : () {
+                    Navigator.of(context).pop();
+                    _deleteCard(cardProvider, card);
+                  },
             style: TextButton.styleFrom(foregroundColor: AppConfig.errorColor),
-            child: Text(UITextConstants.delete),
+            child: cardProvider.isLoading
+                ? SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(AppConfig.errorColor)),
+                  )
+                : Text(UITextConstants.delete),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _deleteCard() async {
-    try {
-      // TODO: Implement delete card functionality
-      // SnackbarUtils.showInfo(context, 'Delete card functionality coming soon!'); // Removed as per new_code
-    } catch (e) {
-      if (mounted) {
-        // SnackbarUtils.showError(context, 'Failed to delete card: $e'); // Removed as per new_code
-      }
+  Future<void> _deleteCard(CardDetailProvider cardProvider, CardViewModel card) async {
+    final success = await cardProvider.deleteCard(card.id);
+
+    if (success && mounted) {
+      context.go(RouteConstants.inventory);
     }
   }
 }
