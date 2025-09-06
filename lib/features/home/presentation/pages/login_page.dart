@@ -94,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: InputDecoration(
                           labelText: UITextConstants.phoneNumber,
                           prefixIcon: const Icon(Icons.phone),
-                          hintText: UITextConstants.phoneHint,
+                          // hintText: UITextConstants.phoneHint,
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -132,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
                           if (value == null || value.isEmpty) {
                             return UITextConstants.pleaseEnterPassword;
                           }
-                          if (value.length < 6) {
+                          if (value.length < 3) {
                             return UITextConstants.passwordTooShort;
                           }
                           return null;

@@ -19,6 +19,9 @@ import 'package:vsc_app/features/orders/presentation/pages/create_order_review_p
 import 'package:vsc_app/features/orders/presentation/pages/order_detail_page.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_detail_provider.dart';
 import 'package:vsc_app/features/bills/presentation/pages/bill_page.dart';
+import 'package:vsc_app/features/home/presentation/pages/yearly_profit_page.dart';
+import 'package:vsc_app/features/home/presentation/providers/analytics_provider.dart';
+import 'package:provider/provider.dart';
 
 class AppRouter {
   static late final GoRouter router;
@@ -145,6 +148,13 @@ class AppRouter {
 
         // Register route (Admin only)
         GoRoute(path: RouteConstants.register, name: RouteConstants.registerRouteName, builder: (context, state) => const RegisterPage()),
+
+        // Analytics routes
+        GoRoute(
+          path: RouteConstants.yearlyProfit,
+          name: RouteConstants.yearlyProfitRouteName,
+          builder: (context, state) => ChangeNotifierProvider(create: (_) => AnalyticsProvider(), child: const YearlyProfitPage()),
+        ),
       ],
     );
 

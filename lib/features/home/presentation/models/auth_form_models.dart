@@ -34,7 +34,7 @@ class LoginFormModel {
         return ValidationResult.failureSingle('password', 'Please enter password');
       }
 
-      if (password.length < 6) {
+      if (password.length < 3) {
         return ValidationResult.failureSingle('password', 'Password must be at least 6 characters');
       }
 
@@ -42,11 +42,11 @@ class LoginFormModel {
         return ValidationResult.failureSingle('password', 'Password must be less than 50 characters');
       }
 
-      final hasLetter = RegExp(r'[a-zA-Z]').hasMatch(password);
-      final hasNumber = RegExp(r'[0-9]').hasMatch(password);
-      if (!hasLetter || !hasNumber) {
-        return ValidationResult.failureSingle('password', 'Password must contain at least one letter and one number');
-      }
+      // final hasLetter = RegExp(r'[a-zA-Z]').hasMatch(password);
+      // final hasNumber = RegExp(r'[0-9]').hasMatch(password);
+      // if (!hasLetter || !hasNumber) {
+      //   return ValidationResult.failureSingle('password', 'Password must contain at least one letter and one number');
+      // }
 
       return ValidationResult.success();
     }

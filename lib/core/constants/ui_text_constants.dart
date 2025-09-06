@@ -75,7 +75,7 @@ class UITextConstants {
   static const String deliveryDate = 'Delivery Date';
 
   // ================================ FORM HINTS ================================
-  static const String phoneHint = '9876543210';
+  static const String phoneHint = '98XXXXXX01';
   static const String nameHint = 'John Doe';
   static const String costPriceHint = 'Enter cost price';
   static const String sellPriceHint = 'Enter sell price';
@@ -97,7 +97,7 @@ class UITextConstants {
   static const String pleaseEnterValidPhone = 'Please enter a valid phone number';
   static const String pleaseEnterPassword = 'Please enter your password';
   static const String pleaseEnterConfirmPassword = 'Please confirm the password';
-  static const String passwordTooShort = 'Password must be at least 6 characters';
+  static const String passwordTooShort = 'Password must be at least 3 characters';
   static const String passwordTooShortRegister = 'Password must be at least 8 characters';
   static const String passwordComplexity = 'Password must contain uppercase, lowercase, and number';
   static const String passwordsDoNotMatch = 'Passwords do not match';

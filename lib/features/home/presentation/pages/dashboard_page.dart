@@ -167,7 +167,8 @@ class _DashboardPageState extends State<DashboardPage> {
           value: '₹${dashboard.monthlyProfit}',
           icon: Icons.attach_money,
           color: AppConfig.successColor,
-          subtitle: '',
+          subtitle: 'View yearly analysis',
+          onTap: () => context.push(RouteConstants.yearlyProfit),
         ),
       );
     }
@@ -299,47 +300,55 @@ class _DashboardPageState extends State<DashboardPage> {
     required IconData icon,
     required Color color,
     required String subtitle,
+    VoidCallback? onTap,
   }) {
     final isMobile = MediaQuery.of(context).size.width < AppConfig.mobileBreakpoint;
 
     return Card(
       elevation: isMobile ? 1 : 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(isMobile ? 8 : AppConfig.defaultRadius)),
-      child: Padding(
-        padding: EdgeInsets.all(isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: color, size: isMobile ? AppConfig.iconSizeSmall : AppConfig.iconSizeMedium),
-                Spacer(),
-                Icon(Icons.trending_up, color: color.withOpacity(0.5), size: isMobile ? 12 : AppConfig.iconSizeSmall),
-              ],
-            ),
-            Spacer(),
-            Text(
-              value,
-              style: isMobile
-                  ? ResponsiveText.getTitle(context).copyWith(color: color, fontWeight: FontWeight.bold)
-                  : ResponsiveText.getHeadline(context).copyWith(color: color),
-            ),
-            SizedBox(height: isMobile ? 4 : AppConfig.smallPadding),
-            Text(
-              title,
-              style: isMobile ? ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w500) : ResponsiveText.getTitle(context),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            SizedBox(height: isMobile ? 2 : AppConfig.smallPadding),
-            Text(
-              subtitle,
-              style: ResponsiveText.getCaption(context).copyWith(color: AppConfig.grey600, fontSize: isMobile ? 10 : null),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(isMobile ? 8 : AppConfig.defaultRadius),
+        child: Padding(
+          padding: EdgeInsets.all(isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, color: color, size: isMobile ? AppConfig.iconSizeSmall : AppConfig.iconSizeMedium),
+                  Spacer(),
+                  if (onTap != null)
+                    Icon(Icons.arrow_forward_ios, color: color.withOpacity(0.5), size: isMobile ? 12 : AppConfig.iconSizeSmall)
+                  else
+                    Icon(Icons.trending_up, color: color.withOpacity(0.5), size: isMobile ? 12 : AppConfig.iconSizeSmall),
+                ],
+              ),
+              Spacer(),
+              Text(
+                value,
+                style: isMobile
+                    ? ResponsiveText.getTitle(context).copyWith(color: color, fontWeight: FontWeight.bold)
+                    : ResponsiveText.getHeadline(context).copyWith(color: color),
+              ),
+              SizedBox(height: isMobile ? 4 : AppConfig.smallPadding),
+              Text(
+                title,
+                style: isMobile ? ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w500) : ResponsiveText.getTitle(context),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              SizedBox(height: isMobile ? 2 : AppConfig.smallPadding),
+              Text(
+                subtitle,
+                style: ResponsiveText.getCaption(context).copyWith(color: AppConfig.grey600, fontSize: isMobile ? 10 : null),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );

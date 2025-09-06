@@ -21,6 +21,7 @@ class RouteConstants {
   static const String orderReview = '/orders/new/review';
   static const String orderDetail = '/orders/:id';
   static const String register = '/register';
+  static const String yearlyProfit = '/analytics/yearly-profit';
 
   // ================================ ROUTE NAMES ================================
   static const String loginRouteName = 'login';
@@ -43,6 +44,7 @@ class RouteConstants {
   static const String orderReviewRouteName = 'order-review';
   static const String orderDetailRouteName = 'order-detail';
   static const String registerRouteName = 'register';
+  static const String yearlyProfitRouteName = 'yearly-profit';
 
   // ================================ ROUTE GROUPS ================================
   static const List<String> protectedRoutes = [
@@ -65,6 +67,7 @@ class RouteConstants {
     orderDetail,
     register,
     billDetail,
+    yearlyProfit,
   ];
 
   static const List<String> publicRoutes = [login];
