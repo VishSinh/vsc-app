@@ -2,6 +2,8 @@ import 'package:vsc_app/core/models/api_response.dart';
 import 'package:vsc_app/features/orders/data/models/order_requests.dart';
 import 'package:vsc_app/features/orders/data/models/order_responses.dart';
 import 'package:vsc_app/core/services/base_service.dart';
+import 'package:vsc_app/core/utils/app_logger.dart';
+import 'dart:convert';
 import 'package:vsc_app/core/constants/app_constants.dart';
 
 class OrderService extends ApiService {
@@ -36,5 +38,20 @@ class OrderService extends ApiService {
   /// Get order by ID
   Future<ApiResponse<OrderResponse>> getOrderById(String orderId) async {
     return await executeRequest(() => get('${AppConstants.ordersEndpoint}$orderId/'), (json) => OrderResponse.fromJson(json as Map<String, dynamic>));
+  }
+
+  /// Update order by ID (PATCH)
+  Future<ApiResponse<OrderResponse>> updateOrder({required String orderId, required UpdateOrderRequest request}) async {
+    // Log the full request payload for debugging
+    try {
+      final payload = request.toJson();
+      AppLogger.debug('OrderService.updateOrder → ${jsonEncode(payload)}');
+    } catch (e) {
+      AppLogger.debug('OrderService.updateOrder: failed to encode request: $e');
+    }
+    return await executeRequest(
+      () => patch('${AppConstants.ordersEndpoint}$orderId/', data: request),
+      (json) => OrderResponse.fromJson(json as Map<String, dynamic>),
+    );
   }
 }

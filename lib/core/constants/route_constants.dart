@@ -7,6 +7,7 @@ class RouteConstants {
   static const String billDetail = '/bills/:id';
   static const String orders = '/orders';
   static const String newOrder = '/orders/new';
+  static const String editOrder = '/orders/:id/edit';
   static const String inventory = '/inventory';
   static const String production = '/production';
   static const String administration = '/administration';
@@ -32,6 +33,7 @@ class RouteConstants {
   static const String billDetailRouteName = 'bill-detail';
   static const String ordersRouteName = 'orders';
   static const String newOrderRouteName = 'new-order';
+  static const String editOrderRouteName = 'edit-order';
   static const String inventoryRouteName = 'inventory';
   static const String productionRouteName = 'production';
   static const String administrationRouteName = 'administration';
@@ -56,6 +58,7 @@ class RouteConstants {
     bills,
     orders,
     newOrder,
+    editOrder,
     inventory,
     production,
     administration,

@@ -52,7 +52,14 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         appBar: AppBar(
           title: const Text('Order Details'),
           leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.orders)),
-          actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: () => _loadOrderDetails(), tooltip: 'Refresh')],
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () => context.push('${RouteConstants.orders}/${widget.orderId}/edit'),
+              tooltip: 'Edit',
+            ),
+            IconButton(icon: const Icon(Icons.refresh), onPressed: () => _loadOrderDetails(), tooltip: 'Refresh'),
+          ],
         ),
         body: _buildOrderDetailContent(),
       ),

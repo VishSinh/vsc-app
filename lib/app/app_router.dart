@@ -17,6 +17,7 @@ import 'package:vsc_app/features/orders/presentation/pages/create_order_customer
 import 'package:vsc_app/features/orders/presentation/pages/create_order_page.dart';
 import 'package:vsc_app/features/orders/presentation/pages/create_order_review_page.dart';
 import 'package:vsc_app/features/orders/presentation/pages/order_detail_page.dart';
+import 'package:vsc_app/features/orders/presentation/pages/edit_order_page.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_detail_provider.dart';
 import 'package:vsc_app/features/bills/presentation/pages/bill_page.dart';
 import 'package:vsc_app/features/home/presentation/pages/yearly_profit_page.dart';
@@ -145,6 +146,15 @@ class AppRouter {
             final orderId = state.pathParameters['id']!;
             final orderProvider = state.extra as OrderDetailProvider?;
             return OrderDetailPage(orderId: orderId, orderProvider: orderProvider);
+          },
+        ),
+        GoRoute(
+          path: RouteConstants.editOrder,
+          name: RouteConstants.editOrderRouteName,
+          builder: (context, state) {
+            final orderId = state.pathParameters['id']!;
+            final orderProvider = state.extra as OrderDetailProvider?;
+            return EditOrderPage(orderId: orderId, orderProvider: orderProvider);
           },
         ),
 

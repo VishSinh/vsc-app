@@ -7,16 +7,21 @@ class AppConstants {
   // API Configuration
   // Dynamically determine the correct API base URL based on platform
   static String get apiBaseUrl {
-    bool isLocal = false;
+    bool isLocal = true;
+    bool isPhysicalDevice = true;
     if (kIsWeb) {
-      return isLocal ? 'http://localhost:8000/api/v1' : 'http://15.235.147.1/api/v1';
+      return isLocal ? 'http://localhost/api/v1' : 'http://15.235.147.1/api/v1';
     } else if (Platform.isAndroid) {
       return
       // For Android emulator, use 10.0.2.2 to reach host machine's localhost
-      isLocal ? 'http://10.0.2.2:8000/api/v1' : 'http://15.235.147.1/api/v1';
+      isLocal
+          ? isPhysicalDevice
+                ? 'http://localhost:8000/api/v1'
+                : 'http://10.0.2.2/api/v1'
+          : 'http://15.235.147.1/api/v1';
     } else {
       // For iOS simulator and other platforms, use localhost
-      return isLocal ? 'http://localhost:8000/api/v1' : 'http://15.235.147.1/api/v1';
+      return isLocal ? 'http://localhost/api/v1' : 'http://15.235.147.1/api/v1';
     }
   }
 

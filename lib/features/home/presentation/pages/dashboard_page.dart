@@ -136,7 +136,6 @@ class _DashboardPageState extends State<DashboardPage> {
                 doubleSpan: true,
                 allowDoubleSpan: allowDoubleSpan,
                 trailing: Lottie.asset('assets/animations/revenue_coins.json', height: isMobile ? 100 : 140, width: isMobile ? 100 : 140),
-                mainAxisCells: 2,
               ),
             );
           }
@@ -185,7 +184,6 @@ class _DashboardPageState extends State<DashboardPage> {
                 doubleSpan: true,
                 allowDoubleSpan: allowDoubleSpan,
                 trailing: Lottie.asset('assets/animations/low_stock.json', fit: BoxFit.contain),
-                mainAxisCells: 2,
               ),
             );
             tiles.add(
@@ -200,7 +198,6 @@ class _DashboardPageState extends State<DashboardPage> {
                 doubleSpan: true,
                 allowDoubleSpan: allowDoubleSpan,
                 trailing: Lottie.asset('assets/animations/out_of_stock.json', fit: BoxFit.contain),
-                mainAxisCells: 2,
               ),
             );
           }

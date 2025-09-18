@@ -1,5 +1,4 @@
 import 'package:vsc_app/core/providers/base_provider.dart';
-import 'package:vsc_app/core/models/api_response.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:vsc_app/features/orders/data/services/order_service.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
@@ -10,6 +9,7 @@ import 'package:vsc_app/features/production/presentation/models/printing_job_upd
 import 'package:vsc_app/features/production/presentation/models/printer_view_model.dart';
 import 'package:vsc_app/features/production/presentation/models/tracing_studio_view_model.dart';
 import 'package:vsc_app/features/cards/data/services/card_service.dart';
+import 'package:vsc_app/features/orders/presentation/models/order_update_form_models.dart';
 
 /// Provider for managing order details and production operations
 class OrderDetailProvider extends BaseProvider {
@@ -50,6 +50,10 @@ class OrderDetailProvider extends BaseProvider {
   // Getters for fetched data
   OrderViewModel? get currentOrder => _currentOrder;
   Map<String, OrderCardViewModel> get cardCache => Map.unmodifiable(_cardCache);
+
+  // Scanned/selected card for adding new items in Edit flow
+  OrderCardViewModel? _currentScannedCard;
+  OrderCardViewModel? get currentScannedCard => _currentScannedCard;
 
   // Getters for production data
   bool get isLoadingBoxMakers => _isLoadingBoxMakers;
@@ -165,6 +169,40 @@ class OrderDetailProvider extends BaseProvider {
   /// Get card for a specific order item
   OrderCardViewModel? getCardForOrderItem(String cardId) {
     return _cardCache[cardId];
+  }
+
+  /// Search card by barcode and cache it for add-item flow
+  Future<void> searchCardByBarcode(String barcode) async {
+    await executeApiOperation(
+      apiCall: () => _cardService.getCardByBarcode(barcode),
+      onSuccess: (response) {
+        final cardVm = OrderCardViewModel.fromApiResponse(response.data!);
+        _currentScannedCard = cardVm;
+        _cardCache[cardVm.id] = cardVm; // cache for display reuse
+        notifyListeners();
+        return response.data!;
+      },
+      errorMessage: 'Failed to search for card',
+    );
+  }
+
+  void clearCurrentScannedCard() {
+    _currentScannedCard = null;
+    notifyListeners();
+  }
+
+  /// Update order via API and refresh details
+  Future<void> updateOrder({required String orderId, required OrderUpdateFormModel formModel}) async {
+    await executeApiOperation(
+      apiCall: () => _orderService.updateOrder(orderId: orderId, request: formModel.toApiRequest()),
+      onSuccess: (response) async {
+        setSuccess('Order updated successfully');
+        await getOrderById(orderId);
+        return response.data!;
+      },
+      showLoading: true,
+      errorMessage: 'Failed to update order',
+    );
   }
 
   // Production methods for box orders

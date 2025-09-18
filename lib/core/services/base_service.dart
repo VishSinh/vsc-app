@@ -106,6 +106,31 @@ abstract class ApiService {
     return data;
   }
 
+  /// Deeply convert any objects with toJson() into Maps/Lists for transmission
+  dynamic _deepConvert(dynamic data) {
+    if (data == null) return null;
+
+    if (data is Map<String, dynamic>) {
+      final converted = <String, dynamic>{};
+      data.forEach((key, value) {
+        converted[key] = _deepConvert(value);
+      });
+      return converted;
+    }
+
+    if (data is List) {
+      return data.map((item) => _deepConvert(item)).toList();
+    }
+
+    // Attempt to call toJson() on arbitrary objects
+    try {
+      final json = (data as dynamic).toJson();
+      return _deepConvert(json);
+    } catch (_) {
+      return data;
+    }
+  }
+
   /// Filter out null values from request data
   dynamic _filterNullValues(dynamic data) {
     if (data is Map<String, dynamic>) {
@@ -126,13 +151,13 @@ abstract class ApiService {
   }
 
   /// HTTP POST request
-  Future<Response> post(String path, {dynamic data}) => _dio.post(path, data: _filterNullValues(_convertToJsonForLogging(data)));
+  Future<Response> post(String path, {dynamic data}) => _dio.post(path, data: _filterNullValues(_deepConvert(_convertToJsonForLogging(data))));
 
   /// HTTP PUT request
   // Future<Response> put(String path, {dynamic data}) => _dio.put(path, data: _filterNullValues(_convertToJsonForLogging(data)));
 
   /// HTTP PATCH request
-  Future<Response> patch(String path, {dynamic data}) => _dio.patch(path, data: _filterNullValues(_convertToJsonForLogging(data)));
+  Future<Response> patch(String path, {dynamic data}) => _dio.patch(path, data: _filterNullValues(_deepConvert(_convertToJsonForLogging(data))));
 
   /// HTTP DELETE request
   Future<Response> delete(String path) => _dio.delete(path);
