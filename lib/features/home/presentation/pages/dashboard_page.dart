@@ -11,6 +11,9 @@ import 'package:vsc_app/features/home/presentation/providers/permission_provider
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:lottie/lottie.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -87,7 +90,6 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildStatsGrid(UserRole userRole, PermissionProvider permissionProvider, DashboardProvider dashboardProvider) {
-    final statsCards = <Widget>[];
     final dashboard = dashboardProvider.dashboardData;
 
     // If still loading with no data, show loading indicator
@@ -106,187 +108,234 @@ class _DashboardPageState extends State<DashboardPage> {
       );
     }
 
-    // Orders stats - show if user can manage orders
-    if (permissionProvider.canManageOrders) {
-      statsCards.addAll([
-        _buildStatCard(
-          context,
-          title: UITextConstants.totalOrders,
-          value: dashboard.totalOrdersCurrentMonth.toString(),
-          icon: Icons.shopping_cart,
-          color: AppConfig.primaryColor,
-          subtitle: dashboard.monthlyOrderChangePercentage >= 0
-              ? '${dashboard.formattedMonthlyOrderChangePercentage} from last month'
-              : '${dashboard.formattedMonthlyOrderChangePercentage} from last month',
-        ),
-        _buildStatCard(
-          context,
-          title: UITextConstants.pendingOrders,
-          value: dashboard.pendingOrders.toString(),
-          icon: Icons.pending,
-          color: AppConfig.warningColor,
-          subtitle: dashboard.pendingOrders > 0 ? UITextConstants.ordersRequireAttention : 'No orders require attention',
-        ),
-      ]);
-    }
-
-    // Production stats - show if user can manage production
-    if (permissionProvider.canManageProduction) {
-      statsCards.add(
-        _buildStatCard(
-          context,
-          title: UITextConstants.productionJobs,
-          value: (dashboard.pendingPrintingJobs + dashboard.pendingBoxJobs).toString(),
-          icon: Icons.print,
-          color: AppConfig.accentColor,
-          subtitle: UITextConstants.jobsInProgress,
-        ),
-      );
-    }
-
-    // Inventory stats - show if user can manage inventory
-    if (permissionProvider.canManageInventory) {
-      statsCards.add(
-        _buildStatCard(
-          context,
-          title: UITextConstants.lowStockItems,
-          value: dashboard.lowStockItems.toString(),
-          icon: Icons.warning,
-          color: AppConfig.errorColor,
-          subtitle: UITextConstants.needReorder,
-        ),
-      );
-    }
-
-    // Revenue stats - show if user can manage billing or payments
-    if (permissionProvider.canManageBilling || permissionProvider.canManagePayments) {
-      statsCards.add(
-        _buildStatCard(
-          context,
-          title: UITextConstants.totalRevenue,
-          value: '₹${dashboard.monthlyProfit}',
-          icon: Icons.attach_money,
-          color: AppConfig.successColor,
-          subtitle: 'View yearly analysis',
-          onTap: () => context.push(RouteConstants.yearlyProfit),
-        ),
-      );
-    }
-
-    // Recent activity stats - show for all users
-    statsCards.add(
-      _buildStatCard(
-        context,
-        title: UITextConstants.todaysOrders,
-        value: dashboard.todaysOrders.toString(),
-        icon: Icons.today,
-        color: AppConfig.primaryColor,
-        subtitle: UITextConstants.ordersCreatedToday,
-      ),
-    );
-
-    // Inventory alerts - show if user can manage inventory
-    if (permissionProvider.canManageInventory) {
-      statsCards.add(
-        _buildStatCard(
-          context,
-          title: UITextConstants.outOfStock,
-          value: dashboard.outOfStockItems.toString(),
-          icon: Icons.remove_shopping_cart,
-          color: AppConfig.errorColor,
-          subtitle: UITextConstants.itemsNeedRestocking,
-        ),
-      );
-    }
-
-    // Production efficiency - show if user can manage production
-    if (permissionProvider.canManageProduction) {
-      statsCards.add(
-        _buildStatCard(
-          context,
-          title: UITextConstants.pendingPrintingJobs,
-          value: dashboard.pendingPrintingJobs.toString(),
-          icon: Icons.print,
-          color: AppConfig.accentColor,
-          subtitle: UITextConstants.jobsInPrintingQueue,
-        ),
-      );
-
-      statsCards.add(
-        _buildStatCard(
-          context,
-          title: UITextConstants.pendingBoxJobs,
-          value: dashboard.pendingBoxJobs.toString(),
-          icon: Icons.inventory_2,
-          color: AppConfig.accentColor,
-          subtitle: UITextConstants.boxOrdersInQueue,
-        ),
-      );
-    }
-
-    // Financial metrics - show if user can manage billing
-    if (permissionProvider.canManageBilling) {
-      statsCards.add(
-        _buildStatCard(
-          context,
-          title: UITextConstants.monthlyGrowth,
-          value: dashboard.formattedMonthlyOrderChangePercentage,
-          icon: Icons.trending_up,
-          color: AppConfig.successColor,
-          subtitle: UITextConstants.orderGrowthThisMonth,
-        ),
-      );
-
-      statsCards.add(
-        _buildStatCard(
-          context,
-          title: UITextConstants.pendingBills,
-          value: dashboard.pendingBills.toString(),
-          icon: Icons.receipt_long,
-          color: AppConfig.warningColor,
-          subtitle: UITextConstants.billsAwaitingPayment,
-        ),
-      );
-    }
-
-    // Expense logging metrics - show for finance users
-    if (permissionProvider.canManageBilling) {
-      statsCards.add(
-        _buildStatCard(
-          context,
-          title: UITextConstants.expenseLogging,
-          value: dashboard.ordersPendingExpenseLogging.toString(),
-          icon: Icons.attach_money,
-          color: AppConfig.warningColor,
-          subtitle: UITextConstants.ordersPendingExpenseLogging,
-        ),
-      );
-    }
-    ;
-
     return LayoutBuilder(
       builder: (context, constraints) {
         // Calculate responsive grid parameters based on screen size
         final availableWidth = constraints.maxWidth;
         final isMobile = availableWidth < AppConfig.mobileBreakpoint;
 
-        // Adjust card width and aspect ratio based on screen size
+        // Adjust card width and calculate columns
         final cardWidth = isMobile ? 160.0 : 300.0;
-        final childAspectRatio = isMobile ? 1.0 : 1.2;
-
-        // Calculate cross axis count
         final crossAxisCount = (availableWidth / (cardWidth + (isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding))).floor();
-        final actualCrossAxisCount = crossAxisCount.clamp(1, 4); // Max 4 columns
+        final actualCrossAxisCount = isMobile ? 2 : crossAxisCount.clamp(1, 4); // Force 2 cols on mobile
+        final allowDoubleSpan = actualCrossAxisCount >= 2;
+
+        final tiles = <StaggeredGridTile>[];
+        // Helpers to add common tiles
+        void addRevenue() {
+          if (permissionProvider.canManageBilling || permissionProvider.canManagePayments) {
+            tiles.add(
+              _buildStatTile(
+                context,
+                title: UITextConstants.totalRevenue,
+                value: '₹${dashboard.monthlyProfit}',
+                icon: Icons.attach_money,
+                color: AppConfig.successColor,
+                subtitle: 'View yearly analysis',
+                onTap: () => context.push(RouteConstants.yearlyProfit),
+                doubleSpan: true,
+                allowDoubleSpan: allowDoubleSpan,
+                trailing: Lottie.asset('assets/animations/revenue_coins.json', height: isMobile ? 100 : 140, width: isMobile ? 100 : 140),
+                mainAxisCells: 2,
+              ),
+            );
+          }
+        }
+
+        void addOrders() {
+          if (permissionProvider.canManageOrders) {
+            tiles.add(
+              _buildStatTile(
+                context,
+                title: UITextConstants.totalOrders,
+                value: dashboard.totalOrdersCurrentMonth.toString(),
+                icon: Icons.shopping_cart,
+                color: AppConfig.primaryColor,
+                subtitle: dashboard.monthlyOrderChangePercentage >= 0
+                    ? '${dashboard.formattedMonthlyOrderChangePercentage} from last month'
+                    : '${dashboard.formattedMonthlyOrderChangePercentage} from last month',
+                allowDoubleSpan: allowDoubleSpan,
+              ),
+            );
+            tiles.add(
+              _buildStatTile(
+                context,
+                title: UITextConstants.pendingOrders,
+                value: dashboard.pendingOrders.toString(),
+                icon: Icons.pending,
+                color: AppConfig.warningColor,
+                subtitle: dashboard.pendingOrders > 0 ? UITextConstants.ordersRequireAttention : 'No orders require attention',
+                allowDoubleSpan: allowDoubleSpan,
+              ),
+            );
+          }
+        }
+
+        void addInventoryAlerts() {
+          if (permissionProvider.canManageInventory) {
+            tiles.add(
+              _buildStatTile(
+                context,
+                title: UITextConstants.lowStockItems,
+                value: dashboard.lowStockItems.toString(),
+                icon: Icons.warning,
+                color: AppConfig.errorColor,
+                subtitle: UITextConstants.needReorder,
+                onTap: () => context.push(RouteConstants.lowStockCards),
+                doubleSpan: true,
+                allowDoubleSpan: allowDoubleSpan,
+                trailing: Lottie.asset('assets/animations/low_stock.json', fit: BoxFit.contain),
+                mainAxisCells: 2,
+              ),
+            );
+            tiles.add(
+              _buildStatTile(
+                context,
+                title: UITextConstants.outOfStock,
+                value: dashboard.outOfStockItems.toString(),
+                icon: Icons.remove_shopping_cart,
+                color: AppConfig.errorColor,
+                subtitle: UITextConstants.itemsNeedRestocking,
+                onTap: () => context.push(RouteConstants.outOfStockCards),
+                doubleSpan: true,
+                allowDoubleSpan: allowDoubleSpan,
+                trailing: Lottie.asset('assets/animations/out_of_stock.json', fit: BoxFit.contain),
+                mainAxisCells: 2,
+              ),
+            );
+          }
+        }
+
+        void addProduction() {
+          if (permissionProvider.canManageProduction) {
+            tiles.add(
+              _buildStatTile(
+                context,
+                title: UITextConstants.productionJobs,
+                value: (dashboard.pendingPrintingJobs + dashboard.pendingBoxJobs).toString(),
+                icon: Icons.print,
+                color: AppConfig.accentColor,
+                subtitle: UITextConstants.jobsInProgress,
+                allowDoubleSpan: allowDoubleSpan,
+              ),
+            );
+            if (isMobile) {
+              tiles.add(
+                _buildStatTile(
+                  context,
+                  title: UITextConstants.pendingPrintingJobs,
+                  value: dashboard.pendingPrintingJobs.toString(),
+                  icon: Icons.print,
+                  color: AppConfig.accentColor,
+                  subtitle: UITextConstants.jobsInPrintingQueue,
+                  allowDoubleSpan: allowDoubleSpan,
+                ),
+              );
+              tiles.add(
+                _buildStatTile(
+                  context,
+                  title: UITextConstants.pendingBoxJobs,
+                  value: dashboard.pendingBoxJobs.toString(),
+                  icon: Icons.inventory_2,
+                  color: AppConfig.accentColor,
+                  subtitle: UITextConstants.boxOrdersInQueue,
+                  allowDoubleSpan: allowDoubleSpan,
+                ),
+              );
+            }
+          }
+        }
+
+        void addFinance() {
+          if (permissionProvider.canManageBilling) {
+            tiles.add(
+              _buildStatTile(
+                context,
+                title: UITextConstants.monthlyGrowth,
+                value: dashboard.formattedMonthlyOrderChangePercentage,
+                icon: Icons.trending_up,
+                color: AppConfig.successColor,
+                subtitle: UITextConstants.orderGrowthThisMonth,
+                allowDoubleSpan: allowDoubleSpan,
+              ),
+            );
+            tiles.add(
+              _buildStatTile(
+                context,
+                title: UITextConstants.pendingBills,
+                value: dashboard.pendingBills.toString(),
+                icon: Icons.receipt_long,
+                color: AppConfig.warningColor,
+                subtitle: UITextConstants.billsAwaitingPayment,
+                allowDoubleSpan: allowDoubleSpan,
+              ),
+            );
+            tiles.add(
+              _buildStatTile(
+                context,
+                title: UITextConstants.expenseLogging,
+                value: dashboard.ordersPendingExpenseLogging.toString(),
+                icon: Icons.attach_money,
+                color: AppConfig.warningColor,
+                subtitle: UITextConstants.ordersPendingExpenseLogging,
+                allowDoubleSpan: allowDoubleSpan,
+              ),
+            );
+          }
+        }
+
+        void addCommon() {
+          tiles.add(
+            _buildStatTile(
+              context,
+              title: UITextConstants.todaysOrders,
+              value: dashboard.todaysOrders.toString(),
+              icon: Icons.today,
+              color: AppConfig.primaryColor,
+              subtitle: UITextConstants.ordersCreatedToday,
+              allowDoubleSpan: allowDoubleSpan,
+            ),
+          );
+        }
+
+        // Order tiles based on device
+        if (isMobile) {
+          addRevenue();
+          addOrders();
+          addInventoryAlerts();
+          addCommon();
+          addProduction();
+          addFinance();
+        } else {
+          addOrders();
+          addProduction();
+          addInventoryAlerts();
+          addRevenue();
+          addCommon();
+          addFinance();
+        }
 
         return RefreshIndicator(
           onRefresh: () => dashboardProvider.fetchDashboardData(),
-          child: GridView.count(
-            physics: const AlwaysScrollableScrollPhysics(), // Ensures scroll works even when content fits screen
-            crossAxisCount: actualCrossAxisCount,
-            crossAxisSpacing: isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding,
-            mainAxisSpacing: isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding,
-            childAspectRatio: childAspectRatio,
-            children: statsCards,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding,
+                    right: isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding,
+                    bottom: isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding,
+                  ),
+                  child: StaggeredGrid.count(
+                    crossAxisCount: actualCrossAxisCount,
+                    mainAxisSpacing: isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding,
+                    crossAxisSpacing: isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding,
+                    children: tiles,
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },
@@ -301,6 +350,8 @@ class _DashboardPageState extends State<DashboardPage> {
     required Color color,
     required String subtitle,
     VoidCallback? onTap,
+    Widget? footer,
+    Widget? trailing,
   }) {
     final isMobile = MediaQuery.of(context).size.width < AppConfig.mobileBreakpoint;
 
@@ -312,46 +363,83 @@ class _DashboardPageState extends State<DashboardPage> {
         borderRadius: BorderRadius.circular(isMobile ? 8 : AppConfig.defaultRadius),
         child: Padding(
           padding: EdgeInsets.all(isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+          child: Row(
             children: [
-              Row(
-                children: [
-                  Icon(icon, color: color, size: isMobile ? AppConfig.iconSizeSmall : AppConfig.iconSizeMedium),
-                  Spacer(),
-                  if (onTap != null)
-                    Icon(Icons.arrow_forward_ios, color: color.withOpacity(0.5), size: isMobile ? 12 : AppConfig.iconSizeSmall)
-                  else
-                    Icon(Icons.trending_up, color: color.withOpacity(0.5), size: isMobile ? 12 : AppConfig.iconSizeSmall),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(icon, color: color, size: AppConfig.iconSizeLarge),
+                        const Spacer(),
+                        if (onTap != null)
+                          Icon(Icons.arrow_forward_ios, color: color.withOpacity(0.5), size: isMobile ? 12 : AppConfig.iconSizeSmall)
+                        else
+                          Icon(Icons.trending_up, color: color.withOpacity(0.5), size: isMobile ? 12 : AppConfig.iconSizeSmall),
+                      ],
+                    ),
+                    Spacer(),
+                    Text(
+                      value,
+                      style: ResponsiveText.getHeadline(context).copyWith(color: color),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: isMobile ? 4 : AppConfig.smallPadding),
+                    Text(
+                      title,
+                      style: isMobile ? ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w500) : ResponsiveText.getTitle(context),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: isMobile ? 2 : AppConfig.smallPadding),
+                    Text(
+                      subtitle,
+                      style: ResponsiveText.getCaption(context).copyWith(color: AppConfig.grey600, fontSize: isMobile ? 10 : null),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (footer != null) ...[SizedBox(height: isMobile ? 8 : AppConfig.smallPadding), footer],
+                  ],
+                ),
               ),
-              Spacer(),
-              Text(
-                value,
-                style: isMobile
-                    ? ResponsiveText.getTitle(context).copyWith(color: color, fontWeight: FontWeight.bold)
-                    : ResponsiveText.getHeadline(context).copyWith(color: color),
-              ),
-              SizedBox(height: isMobile ? 4 : AppConfig.smallPadding),
-              Text(
-                title,
-                style: isMobile ? ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w500) : ResponsiveText.getTitle(context),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              SizedBox(height: isMobile ? 2 : AppConfig.smallPadding),
-              Text(
-                subtitle,
-                style: ResponsiveText.getCaption(context).copyWith(color: AppConfig.grey600, fontSize: isMobile ? 10 : null),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+              if (trailing != null) SizedBox(width: 200, height: 150, child: trailing),
             ],
           ),
         ),
       ),
     );
+  }
+
+  StaggeredGridTile _buildStatTile(
+    BuildContext context, {
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+    required String subtitle,
+    VoidCallback? onTap,
+    bool doubleSpan = false,
+    required bool allowDoubleSpan,
+    Widget? footer,
+    Widget? trailing,
+    int mainAxisCells = 1,
+  }) {
+    final card = _buildStatCard(
+      context,
+      title: title,
+      value: value,
+      icon: icon,
+      color: color,
+      subtitle: subtitle,
+      onTap: onTap,
+      footer: footer,
+      trailing: trailing,
+    ).animate().fadeIn(duration: 250.ms).scale(begin: const Offset(0.98, 0.98), duration: 250.ms);
+
+    return StaggeredGridTile.count(crossAxisCellCount: doubleSpan && allowDoubleSpan ? 2 : 1, mainAxisCellCount: mainAxisCells, child: card);
   }
 
   Widget _buildCreateOrderButton(BuildContext context) {

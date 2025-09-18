@@ -22,6 +22,8 @@ class RouteConstants {
   static const String orderDetail = '/orders/:id';
   static const String register = '/register';
   static const String yearlyProfit = '/analytics/yearly-profit';
+  static const String lowStockCards = '/analytics/low-stock-cards';
+  static const String outOfStockCards = '/analytics/out-of-stock-cards';
 
   // ================================ ROUTE NAMES ================================
   static const String loginRouteName = 'login';
@@ -45,6 +47,8 @@ class RouteConstants {
   static const String orderDetailRouteName = 'order-detail';
   static const String registerRouteName = 'register';
   static const String yearlyProfitRouteName = 'yearly-profit';
+  static const String lowStockCardsRouteName = 'low-stock-cards';
+  static const String outOfStockCardsRouteName = 'out-of-stock-cards';
 
   // ================================ ROUTE GROUPS ================================
   static const List<String> protectedRoutes = [
@@ -68,6 +72,8 @@ class RouteConstants {
     register,
     billDetail,
     yearlyProfit,
+    lowStockCards,
+    outOfStockCards,
   ];
 
   static const List<String> publicRoutes = [login];

@@ -84,15 +84,16 @@ class CardListProvider extends BaseProvider {
   }
 
   /// Load cards with pagination
-  Future<void> loadCards({int page = 1, int pageSize = 10}) async {
+  Future<void> loadCards({int page = 1, int pageSize = 16}) async {
     await executeApiOperation(
       apiCall: () => _cardService.getCards(page: page, pageSize: pageSize),
       onSuccess: (response) {
-        if (page == 1) {
-          _cards.clear();
-        }
+        // if (page == 1) {
+        //   _cards.clear();
+        // }
         // Use direct conversion from API response to ViewModel
         final cardViewModels = (response.data ?? []).map((cardResponse) => CardViewModel.fromApiResponse(cardResponse)).toList();
+        _cards.clear();
         _cards.addAll(cardViewModels);
         _pagination = response.pagination;
         notifyListeners();

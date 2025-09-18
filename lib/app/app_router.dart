@@ -21,6 +21,8 @@ import 'package:vsc_app/features/orders/presentation/providers/order_detail_prov
 import 'package:vsc_app/features/bills/presentation/pages/bill_page.dart';
 import 'package:vsc_app/features/home/presentation/pages/yearly_profit_page.dart';
 import 'package:vsc_app/features/home/presentation/providers/analytics_provider.dart';
+import 'package:vsc_app/features/home/presentation/pages/low_stock_cards_page.dart';
+import 'package:vsc_app/features/home/presentation/pages/out_of_stock_cards_page.dart';
 import 'package:provider/provider.dart';
 
 class AppRouter {
@@ -154,6 +156,16 @@ class AppRouter {
           path: RouteConstants.yearlyProfit,
           name: RouteConstants.yearlyProfitRouteName,
           builder: (context, state) => ChangeNotifierProvider(create: (_) => AnalyticsProvider(), child: const YearlyProfitPage()),
+        ),
+        GoRoute(
+          path: RouteConstants.lowStockCards,
+          name: RouteConstants.lowStockCardsRouteName,
+          builder: (context, state) => ChangeNotifierProvider(create: (_) => AnalyticsProvider(), child: const LowStockCardsPage()),
+        ),
+        GoRoute(
+          path: RouteConstants.outOfStockCards,
+          name: RouteConstants.outOfStockCardsRouteName,
+          builder: (context, state) => ChangeNotifierProvider(create: (_) => AnalyticsProvider(), child: const OutOfStockCardsPage()),
         ),
       ],
     );

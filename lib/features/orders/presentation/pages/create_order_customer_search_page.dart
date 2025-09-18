@@ -65,7 +65,7 @@ class _CreateOrderCustomerSearchPageState extends State<CreateOrderCustomerSearc
         if (customer != null) {
           orderProvider.setSelectedCustomerData(customer);
           SnackbarUtils.showSuccess(context, UITextConstants.customerCreatedSuccessfully);
-          context.go(RouteConstants.orderItems, extra: orderProvider);
+          context.push(RouteConstants.orderItems, extra: orderProvider);
         } else {
           SnackbarUtils.showError(context, UITextConstants.customerRetrieveFailed);
         }

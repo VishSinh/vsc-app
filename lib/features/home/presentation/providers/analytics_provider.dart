@@ -2,6 +2,7 @@ import 'package:vsc_app/core/providers/base_provider.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:vsc_app/features/home/data/services/dashboard_service.dart';
 import 'package:vsc_app/features/home/presentation/models/yearly_profit_view_model.dart';
+import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 
 /// Provider for managing analytics data including yearly profit analysis
 class AnalyticsProvider extends BaseProvider {
@@ -9,9 +10,13 @@ class AnalyticsProvider extends BaseProvider {
 
   // Analytics data
   List<YearlyProfitViewModel>? _yearlyProfitData;
+  List<CardViewModel>? _lowStockCards;
+  List<CardViewModel>? _outOfStockCards;
 
   // Getters
   List<YearlyProfitViewModel>? get yearlyProfitData => _yearlyProfitData;
+  List<CardViewModel>? get lowStockCards => _lowStockCards;
+  List<CardViewModel>? get outOfStockCards => _outOfStockCards;
 
   // Constructor
   AnalyticsProvider({DashboardService? dashboardService}) : _dashboardService = dashboardService ?? DashboardService() {
@@ -23,7 +28,7 @@ class AnalyticsProvider extends BaseProvider {
     AppLogger.service('AnalyticsProvider', 'Fetching yearly profit data');
 
     await executeApiOperation(
-      apiCall: () => _dashboardService.getAnalyticsDetail('yearly_profit'),
+      apiCall: () => _dashboardService.getYearlyProfitAnalytics(),
       onSuccess: (response) {
         if (response.data != null) {
           _yearlyProfitData = YearlyProfitViewModel.fromAPIModelList(response.data!);
@@ -35,6 +40,46 @@ class AnalyticsProvider extends BaseProvider {
       showSnackbar: showSnackbar,
       showLoading: true,
       errorMessage: 'Failed to load profit data',
+    );
+  }
+
+  Future<void> getLowStockCards({bool showSnackbar = false}) async {
+    AppLogger.service('AnalyticsProvider', 'Fetching low stock cards');
+
+    await executeApiOperation(
+      apiCall: () => _dashboardService.getLowStockCards(),
+      onSuccess: (response) {
+        if (response.data != null) {
+          _lowStockCards = response.data!.map((r) => CardViewModel.fromApiResponse(r)).toList();
+          AppLogger.service('AnalyticsProvider', 'Low stock cards loaded: ${_lowStockCards?.length}');
+          notifyListeners();
+          return _lowStockCards;
+        }
+        return null;
+      },
+      showSnackbar: showSnackbar,
+      showLoading: true,
+      errorMessage: 'Failed to load low stock cards',
+    );
+  }
+
+  Future<void> getOutOfStockCards({bool showSnackbar = false}) async {
+    AppLogger.service('AnalyticsProvider', 'Fetching out of stock cards');
+
+    await executeApiOperation(
+      apiCall: () => _dashboardService.getOutOfStockCards(),
+      onSuccess: (response) {
+        if (response.data != null) {
+          _outOfStockCards = response.data!.map((r) => CardViewModel.fromApiResponse(r)).toList();
+          AppLogger.service('AnalyticsProvider', 'Out of stock cards loaded: ${_outOfStockCards?.length}');
+          notifyListeners();
+          return _outOfStockCards;
+        }
+        return null;
+      },
+      showSnackbar: showSnackbar,
+      showLoading: true,
+      errorMessage: 'Failed to load out of stock cards',
     );
   }
 
@@ -63,6 +108,8 @@ class AnalyticsProvider extends BaseProvider {
   @override
   void reset() {
     _yearlyProfitData = null;
+    _lowStockCards = null;
+    _outOfStockCards = null;
     super.reset();
     AppLogger.service('AnalyticsProvider', 'Provider state reset');
   }
