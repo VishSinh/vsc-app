@@ -4,30 +4,43 @@ import 'package:vsc_app/features/production/data/models/printing_job_response.da
 
 part 'order_responses.g.dart';
 
+/// Base order response without billId - used by both OrderResponse and BillOrderResponse
 @JsonSerializable()
-class OrderResponse {
+class BaseOrderResponse {
+  @JsonKey(name: 'id')
   final String id;
+
+  @JsonKey(name: 'name')
   final String name;
+
   @JsonKey(name: 'customer_id')
   final String customerId;
+
   @JsonKey(name: 'customer_name')
   final String customerName;
+
   @JsonKey(name: 'staff_id')
   final String staffId;
+
   @JsonKey(name: 'staff_name')
   final String staffName;
+
   @JsonKey(name: 'order_date')
   final String orderDate;
+
   @JsonKey(name: 'delivery_date')
   final String deliveryDate;
+
   @JsonKey(name: 'order_status')
   final String orderStatus;
+
   @JsonKey(name: 'special_instruction')
   final String specialInstruction;
+
   @JsonKey(name: 'order_items')
   final List<OrderItemResponse> orderItems;
 
-  const OrderResponse({
+  const BaseOrderResponse({
     required this.id,
     required this.name,
     required this.customerId,
@@ -39,6 +52,30 @@ class OrderResponse {
     required this.orderStatus,
     required this.specialInstruction,
     required this.orderItems,
+  });
+
+  factory BaseOrderResponse.fromJson(Map<String, dynamic> json) => _$BaseOrderResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$BaseOrderResponseToJson(this);
+}
+
+@JsonSerializable()
+class OrderResponse extends BaseOrderResponse {
+  @JsonKey(name: 'bill_id')
+  final String billId;
+
+  const OrderResponse({
+    required super.id,
+    required super.name,
+    required super.customerId,
+    required super.customerName,
+    required super.staffId,
+    required super.staffName,
+    required super.orderDate,
+    required super.deliveryDate,
+    required super.orderStatus,
+    required super.specialInstruction,
+    required super.orderItems,
+    required this.billId,
   });
 
   factory OrderResponse.fromJson(Map<String, dynamic> json) => _$OrderResponseFromJson(json);
@@ -86,26 +123,26 @@ class OrderItemResponse {
   Map<String, dynamic> toJson() => _$OrderItemResponseToJson(this);
 }
 
-@JsonSerializable()
-class OrderCreateResponse extends OrderResponse {
-  @JsonKey(name: 'bill_id')
-  final String billId;
+// @JsonSerializable()
+// class OrderCreateResponse extends OrderResponse {
+//   @JsonKey(name: 'bill_id')
+//   final String billId;
 
-  const OrderCreateResponse({
-    required super.id,
-    required super.name,
-    required super.customerId,
-    required super.customerName,
-    required super.staffId,
-    required super.staffName,
-    required super.orderDate,
-    required super.deliveryDate,
-    required super.orderStatus,
-    required super.specialInstruction,
-    required super.orderItems,
-    required this.billId,
-  });
+//   const OrderCreateResponse({
+//     required super.id,
+//     required super.name,
+//     required super.customerId,
+//     required super.customerName,
+//     required super.staffId,
+//     required super.staffName,
+//     required super.orderDate,
+//     required super.deliveryDate,
+//     required super.orderStatus,
+//     required super.specialInstruction,
+//     required super.orderItems,
+//     required this.billId,
+//   });
 
-  factory OrderCreateResponse.fromJson(Map<String, dynamic> json) => _$OrderCreateResponseFromJson(json);
-  Map<String, dynamic> toJson() => _$OrderCreateResponseToJson(this);
-}
+//   factory OrderCreateResponse.fromJson(Map<String, dynamic> json) => _$OrderCreateResponseFromJson(json);
+//   Map<String, dynamic> toJson() => _$OrderCreateResponseToJson(this);
+// }

@@ -217,6 +217,21 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             _buildInfoRow('Delivery Date', _formatDateTime(order.deliveryDate)),
             _buildInfoRow('Total Items', '${order.orderItems.length}'),
             _buildInfoRow('Total Amount', '₹${OrderCalculationService.calculateOrderTotal(order.orderItems).toStringAsFixed(2)}'),
+            const SizedBox(height: 16),
+            if (order.billId.isNotEmpty)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => context.push('${RouteConstants.bills}/${order.billId}'),
+                  icon: const Icon(Icons.receipt),
+                  label: const Text('View Bill'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

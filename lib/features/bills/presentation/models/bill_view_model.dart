@@ -21,6 +21,9 @@ class BillViewModel {
     required this.summary,
   });
 
+  /// Get the bill ID associated with this bill's order for navigation purposes
+  String get orderBillId => id;
+
   factory BillViewModel.fromApiResponse(BillGetResponse response) {
     return BillViewModel(
       id: response.id,
@@ -34,23 +37,32 @@ class BillViewModel {
   }
 }
 
-class BillOrderViewModel extends OrderViewModel {
-  BillOrderViewModel({
-    required super.id,
-    required super.name,
-    required super.customerId,
-    required super.customerName,
-    required super.staffId,
-    required super.staffName,
-    required super.orderDate,
-    required super.deliveryDate,
-    required super.orderStatus,
-    required super.specialInstruction,
-    required List<BillOrderItemViewModel> orderItems,
-  }) : super(orderItems: orderItems);
+class BillOrderViewModel {
+  final String id;
+  final String name;
+  final String customerId;
+  final String customerName;
+  final String staffId;
+  final String staffName;
+  final DateTime orderDate;
+  final DateTime deliveryDate;
+  final String orderStatus;
+  final String specialInstruction;
+  final List<BillOrderItemViewModel> orderItems;
 
-  @override
-  List<BillOrderItemViewModel> get orderItems => super.orderItems as List<BillOrderItemViewModel>;
+  BillOrderViewModel({
+    required this.id,
+    required this.name,
+    required this.customerId,
+    required this.customerName,
+    required this.staffId,
+    required this.staffName,
+    required this.orderDate,
+    required this.deliveryDate,
+    required this.orderStatus,
+    required this.specialInstruction,
+    required this.orderItems,
+  });
 
   factory BillOrderViewModel.fromApiResponse(BillOrderResponse response) {
     return BillOrderViewModel(
@@ -64,7 +76,7 @@ class BillOrderViewModel extends OrderViewModel {
       deliveryDate: DateTime.parse(response.deliveryDate),
       orderStatus: response.orderStatus,
       specialInstruction: response.specialInstruction,
-      orderItems: response.orderItems.map((item) => BillOrderItemViewModel.fromApiResponse(item)).toList(),
+      orderItems: response.orderItems.map((item) => BillOrderItemViewModel.fromApiResponse(item as BillOrderItemResponse)).toList(),
     );
   }
 }

@@ -1,70 +1,3 @@
-// {
-//     "success": true,
-//     "data": {
-//         "id": "93d3146b-7a67-4c4e-bdcc-74a11ecfc6d6",
-//         "order_id": "e9506222-db6b-409b-a65d-2bca0c2fc7da",
-//         "order_name": "Y wedds X",
-//         "tax_percentage": "0.00",
-//         "payment_status": "PENDING",
-//         "order": {
-//             "id": "e9506222-db6b-409b-a65d-2bca0c2fc7da",
-//             "name": "Y wedds X",
-//             "customer_id": "77a5345e-3f8a-484d-b786-a3ce5fdbccd6",
-//             "customer_name": "Monte",
-//             "staff_id": "3bd1de7d-c4c5-4ddc-a2e7-f35ea3badfb8",
-//             "staff_name": "Vijay Sinha",
-//             "order_date": "2025-08-03T07:21:40.541Z",
-//             "delivery_date": "2025-11-15T10:00:00Z",
-//             "order_status": "CONFIRMED",
-//             "special_instruction": "",
-//             "order_items": [
-//                 {
-//                     "id": "2203a8c0-1b2d-4e3e-aa2f-b371ff82c584",
-//                     "order_id": "e9506222-db6b-409b-a65d-2bca0c2fc7da",
-//                     "order_name": "Y wedds X",
-//                     "card_id": "295ff0d8-2919-4643-992e-67fa48e9bd3f",
-//                     "quantity": 2,
-//                     "price_per_item": "150.00",
-//                     "discount_amount": "5.00",
-//                     "requires_box": true,
-//                     "requires_printing": false,
-//                     "calculated_costs": {
-//                         "base_cost": "290.00",
-//                         "box_cost": "500.00",
-//                         "printing_cost": "0.00",
-//                         "total_cost": "790.00"
-//                     }
-//                 },
-//                 {
-//                     "id": "cc085e56-844b-4773-b193-ba3cd7429be2",
-//                     "order_id": "e9506222-db6b-409b-a65d-2bca0c2fc7da",
-//                     "order_name": "Y wedds X",
-//                     "card_id": "fcff2b14-1882-47aa-bb2d-0178234cdbe4",
-//                     "quantity": 1,
-//                     "price_per_item": "150.00",
-//                     "discount_amount": "0.00",
-//                     "requires_box": false,
-//                     "requires_printing": true,
-//                     "calculated_costs": {
-//                         "base_cost": "150.00",
-//                         "box_cost": "0.00",
-//                         "printing_cost": "400.00",
-//                         "total_cost": "550.00"
-//                     }
-//                 }
-//             ]
-//         },
-//         "summary": {
-//             "items_subtotal": "440.00",
-//             "total_box_cost": "500.00",
-//             "total_printing_cost": "400.00",
-//             "grand_total": "1340.00",
-//             "tax_percentage": "0.00",
-//             "tax_amount": "0.00",
-//             "total_with_tax": "1340.00"
-//         }
-//     }
-// }
 import 'package:json_annotation/json_annotation.dart';
 import 'package:vsc_app/features/orders/data/models/order_responses.dart';
 
@@ -109,7 +42,7 @@ class BillGetResponse {
 }
 
 @JsonSerializable()
-class BillOrderResponse extends OrderResponse {
+class BillOrderResponse extends BaseOrderResponse {
   const BillOrderResponse({
     required super.id,
     required super.name,
@@ -124,11 +57,7 @@ class BillOrderResponse extends OrderResponse {
     required List<BillOrderItemResponse> orderItems,
   }) : super(orderItems: orderItems);
 
-  @override
-  List<BillOrderItemResponse> get orderItems => super.orderItems as List<BillOrderItemResponse>;
-
   factory BillOrderResponse.fromJson(Map<String, dynamic> json) => _$BillOrderResponseFromJson(json);
-  @override
   Map<String, dynamic> toJson() => _$BillOrderResponseToJson(this);
 }
 

@@ -16,6 +16,7 @@ class OrderViewModel {
   final String orderStatus;
   final String specialInstruction;
   final List<OrderItemViewModel> orderItems;
+  final String billId;
 
   OrderViewModel({
     required this.id,
@@ -29,6 +30,7 @@ class OrderViewModel {
     required this.orderStatus,
     required this.specialInstruction,
     required this.orderItems,
+    required this.billId,
   });
 
   factory OrderViewModel.fromApiResponse(OrderResponse response) {
@@ -44,6 +46,7 @@ class OrderViewModel {
       orderStatus: response.orderStatus,
       specialInstruction: response.specialInstruction,
       orderItems: response.orderItems.map((item) => OrderItemViewModel.fromApiResponse(item)).toList(),
+      billId: response.billId,
     );
   }
 
@@ -61,6 +64,7 @@ class OrderViewModel {
       orderStatus: orderStatus,
       specialInstruction: specialInstruction,
       orderItems: orderItems ?? this.orderItems,
+      billId: billId,
     );
   }
 }
