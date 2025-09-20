@@ -149,7 +149,7 @@ class _OrdersPageState extends State<OrdersPage> {
                           children: [
                             Text(
                               order.name.isNotEmpty ? order.name : 'Order #${order.id.substring(0, 8)}',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
                             ),
                             if (order.specialInstruction.isNotEmpty)
                               Text(
@@ -175,49 +175,47 @@ class _OrdersPageState extends State<OrdersPage> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
-                      const SizedBox(width: 8),
-                      Expanded(child: Text('Ordered: ${_formatDateTime(order.orderDate)}')),
-                    ],
-                  ),
+                  _buildOrderInfoRow(Icons.calendar_today, 'Ordered:', _formatDateTime(order.orderDate)),
                   const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(Icons.person, size: 16, color: Colors.grey),
-                      const SizedBox(width: 8),
-                      Expanded(child: Text('Customer: ${order.customerName}')),
-                    ],
-                  ),
+                  _buildOrderInfoRow(Icons.person, 'Customer:', order.customerName),
                   const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(Icons.badge, size: 16, color: Colors.grey),
-                      const SizedBox(width: 8),
-                      Expanded(child: Text('Staff: ${order.staffName}')),
-                    ],
-                  ),
+                  _buildOrderInfoRow(Icons.badge, 'Staff:', order.staffName),
                   const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(Icons.local_shipping, size: 16, color: Colors.grey),
-                      const SizedBox(width: 8),
-                      Expanded(child: Text('Delivery: ${_formatDateTime(order.deliveryDate)}')),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
+                  _buildOrderInfoRow(Icons.local_shipping, 'Delivery:', _formatDateTime(order.deliveryDate)),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       const Icon(Icons.shopping_cart, size: 16, color: Colors.grey),
                       const SizedBox(width: 8),
-                      Text('${order.orderItems.length} item${order.orderItems.length != 1 ? 's' : ''}'),
+                      Text('${order.orderItems.length} item${order.orderItems.length != 1 ? 's' : ''}', style: const TextStyle(color: Colors.grey)),
                       if (_hasBoxRequirements(order)) ...[const SizedBox(width: 12), const Icon(Icons.inventory_2, size: 16, color: Colors.blue)],
                       if (_hasPrintingRequirements(order)) ...[const SizedBox(width: 8), const Icon(Icons.print, size: 16, color: Colors.green)],
                       const Spacer(),
-                      Text(
-                        '₹${OrderCalculationService.calculateOrderTotal(order.orderItems).toStringAsFixed(2)}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: '₹ ',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 25,
+                                color: Colors.green,
+                                fontFamily: 'Roboto',
+                                height: 1.0,
+                              ),
+                            ),
+                            TextSpan(
+                              text: '${OrderCalculationService.calculateOrderTotal(order.orderItems).toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                                color: Colors.white,
+                                fontFamily: 'Roboto',
+                                height: 1.0,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -231,7 +229,7 @@ class _OrdersPageState extends State<OrdersPage> {
                             decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
                             child: const Text(
                               'Box',
-                              style: TextStyle(fontSize: 11, color: Colors.blue, fontWeight: FontWeight.w500),
+                              style: TextStyle(fontSize: 18, color: Colors.blue, fontWeight: FontWeight.w500),
                             ),
                           ),
                         if (_hasBoxRequirements(order) && _hasPrintingRequirements(order)) const SizedBox(width: 4),
@@ -241,7 +239,7 @@ class _OrdersPageState extends State<OrdersPage> {
                             decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
                             child: const Text(
                               'Print',
-                              style: TextStyle(fontSize: 11, color: Colors.green, fontWeight: FontWeight.w500),
+                              style: TextStyle(fontSize: 18, color: Colors.green, fontWeight: FontWeight.w500),
                             ),
                           ),
                       ],
@@ -589,4 +587,20 @@ class _OrdersPageState extends State<OrdersPage> {
   // Using OrderCalculationService.calculateOrderTotal instead of local method
 
   // Using OrderStatusExtension.getColorFromString instead of local color mapping method
+
+  Widget _buildOrderInfoRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: Colors.grey),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 75, // Slightly increased width for larger text
+          child: Text(label, style: const TextStyle(color: Colors.grey, fontSize: 16)),
+        ),
+        Expanded(
+          child: Text(value, style: const TextStyle(color: Colors.white, fontSize: 16)),
+        ),
+      ],
+    );
+  }
 }

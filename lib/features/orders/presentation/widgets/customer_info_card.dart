@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vsc_app/app/app_config.dart';
+import 'package:vsc_app/core/constants/app_config.dart';
 import 'package:vsc_app/core/models/customer_model.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vsc_app/app/app_config.dart';
+import 'package:vsc_app/core/constants/app_config.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_item_form_model.dart';
 import 'package:vsc_app/features/orders/presentation/services/order_calculation_service.dart';

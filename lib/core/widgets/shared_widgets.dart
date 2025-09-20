@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:vsc_app/app/app_config.dart';
+import 'package:vsc_app/core/constants/app_config.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';

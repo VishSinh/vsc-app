@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:vsc_app/app/app_config.dart';
+import 'package:vsc_app/core/constants/app_config.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 
 /// Responsive text utility that provides consistent text styles

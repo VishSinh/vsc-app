@@ -7,7 +7,7 @@ class AppConstants {
   // API Configuration
   // Dynamically determine the correct API base URL based on platform
   static String get apiBaseUrl {
-    bool isLocal = true;
+    bool isLocal = false;
     bool isPhysicalDevice = true;
     if (kIsWeb) {
       return isLocal ? 'http://localhost/api/v1' : 'http://15.235.147.1/api/v1';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vsc_app/app/app_config.dart';
+import 'package:vsc_app/core/constants/app_config.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
@@ -139,7 +139,6 @@ class _InventoryPageState extends State<InventoryPage> {
               physics: const ClampingScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: gridConfig.crossAxisCount,
-                childAspectRatio: gridConfig.childAspectRatio,
                 crossAxisSpacing: AppConfig.defaultPadding,
                 mainAxisSpacing: AppConfig.defaultPadding,
               ),
@@ -148,7 +147,7 @@ class _InventoryPageState extends State<InventoryPage> {
                 final card = filteredCards[index];
                 return InventoryCardItem(card: card);
               },
-              padding: const EdgeInsets.only(bottom: 80),
+              // padding: const EdgeInsets.only(bottom: 80),
             );
           },
         );
@@ -294,7 +293,7 @@ class InventoryCardItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 3,
+      // elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -329,7 +328,20 @@ class InventoryCardItem extends StatelessWidget {
             ),
           ),
         ),
-        if (card.quantity <= 5)
+        if (card.quantity <= 250 && card.quantity > 50)
+          Positioned(
+            top: 8,
+            right: 8,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(color: Colors.orange.withOpacity(0.8), borderRadius: BorderRadius.circular(12)),
+              child: const Text(
+                'LOW STOCK',
+                style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        if (card.quantity <= 50)
           Positioned(
             top: 8,
             right: 8,
@@ -337,7 +349,7 @@ class InventoryCardItem extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(color: Colors.red.withOpacity(0.8), borderRadius: BorderRadius.circular(12)),
               child: const Text(
-                'LOW STOCK',
+                'OUT OF STOCK',
                 style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
               ),
             ),
@@ -378,75 +390,32 @@ class InventoryCardItem extends StatelessWidget {
   Widget _buildContentSection(BuildContext context) {
     final padding = context.isMobile ? 8.0 : AppConfig.defaultPadding;
 
-    // Use more vertical space on desktop to balance the card
-    final verticalSpacing = context.isMobile ? 4.0 : 12.0;
-
     return Padding(
       padding: EdgeInsets.all(padding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildPriceText(context),
-                    SizedBox(height: context.isMobile ? 2.0 : 6.0),
-                    _buildDiscountText(context),
-                  ],
-                ),
-              ),
-              _buildStockIndicator(context),
-            ],
-          ),
-          SizedBox(height: verticalSpacing),
-          _buildInfoRow(context),
-          // Add extra space at the bottom on desktop
-          if (!context.isMobile) SizedBox(height: verticalSpacing),
-        ],
-      ),
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [_buildPriceText(context), _buildStockIndicator(context)]),
     );
   }
 
   Widget _buildPriceText(BuildContext context) {
     // Increase font size on desktop for better proportions
     final textStyle = context.isMobile
-        ? ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.bold)
+        ? ResponsiveText.getBody(context).copyWith(fontSize: 18, fontWeight: FontWeight.bold)
         : ResponsiveText.getTitle(context).copyWith(fontSize: 22, fontWeight: FontWeight.bold);
 
     return Text('₹${card.sellPrice}', style: textStyle);
   }
 
-  Widget _buildDiscountText(BuildContext context) {
-    // Adjust font size for desktop
-    final fontSize = context.isMobile ? 10.0 : 14.0;
-
-    return Text(
-      context.isMobile ? 'Disc: ₹${card.maxDiscount}' : 'Max Discount: ₹${card.maxDiscount}',
-      style: ResponsiveText.getCaption(
-        context,
-      ).copyWith(color: AppConfig.errorColor, fontSize: fontSize, fontWeight: context.isMobile ? FontWeight.normal : FontWeight.w500),
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
   Widget _buildStockIndicator(BuildContext context) {
-    final color = card.quantity > 10
+    final color = card.quantity > 250
         ? Colors.green
-        : card.quantity > 5
+        : card.quantity > 50
         ? Colors.orange
         : Colors.red;
 
     // Make stock indicator more prominent on desktop
     final horizontalPadding = context.isMobile ? 6.0 : 12.0;
     final verticalPadding = context.isMobile ? 2.0 : 6.0;
-    final fontSize = context.isMobile ? 12.0 : 16.0;
+    final fontSize = context.isMobile ? 16.0 : 18.0;
     final borderRadius = context.isMobile ? 4.0 : 8.0;
 
     return Container(
@@ -460,44 +429,6 @@ class InventoryCardItem extends StatelessWidget {
         '${card.quantity}',
         style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: fontSize),
       ),
-    );
-  }
-
-  Widget _buildInfoRow(BuildContext context) {
-    // Adjust icon and text sizes for desktop
-    final iconSize = context.isMobile ? 12.0 : 18.0;
-    final fontSize = context.isMobile ? 10.0 : 14.0;
-    final spacing = context.isMobile ? 4.0 : 8.0;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Flexible(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.monetization_on_outlined, size: iconSize, color: AppConfig.secondaryColor),
-              SizedBox(width: spacing / 2),
-              Flexible(
-                child: Text(
-                  'Cost: ₹${card.costPrice}',
-                  style: ResponsiveText.getCaption(
-                    context,
-                  ).copyWith(fontSize: fontSize, fontWeight: context.isMobile ? FontWeight.normal : FontWeight.w500),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(width: spacing),
-        Text(
-          'Val: ₹${card.totalValue.toStringAsFixed(0)}',
-          style: ResponsiveText.getCaption(
-            context,
-          ).copyWith(fontWeight: FontWeight.bold, fontSize: fontSize, color: context.isMobile ? null : AppConfig.primaryColor),
-        ),
-      ],
     );
   }
 

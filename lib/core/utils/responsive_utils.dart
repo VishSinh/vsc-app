@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vsc_app/app/app_config.dart';
+import 'package:vsc_app/core/constants/app_config.dart';
 
 /// Screen size categories for responsive design
 enum ScreenSize { mobile, tablet, desktop }

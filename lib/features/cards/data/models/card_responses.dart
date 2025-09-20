@@ -9,6 +9,8 @@ class CardResponse {
   final String id;
   @JsonKey(name: 'vendor_id')
   final String vendorId;
+  @JsonKey(name: 'vendor_name')
+  final String vendorName;
   final String barcode;
   @JsonKey(name: 'sell_price')
   final String sellPrice;
@@ -26,6 +28,7 @@ class CardResponse {
   const CardResponse({
     required this.id,
     required this.vendorId,
+    required this.vendorName,
     required this.barcode,
     required this.sellPrice,
     required this.costPrice,

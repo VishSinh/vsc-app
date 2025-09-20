@@ -3,8 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:logging/logging.dart';
 
-import 'package:vsc_app/app/app_router.dart';
-import 'package:vsc_app/app/app_theme.dart';
+import 'package:vsc_app/core/constants/app_router.dart';
+import 'package:vsc_app/core/constants/app_theme.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:vsc_app/features/home/presentation/providers/auth_provider.dart';
 import 'package:vsc_app/features/home/presentation/providers/dashboard_provider.dart';

@@ -8,7 +8,7 @@ import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/cards/presentation/providers/create_card_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
-import 'package:vsc_app/app/app_config.dart';
+import 'package:vsc_app/core/constants/app_config.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
@@ -67,38 +67,32 @@ class _CreateCardPageState extends State<CreateCardPage> {
               child: Center(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(maxWidth: context.responsiveMaxWidth),
-                  child: Card(
-                    elevation: 4,
-                    child: Padding(
-                      padding: context.responsivePadding,
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Header Section
-                            SizedBox(height: context.responsiveSpacing),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header Section
+                        SizedBox(height: context.responsiveSpacing),
 
-                            // Content Layout
-                            if (context.isDesktop) ...[
-                              // Desktop: Side-by-side layout
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(flex: 1, child: _buildImageSection(cardProvider)),
-                                  SizedBox(width: context.responsiveSpacing),
-                                  Expanded(flex: 1, child: _buildFormSection(cardProvider)),
-                                ],
-                              ),
-                            ] else ...[
-                              // Mobile/Tablet: Stacked layout
-                              _buildImageSection(cardProvider),
-                              SizedBox(height: context.isMobile ? AppConfig.defaultPadding : context.responsiveSpacing),
-                              _buildFormSection(cardProvider),
+                        // Content Layout
+                        if (context.isDesktop) ...[
+                          // Desktop: Side-by-side layout
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(flex: 1, child: _buildImageSection(cardProvider)),
+                              SizedBox(width: context.responsiveSpacing),
+                              Expanded(flex: 1, child: _buildFormSection(cardProvider)),
                             ],
-                          ],
-                        ),
-                      ),
+                          ),
+                        ] else ...[
+                          // Mobile/Tablet: Stacked layout
+                          _buildImageSection(cardProvider),
+                          SizedBox(height: context.isMobile ? AppConfig.defaultPadding : context.responsiveSpacing),
+                          _buildFormSection(cardProvider),
+                        ],
+                      ],
                     ),
                   ),
                 ),

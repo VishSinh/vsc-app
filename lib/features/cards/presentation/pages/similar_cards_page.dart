@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:vsc_app/app/app_config.dart';
+import 'package:vsc_app/core/constants/app_config.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';

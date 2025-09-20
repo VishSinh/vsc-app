@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:vsc_app/app/app_config.dart';
+import 'package:vsc_app/core/constants/app_config.dart';
 import 'package:vsc_app/core/providers/navigation_provider.dart';
 import 'package:vsc_app/core/constants/navigation_items.dart';
 import 'package:vsc_app/features/home/presentation/providers/permission_provider.dart';

@@ -6,6 +6,7 @@ import 'package:vsc_app/features/cards/presentation/services/card_calculation_se
 class CardViewModel {
   final String id;
   final String vendorId;
+  final String vendorName;
   final String barcode;
   final String sellPrice;
   final String costPrice;
@@ -25,6 +26,7 @@ class CardViewModel {
   const CardViewModel({
     required this.id,
     required this.vendorId,
+    required this.vendorName,
     required this.barcode,
     required this.sellPrice,
     required this.costPrice,
@@ -53,6 +55,7 @@ class CardViewModel {
     return CardViewModel(
       id: response.id,
       vendorId: response.vendorId,
+      vendorName: response.vendorName,
       barcode: response.barcode,
       sellPrice: sellPriceAsDouble.toString(),
       costPrice: costPriceAsDouble.toString(),

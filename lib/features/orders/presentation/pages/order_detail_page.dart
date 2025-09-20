@@ -14,7 +14,7 @@ import 'package:vsc_app/features/orders/presentation/widgets/printing_job_edit_d
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/features/production/presentation/models/box_order_view_model.dart';
 import 'package:vsc_app/features/production/presentation/models/printing_job_view_model.dart';
-import 'package:vsc_app/app/app_config.dart';
+import 'package:vsc_app/core/constants/app_config.dart';
 
 class OrderDetailPage extends StatefulWidget {
   final String orderId;
@@ -79,7 +79,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(orderProvider.errorMessage!),
-                const SizedBox(height: 16),
+                SizedBox(height: AppConfig.defaultPadding),
                 ElevatedButton(onPressed: () => _loadOrderDetails(), child: const Text('Retry')),
               ],
             ),
@@ -97,15 +97,23 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   }
 
   Widget _buildLoadingSpinner() {
-    return const Center(child: SpinKitDoubleBounce(color: Colors.blue, size: 50.0));
+    return Center(
+      child: SpinKitDoubleBounce(color: Colors.blue, size: AppConfig.iconSizeXXLarge),
+    );
   }
 
   Widget _buildMobileLayout(OrderViewModel order) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(AppConfig.defaultPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [_buildOrderHeader(order), const SizedBox(height: 24), _buildOrderInfo(order), const SizedBox(height: 24), _buildOrderItems(order)],
+        children: [
+          _buildOrderHeader(order),
+          SizedBox(height: AppConfig.largePadding),
+          _buildOrderInfo(order),
+          SizedBox(height: AppConfig.largePadding),
+          _buildOrderItems(order),
+        ],
       ),
     );
   }
@@ -117,10 +125,14 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         Expanded(
           flex: 1,
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(AppConfig.defaultPadding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [_buildOrderHeader(order), const SizedBox(height: 24), _buildOrderInfo(order)],
+              children: [
+                _buildOrderHeader(order),
+                SizedBox(height: AppConfig.largePadding),
+                _buildOrderInfo(order),
+              ],
             ),
           ),
         ),
@@ -136,7 +148,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   Widget _buildOrderHeader(OrderViewModel order) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -145,7 +157,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                 Expanded(
                   child: Text(
                     order.name.isNotEmpty ? order.name : 'Order',
-                    style: TextStyle(fontSize: AppConfig.fontSize2xl, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: AppConfig.fontSize3xl, fontWeight: FontWeight.bold),
                   ),
                 ),
                 Container(
@@ -162,18 +174,18 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               ],
             ),
             if (order.specialInstruction.isNotEmpty) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: AppConfig.spacingMedium),
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(AppConfig.smallPadding),
                 decoration: BoxDecoration(color: Colors.orange.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline, color: Colors.orange, size: 20),
+                    Icon(Icons.info_outline, color: Colors.orange, size: AppConfig.iconSizeMedium),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         order.specialInstruction,
-                        style: TextStyle(color: Colors.orange, fontStyle: FontStyle.italic),
+                        style: TextStyle(fontSize: AppConfig.fontSizeMd, color: Colors.orange, fontStyle: FontStyle.italic),
                       ),
                     ),
                   ],
@@ -189,13 +201,13 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   Widget _buildOrderInfo(OrderViewModel order) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Order Information',
-              style: TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: AppConfig.fontSizeXl, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
 
@@ -213,19 +225,22 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 120,
+            width: 130,
             child: Text(
               label,
-              style: TextStyle(fontWeight: FontWeight.w500, color: Colors.grey),
+              style: TextStyle(fontSize: AppConfig.fontSizeMd, fontWeight: FontWeight.w500, color: AppConfig.textColorSecondary),
             ),
           ),
           Expanded(
-            child: Text(value, style: TextStyle(fontWeight: FontWeight.w500)),
+            child: Text(
+              value,
+              style: TextStyle(fontSize: AppConfig.fontSizeMd, fontWeight: FontWeight.w500),
+            ),
           ),
         ],
       ),
@@ -238,7 +253,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       children: [
         Text(
           'Order Items',
-          style: TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: AppConfig.fontSizeXl, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         ...order.orderItems.map((item) => _buildOrderItemCard(item)),
@@ -250,7 +265,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -338,14 +353,14 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
   Widget _buildItemInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           SizedBox(
-            width: 200,
+            width: 220,
             child: Text(
               label,
-              style: TextStyle(fontSize: AppConfig.fontSizeMd, color: Colors.grey),
+              style: TextStyle(fontSize: AppConfig.fontSizeMd, color: AppConfig.textColorSecondary),
             ),
           ),
           Text(
@@ -363,9 +378,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       children: [
         Text(
           'Box Orders',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+          style: TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold, color: Colors.blue),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: AppConfig.smallPadding),
         ...boxOrders.map((box) => _buildBoxOrderItem(box)),
       ],
     );
@@ -386,7 +401,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           Row(
             children: [
               Expanded(
-                child: Text('Box Order', style: TextStyle(fontWeight: FontWeight.w500)),
+                child: Text(
+                  'Box Order',
+                  style: TextStyle(fontSize: AppConfig.fontSizeMd, fontWeight: FontWeight.w500),
+                ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -399,14 +417,14 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               const SizedBox(width: 8),
               IconButton(
                 onPressed: () => _showEditBoxOrderDialog(box),
-                icon: const Icon(Icons.edit, size: 16, color: Colors.blue),
+                icon: Icon(Icons.edit, size: AppConfig.iconSizeSmall, color: Colors.blue),
                 tooltip: 'Edit Box Order',
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: AppConfig.smallPadding),
           _buildBoxInfoRow('Type', box.boxType.toString().split('.').last.toUpperCase()),
           _buildBoxInfoRow('Quantity', '${box.boxQuantity}'),
           _buildBoxInfoRow('Cost', '₹${box.totalBoxCost}'),
@@ -423,9 +441,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       children: [
         Text(
           'Printing Jobs',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
+          style: TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.bold, color: Colors.green),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: AppConfig.smallPadding),
         ...printingJobs.map((job) => _buildPrintingJobItem(job)),
       ],
     );
@@ -446,7 +464,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           Row(
             children: [
               Expanded(
-                child: Text('Printing Job', style: TextStyle(fontWeight: FontWeight.w500)),
+                child: Text(
+                  'Printing Job',
+                  style: TextStyle(fontSize: AppConfig.fontSizeMd, fontWeight: FontWeight.w500),
+                ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -462,14 +483,14 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               const SizedBox(width: 8),
               IconButton(
                 onPressed: () => _showEditPrintingJobDialog(job),
-                icon: const Icon(Icons.edit, size: 16, color: Colors.green),
+                icon: Icon(Icons.edit, size: AppConfig.iconSizeSmall, color: Colors.green),
                 tooltip: 'Edit Printing Job',
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: AppConfig.smallPadding),
           _buildPrintingInfoRow('Quantity', '${job.printQuantity}'),
           _buildPrintingInfoRow('Cost', '₹${job.totalPrintingCost}'),
           if (job.printerId != null) _buildPrintingInfoRow('Printer', job.printerName ?? job.printerId!),
@@ -482,19 +503,19 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
   Widget _buildBoxInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1),
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
           SizedBox(
-            width: 120,
+            width: 130,
             child: Text(
               label,
-              style: TextStyle(fontSize: AppConfig.fontSizeXs, color: Colors.grey),
+              style: TextStyle(fontSize: AppConfig.fontSizeSm, color: AppConfig.textColorSecondary),
             ),
           ),
           Text(
             value,
-            style: TextStyle(fontSize: AppConfig.fontSizeXs, fontWeight: FontWeight.w500),
+            style: TextStyle(fontSize: AppConfig.fontSizeSm, fontWeight: FontWeight.w500),
           ),
         ],
       ),
@@ -503,19 +524,19 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
   Widget _buildPrintingInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1),
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
           SizedBox(
-            width: 80,
+            width: 100,
             child: Text(
               label,
-              style: TextStyle(fontSize: AppConfig.fontSizeXs, color: Colors.grey),
+              style: TextStyle(fontSize: AppConfig.fontSizeSm, color: AppConfig.textColorSecondary),
             ),
           ),
           Text(
             value,
-            style: TextStyle(fontSize: AppConfig.fontSizeXs, fontWeight: FontWeight.w500),
+            style: TextStyle(fontSize: AppConfig.fontSizeSm, fontWeight: FontWeight.w500),
           ),
         ],
       ),

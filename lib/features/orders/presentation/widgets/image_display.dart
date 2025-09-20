@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vsc_app/app/app_config.dart';
+import 'package:vsc_app/core/constants/app_config.dart';
 
 /// Reusable image display widget with error handling
 class ImageDisplay extends StatelessWidget {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:barcode_widget/barcode_widget.dart';
-import 'package:vsc_app/app/app_config.dart';
+import 'package:vsc_app/core/constants/app_config.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
@@ -88,40 +88,34 @@ class _CardDetailPageState extends State<CardDetailPage> {
           child: Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: context.responsiveMaxWidth),
-              child: Card(
-                elevation: 4,
-                child: Padding(
-                  padding: context.responsivePadding,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Card Image
-                      _buildCardImage(card),
-                      SizedBox(height: context.responsiveSpacing),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Card Image
+                  _buildCardImage(card),
+                  SizedBox(height: context.responsiveSpacing),
 
-                      // Content Layout
-                      if (context.isDesktop) ...[
-                        // Desktop: Side-by-side layout
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(flex: 1, child: _buildCardInfo(card)),
-                            Expanded(flex: 1, child: _buildBarcodeSection(card)),
-                          ],
-                        ),
-                      ] else ...[
-                        // Mobile/Tablet: Stacked layout
-                        _buildCardInfo(card),
-                        SizedBox(height: context.responsiveSpacing),
-                        _buildBarcodeSection(card),
+                  // Content Layout
+                  if (context.isDesktop) ...[
+                    // Desktop: Side-by-side layout
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(flex: 1, child: _buildCardInfo(card)),
+                        Expanded(flex: 1, child: _buildBarcodeSection(card)),
                       ],
-                      SizedBox(height: context.responsiveSpacing),
+                    ),
+                  ] else ...[
+                    // Mobile/Tablet: Stacked layout
+                    _buildCardInfo(card),
+                    SizedBox(height: context.responsiveSpacing),
+                    _buildBarcodeSection(card),
+                  ],
+                  SizedBox(height: context.responsiveSpacing),
 
-                      // Card Statistics
-                      // _buildCardStats(),
-                    ],
-                  ),
-                ),
+                  // Card Statistics
+                  // _buildCardStats(),
+                ],
               ),
             ),
           ),
@@ -231,11 +225,10 @@ class _CardDetailPageState extends State<CardDetailPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildInfoRow('Barcode', card.barcode),
-            SizedBox(height: AppConfig.smallPadding),
-            _buildInfoRow('Vendor ID', card.vendorId),
+            _buildInfoRow('Vendor', card.vendorName),
             _buildInfoRow('Sell Price', '₹${card.sellPrice}'),
             _buildInfoRow('Cost Price', '₹${card.costPrice}'),
-            _buildInfoRow('Max Discount', '-₹${card.maxDiscount}'),
+            _buildInfoRow('Max Discount', '₹${card.maxDiscount}', valueColor: AppConfig.errorColor),
             _buildInfoRow('Quantity', card.quantity.toString()),
           ],
         ),
@@ -282,7 +275,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(String label, String value, {Color? valueColor}) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: AppConfig.smallPadding),
       child: Row(
@@ -296,7 +289,10 @@ class _CardDetailPageState extends State<CardDetailPage> {
             ),
           ),
           Expanded(
-            child: Text(value, style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w600)),
+            child: Text(
+              value,
+              style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w600, color: valueColor ?? AppConfig.textColorPrimary),
+            ),
           ),
         ],
       ),
