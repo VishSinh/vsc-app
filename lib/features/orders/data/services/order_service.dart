@@ -5,6 +5,7 @@ import 'package:vsc_app/core/services/base_service.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 import 'dart:convert';
 import 'package:vsc_app/core/constants/app_constants.dart';
+import 'package:vsc_app/core/models/message_data.dart';
 
 class OrderService extends ApiService {
   /// Get orders with pagination
@@ -52,6 +53,14 @@ class OrderService extends ApiService {
     return await executeRequest(
       () => patch('${AppConstants.ordersEndpoint}$orderId/', data: request),
       (json) => OrderResponse.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  /// Delete order by ID (DELETE)
+  Future<ApiResponse<MessageData>> deleteOrder(String orderId) async {
+    return await executeRequest(
+      () => delete('${AppConstants.ordersEndpoint}$orderId/'),
+      (json) => MessageData.fromJson(json as Map<String, dynamic>),
     );
   }
 }

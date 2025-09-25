@@ -158,7 +158,7 @@ class _BillPageState extends State<BillPage> {
         ),
         const VerticalDivider(width: 1),
         Expanded(
-          flex: 2,
+          flex: 1,
           child: SingleChildScrollView(
             child: Padding(padding: const EdgeInsets.all(16), child: _buildOrderItems(bill)),
           ),
@@ -420,10 +420,20 @@ class _BillPageState extends State<BillPage> {
           children: [
             const Text('Bill Summary', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
+            // First row: Card total, Box cost, Printing cost
             Row(
               children: [
                 Expanded(child: _buildSummaryCard('Card total', bill.summary.formattedItemsSubtotal, Colors.grey[600]!)),
                 const SizedBox(width: 8),
+                Expanded(child: _buildSummaryCard('Box cost', bill.summary.formattedTotalBoxCost, Colors.blue[600]!)),
+                const SizedBox(width: 8),
+                Expanded(child: _buildSummaryCard('Printing cost', bill.summary.formattedTotalPrintingCost, Colors.purple[600]!)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Second row: Tax and Total
+            Row(
+              children: [
                 Expanded(child: _buildSummaryCard('Tax', bill.summary.formattedTaxAmount, Colors.orange[600]!)),
                 const SizedBox(width: 8),
                 Expanded(child: _buildSummaryCard('Total', bill.summary.formattedTotalWithTax, Colors.green[600]!, isHighlighted: true)),
@@ -439,21 +449,21 @@ class _BillPageState extends State<BillPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isHighlighted ? color.withOpacity(0.1) : Colors.grey[50],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: isHighlighted ? color : Colors.grey[300]!, width: isHighlighted ? 2 : 1),
+        color: isHighlighted ? color.withOpacity(0.15) : AppConfig.secondaryColor.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(AppConfig.defaultRadius),
+        border: Border.all(color: isHighlighted ? color.withOpacity(0.5) : AppConfig.grey600.withOpacity(0.3), width: isHighlighted ? 2 : 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500),
+            style: TextStyle(fontSize: 12, color: AppConfig.textColorSecondary, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 4),
           Text(
             value,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isHighlighted ? color : Colors.black),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isHighlighted ? color : AppConfig.textColorPrimary),
           ),
         ],
       ),

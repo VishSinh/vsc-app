@@ -72,9 +72,6 @@ class _CreateCardPageState extends State<CreateCardPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header Section
-                        SizedBox(height: context.responsiveSpacing),
-
                         // Content Layout
                         if (context.isDesktop) ...[
                           // Desktop: Side-by-side layout

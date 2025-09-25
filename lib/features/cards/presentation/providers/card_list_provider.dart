@@ -84,7 +84,7 @@ class CardListProvider extends BaseProvider {
   }
 
   /// Load cards with pagination
-  Future<void> loadCards({int page = 1, int pageSize = 16}) async {
+  Future<void> loadCards({int page = 1, int pageSize = 24}) async {
     await executeApiOperation(
       apiCall: () => _cardService.getCards(page: page, pageSize: pageSize),
       onSuccess: (response) {

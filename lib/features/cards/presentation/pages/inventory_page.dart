@@ -139,6 +139,7 @@ class _InventoryPageState extends State<InventoryPage> {
               physics: const ClampingScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: gridConfig.crossAxisCount,
+                childAspectRatio: gridConfig.childAspectRatio,
                 crossAxisSpacing: AppConfig.defaultPadding,
                 mainAxisSpacing: AppConfig.defaultPadding,
               ),
@@ -156,9 +157,9 @@ class _InventoryPageState extends State<InventoryPage> {
   }
 
   GridConfig _calculateGridConfig(double availableWidth) {
-    const cardWidth = 280.0; // Fixed card width for desktop
+    const cardWidth = 240.0; // Fixed card width for desktop
     const mobileCardWidth = 160.0; // Fixed card width for mobile
-    const childAspectRatio = 0.8;
+    const childAspectRatio = 0.93;
 
     final effectiveCardWidth = context.isDesktop ? cardWidth : mobileCardWidth;
     final crossAxisCount = (availableWidth / (effectiveCardWidth + AppConfig.defaultPadding)).floor();

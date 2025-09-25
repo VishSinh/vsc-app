@@ -44,6 +44,32 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     _orderProvider.getOrderById(widget.orderId);
   }
 
+  Future<void> _confirmAndDeleteOrder() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Order'),
+        content: const Text('Are you sure you want to delete this order? This action cannot be undone.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      _orderProvider.setContext(context);
+      final success = await _orderProvider.deleteOrder(widget.orderId);
+      if (success && mounted) {
+        context.go(RouteConstants.orders);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
@@ -53,6 +79,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           title: const Text('Order Details'),
           leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.orders)),
           actions: [
+            IconButton(icon: const Icon(Icons.delete_forever), onPressed: _confirmAndDeleteOrder, tooltip: 'Delete Order'),
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () => context.push('${RouteConstants.orders}/${widget.orderId}/edit'),
@@ -139,7 +166,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         const VerticalDivider(width: 1),
         Expanded(
           flex: 2,
-          child: Padding(padding: const EdgeInsets.all(16), child: _buildOrderItems(order)),
+          child: SingleChildScrollView(padding: const EdgeInsets.all(16), child: _buildOrderItems(order)),
         ),
       ],
     );

@@ -46,17 +46,44 @@ class _PaymentCreateDialogState extends State<PaymentCreateDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       child: Container(
-        width: context.isDesktop ? 500 : double.infinity,
-        padding: context.responsivePadding,
+        width: context.isDesktop ? 500 : MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500, maxHeight: MediaQuery.of(context).size.height * 0.8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
-            SizedBox(height: context.responsiveSpacing),
-            _buildForm(),
-            SizedBox(height: context.responsiveSpacing),
-            _buildActions(),
+            // Fixed Header
+            Padding(
+              padding: EdgeInsets.only(
+                left: context.responsivePadding.left,
+                right: context.responsivePadding.right,
+                top: context.responsivePadding.top,
+              ),
+              child: _buildHeader(),
+            ),
+            // Scrollable Form Content
+            Flexible(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: context.responsivePadding.left),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: context.responsiveSpacing),
+                    _buildForm(),
+                    SizedBox(height: context.responsiveSpacing),
+                  ],
+                ),
+              ),
+            ),
+            // Fixed Actions
+            Padding(
+              padding: EdgeInsets.only(
+                left: context.responsivePadding.left,
+                right: context.responsivePadding.right,
+                bottom: context.responsivePadding.bottom,
+              ),
+              child: _buildActions(),
+            ),
           ],
         ),
       ),
@@ -66,15 +93,20 @@ class _PaymentCreateDialogState extends State<PaymentCreateDialog> {
   Widget _buildHeader() {
     return Row(
       children: [
-        Icon(Icons.payment, color: AppConfig.primaryColor, size: 24),
-        SizedBox(width: AppConfig.smallPadding),
+        Icon(Icons.payment, color: AppConfig.primaryColor, size: context.isMobile ? 20 : 24),
+        SizedBox(width: context.isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding),
         Expanded(
           child: Text(
             'Create Payment',
             style: ResponsiveText.getTitle(context).copyWith(fontWeight: FontWeight.bold, color: AppConfig.textColorPrimary),
           ),
         ),
-        IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop()),
+        IconButton(
+          icon: Icon(Icons.close, size: context.isMobile ? 20 : 24),
+          onPressed: () => Navigator.of(context).pop(),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+        ),
       ],
     );
   }
@@ -185,7 +217,8 @@ class _PaymentCreateDialogState extends State<PaymentCreateDialog> {
         SizedBox(height: AppConfig.smallPadding),
         TextFormField(
           controller: _notesController,
-          maxLines: 3,
+          maxLines: context.isMobile ? 2 : 3,
+          minLines: context.isMobile ? 1 : 2,
           decoration: InputDecoration(
             hintText: 'Enter payment notes',
             prefixIcon: const Icon(Icons.note),
@@ -197,20 +230,43 @@ class _PaymentCreateDialogState extends State<PaymentCreateDialog> {
   }
 
   Widget _buildActions() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        TextButton(onPressed: _isLoading ? null : () => Navigator.of(context).pop(), child: Text(UITextConstants.cancel)),
-        SizedBox(width: AppConfig.smallPadding),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _createPayment,
-          style: ElevatedButton.styleFrom(backgroundColor: AppConfig.primaryColor, foregroundColor: Colors.white),
-          child: _isLoading
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-              : const Text('Create Payment'),
-        ),
-      ],
-    );
+    return context.isMobile
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ElevatedButton(
+                onPressed: _isLoading ? null : _createPayment,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppConfig.primaryColor,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 48),
+                ),
+                child: _isLoading
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Text('Create Payment'),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                style: TextButton.styleFrom(minimumSize: const Size(double.infinity, 48)),
+                child: Text(UITextConstants.cancel),
+              ),
+            ],
+          )
+        : Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(onPressed: _isLoading ? null : () => Navigator.of(context).pop(), child: Text(UITextConstants.cancel)),
+              SizedBox(width: AppConfig.smallPadding),
+              ElevatedButton(
+                onPressed: _isLoading ? null : _createPayment,
+                style: ElevatedButton.styleFrom(backgroundColor: AppConfig.primaryColor, foregroundColor: Colors.white),
+                child: _isLoading
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Text('Create Payment'),
+              ),
+            ],
+          );
   }
 
   Future<void> _createPayment() async {

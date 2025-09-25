@@ -205,6 +205,21 @@ class OrderDetailProvider extends BaseProvider {
     );
   }
 
+  /// Delete order by ID
+  Future<bool> deleteOrder(String orderId) async {
+    final result = await executeApiOperation(
+      apiCall: () => _orderService.deleteOrder(orderId),
+      onSuccess: (response) {
+        clearCurrentOrder();
+        return true;
+      },
+      showLoading: true,
+      successMessage: 'Order deleted successfully',
+      errorMessage: 'Failed to delete order',
+    );
+    return result ?? false;
+  }
+
   // Production methods for box orders
   /// Fetch box makers
   Future<void> fetchBoxMakers({int page = 1, int pageSize = 10}) async {

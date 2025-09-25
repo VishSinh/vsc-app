@@ -115,9 +115,7 @@ class _DashboardPageState extends State<DashboardPage> {
         final isMobile = availableWidth < AppConfig.mobileBreakpoint;
 
         // Adjust card width and calculate columns
-        final cardWidth = isMobile ? 160.0 : 300.0;
-        final crossAxisCount = (availableWidth / (cardWidth + (isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding))).floor();
-        final actualCrossAxisCount = isMobile ? 2 : crossAxisCount.clamp(1, 4); // Force 2 cols on mobile
+        final actualCrossAxisCount = isMobile ? 2 : 4; // Force 2 cols on mobile, 4 cols on desktop
         final allowDoubleSpan = actualCrossAxisCount >= 2;
 
         final tiles = <StaggeredGridTile>[];
@@ -267,17 +265,6 @@ class _DashboardPageState extends State<DashboardPage> {
                 allowDoubleSpan: allowDoubleSpan,
               ),
             );
-            tiles.add(
-              _buildStatTile(
-                context,
-                title: UITextConstants.expenseLogging,
-                value: dashboard.ordersPendingExpenseLogging.toString(),
-                icon: Icons.attach_money,
-                color: AppConfig.warningColor,
-                subtitle: UITextConstants.ordersPendingExpenseLogging,
-                allowDoubleSpan: allowDoubleSpan,
-              ),
-            );
           }
         }
 
@@ -304,10 +291,10 @@ class _DashboardPageState extends State<DashboardPage> {
           addProduction();
           addFinance();
         } else {
+          addRevenue();
           addOrders();
           addProduction();
           addInventoryAlerts();
-          addRevenue();
           addCommon();
           addFinance();
         }

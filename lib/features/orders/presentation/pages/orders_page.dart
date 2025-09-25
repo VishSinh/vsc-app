@@ -298,19 +298,7 @@ class _OrdersPageState extends State<OrdersPage> {
                 Expanded(
                   flex: 1,
                   child: Center(
-                    child: Text('Delivery Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Center(
                     child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Center(
-                    child: Text('Items', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                   ),
                 ),
                 Expanded(
@@ -407,12 +395,6 @@ class _OrdersPageState extends State<OrdersPage> {
             Expanded(
               flex: 1,
               child: Center(
-                child: Text(_formatDateTime(order.deliveryDate), style: const TextStyle(fontSize: 13), textAlign: TextAlign.center),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Center(
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
@@ -425,12 +407,6 @@ class _OrdersPageState extends State<OrdersPage> {
                     textAlign: TextAlign.center,
                   ),
                 ),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Center(
-                child: Text('${order.orderItems.length}', style: const TextStyle(fontSize: 13), textAlign: TextAlign.center),
               ),
             ),
             Expanded(
@@ -483,6 +459,7 @@ class _OrdersPageState extends State<OrdersPage> {
                           textAlign: TextAlign.center,
                         ),
                       ),
+                    if (_hasBoxRequirements(order) && _hasPrintingRequirements(order)) const SizedBox(width: 4),
                     if (_hasPrintingRequirements(order))
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),

@@ -48,6 +48,7 @@ This project uses a simplified 2-layer architecture:
 - **Every screen must be responsive**: Use appropriate layouts for different screen sizes:
   - Desktop: sidebars, tables, and modals
   - Mobile: cards, bottom sheets, or list views
+- **Tablet Full Screen Mode**: Tablets automatically enter immersive full screen mode (like games) hiding system UI for a distraction-free experience. Users can temporarily reveal system UI by swiping from screen edges.
 
 ### UI Standards
 - **Follow design system standards**: UI components must adhere to the established design system, using shared:
