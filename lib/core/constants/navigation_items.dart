@@ -10,16 +10,6 @@ import 'package:vsc_app/features/cards/presentation/providers/create_card_provid
 import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
 
 class NavigationItems {
-  // All available navigation destinations
-  static const List<NavigationDestination> allDestinations = [
-    NavigationDestination(icon: Icon(Icons.dashboard), label: UITextConstants.dashboard),
-    NavigationDestination(icon: Icon(Icons.shopping_cart), label: UITextConstants.orders),
-    NavigationDestination(icon: Icon(Icons.inventory), label: UITextConstants.inventory),
-    NavigationDestination(icon: Icon(Icons.print), label: UITextConstants.production),
-    NavigationDestination(icon: Icon(Icons.people), label: UITextConstants.vendors),
-    NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: UITextConstants.administration),
-  ];
-
   // Get floating action button for a specific page
   static Widget? getFloatingActionButtonForPage(String pageName, BuildContext context) {
     switch (pageName.toLowerCase()) {
@@ -134,13 +124,13 @@ class NavigationItems {
       destinations.add(const NavigationDestination(icon: Icon(Icons.inventory), label: UITextConstants.inventory));
     }
 
-    if (canManageProduction) {
-      destinations.add(const NavigationDestination(icon: Icon(Icons.print), label: UITextConstants.production));
-    }
+    // if (canManageProduction) {
+    //   destinations.add(const NavigationDestination(icon: Icon(Icons.print), label: UITextConstants.production));
+    // }
 
-    if (canManageVendors) {
-      destinations.add(const NavigationDestination(icon: Icon(Icons.people), label: UITextConstants.vendors));
-    }
+    // if (canManageVendors) {
+    //   destinations.add(const NavigationDestination(icon: Icon(Icons.people), label: UITextConstants.vendors));
+    // }
 
     if (canManageSystem || canViewAuditLogs) {
       destinations.add(const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: UITextConstants.administration));

@@ -53,36 +53,4 @@ class RouteConstants {
   static const String lowStockCardsRouteName = 'low-stock-cards';
   static const String outOfStockCardsRouteName = 'out-of-stock-cards';
   static const String todaysOrdersRouteName = 'todays-orders';
-
-  // ================================ ROUTE GROUPS ================================
-  static const List<String> protectedRoutes = [
-    dashboard,
-    bills,
-    orders,
-    newOrder,
-    editOrder,
-    inventory,
-    production,
-    administration,
-    vendors,
-    vendorDetail,
-
-    cardDetail,
-    createCard,
-    bluetoothPrint,
-    customerSearch,
-    orderItems,
-    orderReview,
-    orderDetail,
-    register,
-    billDetail,
-    yearlyProfit,
-    lowStockCards,
-    outOfStockCards,
-    todaysOrders,
-  ];
-
-  static const List<String> publicRoutes = [login];
-
-  static const List<String> adminOnlyRoutes = [register];
 }

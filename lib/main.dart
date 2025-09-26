@@ -66,7 +66,14 @@ class VSCApp extends StatelessWidget {
       ChangeNotifierProvider(create: (BuildContext context) => PermissionProvider()),
       ChangeNotifierProvider(create: (BuildContext context) => VendorProvider()),
       // CustomerProvider removed; customer APIs are called from feature-specific providers
-      ChangeNotifierProvider(create: (BuildContext context) => AuthProvider()),
+      ChangeNotifierProxyProvider<PermissionProvider, AuthProvider>(
+        create: (BuildContext context) => AuthProvider(),
+        update: (BuildContext context, PermissionProvider permissionProvider, AuthProvider? authProvider) {
+          authProvider ??= AuthProvider();
+          authProvider.setPermissionProvider(permissionProvider);
+          return authProvider;
+        },
+      ),
       ChangeNotifierProvider(create: (BuildContext context) => DashboardProvider()),
       ChangeNotifierProvider(create: (context) => BillProvider()),
       ChangeNotifierProvider(create: (context) => NavigationProvider()),

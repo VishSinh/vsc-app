@@ -1,11 +1,4 @@
 class LoggingConstants {
-  // Log Levels
-  static const String levelDebug = 'DEBUG';
-  static const String levelInfo = 'INFO';
-  static const String levelWarning = 'WARNING';
-  static const String levelError = 'ERROR';
-  static const String levelFatal = 'FATAL';
-
   // Log Categories
   static const String categoryApi = 'API';
   static const String categoryUi = 'UI';

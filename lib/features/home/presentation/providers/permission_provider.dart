@@ -46,6 +46,7 @@ class PermissionProvider extends BaseProvider {
     final cachedPermissions = await _permissionService.getCachedStaffPermissions();
     if (cachedPermissions.isNotEmpty) {
       _initializeWithPermissions(cachedPermissions);
+      notifyListeners();
     }
   }
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Service type enum for service items in orders
-enum ServiceType { digitalCard, abhinandanPatr, carPoster, digitalVisitingCard }
+enum ServiceType { digitalCard, abhinandanPatr, carPoster, digitalVisitingCard, printingService, boxService }
 
 /// Extension utilities for ServiceType enum
 extension ServiceTypeExtension on ServiceType {
@@ -16,6 +16,10 @@ extension ServiceTypeExtension on ServiceType {
         return 'CAR_POSTER';
       case ServiceType.digitalVisitingCard:
         return 'DIGITAL_VISITING_CARD';
+      case ServiceType.printingService:
+        return 'PRINTING_SERVICE';
+      case ServiceType.boxService:
+        return 'BOX_SERVICE';
     }
   }
 
@@ -30,6 +34,10 @@ extension ServiceTypeExtension on ServiceType {
         return 'Car Poster';
       case ServiceType.digitalVisitingCard:
         return 'Digital Visiting Card';
+      case ServiceType.printingService:
+        return 'Printing Service';
+      case ServiceType.boxService:
+        return 'Box Service';
     }
   }
 
@@ -45,6 +53,10 @@ extension ServiceTypeExtension on ServiceType {
         return ServiceType.carPoster;
       case 'DIGITAL_VISITING_CARD':
         return ServiceType.digitalVisitingCard;
+      case 'PRINTING_SERVICE':
+        return ServiceType.printingService;
+      case 'BOX_SERVICE':
+        return ServiceType.boxService;
       default:
         return null;
     }
@@ -61,6 +73,10 @@ extension ServiceTypeExtension on ServiceType {
         return Colors.deepOrange;
       case ServiceType.digitalVisitingCard:
         return Colors.purple;
+      case ServiceType.printingService:
+        return Colors.amber;
+      case ServiceType.boxService:
+        return Colors.green;
     }
   }
 }

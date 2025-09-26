@@ -10,7 +10,7 @@ import 'package:vsc_app/features/home/presentation/services/auth_validators.dart
 /// Provider for managing authentication state and operations
 class AuthProvider extends BaseProvider {
   final AuthService _authService = AuthService();
-  final PermissionProvider _permissionProvider = PermissionProvider();
+  PermissionProvider? _permissionProvider;
 
   LoginResponse? _currentUser;
   LoginFormModel? _loginForm;
@@ -42,6 +42,11 @@ class AuthProvider extends BaseProvider {
     return _currentUser?.userRole == role;
   }
 
+  /// Inject shared PermissionProvider from Provider tree
+  void setPermissionProvider(PermissionProvider permissionProvider) {
+    _permissionProvider = permissionProvider;
+  }
+
   /// Initialize auth state on app start
   Future<void> initializeAuth() async {
     await executeAsync(() async {
@@ -59,7 +64,7 @@ class AuthProvider extends BaseProvider {
 
         // Only initialize cached permissions, don't call API
         // Permissions API will be called only after fresh login
-        await _permissionProvider.initializeCachedPermissions();
+        await _permissionProvider?.initializeCachedPermissions();
       }
     }, showLoading: false);
   }
@@ -121,13 +126,13 @@ class AuthProvider extends BaseProvider {
       apiCall: () => _authService.login(_loginForm!.phone.trim(), _loginForm!.password),
       onSuccess: (response) {
         // Clear previous data first
-        _permissionProvider.clearPermissions();
+        _permissionProvider?.clearPermissions();
 
         // Store the login data directly
         _currentUser = response.data!;
 
         // Load permissions after successful login (only once per session)
-        _permissionProvider.initializePermissions();
+        _permissionProvider?.initializePermissions();
         return response.data!;
       },
       successMessage: 'Login successful!',
@@ -177,7 +182,7 @@ class AuthProvider extends BaseProvider {
   Future<void> logout() async {
     await executeAsync(() async {
       // Clear permissions first
-      _permissionProvider.clearPermissions();
+      _permissionProvider?.clearPermissions();
 
       await _authService.logout();
       _currentUser = null;

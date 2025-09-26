@@ -7,6 +7,8 @@ import 'package:vsc_app/features/home/presentation/providers/permission_provider
 import 'package:vsc_app/features/home/presentation/providers/auth_provider.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:vsc_app/core/constants/ui_text_constants.dart';
 
 class AppScaffold extends StatelessWidget {
   final Widget child;
@@ -50,7 +52,8 @@ class AppScaffold extends StatelessWidget {
                 Expanded(
                   child: Column(
                     children: [
-                      _buildAppBar(context),
+                      // _buildAppBar(context),
+                      SizedBox(height: AppConfig.defaultPadding),
                       Expanded(child: child),
                     ],
                   ),
@@ -64,7 +67,29 @@ class AppScaffold extends StatelessWidget {
     );
   }
 
+  IconData _mapLabelToLucideIcon(String label) {
+    switch (label) {
+      case UITextConstants.dashboard:
+        return LucideIcons.home;
+      case UITextConstants.orders:
+        return LucideIcons.shoppingCart;
+      case UITextConstants.bills:
+        return LucideIcons.receipt;
+      case UITextConstants.inventory:
+        return LucideIcons.package;
+      case UITextConstants.production:
+        return LucideIcons.factory;
+      case UITextConstants.vendors:
+        return LucideIcons.users;
+      case UITextConstants.administration:
+        return LucideIcons.settings;
+      default:
+        return LucideIcons.home;
+    }
+  }
+
   Widget _buildDrawer(BuildContext context, List<NavigationDestination> destinations, NavigationProvider navigationProvider) {
+    final safeSelectedIndex = navigationProvider.selectedIndex < destinations.length ? navigationProvider.selectedIndex : 0;
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -80,7 +105,7 @@ class AppScaffold extends StatelessWidget {
                 ),
                 SizedBox(height: AppConfig.spacingSmall),
                 Text(
-                  destinations[navigationProvider.selectedIndex].label,
+                  destinations[safeSelectedIndex].label,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8)),
                 ),
               ],
@@ -92,24 +117,63 @@ class AppScaffold extends StatelessWidget {
             return ListTile(
               leading: destination.icon,
               title: Text(destination.label),
-              selected: navigationProvider.selectedIndex == index,
+              selected: safeSelectedIndex == index,
               onTap: () => navigationProvider.setIndexOnly(index),
             );
           }),
           const Divider(),
-          ListTile(leading: const Icon(Icons.logout), title: const Text('Logout'), onTap: () => _handleLogout(context)),
+          ListTile(leading: const Icon(LucideIcons.logOut), title: const Text('Logout'), onTap: () => _handleLogout(context)),
         ],
       ),
     );
   }
 
   Widget _buildNavigationRail(BuildContext context, List<NavigationDestination> destinations, NavigationProvider navigationProvider) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    const selectedColor = Color(0xFF1E88E5);
+    final unselectedColor = colorScheme.onSurfaceVariant;
+
+    final safeSelectedIndex = navigationProvider.selectedIndex < destinations.length ? navigationProvider.selectedIndex : 0;
+
     return NavigationRail(
-      selectedIndex: navigationProvider.selectedIndex,
+      selectedIndex: safeSelectedIndex,
       onDestinationSelected: (index) => navigationProvider.setIndexOnly(index),
+      extended: false,
+      minWidth: 56,
+      minExtendedWidth: 200,
+      backgroundColor: colorScheme.surface,
+      elevation: 2,
+      groupAlignment: 0.0,
+      useIndicator: true,
+      indicatorColor: Colors.transparent,
+      indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       labelType: NavigationRailLabelType.all,
+      trailing: Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Divider(height: 16, color: Colors.grey),
+            IconButton(
+              tooltip: 'Logout',
+              icon: Icon(LucideIcons.logOut, color: unselectedColor, size: 24),
+              onPressed: () => _handleLogout(context),
+            ),
+          ],
+        ),
+      ),
+      selectedLabelTextStyle: textTheme.labelMedium?.copyWith(color: selectedColor, fontWeight: FontWeight.w600),
+      unselectedLabelTextStyle: textTheme.labelMedium?.copyWith(color: unselectedColor),
       destinations: destinations
-          .map((destination) => NavigationRailDestination(icon: destination.icon, selectedIcon: destination.icon, label: Text(destination.label)))
+          .map(
+            (destination) => NavigationRailDestination(
+              padding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 10.0),
+              icon: Center(child: Icon(_mapLabelToLucideIcon(destination.label), size: 26, color: unselectedColor)),
+              selectedIcon: Center(child: Icon(_mapLabelToLucideIcon(destination.label), size: 26, color: selectedColor)),
+              label: Text(destination.label),
+            ),
+          )
           .toList(),
     );
   }

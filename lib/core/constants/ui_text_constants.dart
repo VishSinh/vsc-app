@@ -6,7 +6,7 @@ class UITextConstants {
   static const String orders = 'Orders';
   static const String inventory = 'Inventory';
   static const String production = 'Production';
-  static const String administration = 'Administration';
+  static const String administration = 'Admin';
   static const String vendors = 'Vendors';
   static const String customers = 'Customers';
   static const String cards = 'Cards';
@@ -199,52 +199,5 @@ class UITextConstants {
   // ================================ QUICK ACTIONS ================================
   static const String quickActions = 'Quick Actions';
 
-  // ================================ MOCK DATA ================================
-  // Order Statuses
-  static const String statusPending = 'Pending';
-  static const String statusInProduction = 'In Production';
-  static const String statusCompleted = 'Completed';
-  static const String statusAll = 'All';
-
-  // Categories
-  static const String categoryAll = 'All';
-  static const String categoryBusinessCards = 'Business Cards';
-  static const String categoryFlyers = 'Flyers';
-  static const String categoryBrochures = 'Brochures';
-
-  // ================================ AUDIT LOG ACTIONS ================================
-  static const String auditOrderCreated = 'Order Created';
-  static const String auditStockUpdated = 'Stock Updated';
-
-  // ================================ STAFF ROLES ================================
-  static const String roleAdmin = 'Admin';
-  static const String roleManager = 'Manager';
-  static const String roleSales = 'Sales';
-  static const String roleProduction = 'Production';
-
-  // ================================ INVENTORY ITEMS ================================
-  static const String businessCardPremium = 'Business Card Premium';
-  static const String flyerGlossyA4 = 'Flyer Glossy A4';
-  static const String brochureTriFold = 'Brochure Tri-Fold';
-
-  // ================================ VENDORS ================================
-  static const String premiumPaperCo = 'Premium Paper Co.';
-  static const String qualityPrintSupplies = 'Quality Print Supplies';
-
-  // ================================ CUSTOMERS ================================
-  static const String johnDoe = 'John Doe';
-  static const String janeSmith = 'Jane Smith';
-  static const String bobJohnson = 'Bob Johnson';
-
-  // ================================ STAFF MEMBERS ================================
-  static const String johnAdmin = 'John Admin';
-  static const String sarahManager = 'Sarah Manager';
-
-  // ================================ AUDIT LOG DETAILS ================================
-  static const String auditOrderCreatedDetails = 'Created order ORD-001 for John Doe';
-  static const String auditStockUpdatedDetails = 'Updated stock for CARD-001: +500 units';
-
-  // ================================ IP ADDRESSES ================================
-  static const String ipAddress1 = '192.168.1.100';
-  static const String ipAddress2 = '192.168.1.101';
+  // ================================ MOCK DATA (removed unused) ================================
 }
