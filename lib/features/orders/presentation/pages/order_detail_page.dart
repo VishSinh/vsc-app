@@ -8,13 +8,14 @@ import 'package:vsc_app/core/enums/order_status.dart';
 import 'package:vsc_app/core/enums/printing_status.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_detail_provider.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
-import 'package:vsc_app/features/orders/presentation/services/order_calculation_service.dart';
 import 'package:vsc_app/features/orders/presentation/widgets/box_order_edit_dialog.dart';
 import 'package:vsc_app/features/orders/presentation/widgets/printing_job_edit_dialog.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:vsc_app/features/production/presentation/models/box_order_view_model.dart';
 import 'package:vsc_app/features/production/presentation/models/printing_job_view_model.dart';
 import 'package:vsc_app/core/constants/app_config.dart';
+import 'package:vsc_app/core/enums/service_type.dart';
+import 'package:vsc_app/features/orders/presentation/services/order_calculation_service.dart';
 
 class OrderDetailPage extends StatefulWidget {
   final String orderId;
@@ -189,12 +190,9 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: OrderStatusExtension.getColorFromString(order.orderStatus),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+                  decoration: BoxDecoration(color: order.orderStatus.getStatusColor(), borderRadius: BorderRadius.circular(16)),
                   child: Text(
-                    OrderStatusExtension.getDisplayTextFromString(order.orderStatus),
+                    order.orderStatus.getDisplayText(),
                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -238,12 +236,40 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             ),
             const SizedBox(height: 16),
 
-            _buildInfoRow('Customer', order.customerName),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 130,
+                  child: Text(
+                    'Customer',
+                    style: TextStyle(fontSize: AppConfig.fontSizeMd, fontWeight: FontWeight.w500, color: AppConfig.textColorSecondary),
+                  ),
+                ),
+                Expanded(
+                  child: Consumer<OrderDetailProvider>(
+                    builder: (context, provider, _) {
+                      final phone = provider.getCustomerPhone(order.customerId);
+                      // Trigger fetch if not present
+                      if (phone == null) provider.fetchCustomerPhone(order.customerId);
+                      final display = phone == null ? order.customerName : '${order.customerName} (${phone})';
+                      return Text(
+                        display,
+                        style: TextStyle(fontSize: AppConfig.fontSizeMd, fontWeight: FontWeight.w500),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
             _buildInfoRow('Staff', order.staffName),
             _buildInfoRow('Order Date', _formatDateTime(order.orderDate)),
             _buildInfoRow('Delivery Date', _formatDateTime(order.deliveryDate)),
             _buildInfoRow('Total Items', '${order.orderItems.length}'),
-            _buildInfoRow('Total Amount', '₹${OrderCalculationService.calculateOrderTotal(order.orderItems).toStringAsFixed(2)}'),
+            _buildInfoRow(
+              'Total Amount',
+              '₹${OrderCalculationService.calculateOrderTotal(order.orderItems, serviceItems: order.serviceItems).toStringAsFixed(2)}',
+            ),
             const SizedBox(height: 16),
             if (order.billId.isNotEmpty)
               SizedBox(
@@ -299,6 +325,15 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         ),
         const SizedBox(height: 16),
         ...order.orderItems.map((item) => _buildOrderItemCard(item)),
+        if (order.serviceItems.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Text(
+            'Service Items',
+            style: TextStyle(fontSize: AppConfig.fontSizeXl, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          ...order.serviceItems.map((svc) => _buildServiceItemCard(svc)),
+        ],
       ],
     );
   }
@@ -602,6 +637,43 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   // Using PrintingStatus.getColorFromString instead of local color mapping method
 
   // Using OrderCalculationService for all calculation methods
+
+  Widget _buildServiceItemCard(ServiceItemViewModel svc) {
+    final typeText = svc.serviceType?.displayText ?? svc.serviceTypeRaw;
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    typeText,
+                    style: TextStyle(fontSize: AppConfig.fontSizeLg, fontWeight: FontWeight.w600),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(color: Colors.teal.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                  child: Text(
+                    'Qty: ${svc.quantity}',
+                    style: TextStyle(fontSize: AppConfig.fontSizeSm, color: Colors.teal, fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            _buildPrintingInfoRow('Total Cost', '₹${svc.totalCost}'),
+            if (svc.totalExpense != null) _buildPrintingInfoRow('Expense', '₹${svc.totalExpense}'),
+            if (svc.description != null && svc.description!.isNotEmpty) _buildPrintingInfoRow('Description', svc.description!),
+          ],
+        ),
+      ),
+    );
+  }
 
   void _showEditBoxOrderDialog(BoxOrderViewModel box) {
     showDialog(

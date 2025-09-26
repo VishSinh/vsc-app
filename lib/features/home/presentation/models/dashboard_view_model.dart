@@ -46,7 +46,39 @@ class DashboardViewModel {
   }
 
   /// Format the monthly profit as a currency string
-  String get formattedMonthlyProfit => '₹${monthlyProfit.toStringAsFixed(2)}';
+  String get formattedMonthlyProfit => '₹${_formatIndianCurrency(monthlyProfit)}';
+
+  /// Formats a number as Indian currency with commas (e.g., 12,34,567.89)
+  String _formatIndianCurrency(double amount) {
+    // Handle negative numbers
+    final isNegative = amount < 0;
+    final absAmount = amount.abs();
+    final parts = absAmount.toStringAsFixed(2).split('.');
+    String integerPart = parts[0];
+    String decimalPart = parts[1];
+
+    if (integerPart.length <= 3) {
+      return '${isNegative ? '-' : ''}$integerPart.$decimalPart';
+    }
+
+    // Split last 3 digits
+    final lastThree = integerPart.substring(integerPart.length - 3);
+    String rest = integerPart.substring(0, integerPart.length - 3);
+
+    // Add commas after every 2 digits in the rest
+    final buffer = StringBuffer();
+    while (rest.length > 2) {
+      buffer.write('${rest.substring(rest.length - 2)},');
+      rest = rest.substring(0, rest.length - 2);
+    }
+    if (rest.isNotEmpty) {
+      buffer.write('$rest,');
+    }
+    final formattedRest = buffer.toString().split('').reversed.join('');
+    final formatted = '${isNegative ? '-' : ''}${formattedRest.split('').reversed.join()}$lastThree.$decimalPart';
+    // Remove any leading comma if present
+    return formatted.startsWith(',') ? formatted.substring(1) : formatted;
+  }
 
   /// Format the monthly order change percentage
   String get formattedMonthlyOrderChangePercentage =>

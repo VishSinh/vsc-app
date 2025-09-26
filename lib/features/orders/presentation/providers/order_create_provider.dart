@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
 import 'package:vsc_app/features/cards/data/services/card_service.dart';
-import 'package:vsc_app/features/cards/data/models/card_responses.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_item_form_model.dart';
 import '../../data/services/order_service.dart';
 import '../models/order_form_models.dart';
 
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
-import 'package:vsc_app/core/models/customer_model.dart';
+import 'package:vsc_app/features/orders/presentation/models/order_customer_view_model.dart';
+import 'package:vsc_app/features/customers/data/services/customer_service.dart';
+import 'package:vsc_app/features/orders/presentation/models/create_order_customer_form_model.dart';
+import 'package:vsc_app/features/orders/presentation/models/service_item_form_model.dart';
 
 /// Provider for managing order creation state and operations
 class OrderCreateProvider extends BaseProvider {
@@ -15,7 +17,8 @@ class OrderCreateProvider extends BaseProvider {
 
   final OrderCreationFormModel _orderCreationForm = OrderCreationFormModel(orderItems: []);
 
-  Customer? _selectedCustomer;
+  OrderCustomerViewModel? _selectedCustomer;
+  bool _isCreatingCustomer = false;
   CardViewModel? _currentCard;
 
   // Delivery date/time state
@@ -27,12 +30,14 @@ class OrderCreateProvider extends BaseProvider {
 
   // Getters for form data
   List<OrderItemCreationFormModel> get orderItems => _orderCreationForm.orderItems ?? [];
+  List<ServiceItemCreationFormModel> get serviceItems => _orderCreationForm.serviceItems ?? [];
   String? get selectedCustomerId => _orderCreationForm.customerId;
   String? get orderName => _orderCreationForm.name;
   String? get deliveryDate => _orderCreationForm.deliveryDate;
   String? get specialInstruction => _orderCreationForm.specialInstruction;
-  Customer? get selectedCustomer => _selectedCustomer;
+  OrderCustomerViewModel? get selectedCustomer => _selectedCustomer;
   CardViewModel? get currentCardViewModel => _currentCard;
+  bool get isCreatingCustomer => _isCreatingCustomer;
 
   // Getters for delivery date/time
   DateTime? get selectedDeliveryDate => _selectedDeliveryDate;
@@ -47,10 +52,61 @@ class OrderCreateProvider extends BaseProvider {
     notifyListeners();
   }
 
+  /// Add service item to the form
+  void addServiceItem(ServiceItemCreationFormModel item) {
+    _orderCreationForm.serviceItems ??= [];
+    _orderCreationForm.serviceItems!.add(item);
+    notifyListeners();
+  }
+
   /// Set selected customer data
-  void setSelectedCustomerData(Customer customer) {
+  void setSelectedCustomerData(OrderCustomerViewModel customer) {
     _selectedCustomer = customer;
     _orderCreationForm.customerId = customer.id;
+    notifyListeners();
+  }
+
+  /// Search or create customer within order flow
+  Future<OrderCustomerViewModel?> searchCustomerByPhone(String phone) async {
+    return await executeApiOperation(
+      apiCall: () => CustomerService().getCustomerByPhone(phone),
+      onSuccess: (response) {
+        final c = response.data!;
+        final vm = OrderCustomerViewModel.fromApi(id: c.id, name: c.name, phone: c.phone, isActive: c.isActive);
+        setSelectedCustomerData(vm);
+        return vm;
+      },
+      showSnackbar: false,
+      errorMessage: 'Customer not found',
+    );
+  }
+
+  Future<bool> createCustomerForOrder(CreateOrderCustomerFormModel form) async {
+    final name = form.name?.trim() ?? '';
+    final phone = form.phone?.trim() ?? '';
+    if (name.isEmpty || phone.isEmpty) {
+      setErrorWithSnackBar('Please enter name and phone', context!);
+      return false;
+    }
+    final result = await executeApiOperation(
+      apiCall: () => CustomerService().createCustomer(name: name, phone: phone),
+      onSuccess: (response) async {
+        final customer = await searchCustomerByPhone(phone);
+        return customer != null;
+      },
+      successMessage: 'Customer created successfully',
+      errorMessage: 'Failed to create customer',
+    );
+    return result ?? false;
+  }
+
+  void toggleCreatingCustomer() {
+    _isCreatingCustomer = !_isCreatingCustomer;
+    notifyListeners();
+  }
+
+  void setCreatingCustomer(bool isCreating) {
+    _isCreatingCustomer = isCreating;
     notifyListeners();
   }
 
@@ -62,10 +118,26 @@ class OrderCreateProvider extends BaseProvider {
     }
   }
 
+  /// Remove service item at specified index
+  void removeServiceItem(int index) {
+    if (_orderCreationForm.serviceItems != null && index >= 0 && index < _orderCreationForm.serviceItems!.length) {
+      _orderCreationForm.serviceItems!.removeAt(index);
+      notifyListeners();
+    }
+  }
+
   /// Update order item at specified index
   void updateOrderItem(int index, OrderItemCreationFormModel item) {
     if (_orderCreationForm.orderItems != null && index >= 0 && index < _orderCreationForm.orderItems!.length) {
       _orderCreationForm.orderItems![index] = item;
+      notifyListeners();
+    }
+  }
+
+  /// Update service item at specified index
+  void updateServiceItem(int index, ServiceItemCreationFormModel item) {
+    if (_orderCreationForm.serviceItems != null && index >= 0 && index < _orderCreationForm.serviceItems!.length) {
+      _orderCreationForm.serviceItems![index] = item;
       notifyListeners();
     }
   }
@@ -86,6 +158,8 @@ class OrderCreateProvider extends BaseProvider {
   void clearOrderItemsOnly() {
     _orderCreationForm.orderItems?.clear();
     _orderCreationForm.orderItems ??= [];
+    _orderCreationForm.serviceItems?.clear();
+    _orderCreationForm.serviceItems ??= [];
     notifyListeners();
   }
 
@@ -137,6 +211,8 @@ class OrderCreateProvider extends BaseProvider {
   void reset() {
     _orderCreationForm.orderItems?.clear();
     _orderCreationForm.orderItems ??= [];
+    _orderCreationForm.serviceItems?.clear();
+    _orderCreationForm.serviceItems ??= [];
     _orderCreationForm.customerId = null;
     _orderCreationForm.name = null;
     _orderCreationForm.deliveryDate = null;

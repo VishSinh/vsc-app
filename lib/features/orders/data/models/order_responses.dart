@@ -37,8 +37,11 @@ class BaseOrderResponse {
   @JsonKey(name: 'special_instruction')
   final String specialInstruction;
 
-  @JsonKey(name: 'order_items')
+  @JsonKey(name: 'order_items', defaultValue: [])
   final List<OrderItemResponse> orderItems;
+
+  @JsonKey(name: 'service_items', defaultValue: [])
+  final List<ServiceItemResponse> serviceItems;
 
   const BaseOrderResponse({
     required this.id,
@@ -52,6 +55,7 @@ class BaseOrderResponse {
     required this.orderStatus,
     required this.specialInstruction,
     required this.orderItems,
+    this.serviceItems = const [],
   });
 
   factory BaseOrderResponse.fromJson(Map<String, dynamic> json) => _$BaseOrderResponseFromJson(json);
@@ -75,6 +79,7 @@ class OrderResponse extends BaseOrderResponse {
     required super.orderStatus,
     required super.specialInstruction,
     required super.orderItems,
+    super.serviceItems = const [],
     required this.billId,
   });
 
@@ -121,6 +126,40 @@ class OrderItemResponse {
 
   factory OrderItemResponse.fromJson(Map<String, dynamic> json) => _$OrderItemResponseFromJson(json);
   Map<String, dynamic> toJson() => _$OrderItemResponseToJson(this);
+}
+
+@JsonSerializable()
+class ServiceItemResponse {
+  final String id;
+  @JsonKey(name: 'order_id')
+  final String orderId;
+  @JsonKey(name: 'order_name')
+  final String orderName;
+  @JsonKey(name: 'service_type')
+  final String serviceType;
+  final int quantity;
+  @JsonKey(name: 'procurement_status')
+  final String procurementStatus;
+  @JsonKey(name: 'total_cost')
+  final String totalCost;
+  @JsonKey(name: 'total_expense')
+  final String totalExpense;
+  final String? description;
+
+  const ServiceItemResponse({
+    required this.id,
+    required this.orderId,
+    required this.orderName,
+    required this.serviceType,
+    required this.quantity,
+    required this.procurementStatus,
+    required this.totalCost,
+    required this.totalExpense,
+    this.description,
+  });
+
+  factory ServiceItemResponse.fromJson(Map<String, dynamic> json) => _$ServiceItemResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$ServiceItemResponseToJson(this);
 }
 
 // @JsonSerializable()

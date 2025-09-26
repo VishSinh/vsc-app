@@ -8,7 +8,8 @@ import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
-import 'package:vsc_app/features/customers/presentation/providers/customer_provider.dart';
+// Removed CustomerProvider usage; using OrderCreateProvider to call customer APIs
+import 'package:vsc_app/features/orders/presentation/models/create_order_customer_form_model.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_create_provider.dart';
 
 class CreateOrderCustomerSearchPage extends StatefulWidget {
@@ -33,47 +34,32 @@ class _CreateOrderCustomerSearchPageState extends State<CreateOrderCustomerSearc
   Future<void> _searchCustomer() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final customerProvider = context.read<CustomerProvider>();
     final orderProvider = context.read<OrderCreateProvider>();
-
-    final customer = await customerProvider.searchCustomerByPhone(_phoneController.text.trim());
-
-    if (mounted) {
-      if (customer != null) {
-        orderProvider.setSelectedCustomerData(customer);
-        SnackbarUtils.showSuccess(context, UITextConstants.customerFoundSuccess);
-        context.push(RouteConstants.orderItems, extra: orderProvider);
-      } else {
-        final apiErrorMessage = customerProvider.errorMessage ?? UITextConstants.customerNotFoundWithSuggestion;
-        SnackbarUtils.showError(context, apiErrorMessage);
-        customerProvider.setError(null);
-      }
+    final customer = await orderProvider.searchCustomerByPhone(_phoneController.text.trim());
+    if (!mounted) return;
+    if (customer != null) {
+      SnackbarUtils.showSuccess(context, UITextConstants.customerFoundSuccess);
+      context.push(RouteConstants.orderItems, extra: orderProvider);
+    } else {
+      final apiErrorMessage = orderProvider.errorMessage ?? UITextConstants.customerNotFoundWithSuggestion;
+      SnackbarUtils.showError(context, apiErrorMessage);
+      orderProvider.setError(null);
     }
   }
 
   Future<void> _createCustomer() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final customerProvider = context.read<CustomerProvider>();
     final orderProvider = context.read<OrderCreateProvider>();
-
-    final success = await customerProvider.createCustomer(name: _nameController.text.trim(), phone: _phoneController.text.trim());
-
-    if (mounted) {
-      if (success) {
-        final customer = customerProvider.selectedCustomer;
-        if (customer != null) {
-          orderProvider.setSelectedCustomerData(customer);
-          SnackbarUtils.showSuccess(context, UITextConstants.customerCreatedSuccessfully);
-          context.push(RouteConstants.orderItems, extra: orderProvider);
-        } else {
-          SnackbarUtils.showError(context, UITextConstants.customerRetrieveFailed);
-        }
-      } else {
-        // Show error from provider
-        final errorMessage = customerProvider.errorMessage ?? UITextConstants.customerCreateFailed;
-        SnackbarUtils.showError(context, errorMessage);
-      }
+    final form = CreateOrderCustomerFormModel(name: _nameController.text.trim(), phone: _phoneController.text.trim());
+    final success = await orderProvider.createCustomerForOrder(form);
+    if (!mounted) return;
+    if (success) {
+      SnackbarUtils.showSuccess(context, UITextConstants.customerCreatedSuccessfully);
+      context.push(RouteConstants.orderItems, extra: orderProvider);
+    } else {
+      final errorMessage = orderProvider.errorMessage ?? UITextConstants.customerCreateFailed;
+      SnackbarUtils.showError(context, errorMessage);
     }
   }
 
@@ -84,14 +70,14 @@ class _CreateOrderCustomerSearchPageState extends State<CreateOrderCustomerSearc
         title: const Text(UITextConstants.createOrderCustomerSearchTitle),
         leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.dashboard)),
       ),
-      body: Consumer2<CustomerProvider, OrderCreateProvider>(
-        builder: (context, customerProvider, orderProvider, child) {
+      body: Consumer<OrderCreateProvider>(
+        builder: (context, orderProvider, child) {
           return LayoutBuilder(
             builder: (context, constraints) {
               if (constraints.maxWidth < AppConfig.mobileBreakpoint) {
-                return _buildMobileLayout(customerProvider);
+                return _buildMobileLayout(orderProvider);
               } else {
-                return _buildDesktopLayout(customerProvider);
+                return _buildDesktopLayout(orderProvider);
               }
             },
           );
@@ -100,20 +86,20 @@ class _CreateOrderCustomerSearchPageState extends State<CreateOrderCustomerSearc
     );
   }
 
-  Widget _buildMobileLayout(CustomerProvider customerProvider) {
-    return SingleChildScrollView(padding: EdgeInsets.all(AppConfig.defaultPadding), child: _buildUnifiedForm(customerProvider));
+  Widget _buildMobileLayout(OrderCreateProvider orderProvider) {
+    return SingleChildScrollView(padding: EdgeInsets.all(AppConfig.defaultPadding), child: _buildUnifiedForm(orderProvider));
   }
 
-  Widget _buildDesktopLayout(CustomerProvider customerProvider) {
+  Widget _buildDesktopLayout(OrderCreateProvider orderProvider) {
     return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: 600),
-        child: SingleChildScrollView(padding: EdgeInsets.all(AppConfig.largePadding), child: _buildUnifiedForm(customerProvider)),
+        child: SingleChildScrollView(padding: EdgeInsets.all(AppConfig.largePadding), child: _buildUnifiedForm(orderProvider)),
       ),
     );
   }
 
-  Widget _buildUnifiedForm(CustomerProvider customerProvider) {
+  Widget _buildUnifiedForm(OrderCreateProvider orderProvider) {
     return Card(
       child: Padding(
         padding: EdgeInsets.all(AppConfig.defaultPadding),
@@ -122,7 +108,7 @@ class _CreateOrderCustomerSearchPageState extends State<CreateOrderCustomerSearc
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(customerProvider.isCreatingCustomer ? 'Create Customer' : 'Search Customer', style: ResponsiveText.getTitle(context)),
+              Text(orderProvider.isCreatingCustomer ? 'Create Customer' : 'Search Customer', style: ResponsiveText.getTitle(context)),
               SizedBox(height: AppConfig.defaultPadding),
 
               // Phone field (always visible)
@@ -143,7 +129,7 @@ class _CreateOrderCustomerSearchPageState extends State<CreateOrderCustomerSearc
               ),
 
               // Name field (only visible when creating)
-              if (customerProvider.isCreatingCustomer) ...[
+              if (orderProvider.isCreatingCustomer) ...[
                 SizedBox(height: AppConfig.defaultPadding),
                 TextFormField(
                   controller: _nameController,
@@ -171,14 +157,14 @@ class _CreateOrderCustomerSearchPageState extends State<CreateOrderCustomerSearc
                     children: [
                       SizedBox(
                         width: double.infinity,
-                        child: customerProvider.isCreatingCustomer
+                        child: orderProvider.isCreatingCustomer
                             ? ButtonUtils.primaryButton(
-                                onPressed: customerProvider.isLoading ? null : _createCustomer,
+                                onPressed: orderProvider.isLoading ? null : _createCustomer,
                                 label: UITextConstants.createCustomer,
                                 icon: Icons.person_add,
                               )
                             : ButtonUtils.primaryButton(
-                                onPressed: customerProvider.isLoading ? null : _searchCustomer,
+                                onPressed: orderProvider.isLoading ? null : _searchCustomer,
                                 label: UITextConstants.searchCustomer,
                                 icon: Icons.search,
                               ),
@@ -188,15 +174,15 @@ class _CreateOrderCustomerSearchPageState extends State<CreateOrderCustomerSearc
                         width: double.infinity,
                         child: ButtonUtils.secondaryButton(
                           onPressed: () {
-                            customerProvider.toggleCreatingCustomer();
-                            if (!customerProvider.isCreatingCustomer) {
+                            orderProvider.toggleCreatingCustomer();
+                            if (!orderProvider.isCreatingCustomer) {
                               // Reset form when switching back to search
                               _nameController.clear();
                               _formKey.currentState?.reset();
                             }
                           },
-                          label: customerProvider.isCreatingCustomer ? UITextConstants.cancel : UITextConstants.createCustomer,
-                          icon: customerProvider.isCreatingCustomer ? Icons.cancel : Icons.add,
+                          label: orderProvider.isCreatingCustomer ? UITextConstants.cancel : UITextConstants.createCustomer,
+                          icon: orderProvider.isCreatingCustomer ? Icons.cancel : Icons.add,
                         ),
                       ),
                     ],
@@ -207,14 +193,14 @@ class _CreateOrderCustomerSearchPageState extends State<CreateOrderCustomerSearc
                 Row(
                   children: [
                     Expanded(
-                      child: customerProvider.isCreatingCustomer
+                      child: orderProvider.isCreatingCustomer
                           ? ButtonUtils.primaryButton(
-                              onPressed: customerProvider.isLoading ? null : _createCustomer,
+                              onPressed: orderProvider.isLoading ? null : _createCustomer,
                               label: UITextConstants.createCustomer,
                               icon: Icons.person_add,
                             )
                           : ButtonUtils.primaryButton(
-                              onPressed: customerProvider.isLoading ? null : _searchCustomer,
+                              onPressed: orderProvider.isLoading ? null : _searchCustomer,
                               label: UITextConstants.searchCustomer,
                               icon: Icons.search,
                             ),
@@ -223,15 +209,15 @@ class _CreateOrderCustomerSearchPageState extends State<CreateOrderCustomerSearc
                     Expanded(
                       child: ButtonUtils.secondaryButton(
                         onPressed: () {
-                          customerProvider.toggleCreatingCustomer();
-                          if (!customerProvider.isCreatingCustomer) {
+                          orderProvider.toggleCreatingCustomer();
+                          if (!orderProvider.isCreatingCustomer) {
                             // Reset form when switching back to search
                             _nameController.clear();
                             _formKey.currentState?.reset();
                           }
                         },
-                        label: customerProvider.isCreatingCustomer ? UITextConstants.cancel : UITextConstants.createCustomer,
-                        icon: customerProvider.isCreatingCustomer ? Icons.cancel : Icons.add,
+                        label: orderProvider.isCreatingCustomer ? UITextConstants.cancel : UITextConstants.createCustomer,
+                        icon: orderProvider.isCreatingCustomer ? Icons.cancel : Icons.add,
                       ),
                     ),
                   ],

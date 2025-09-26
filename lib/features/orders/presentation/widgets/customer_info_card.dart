@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:vsc_app/core/constants/app_config.dart';
-import 'package:vsc_app/core/models/customer_model.dart';
+import 'package:vsc_app/features/orders/presentation/models/order_customer_view_model.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 
 /// Reusable customer info card widget
 class CustomerInfoCard extends StatelessWidget {
-  final Customer? customer;
+  final OrderCustomerViewModel? customer;
   final String title;
   final bool showEmptyState;
 

@@ -7,6 +7,11 @@ import 'package:vsc_app/features/bills/data/models/payment_get_response.dart';
 import 'package:vsc_app/features/bills/data/models/payment_request.dart';
 
 class BillService extends ApiService {
+  Future<ApiResponse<List<BillGetResponse>>> getBills({int page = 1, int pageSize = AppConstants.defaultPageSize}) async => await executeRequest(
+    () => get('${AppConstants.billsEndpoint}?page=$page&page_size=$pageSize'),
+    (json) => ServiceUtils.parseList(json, (item) => BillGetResponse.fromJson(item)),
+  );
+
   Future<ApiResponse<BillGetResponse>> getBillByBillId({required String billId}) async =>
       await executeRequest(() => get('${AppConstants.billsEndpoint}$billId/'), (json) => ServiceUtils.parseItem(json, BillGetResponse.fromJson));
 
@@ -15,8 +20,12 @@ class BillService extends ApiService {
     (json) => ServiceUtils.parseList(json, (item) => BillGetResponse.fromJson(item)),
   );
 
-  Future<ApiResponse<List<BillGetResponse>>> getBillByPhone({required String phone}) async => await executeRequest(
-    () => get('${AppConstants.billsEndpoint}?phone=$phone'),
+  Future<ApiResponse<List<BillGetResponse>>> getBillByPhone({
+    required String phone,
+    int page = 1,
+    int pageSize = AppConstants.defaultPageSize,
+  }) async => await executeRequest(
+    () => get('${AppConstants.billsEndpoint}?phone=$phone&page=$page&page_size=$pageSize'),
     (json) => ServiceUtils.parseList(json, (item) => BillGetResponse.fromJson(item)),
   );
 

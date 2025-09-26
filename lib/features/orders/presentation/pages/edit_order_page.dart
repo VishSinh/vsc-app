@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/core/constants/app_config.dart';
-import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/enums/order_status.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
@@ -64,7 +63,7 @@ class _EditOrderPageState extends State<EditOrderPage> {
     if (order == null) return;
     _specialInstructionController.text = order.specialInstruction;
     _deliveryDateController.text = order.deliveryDate.toIso8601String();
-    _selectedStatus = OrderStatusExtension.fromApiString(order.orderStatus);
+    _selectedStatus = order.orderStatus;
     setState(() {});
   }
 
@@ -192,8 +191,8 @@ class _EditOrderPageState extends State<EditOrderPage> {
             Expanded(child: Text(order.name.isNotEmpty ? order.name : 'Order', style: ResponsiveText.getTitle(context))),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(color: OrderStatusExtension.getColorFromString(order.orderStatus), borderRadius: BorderRadius.circular(16)),
-              child: Text(OrderStatusExtension.getDisplayTextFromString(order.orderStatus), style: TextStyle(color: Colors.white)),
+              decoration: BoxDecoration(color: order.orderStatus.getStatusColor(), borderRadius: BorderRadius.circular(16)),
+              child: Text(order.orderStatus.getDisplayText(), style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

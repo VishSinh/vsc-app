@@ -12,6 +12,7 @@ import 'package:vsc_app/features/bills/presentation/services/bill_calculation_se
 import 'package:vsc_app/features/bills/presentation/widgets/payment_create_dialog.dart';
 import 'package:vsc_app/core/enums/bill_status.dart';
 import 'package:vsc_app/core/enums/payment_mode.dart';
+import 'package:vsc_app/core/enums/order_status.dart';
 
 class BillPage extends StatefulWidget {
   final String billId;
@@ -180,9 +181,9 @@ class _BillPageState extends State<BillPage> {
                 Expanded(child: Text(bill.orderName, style: AppConfig.getResponsiveHeadline(context))),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(color: _getStatusColor(bill.paymentStatus), borderRadius: BorderRadius.circular(16)),
+                  decoration: BoxDecoration(color: bill.paymentStatus.getStatusColor(), borderRadius: BorderRadius.circular(16)),
                   child: Text(
-                    _getStatusText(bill.paymentStatus),
+                    bill.paymentStatus.getDisplayText(),
                     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -201,8 +202,8 @@ class _BillPageState extends State<BillPage> {
         final bill = billProvider.currentBill;
         if (bill == null) return const SizedBox.shrink();
 
-        // Check if bill is fully paid using BillCalculationService
-        final isFullyPaid = BillCalculationService.isFullyPaid(bill.summary.totalWithTax, billProvider.payments);
+        // Use API-provided pending amount instead of app-side calculation
+        final isFullyPaid = (bill.summary.pendingAmount <= 0.0);
 
         return SizedBox(
           width: double.infinity,
@@ -249,11 +250,29 @@ class _BillPageState extends State<BillPage> {
           children: [
             Text('Order Information', style: AppConfig.getResponsiveTitle(context)),
             const SizedBox(height: 16),
-            _buildInfoRow('Customer', bill.order.customerName),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(width: 120, child: Text('Customer', style: AppConfig.getResponsiveCaption(context))),
+                Expanded(
+                  child: Consumer<BillProvider>(
+                    builder: (context, billProvider, _) {
+                      final phone = billProvider.getCustomerPhone(bill.order.customerId);
+                      if (phone == null) {
+                        // fire and forget; UI will rebuild when phone is fetched
+                        billProvider.fetchCustomerPhone(bill.order.customerId);
+                      }
+                      final display = phone == null ? bill.order.customerName : '${bill.order.customerName} (${phone})';
+                      return Text(display, style: AppConfig.getResponsiveBody(context));
+                    },
+                  ),
+                ),
+              ],
+            ),
             _buildInfoRow('Staff', bill.order.staffName),
             _buildInfoRow('Order Date', _formatDateTime(bill.order.orderDate)),
             _buildInfoRow('Delivery Date', _formatDateTime(bill.order.deliveryDate)),
-            _buildInfoRow('Status', bill.order.orderStatus),
+            _buildInfoRow('Status', bill.order.orderStatus.getDisplayText()),
             if (bill.order.specialInstruction.isNotEmpty) _buildInfoRow('Special Instructions', bill.order.specialInstruction),
           ],
         ),
@@ -470,14 +489,6 @@ class _BillPageState extends State<BillPage> {
     );
   }
 
-  Color _getStatusColor(BillStatus status) {
-    return BillCalculationService.getStatusColor(status);
-  }
-
-  String _getStatusText(BillStatus status) {
-    return BillCalculationService.getStatusText(status);
-  }
-
   String _formatDateTime(DateTime dateTime) {
     return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
@@ -489,8 +500,8 @@ class _BillPageState extends State<BillPage> {
         final bill = billProvider.currentBill;
 
         if (bill == null) return const SizedBox.shrink();
-
-        final remainingAmount = BillCalculationService.calculateRemainingAmount(bill.summary.totalWithTax, payments);
+        // Use pending amount from API
+        final remainingAmount = bill.summary.pendingAmount;
 
         return Card(
           child: Padding(

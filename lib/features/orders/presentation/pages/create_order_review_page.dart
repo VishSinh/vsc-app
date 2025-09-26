@@ -11,6 +11,8 @@ import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_create_provider.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
+import 'package:vsc_app/features/orders/presentation/services/order_calculation_service.dart';
+import 'package:vsc_app/core/enums/service_type.dart';
 
 class CreateOrderReviewPage extends StatefulWidget {
   const CreateOrderReviewPage({super.key});
@@ -25,9 +27,11 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
   @override
   void initState() {
     super.initState();
-    // Set default delivery date to tomorrow
-    final orderProvider = context.read<OrderCreateProvider>();
-    orderProvider.setDefaultDeliveryDateTime();
+    // Set default delivery date after first frame to avoid setState during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final orderProvider = context.read<OrderCreateProvider>();
+      orderProvider.setDefaultDeliveryDateTime();
+    });
   }
 
   @override
@@ -130,6 +134,8 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
           // Order Items taking full width
           _buildOrderItemsReview(orderProvider),
           SizedBox(height: AppConfig.largePadding),
+          _buildServiceItemsReview(orderProvider),
+          SizedBox(height: AppConfig.largePadding),
           _buildActionButtons(orderProvider),
         ],
       ),
@@ -156,6 +162,8 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
           SizedBox(height: AppConfig.largePadding),
           // Order Items taking full width
           _buildOrderItemsReview(orderProvider),
+          SizedBox(height: AppConfig.largePadding),
+          _buildServiceItemsReview(orderProvider),
           SizedBox(height: AppConfig.largePadding),
           _buildActionButtons(orderProvider),
         ],
@@ -275,6 +283,94 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
         ),
       ),
     );
+  }
+
+  Widget _buildServiceItemsReview(OrderCreateProvider orderProvider) {
+    return Card(
+      child: Padding(
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Service Items (${orderProvider.serviceItems.length})', style: ResponsiveText.getTitle(context)),
+            SizedBox(height: AppConfig.defaultPadding),
+            if (orderProvider.serviceItems.isEmpty)
+              const EmptyStateWidget(message: 'No service items added', icon: Icons.home_repair_service)
+            else
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: orderProvider.serviceItems.length,
+                itemBuilder: (context, index) {
+                  final svc = orderProvider.serviceItems[index];
+                  return Card(
+                    margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
+                    child: Padding(
+                      padding: EdgeInsets.all(AppConfig.defaultPadding),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.home_repair_service),
+                          SizedBox(width: AppConfig.defaultPadding),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  svc.serviceType?.displayText ?? svc.serviceType?.toApiString() ?? 'SERVICE',
+                                  style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w600),
+                                ),
+                                Text('Qty: ${svc.quantity}  •  Expense: ₹${svc.totalExpense}  •  Cost: ₹${svc.totalCost}'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            SizedBox(height: AppConfig.defaultPadding),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    'Total: ₹${_calculateCreationReviewTotal(orderProvider).toStringAsFixed(2)}',
+                    style: ResponsiveText.getTitle(context).copyWith(color: Colors.green),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  double _calculateCreationReviewTotal(OrderCreateProvider orderProvider) {
+    double total = 0.0;
+
+    // Sum card-based order items using current card price
+    for (final formItem in orderProvider.orderItems) {
+      final card = orderProvider.getCardViewModelById(formItem.cardId);
+      if (card == null) continue;
+      total += OrderCalculationService.calculateLineItemTotalWithParams(
+        basePrice: card.sellPriceAsDouble,
+        discountAmount: formItem.discountAmount,
+        quantity: formItem.quantity,
+        totalBoxCost: formItem.requiresBox ? formItem.totalBoxCost : null,
+        totalPrintingCost: formItem.requiresPrinting ? formItem.totalPrintingCost : null,
+      );
+    }
+
+    // Add service items total cost
+    for (final svc in orderProvider.serviceItems) {
+      final cost = OrderCalculationService.parseDouble(svc.totalCost);
+      total += cost;
+    }
+
+    return total;
   }
 
   Widget _buildActionButtons(OrderCreateProvider orderProvider) {

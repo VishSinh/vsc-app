@@ -1,5 +1,6 @@
 import 'package:vsc_app/core/enums/bill_status.dart';
 import 'package:vsc_app/features/bills/data/models/bill_get_response.dart';
+import 'package:vsc_app/core/enums/order_status.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
 
 class BillViewModel {
@@ -46,7 +47,7 @@ class BillOrderViewModel {
   final String staffName;
   final DateTime orderDate;
   final DateTime deliveryDate;
-  final String orderStatus;
+  final OrderStatus orderStatus;
   final String specialInstruction;
   final List<BillOrderItemViewModel> orderItems;
 
@@ -74,7 +75,7 @@ class BillOrderViewModel {
       staffName: response.staffName,
       orderDate: DateTime.parse(response.orderDate),
       deliveryDate: DateTime.parse(response.deliveryDate),
-      orderStatus: response.orderStatus,
+      orderStatus: OrderStatusExtension.fromApiString(response.orderStatus) ?? OrderStatus.confirmed,
       specialInstruction: response.specialInstruction,
       orderItems: response.orderItems.map((item) => BillOrderItemViewModel.fromApiResponse(item as BillOrderItemResponse)).toList(),
     );
@@ -148,6 +149,7 @@ class BillSummaryViewModel {
   final double taxPercentage;
   final double taxAmount;
   final double totalWithTax;
+  final double pendingAmount;
 
   BillSummaryViewModel({
     required this.itemsSubtotal,
@@ -157,6 +159,7 @@ class BillSummaryViewModel {
     required this.taxPercentage,
     required this.taxAmount,
     required this.totalWithTax,
+    required this.pendingAmount,
   });
 
   factory BillSummaryViewModel.fromApiResponse(BillSummaryResponse response) {
@@ -168,6 +171,7 @@ class BillSummaryViewModel {
       taxPercentage: double.tryParse(response.taxPercentage) ?? 0.0,
       taxAmount: double.tryParse(response.taxAmount) ?? 0.0,
       totalWithTax: double.tryParse(response.totalWithTax) ?? 0.0,
+      pendingAmount: double.tryParse(response.pendingAmount ?? '0.0') ?? 0.0,
     );
   }
 
@@ -179,4 +183,5 @@ class BillSummaryViewModel {
   String get formattedTaxPercentage => '${taxPercentage.toStringAsFixed(2)}%';
   String get formattedTaxAmount => '₹${taxAmount.toStringAsFixed(2)}';
   String get formattedTotalWithTax => '₹${totalWithTax.toStringAsFixed(2)}';
+  String get formattedPendingAmount => '₹${pendingAmount.toStringAsFixed(2)}';
 }

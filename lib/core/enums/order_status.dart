@@ -1,55 +1,55 @@
 import 'package:flutter/material.dart';
 
 /// Order status enum for orders
-enum OrderStatus { pending, confirmed, inProgress, completed, cancelled }
+enum OrderStatus { confirmed, inProgress, ready, delivered, fullyPaid }
 
 /// Extension to add conversion methods to OrderStatus
 extension OrderStatusExtension on OrderStatus {
   /// Convert to API string format
   String toApiString() {
     switch (this) {
-      case OrderStatus.pending:
-        return 'PENDING';
       case OrderStatus.confirmed:
         return 'CONFIRMED';
       case OrderStatus.inProgress:
         return 'IN_PROGRESS';
-      case OrderStatus.completed:
-        return 'COMPLETED';
-      case OrderStatus.cancelled:
-        return 'CANCELLED';
+      case OrderStatus.ready:
+        return 'READY';
+      case OrderStatus.delivered:
+        return 'DELIVERED';
+      case OrderStatus.fullyPaid:
+        return 'FULLY_PAID';
     }
   }
 
   /// Get the display text for the order status
   String getDisplayText() {
     switch (this) {
-      case OrderStatus.pending:
-        return 'PENDING';
       case OrderStatus.confirmed:
-        return 'CONFIRMED';
+        return 'Confirmed';
       case OrderStatus.inProgress:
-        return 'IN PROGRESS';
-      case OrderStatus.completed:
-        return 'COMPLETED';
-      case OrderStatus.cancelled:
-        return 'CANCELLED';
+        return 'In Progress';
+      case OrderStatus.ready:
+        return 'Ready';
+      case OrderStatus.delivered:
+        return 'Delivered';
+      case OrderStatus.fullyPaid:
+        return 'Fully Paid';
     }
   }
 
   /// Get the color associated with this order status
   Color getStatusColor() {
     switch (this) {
-      case OrderStatus.pending:
-        return Colors.orange;
       case OrderStatus.confirmed:
-        return Colors.blue;
+        return Colors.orange;
       case OrderStatus.inProgress:
         return Colors.blue;
-      case OrderStatus.completed:
+      case OrderStatus.ready:
+        return Colors.purple;
+      case OrderStatus.delivered:
         return Colors.green;
-      case OrderStatus.cancelled:
-        return Colors.red;
+      case OrderStatus.fullyPaid:
+        return Colors.green;
     }
   }
 
@@ -57,16 +57,16 @@ extension OrderStatusExtension on OrderStatus {
   static OrderStatus? fromApiString(String? apiString) {
     if (apiString == null) return null;
     switch (apiString.toUpperCase()) {
-      case 'PENDING':
-        return OrderStatus.pending;
       case 'CONFIRMED':
         return OrderStatus.confirmed;
       case 'IN_PROGRESS':
         return OrderStatus.inProgress;
-      case 'COMPLETED':
-        return OrderStatus.completed;
-      case 'CANCELLED':
-        return OrderStatus.cancelled;
+      case 'READY':
+        return OrderStatus.ready;
+      case 'DELIVERED':
+        return OrderStatus.delivered;
+      case 'FULLY_PAID':
+        return OrderStatus.fullyPaid;
       default:
         return null;
     }

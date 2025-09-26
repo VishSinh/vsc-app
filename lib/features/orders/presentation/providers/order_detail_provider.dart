@@ -10,18 +10,23 @@ import 'package:vsc_app/features/production/presentation/models/printer_view_mod
 import 'package:vsc_app/features/production/presentation/models/tracing_studio_view_model.dart';
 import 'package:vsc_app/features/cards/data/services/card_service.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_update_form_models.dart';
+import 'package:vsc_app/features/customers/data/services/customer_service.dart';
 
 /// Provider for managing order details and production operations
 class OrderDetailProvider extends BaseProvider {
   final OrderService _orderService = OrderService();
   final ProductionService _productionService = ProductionService();
   final CardService _cardService = CardService();
+  final CustomerService _customerService = CustomerService();
 
   // Order detail state
   OrderViewModel? _currentOrder;
 
   // Card cache for order items
   final Map<String, OrderCardViewModel> _cardCache = {};
+
+  // Customer phone cache
+  final Map<String, String> _customerPhoneCache = {};
 
   // Production service for box order operations
   // State for box makers
@@ -50,6 +55,7 @@ class OrderDetailProvider extends BaseProvider {
   // Getters for fetched data
   OrderViewModel? get currentOrder => _currentOrder;
   Map<String, OrderCardViewModel> get cardCache => Map.unmodifiable(_cardCache);
+  String? getCustomerPhone(String customerId) => _customerPhoneCache[customerId];
 
   // Scanned/selected card for adding new items in Edit flow
   OrderCardViewModel? _currentScannedCard;
@@ -79,6 +85,11 @@ class OrderDetailProvider extends BaseProvider {
 
         // Fetch card information for each order item
         await _fetchCardDetailsForOrderItems();
+
+        // Fetch customer phone for display
+        if (_currentOrder != null) {
+          await fetchCustomerPhone(_currentOrder!.customerId);
+        }
 
         return response.data!;
       },
@@ -164,6 +175,20 @@ class OrderDetailProvider extends BaseProvider {
 
     _currentOrder = _currentOrder!.copyWith(orderItems: updatedItems);
     notifyListeners();
+  }
+
+  /// Fetch and cache customer phone by customer ID
+  Future<void> fetchCustomerPhone(String customerId) async {
+    if (_customerPhoneCache.containsKey(customerId)) return;
+    try {
+      final response = await _customerService.getCustomerById(customerId);
+      if (response.success && response.data != null) {
+        _customerPhoneCache[customerId] = response.data!.phone;
+        notifyListeners();
+      }
+    } catch (_) {
+      // Silent fail; UI will simply not show phone
+    }
   }
 
   /// Get card for a specific order item

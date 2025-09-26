@@ -1,8 +1,10 @@
 // ViewModel classes for Order Response
 
 import 'package:vsc_app/features/orders/data/models/order_responses.dart';
+import 'package:vsc_app/core/enums/order_status.dart';
 import 'package:vsc_app/features/production/presentation/models/box_order_view_model.dart';
 import 'package:vsc_app/features/production/presentation/models/printing_job_view_model.dart';
+import 'package:vsc_app/core/enums/service_type.dart';
 
 class OrderViewModel {
   final String id;
@@ -13,9 +15,10 @@ class OrderViewModel {
   final String staffName;
   final DateTime orderDate;
   final DateTime deliveryDate;
-  final String orderStatus;
+  final OrderStatus orderStatus;
   final String specialInstruction;
   final List<OrderItemViewModel> orderItems;
+  final List<ServiceItemViewModel> serviceItems;
   final String billId;
 
   OrderViewModel({
@@ -30,6 +33,7 @@ class OrderViewModel {
     required this.orderStatus,
     required this.specialInstruction,
     required this.orderItems,
+    required this.serviceItems,
     required this.billId,
   });
 
@@ -43,15 +47,16 @@ class OrderViewModel {
       staffName: response.staffName,
       orderDate: DateTime.parse(response.orderDate),
       deliveryDate: DateTime.parse(response.deliveryDate),
-      orderStatus: response.orderStatus,
+      orderStatus: OrderStatusExtension.fromApiString(response.orderStatus) ?? OrderStatus.confirmed,
       specialInstruction: response.specialInstruction,
       orderItems: response.orderItems.map((item) => OrderItemViewModel.fromApiResponse(item)).toList(),
+      serviceItems: response.serviceItems.map((item) => ServiceItemViewModel.fromApiResponse(item)).toList(),
       billId: response.billId,
     );
   }
 
   /// Create a copy with updated order items
-  OrderViewModel copyWith({List<OrderItemViewModel>? orderItems}) {
+  OrderViewModel copyWith({List<OrderItemViewModel>? orderItems, List<ServiceItemViewModel>? serviceItems}) {
     return OrderViewModel(
       id: id,
       name: name,
@@ -64,6 +69,7 @@ class OrderViewModel {
       orderStatus: orderStatus,
       specialInstruction: specialInstruction,
       orderItems: orderItems ?? this.orderItems,
+      serviceItems: serviceItems ?? this.serviceItems,
       billId: billId,
     );
   }
@@ -194,6 +200,47 @@ class OrderItemViewModel {
       boxOrders: boxOrders,
       printingJobs: printingJobs,
       card: card ?? this.card,
+    );
+  }
+}
+
+class ServiceItemViewModel {
+  final String id;
+  final String orderId;
+  final String orderName;
+  final ServiceType? serviceType;
+  final String serviceTypeRaw;
+  final int quantity;
+  final String procurementStatus;
+  final String totalCost;
+  final String? totalExpense;
+  final String? description;
+
+  const ServiceItemViewModel({
+    required this.id,
+    required this.orderId,
+    required this.orderName,
+    required this.serviceType,
+    required this.serviceTypeRaw,
+    required this.quantity,
+    required this.procurementStatus,
+    required this.totalCost,
+    this.totalExpense,
+    this.description,
+  });
+
+  factory ServiceItemViewModel.fromApiResponse(ServiceItemResponse response) {
+    return ServiceItemViewModel(
+      id: response.id,
+      orderId: response.orderId,
+      orderName: response.orderName,
+      serviceType: ServiceTypeExtension.fromApiString(response.serviceType),
+      serviceTypeRaw: response.serviceType,
+      quantity: response.quantity,
+      procurementStatus: response.procurementStatus,
+      totalCost: response.totalCost,
+      totalExpense: response.totalExpense,
+      description: response.description,
     );
   }
 }

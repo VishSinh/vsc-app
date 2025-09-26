@@ -3,24 +3,35 @@ import 'package:json_annotation/json_annotation.dart';
 part 'order_requests.g.dart';
 
 /// Request model for creating an order
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class CreateOrderRequest {
   @JsonKey(name: 'customer_id')
   final String customerId;
   final String name;
   @JsonKey(name: 'delivery_date')
   final String deliveryDate;
+  @JsonKey(name: 'special_instruction')
+  final String? specialInstruction;
   @JsonKey(name: 'order_items')
-  final List<OrderItemRequest> orderItems;
+  final List<OrderItemRequest>? orderItems;
+  @JsonKey(name: 'service_items')
+  final List<ServiceItemRequest>? serviceItems;
 
-  const CreateOrderRequest({required this.customerId, required this.name, required this.deliveryDate, required this.orderItems});
+  const CreateOrderRequest({
+    required this.customerId,
+    required this.name,
+    required this.deliveryDate,
+    this.specialInstruction,
+    this.orderItems,
+    this.serviceItems,
+  });
 
   factory CreateOrderRequest.fromJson(Map<String, dynamic> json) => _$CreateOrderRequestFromJson(json);
   Map<String, dynamic> toJson() => _$CreateOrderRequestToJson(this);
 }
 
 /// Request model for order item
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class OrderItemRequest {
   @JsonKey(name: 'card_id')
   final String cardId;
@@ -34,9 +45,9 @@ class OrderItemRequest {
   @JsonKey(name: 'box_type')
   final String? boxType;
   @JsonKey(name: 'total_box_cost')
-  final String totalBoxCost;
+  final String? totalBoxCost;
   @JsonKey(name: 'total_printing_cost')
-  final String totalPrintingCost;
+  final String? totalPrintingCost;
 
   const OrderItemRequest({
     required this.cardId,
@@ -45,12 +56,36 @@ class OrderItemRequest {
     required this.requiresBox,
     required this.requiresPrinting,
     this.boxType,
-    required this.totalBoxCost,
-    required this.totalPrintingCost,
+    this.totalBoxCost,
+    this.totalPrintingCost,
   });
 
   factory OrderItemRequest.fromJson(Map<String, dynamic> json) => _$OrderItemRequestFromJson(json);
   Map<String, dynamic> toJson() => _$OrderItemRequestToJson(this);
+}
+
+/// Request model for service item
+@JsonSerializable(includeIfNull: false)
+class ServiceItemRequest {
+  @JsonKey(name: 'service_type')
+  final String serviceType; // Use ServiceTypeExtension.toApiString() when populating
+  final int quantity;
+  @JsonKey(name: 'total_cost')
+  final String totalCost;
+  @JsonKey(name: 'total_expense')
+  final String totalExpense;
+  final String? description;
+
+  const ServiceItemRequest({
+    required this.serviceType,
+    required this.quantity,
+    required this.totalCost,
+    required this.totalExpense,
+    this.description,
+  });
+
+  factory ServiceItemRequest.fromJson(Map<String, dynamic> json) => _$ServiceItemRequestFromJson(json);
+  Map<String, dynamic> toJson() => _$ServiceItemRequestToJson(this);
 }
 
 /// Request model for updating an order

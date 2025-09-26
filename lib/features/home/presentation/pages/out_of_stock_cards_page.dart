@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:vsc_app/core/constants/app_config.dart';
+import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/cards/presentation/pages/inventory_page.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_detail_provider.dart';
@@ -29,6 +31,19 @@ class _OutOfStockCardsPageState extends State<OutOfStockCardsPage> {
     super.dispose();
   }
 
+  GridConfig _calculateGridConfig(double availableWidth) {
+    const cardWidth = 240.0; // Fixed card width for desktop
+    const mobileCardWidth = 160.0; // Fixed card width for mobile
+    const childAspectRatio = 0.9;
+
+    final effectiveCardWidth = context.isDesktop ? cardWidth : mobileCardWidth;
+    final crossAxisCount = (availableWidth / (effectiveCardWidth + AppConfig.defaultPadding)).floor();
+    final maxCrossAxisCount = context.isDesktop ? 6 : 2;
+    final actualCrossAxisCount = crossAxisCount.clamp(1, maxCrossAxisCount);
+
+    return GridConfig(crossAxisCount: actualCrossAxisCount, childAspectRatio: childAspectRatio);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,17 +65,23 @@ class _OutOfStockCardsPageState extends State<OutOfStockCardsPage> {
               return const EmptyStateWidget(message: 'No out of stock cards found', icon: Icons.inventory_2_outlined);
             }
 
-            return GridView.builder(
-              padding: const EdgeInsets.all(12),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.8,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-              ),
-              itemCount: cards.length,
-              itemBuilder: (context, index) {
-                return InventoryCardItem(card: cards[index]);
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final gridConfig = _calculateGridConfig(constraints.maxWidth);
+
+                return GridView.builder(
+                  padding: const EdgeInsets.all(12),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: gridConfig.crossAxisCount,
+                    childAspectRatio: gridConfig.childAspectRatio,
+                    crossAxisSpacing: AppConfig.defaultPadding,
+                    mainAxisSpacing: AppConfig.defaultPadding,
+                  ),
+                  itemCount: cards.length,
+                  itemBuilder: (context, index) {
+                    return InventoryCardItem(card: cards[index]);
+                  },
+                );
               },
             );
           },

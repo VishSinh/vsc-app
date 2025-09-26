@@ -14,21 +14,24 @@ import 'package:vsc_app/features/orders/presentation/providers/order_item_form_p
 class OrderItemEntryForm extends StatelessWidget {
   final void Function(OrderItemCreationFormModel) onAddItem;
   final bool isLoading;
+  final int? maxQuantity; // Optional max stock constraint
 
-  const OrderItemEntryForm({super.key, required this.onAddItem, this.isLoading = false});
+  const OrderItemEntryForm({super.key, required this.onAddItem, this.isLoading = false, this.maxQuantity});
 
   void _handleAddItem(BuildContext context) {
     final formProvider = context.read<OrderItemFormProvider>();
 
-    // Always provide default values for empty fields
-    final quantity = formProvider.quantityController.text.isEmpty ? 1 : int.tryParse(formProvider.quantityController.text) ?? 1;
+    // Provide strict values so validation can fail when inputs are missing
+    final quantityText = formProvider.quantityController.text;
+    final quantity = quantityText.isEmpty ? 0 : int.tryParse(quantityText) ?? 0;
 
     final discountAmount = formProvider.discountController.text.isEmpty ? '0' : formProvider.discountController.text;
 
-    final boxCost = formProvider.requiresBox && formProvider.boxCostController.text.isEmpty ? '0' : formProvider.boxCostController.text;
+    // When requiresBox/Printing is enabled but cost is empty, keep it empty to trigger validation failure
+    final boxCost = formProvider.requiresBox && formProvider.boxCostController.text.isEmpty ? '' : formProvider.boxCostController.text;
 
     final printingCost = formProvider.requiresPrinting && formProvider.printingCostController.text.isEmpty
-        ? '0'
+        ? ''
         : formProvider.printingCostController.text;
 
     AppLogger.debug('OrderItemEntryForm: Adding item without cardId');
@@ -72,6 +75,9 @@ class OrderItemEntryForm extends StatelessWidget {
                           final quantity = int.tryParse(value);
                           if (quantity == null || quantity <= 0) {
                             return UITextConstants.pleaseEnterValidQuantity;
+                          }
+                          if (maxQuantity != null && quantity > maxQuantity!) {
+                            return 'Cannot exceed stock of $maxQuantity';
                           }
                           return null;
                         },

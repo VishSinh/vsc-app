@@ -130,6 +130,9 @@ class BillSummaryResponse {
   @JsonKey(name: 'total_with_tax')
   final String totalWithTax;
 
+  @JsonKey(name: 'pending_amount')
+  final String? pendingAmount;
+
   const BillSummaryResponse({
     required this.itemsSubtotal,
     required this.totalBoxCost,
@@ -138,6 +141,7 @@ class BillSummaryResponse {
     required this.taxPercentage,
     required this.taxAmount,
     required this.totalWithTax,
+    this.pendingAmount,
   });
 
   factory BillSummaryResponse.fromJson(Map<String, dynamic> json) => _$BillSummaryResponseFromJson(json);

@@ -12,7 +12,6 @@ import 'package:vsc_app/features/home/presentation/providers/dashboard_provider.
 import 'package:vsc_app/features/home/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
 
-import 'package:vsc_app/features/customers/presentation/providers/customer_provider.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_create_provider.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
 import 'package:vsc_app/features/bills/presentation/provider/bill_provider.dart';
@@ -27,30 +26,18 @@ Future<void> _configureFullScreen() async {
   final size = view.physicalSize / view.devicePixelRatio;
 
   // Use the same tablet breakpoint as defined in responsive_utils.dart (600dp)
+  // Detect based on the shortest side so orientation does not affect tablet detection
   const tabletBreakpoint = 600;
-  final isTablet = size.width >= tabletBreakpoint;
+  final isTablet = size.shortestSide >= tabletBreakpoint;
 
   if (isTablet) {
-    // Enable immersive sticky mode for tablets (hides status bar and navigation)
-    // Users can temporarily reveal system UI by swiping from edges
+    // Tablets: immersive and forced landscape
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-
-    // For tablets, prefer landscape orientation for better game-like experience
-    // but still allow portrait if needed
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-      DeviceOrientation.portraitUp, // Allow portrait as fallback
-    ]);
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
   } else {
-    // For phones, use normal system UI and allow all orientations
+    // Phones: normal system UI and forced portrait
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   }
 }
 
@@ -78,7 +65,7 @@ class VSCApp extends StatelessWidget {
     providers: [
       ChangeNotifierProvider(create: (BuildContext context) => PermissionProvider()),
       ChangeNotifierProvider(create: (BuildContext context) => VendorProvider()),
-      ChangeNotifierProvider(create: (BuildContext context) => CustomerProvider()),
+      // CustomerProvider removed; customer APIs are called from feature-specific providers
       ChangeNotifierProvider(create: (BuildContext context) => AuthProvider()),
       ChangeNotifierProvider(create: (BuildContext context) => DashboardProvider()),
       ChangeNotifierProvider(create: (context) => BillProvider()),
@@ -96,13 +83,15 @@ class VSCApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (BuildContext context, Widget? child) {
-        return MaterialApp.router(
-          title: 'Dashboard',
-          theme: AppTheme.darkTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: ThemeMode.dark,
-          routerConfig: AppRouter.router,
-          debugShowCheckedModeBanner: false,
+        return SystemUiRestorer(
+          child: MaterialApp.router(
+            title: 'Dashboard',
+            theme: AppTheme.darkTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: ThemeMode.dark,
+            routerConfig: AppRouter.router,
+            debugShowCheckedModeBanner: false,
+          ),
         );
       },
     );
@@ -136,4 +125,63 @@ class _AuthInitializerState extends State<AuthInitializer> {
   Widget build(BuildContext context) {
     return widget.child;
   }
+}
+
+/// Restores immersive mode on resume/orientation changes so nav bars stay hidden on tablets
+class SystemUiRestorer extends StatefulWidget {
+  final Widget child;
+
+  const SystemUiRestorer({super.key, required this.child});
+
+  @override
+  State<SystemUiRestorer> createState() => _SystemUiRestorerState();
+}
+
+class _SystemUiRestorerState extends State<SystemUiRestorer> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Ensure correct mode after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _applySystemUiForDevice();
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _applySystemUiForDevice();
+    }
+  }
+
+  @override
+  void didChangeMetrics() {
+    // Called on orientation change or when insets change
+    _applySystemUiForDevice();
+  }
+
+  Future<void> _applySystemUiForDevice() async {
+    final view = WidgetsBinding.instance.platformDispatcher.views.first;
+    final size = view.physicalSize / view.devicePixelRatio;
+    const tabletBreakpoint = 600;
+    final isTablet = size.shortestSide >= tabletBreakpoint;
+
+    if (isTablet) {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+    } else {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
+      await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

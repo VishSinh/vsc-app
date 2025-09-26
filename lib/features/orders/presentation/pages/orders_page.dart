@@ -60,7 +60,7 @@ class _OrdersPageState extends State<OrdersPage> {
 
     // Apply status filter
     if (orderProvider.statusFilter != 'all') {
-      orders = orders.where((order) => order.orderStatus.toLowerCase() == orderProvider.statusFilter.toLowerCase()).toList();
+      orders = orders.where((order) => order.orderStatus.toApiString().toLowerCase() == orderProvider.statusFilter.toLowerCase()).toList();
     }
 
     return orders;
@@ -163,12 +163,9 @@ class _OrdersPageState extends State<OrdersPage> {
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: OrderStatusExtension.getColorFromString(order.orderStatus),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
+                        decoration: BoxDecoration(color: order.orderStatus.getStatusColor(), borderRadius: BorderRadius.circular(16)),
                         child: Text(
-                          OrderStatusExtension.getDisplayTextFromString(order.orderStatus),
+                          order.orderStatus.getDisplayText(),
                           style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -187,7 +184,10 @@ class _OrdersPageState extends State<OrdersPage> {
                     children: [
                       const Icon(Icons.shopping_cart, size: 16, color: Colors.grey),
                       const SizedBox(width: 8),
-                      Text('${order.orderItems.length} item${order.orderItems.length != 1 ? 's' : ''}', style: const TextStyle(color: Colors.grey)),
+                      Text(
+                        '${order.orderItems.length + order.serviceItems.length} item${(order.orderItems.length + order.serviceItems.length) != 1 ? 's' : ''}',
+                        style: const TextStyle(color: Colors.grey),
+                      ),
                       if (_hasBoxRequirements(order)) ...[const SizedBox(width: 12), const Icon(Icons.inventory_2, size: 16, color: Colors.blue)],
                       if (_hasPrintingRequirements(order)) ...[const SizedBox(width: 8), const Icon(Icons.print, size: 16, color: Colors.green)],
                       const Spacer(),
@@ -205,7 +205,8 @@ class _OrdersPageState extends State<OrdersPage> {
                               ),
                             ),
                             TextSpan(
-                              text: '${OrderCalculationService.calculateOrderTotal(order.orderItems).toStringAsFixed(2)}',
+                              text:
+                                  '${OrderCalculationService.calculateOrderTotal(order.orderItems, serviceItems: order.serviceItems).toStringAsFixed(2)}',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
@@ -397,12 +398,9 @@ class _OrdersPageState extends State<OrdersPage> {
               child: Center(
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: OrderStatusExtension.getColorFromString(order.orderStatus),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  decoration: BoxDecoration(color: order.orderStatus.getStatusColor(), borderRadius: BorderRadius.circular(12)),
                   child: Text(
-                    OrderStatusExtension.getDisplayTextFromString(order.orderStatus),
+                    order.orderStatus.getDisplayText(),
                     style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
@@ -478,7 +476,7 @@ class _OrdersPageState extends State<OrdersPage> {
               flex: 1,
               child: Center(
                 child: Text(
-                  '₹${OrderCalculationService.calculateOrderTotal(order.orderItems).toStringAsFixed(2)}',
+                  '₹${OrderCalculationService.calculateOrderTotal(order.orderItems, serviceItems: order.serviceItems).toStringAsFixed(2)}',
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                   textAlign: TextAlign.center,
                 ),

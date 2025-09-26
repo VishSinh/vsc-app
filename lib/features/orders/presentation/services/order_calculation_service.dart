@@ -49,11 +49,17 @@ class OrderCalculationService {
 
   // Order Total Calculations
 
-  static double calculateOrderTotal(List<dynamic> orderItems) {
+  static double calculateOrderTotal(List<dynamic> orderItems, {List<dynamic> serviceItems = const []}) {
     double total = 0.0;
 
     for (final item in orderItems) {
       total += calculateItemTotal(item);
+    }
+
+    // Add service items total_cost
+    for (final svc in serviceItems) {
+      final cost = parseDouble(svc.totalCost);
+      total += cost;
     }
 
     return total;

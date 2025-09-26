@@ -15,6 +15,8 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 
 import 'package:vsc_app/features/orders/presentation/providers/order_create_provider.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
+import 'package:vsc_app/core/enums/service_type.dart';
+import 'package:vsc_app/features/orders/presentation/models/service_item_form_model.dart';
 
 class CreateOrderPage extends StatefulWidget {
   const CreateOrderPage({super.key});
@@ -29,6 +31,14 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
   // Add a variable to track the last scanned barcode and time
   String? _lastScannedBarcode;
   DateTime? _lastScanTime;
+  bool _showServiceForm = false;
+
+  // Persistent Service Item form state
+  ServiceType? _serviceType;
+  final TextEditingController _svcQtyController = TextEditingController();
+  final TextEditingController _svcCostController = TextEditingController();
+  final TextEditingController _svcExpenseController = TextEditingController();
+  final TextEditingController _svcDescController = TextEditingController();
 
   @override
   void initState() {
@@ -42,6 +52,10 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
   @override
   void dispose() {
     _barcodeController.dispose();
+    _svcQtyController.dispose();
+    _svcCostController.dispose();
+    _svcExpenseController.dispose();
+    _svcDescController.dispose();
     super.dispose();
   }
 
@@ -60,8 +74,8 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
 
   void _proceedToReview() {
     final orderProvider = context.read<OrderCreateProvider>();
-    if (orderProvider.orderItems.isEmpty) {
-      orderProvider.setErrorWithSnackBar('Please add at least one item to the order', context);
+    if (orderProvider.orderItems.isEmpty && orderProvider.serviceItems.isEmpty) {
+      orderProvider.setErrorWithSnackBar('Please add at least one order item or service item', context);
       return;
     }
     context.push(RouteConstants.orderReview, extra: orderProvider);
@@ -77,6 +91,19 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
 
     item.cardId = currentCard.id;
 
+    // Validate item before adding to order list
+    final validation = item.validate();
+    if (!validation.isValid) {
+      orderProvider.setErrorWithSnackBar(validation.firstMessage ?? 'Please check item details', context);
+      return;
+    }
+
+    // Enforce stock constraint
+    if (item.quantity > currentCard.quantity) {
+      orderProvider.setErrorWithSnackBar('Quantity cannot exceed available stock (${currentCard.quantity})', context);
+      return;
+    }
+
     // Check if the item already exists in the order
     if (orderProvider.orderItems.any((element) => element.cardId == item.cardId)) {
       orderProvider.setErrorWithSnackBar('Item already exists in the order', context);
@@ -85,6 +112,20 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
 
     orderProvider.addOrderItem(item);
     orderProvider.setSuccessWithSnackBar('Item added to order', context);
+  }
+
+  void _handleAddServiceItem(ServiceItemCreationFormModel item) {
+    final orderProvider = context.read<OrderCreateProvider>();
+
+    // Validate service item
+    final validation = item.validate();
+    if (!validation.isValid) {
+      orderProvider.setErrorWithSnackBar(validation.firstMessage ?? 'Please check service item details', context);
+      return;
+    }
+
+    orderProvider.addServiceItem(item);
+    orderProvider.setSuccessWithSnackBar('Service item added to order', context);
   }
 
   void _showBarcodeScanner() {
@@ -193,6 +234,8 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
           SizedBox(height: AppConfig.largePadding),
           _buildOrderItemsList(orderProvider),
           SizedBox(height: AppConfig.largePadding),
+          _buildServiceItemsSection(orderProvider),
+          SizedBox(height: AppConfig.largePadding),
           _buildActionButtons(orderProvider),
         ],
       ),
@@ -227,6 +270,8 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
           SizedBox(height: AppConfig.largePadding),
           // Bottom section: Order Items taking full width
           _buildOrderItemsList(orderProvider),
+          SizedBox(height: AppConfig.largePadding),
+          _buildServiceItemsSection(orderProvider),
           SizedBox(height: AppConfig.largePadding),
           _buildActionButtons(orderProvider),
         ],
@@ -347,6 +392,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                   OrderItemEntryForm(
                     onAddItem: _handleAddOrderItem,
                     isLoading: false, // Will be handled by parent
+                    maxQuantity: card.quantity,
                   ),
                   // Removed duplicate Add Item button here
                 ],
@@ -388,6 +434,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                         OrderItemEntryForm(
                           onAddItem: _handleAddOrderItem,
                           isLoading: false, // Will be handled by parent
+                          maxQuantity: card.quantity,
                         ),
                       ],
                     ),
@@ -461,6 +508,131 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
     );
   }
 
+  Widget _buildServiceItemsSection(OrderCreateProvider orderProvider) {
+    return Card(
+      child: Padding(
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(child: Text('Service Items (${orderProvider.serviceItems.length})', style: ResponsiveText.getTitle(context))),
+                ButtonUtils.secondaryButton(
+                  onPressed: () {
+                    setState(() => _showServiceForm = !_showServiceForm);
+                  },
+                  label: _showServiceForm ? 'Hide Form' : 'Add Service Item',
+                  icon: _showServiceForm ? Icons.close : Icons.add,
+                ),
+              ],
+            ),
+            SizedBox(height: AppConfig.defaultPadding),
+            if (_showServiceForm) ...[_buildServiceItemEntryForm(orderProvider), SizedBox(height: AppConfig.defaultPadding)],
+            if (orderProvider.serviceItems.isEmpty)
+              const EmptyStateWidget(message: 'No service items added yet', icon: Icons.home_repair_service)
+            else
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: orderProvider.serviceItems.length,
+                itemBuilder: (context, index) {
+                  final svc = orderProvider.serviceItems[index];
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: (svc.serviceType?.color ?? Colors.teal).withOpacity(0.2),
+                      child: Icon(Icons.home_repair_service, color: svc.serviceType?.color ?? Colors.teal),
+                    ),
+                    title: Text(svc.serviceType?.displayText ?? svc.serviceType?.toApiString() ?? 'SERVICE'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [Text('Qty: ${svc.quantity}'), Text('Expense: ₹${svc.totalExpense}  •  Cost: ₹${svc.totalCost}')],
+                    ),
+                    trailing: IconButton(icon: const Icon(Icons.delete), onPressed: () => orderProvider.removeServiceItem(index)),
+                  );
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildServiceItemEntryForm(OrderCreateProvider orderProvider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: DropdownButtonFormField<ServiceType>(
+                value: _serviceType,
+                onChanged: (val) => setState(() => _serviceType = val),
+                decoration: const InputDecoration(labelText: 'Service Type', border: OutlineInputBorder()),
+                items: ServiceType.values.map((t) => DropdownMenuItem(value: t, child: Text(t.displayText))).toList(),
+              ),
+            ),
+            SizedBox(width: AppConfig.defaultPadding),
+            Expanded(
+              child: TextFormField(
+                controller: _svcQtyController,
+                decoration: const InputDecoration(labelText: 'Quantity', border: OutlineInputBorder()),
+                keyboardType: TextInputType.number,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: AppConfig.defaultPadding),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _svcExpenseController,
+                decoration: const InputDecoration(labelText: 'Total Expense', border: OutlineInputBorder()),
+                keyboardType: TextInputType.number,
+              ),
+            ),
+            SizedBox(width: AppConfig.defaultPadding),
+            Expanded(
+              child: TextFormField(
+                controller: _svcCostController,
+                decoration: const InputDecoration(labelText: 'Total Cost', border: OutlineInputBorder()),
+                keyboardType: TextInputType.number,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: AppConfig.defaultPadding),
+        TextFormField(
+          controller: _svcDescController,
+          decoration: const InputDecoration(labelText: 'Description (optional)', border: OutlineInputBorder()),
+          maxLines: 2,
+        ),
+        SizedBox(height: AppConfig.defaultPadding),
+        ButtonUtils.successButton(
+          onPressed: () {
+            final qty = int.tryParse(_svcQtyController.text) ?? 0;
+            final item = ServiceItemCreationFormModel(
+              serviceType: _serviceType,
+              quantity: qty,
+              totalCost: _svcCostController.text,
+              totalExpense: _svcExpenseController.text,
+              description: _svcDescController.text.isEmpty ? null : _svcDescController.text,
+            );
+            _handleAddServiceItem(item);
+            _svcQtyController.clear();
+            _svcCostController.clear();
+            _svcExpenseController.clear();
+            _svcDescController.clear();
+            setState(() => _serviceType = null);
+          },
+          label: 'Add Service Item',
+          icon: Icons.add,
+        ),
+      ],
+    );
+  }
+
   Widget _buildActionButtons(OrderCreateProvider orderProvider) {
     return Row(
       children: [
@@ -470,7 +642,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
         SizedBox(width: AppConfig.defaultPadding),
         Expanded(
           child: ButtonUtils.primaryButton(
-            onPressed: orderProvider.orderItems.isNotEmpty ? _proceedToReview : null,
+            onPressed: (orderProvider.orderItems.isNotEmpty || orderProvider.serviceItems.isNotEmpty) ? _proceedToReview : null,
             label: UITextConstants.reviewOrder,
             icon: Icons.arrow_forward,
           ),

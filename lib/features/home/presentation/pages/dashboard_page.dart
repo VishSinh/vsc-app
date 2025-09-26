@@ -126,7 +126,7 @@ class _DashboardPageState extends State<DashboardPage> {
               _buildStatTile(
                 context,
                 title: UITextConstants.totalRevenue,
-                value: '₹${dashboard.monthlyProfit}',
+                value: '${dashboard.formattedMonthlyProfit}',
                 icon: Icons.attach_money,
                 color: AppConfig.successColor,
                 subtitle: 'View yearly analysis',
@@ -277,6 +277,7 @@ class _DashboardPageState extends State<DashboardPage> {
               icon: Icons.today,
               color: AppConfig.primaryColor,
               subtitle: UITextConstants.ordersCreatedToday,
+              onTap: () => context.push(RouteConstants.todaysOrders),
               allowDoubleSpan: allowDoubleSpan,
             ),
           );
