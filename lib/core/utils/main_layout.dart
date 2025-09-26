@@ -45,19 +45,26 @@ class _MainLayoutState extends State<MainLayout> {
     return Consumer2<NavigationProvider, PermissionProvider>(
       builder: (context, navigationProvider, permissionProvider, _) {
         final destinations = NavigationItems.getDestinationsForPermissions(
-          canManageOrders: permissionProvider.canManageOrders,
-          canManageInventory: permissionProvider.canManageInventory,
-          canManageProduction: permissionProvider.canManageProduction,
-          canManageVendors: permissionProvider.canManageVendors,
-          canManageSystem: permissionProvider.canManageSystem,
+          canViewOrders: permissionProvider.canManageOrders,
+          canViewInventory: permissionProvider.canManageInventory,
+          canViewProduction: permissionProvider.canManageProduction,
+          canViewVendors: permissionProvider.canManageVendors,
+          canViewSystem: permissionProvider.canManageSystem,
           canViewAuditLogs: permissionProvider.canViewAuditLogs,
-          canManageBilling: permissionProvider.canManageBilling,
-          canManagePayments: permissionProvider.canManagePayments,
+          canViewBilling: permissionProvider.canManageBilling,
+          canViewPayments: permissionProvider.canManagePayments,
         );
 
+        // Clamp selected index to avoid out-of-range errors (e.g., after permissions change on logout)
+        final safeIndex = destinations.isEmpty
+            ? 0
+            : (navigationProvider.selectedIndex >= 0 && navigationProvider.selectedIndex < destinations.length)
+            ? navigationProvider.selectedIndex
+            : 0;
+
         // Get the current page based on selected index
-        final currentPage = _getCurrentPage(navigationProvider.selectedIndex, destinations);
-        final pageTitle = destinations[navigationProvider.selectedIndex].label;
+        final currentPage = _getCurrentPage(safeIndex, destinations);
+        final pageTitle = destinations.isNotEmpty ? destinations[safeIndex].label : 'Dashboard';
 
         // Get the floating action button for the current page
         final floatingActionButton = NavigationItems.getFloatingActionButtonForPage(pageTitle.toLowerCase(), context);
@@ -93,7 +100,7 @@ class _MainLayoutState extends State<MainLayout> {
         case 'bills':
           availablePages.add(const BillSearchPage());
           break;
-        case 'administration':
+        case 'admin':
           availablePages.add(const AdministrationPage());
           break;
         default:

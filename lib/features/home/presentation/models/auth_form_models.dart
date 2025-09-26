@@ -18,12 +18,8 @@ class LoginFormModel {
         return ValidationResult.failureSingle('phone', 'Please enter phone number');
       }
 
-      if (phone.trim().length < 10) {
-        return ValidationResult.failureSingle('phone', 'Phone number must be at least 10 digits');
-      }
-
-      if (!RegExp(r'^[0-9+\-\s()]+$').hasMatch(phone.trim())) {
-        return ValidationResult.failureSingle('phone', 'Phone number contains invalid characters');
+      if (!RegExp(r'^\d{10}$').hasMatch(phone.trim())) {
+        return ValidationResult.failureSingle('phone', 'Phone number must be exactly 10 digits');
       }
 
       return ValidationResult.success();
@@ -34,19 +30,13 @@ class LoginFormModel {
         return ValidationResult.failureSingle('password', 'Please enter password');
       }
 
-      if (password.length < 3) {
-        return ValidationResult.failureSingle('password', 'Password must be at least 6 characters');
+      if (password.length < 4) {
+        return ValidationResult.failureSingle('password', 'Password must be at least 4 characters');
       }
 
       if (password.length > 50) {
         return ValidationResult.failureSingle('password', 'Password must be less than 50 characters');
       }
-
-      // final hasLetter = RegExp(r'[a-zA-Z]').hasMatch(password);
-      // final hasNumber = RegExp(r'[0-9]').hasMatch(password);
-      // if (!hasLetter || !hasNumber) {
-      //   return ValidationResult.failureSingle('password', 'Password must contain at least one letter and one number');
-      // }
 
       return ValidationResult.success();
     }
@@ -135,19 +125,15 @@ class RegisterFormModel {
         return ValidationResult.failureSingle('password', 'Please enter password');
       }
 
-      if (password.length < 6) {
-        return ValidationResult.failureSingle('password', 'Password must be at least 6 characters');
+      if (password.length < 4) {
+        return ValidationResult.failureSingle('password', 'Password must be at least 4 characters');
       }
 
       if (password.length > 50) {
         return ValidationResult.failureSingle('password', 'Password must be less than 50 characters');
       }
 
-      final hasLetter = RegExp(r'[a-zA-Z]').hasMatch(password);
-      final hasNumber = RegExp(r'[0-9]').hasMatch(password);
-      if (!hasLetter || !hasNumber) {
-        return ValidationResult.failureSingle('password', 'Password must contain at least one letter and one number');
-      }
+      // No complexity requirements
 
       return ValidationResult.success();
     }

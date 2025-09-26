@@ -105,15 +105,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       prefixIcon: const Icon(Icons.person),
                       hintText: UITextConstants.nameHint,
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return UITextConstants.pleaseEnterFullName;
-                      }
-                      if (value.length < 2) {
-                        return UITextConstants.nameTooShort;
-                      }
-                      return null;
-                    },
+                    validator: (value) => null,
                     onChanged: (value) {
                       context.read<AuthProvider>().updateRegisterForm(name: value);
                     },
@@ -133,8 +125,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       if (value == null || value.isEmpty) {
                         return UITextConstants.pleaseEnterPhone;
                       }
-                      if (value.length < 10) {
-                        return UITextConstants.pleaseEnterValidPhone;
+                      final digitsOnly = RegExp(r'^\d{10}$');
+                      if (!digitsOnly.hasMatch(value.trim())) {
+                        return 'Please enter a 10-digit phone number';
                       }
                       return null;
                     },
@@ -157,12 +150,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         context.read<AuthProvider>().updateRegisterForm(role: value.value);
                       }
                     },
-                    validator: (value) {
-                      if (value == null) {
-                        return 'Please select a role';
-                      }
-                      return null;
-                    },
+                    validator: (value) => null,
                   ),
                   SizedBox(height: AppConfig.defaultPadding),
 
@@ -186,8 +174,8 @@ class _RegisterPageState extends State<RegisterPage> {
                       if (value == null || value.isEmpty) {
                         return UITextConstants.pleaseEnterPassword;
                       }
-                      if (value.length < 6) {
-                        return UITextConstants.passwordTooShort;
+                      if (value.length < 4) {
+                        return 'Password must be at least 4 characters';
                       }
                       return null;
                     },

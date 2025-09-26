@@ -81,16 +81,21 @@ class NavigationItems {
               ),
 
               const SizedBox(height: 8),
-              SizedBox(
-                width: 40,
-                height: 40,
-                child: FloatingActionButton(
-                  onPressed: () => context.go(RouteConstants.customerSearch),
-                  backgroundColor: AppConfig.primaryColor,
-                  heroTag: 'add_order',
-                  mini: true,
-                  child: const Icon(Icons.add, color: Colors.white, size: 18),
-                ),
+              Consumer<PermissionProvider>(
+                builder: (context, permissionProvider, _) {
+                  if (!permissionProvider.canCreate('order')) return const SizedBox.shrink();
+                  return SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: FloatingActionButton(
+                      onPressed: () => context.go(RouteConstants.customerSearch),
+                      backgroundColor: AppConfig.primaryColor,
+                      heroTag: 'add_order',
+                      mini: true,
+                      child: const Icon(Icons.add, color: Colors.white, size: 18),
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -102,25 +107,25 @@ class NavigationItems {
 
   // Get destinations based on permissions
   static List<NavigationDestination> getDestinationsForPermissions({
-    required bool canManageOrders,
-    required bool canManageInventory,
-    required bool canManageProduction,
-    required bool canManageVendors,
-    required bool canManageSystem,
+    required bool canViewOrders,
+    required bool canViewInventory,
+    required bool canViewProduction,
+    required bool canViewVendors,
+    required bool canViewSystem,
     required bool canViewAuditLogs,
-    required bool canManageBilling,
-    required bool canManagePayments,
+    required bool canViewBilling,
+    required bool canViewPayments,
   }) {
     final destinations = <NavigationDestination>[const NavigationDestination(icon: Icon(Icons.dashboard), label: UITextConstants.dashboard)];
 
-    if (canManageOrders) {
+    if (canViewOrders) {
       destinations.add(const NavigationDestination(icon: Icon(Icons.shopping_cart), label: UITextConstants.orders));
     }
-    if (canManageBilling || canManagePayments) {
+    if (canViewBilling || canViewPayments) {
       destinations.add(const NavigationDestination(icon: Icon(Icons.receipt_long), label: UITextConstants.bills));
     }
 
-    if (canManageInventory) {
+    if (canViewInventory) {
       destinations.add(const NavigationDestination(icon: Icon(Icons.inventory), label: UITextConstants.inventory));
     }
 
@@ -132,7 +137,7 @@ class NavigationItems {
     //   destinations.add(const NavigationDestination(icon: Icon(Icons.people), label: UITextConstants.vendors));
     // }
 
-    if (canManageSystem || canViewAuditLogs) {
+    if (canViewSystem || canViewAuditLogs) {
       destinations.add(const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: UITextConstants.administration));
     }
 

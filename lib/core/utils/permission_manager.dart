@@ -57,14 +57,13 @@ class PermissionManager {
   /// Check if user can cancel orders
   bool canCancelOrders() => hasPermission('order.cancel');
 
-  /// Check if user can process payments
-  bool canProcessPayments() => hasPermission('payment.process');
+  /// Check if user can view payments
+  bool canReadPayments() => hasPermission('payment.read');
 
-  /// Check if user can refund payments
-  bool canRefundPayments() => hasPermission('payment.refund');
+  /// Check if user can create payments
+  bool canCreatePayments() => hasPermission('payment.create');
 
-  /// Check if user can perform inventory transactions
-  bool canPerformInventoryTransactions() => hasPermission('inventory.transaction');
+  // Inventory replaced by Cards; no explicit inventory permissions in new set
 
   /// Check if user can read audit logs
   bool canReadAuditLogs() => hasPermission('audit.read');
@@ -81,6 +80,12 @@ class PermissionManager {
   /// Check if user can restore system
   bool canRestoreSystem() => hasPermission('system.restore');
 
+  /// Check if user can read dashboard
+  bool canReadDashboard() => hasPermission('dashboard.read');
+
+  /// Check if user can purchase cards/stock
+  bool canPurchaseCards() => hasPermission('card.purchase');
+
   /// Get all current permissions
   List<String> get currentPermissions => List.unmodifiable(_currentPermissions);
 
@@ -94,26 +99,24 @@ class PermissionManager {
   bool get isInitialized => _isInitialized;
 
   // Domain-specific permission checks
-  bool get canManageAccounts => hasAnyPermission(['account.create', 'account.read', 'account.update', 'account.delete', 'account.list']);
+  bool get canManageAccounts => hasAnyPermission(['account.create', 'account.read', 'account.update', 'account.delete']);
 
-  bool get canManageInventory =>
-      hasAnyPermission(['inventory.create', 'inventory.read', 'inventory.update', 'inventory.delete', 'inventory.list', 'inventory.transaction']);
+  // Inventory section maps to Cards in UI
+  bool get canManageInventory => hasAnyPermission(['card.create', 'card.read', 'card.update', 'card.delete', 'card.purchase']);
 
-  bool get canManageOrders =>
-      hasAnyPermission(['order.create', 'order.read', 'order.update', 'order.delete', 'order.list', 'order.approve', 'order.cancel']);
+  bool get canManageOrders => hasAnyPermission(['order.create', 'order.read', 'order.update', 'order.delete', 'order.approve', 'order.cancel']);
 
-  bool get canManageProduction =>
-      hasAnyPermission(['production.create', 'production.read', 'production.update', 'production.delete', 'production.list']);
+  bool get canManageProduction => hasAnyPermission(['production.create', 'production.read', 'production.update', 'production.delete']);
 
-  bool get canManageBilling => hasAnyPermission(['bill.create', 'bill.read', 'bill.update', 'bill.delete', 'bill.list']);
+  bool get canManageBilling => hasAnyPermission(['bill.read', 'bill.adjustment.create']);
 
-  bool get canManagePayments => hasAnyPermission(['payment.process', 'payment.refund']);
+  bool get canManagePayments => hasAnyPermission(['payment.read', 'payment.create']);
 
-  bool get canManageVendors => hasAnyPermission(['vendor.create', 'vendor.read', 'vendor.update', 'vendor.delete', 'vendor.list']);
+  bool get canManageVendors => hasAnyPermission(['vendor.create', 'vendor.read', 'vendor.update', 'vendor.delete']);
 
-  bool get canManageCards => hasAnyPermission(['card.create', 'card.read', 'card.update', 'card.delete', 'card.list']);
+  bool get canManageCards => hasAnyPermission(['card.create', 'card.read', 'card.update', 'card.delete', 'card.purchase']);
 
-  bool get canManageCustomers => hasAnyPermission(['customer.create', 'customer.read', 'customer.update', 'customer.delete', 'customer.list']);
+  bool get canManageCustomers => hasAnyPermission(['customer.create', 'customer.read', 'customer.update', 'customer.delete']);
 
   bool get canManageSystem => hasAnyPermission(['system.config', 'system.backup', 'system.restore']);
 

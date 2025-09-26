@@ -72,6 +72,8 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _buildDashboardContent(UserRole userRole, PermissionProvider permissionProvider, DashboardProvider dashboardProvider) {
     final isMobile = MediaQuery.of(context).size.width < AppConfig.mobileBreakpoint;
 
+    // Hide entire stats grid if dashboard analytics are not allowed
+
     return Padding(
       padding: EdgeInsets.all(isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding),
       child: Column(
@@ -83,13 +85,13 @@ class _DashboardPageState extends State<DashboardPage> {
             SizedBox(height: isMobile ? AppConfig.defaultPadding : AppConfig.largePadding),
           ],
           // Stats Cards
-          Expanded(child: _buildStatsGrid(userRole, permissionProvider, dashboardProvider)),
+          if (permissionProvider.canRead('dashboard')) Expanded(child: _buildStatsGrid(userRole, dashboardProvider)),
         ],
       ),
     );
   }
 
-  Widget _buildStatsGrid(UserRole userRole, PermissionProvider permissionProvider, DashboardProvider dashboardProvider) {
+  Widget _buildStatsGrid(UserRole userRole, DashboardProvider dashboardProvider) {
     final dashboard = dashboardProvider.dashboardData;
 
     // If still loading with no data, show loading indicator
@@ -121,151 +123,141 @@ class _DashboardPageState extends State<DashboardPage> {
         final tiles = <StaggeredGridTile>[];
         // Helpers to add common tiles
         void addRevenue() {
-          if (permissionProvider.canManageBilling || permissionProvider.canManagePayments) {
-            tiles.add(
-              _buildStatTile(
-                context,
-                title: UITextConstants.totalRevenue,
-                value: '${dashboard.formattedMonthlyProfit}',
-                icon: Icons.attach_money,
-                color: AppConfig.successColor,
-                subtitle: 'View yearly analysis',
-                onTap: () => context.push(RouteConstants.yearlyProfit),
-                doubleSpan: true,
-                allowDoubleSpan: allowDoubleSpan,
-                trailing: Lottie.asset('assets/animations/revenue_coins.json', height: isMobile ? 100 : 140, width: isMobile ? 100 : 140),
-              ),
-            );
-          }
+          tiles.add(
+            _buildStatTile(
+              context,
+              title: UITextConstants.totalRevenue,
+              value: '${dashboard.formattedMonthlyProfit}',
+              icon: Icons.attach_money,
+              color: AppConfig.successColor,
+              subtitle: 'View yearly analysis',
+              onTap: () => context.push(RouteConstants.yearlyProfit),
+              doubleSpan: true,
+              allowDoubleSpan: allowDoubleSpan,
+              trailing: Lottie.asset('assets/animations/revenue_coins.json', height: isMobile ? 100 : 140, width: isMobile ? 100 : 140),
+            ),
+          );
         }
 
         void addOrders() {
-          if (permissionProvider.canManageOrders) {
-            tiles.add(
-              _buildStatTile(
-                context,
-                title: UITextConstants.totalOrders,
-                value: dashboard.totalOrdersCurrentMonth.toString(),
-                icon: Icons.shopping_cart,
-                color: AppConfig.primaryColor,
-                subtitle: dashboard.monthlyOrderChangePercentage >= 0
-                    ? '${dashboard.formattedMonthlyOrderChangePercentage} from last month'
-                    : '${dashboard.formattedMonthlyOrderChangePercentage} from last month',
-                allowDoubleSpan: allowDoubleSpan,
-              ),
-            );
-            tiles.add(
-              _buildStatTile(
-                context,
-                title: UITextConstants.pendingOrders,
-                value: dashboard.pendingOrders.toString(),
-                icon: Icons.pending,
-                color: AppConfig.warningColor,
-                subtitle: dashboard.pendingOrders > 0 ? UITextConstants.ordersRequireAttention : 'No orders require attention',
-                allowDoubleSpan: allowDoubleSpan,
-              ),
-            );
-          }
+          tiles.add(
+            _buildStatTile(
+              context,
+              title: UITextConstants.totalOrders,
+              value: dashboard.totalOrdersCurrentMonth.toString(),
+              icon: Icons.shopping_cart,
+              color: AppConfig.primaryColor,
+              subtitle: dashboard.monthlyOrderChangePercentage >= 0
+                  ? '${dashboard.formattedMonthlyOrderChangePercentage} from last month'
+                  : '${dashboard.formattedMonthlyOrderChangePercentage} from last month',
+              allowDoubleSpan: allowDoubleSpan,
+            ),
+          );
+          tiles.add(
+            _buildStatTile(
+              context,
+              title: UITextConstants.pendingOrders,
+              value: dashboard.pendingOrders.toString(),
+              icon: Icons.pending,
+              color: AppConfig.warningColor,
+              subtitle: dashboard.pendingOrders > 0 ? UITextConstants.ordersRequireAttention : 'No orders require attention',
+              allowDoubleSpan: allowDoubleSpan,
+            ),
+          );
         }
 
         void addInventoryAlerts() {
-          if (permissionProvider.canManageInventory) {
-            tiles.add(
-              _buildStatTile(
-                context,
-                title: UITextConstants.lowStockItems,
-                value: dashboard.lowStockItems.toString(),
-                icon: Icons.warning,
-                color: AppConfig.errorColor,
-                subtitle: UITextConstants.needReorder,
-                onTap: () => context.push(RouteConstants.lowStockCards),
-                doubleSpan: true,
-                allowDoubleSpan: allowDoubleSpan,
-                trailing: Lottie.asset('assets/animations/low_stock.json', fit: BoxFit.contain),
-              ),
-            );
-            tiles.add(
-              _buildStatTile(
-                context,
-                title: UITextConstants.outOfStock,
-                value: dashboard.outOfStockItems.toString(),
-                icon: Icons.remove_shopping_cart,
-                color: AppConfig.errorColor,
-                subtitle: UITextConstants.itemsNeedRestocking,
-                onTap: () => context.push(RouteConstants.outOfStockCards),
-                doubleSpan: true,
-                allowDoubleSpan: allowDoubleSpan,
-                trailing: Lottie.asset('assets/animations/out_of_stock.json', fit: BoxFit.contain),
-              ),
-            );
-          }
+          tiles.add(
+            _buildStatTile(
+              context,
+              title: UITextConstants.lowStockItems,
+              value: dashboard.lowStockItems.toString(),
+              icon: Icons.warning,
+              color: AppConfig.errorColor,
+              subtitle: UITextConstants.needReorder,
+              onTap: () => context.push(RouteConstants.lowStockCards),
+              doubleSpan: true,
+              allowDoubleSpan: allowDoubleSpan,
+              trailing: Lottie.asset('assets/animations/low_stock.json', fit: BoxFit.contain),
+            ),
+          );
+          tiles.add(
+            _buildStatTile(
+              context,
+              title: UITextConstants.outOfStock,
+              value: dashboard.outOfStockItems.toString(),
+              icon: Icons.remove_shopping_cart,
+              color: AppConfig.errorColor,
+              subtitle: UITextConstants.itemsNeedRestocking,
+              onTap: () => context.push(RouteConstants.outOfStockCards),
+              doubleSpan: true,
+              allowDoubleSpan: allowDoubleSpan,
+              trailing: Lottie.asset('assets/animations/out_of_stock.json', fit: BoxFit.contain),
+            ),
+          );
         }
 
         void addProduction() {
-          if (permissionProvider.canManageProduction) {
+          tiles.add(
+            _buildStatTile(
+              context,
+              title: UITextConstants.productionJobs,
+              value: (dashboard.pendingPrintingJobs + dashboard.pendingBoxJobs).toString(),
+              icon: Icons.print,
+              color: AppConfig.accentColor,
+              subtitle: UITextConstants.jobsInProgress,
+              allowDoubleSpan: allowDoubleSpan,
+            ),
+          );
+          if (isMobile) {
             tiles.add(
               _buildStatTile(
                 context,
-                title: UITextConstants.productionJobs,
-                value: (dashboard.pendingPrintingJobs + dashboard.pendingBoxJobs).toString(),
+                title: UITextConstants.pendingPrintingJobs,
+                value: dashboard.pendingPrintingJobs.toString(),
                 icon: Icons.print,
                 color: AppConfig.accentColor,
-                subtitle: UITextConstants.jobsInProgress,
+                subtitle: UITextConstants.jobsInPrintingQueue,
                 allowDoubleSpan: allowDoubleSpan,
               ),
             );
-            if (isMobile) {
-              tiles.add(
-                _buildStatTile(
-                  context,
-                  title: UITextConstants.pendingPrintingJobs,
-                  value: dashboard.pendingPrintingJobs.toString(),
-                  icon: Icons.print,
-                  color: AppConfig.accentColor,
-                  subtitle: UITextConstants.jobsInPrintingQueue,
-                  allowDoubleSpan: allowDoubleSpan,
-                ),
-              );
-              tiles.add(
-                _buildStatTile(
-                  context,
-                  title: UITextConstants.pendingBoxJobs,
-                  value: dashboard.pendingBoxJobs.toString(),
-                  icon: Icons.inventory_2,
-                  color: AppConfig.accentColor,
-                  subtitle: UITextConstants.boxOrdersInQueue,
-                  allowDoubleSpan: allowDoubleSpan,
-                ),
-              );
-            }
+            tiles.add(
+              _buildStatTile(
+                context,
+                title: UITextConstants.pendingBoxJobs,
+                value: dashboard.pendingBoxJobs.toString(),
+                icon: Icons.inventory_2,
+                color: AppConfig.accentColor,
+                subtitle: UITextConstants.boxOrdersInQueue,
+                allowDoubleSpan: allowDoubleSpan,
+              ),
+            );
           }
         }
 
         void addFinance() {
-          if (permissionProvider.canManageBilling) {
-            tiles.add(
-              _buildStatTile(
-                context,
-                title: UITextConstants.monthlyGrowth,
-                value: dashboard.formattedMonthlyOrderChangePercentage,
-                icon: Icons.trending_up,
-                color: AppConfig.successColor,
-                subtitle: UITextConstants.orderGrowthThisMonth,
-                allowDoubleSpan: allowDoubleSpan,
-              ),
-            );
-            tiles.add(
-              _buildStatTile(
-                context,
-                title: UITextConstants.pendingBills,
-                value: dashboard.pendingBills.toString(),
-                icon: Icons.receipt_long,
-                color: AppConfig.warningColor,
-                subtitle: UITextConstants.billsAwaitingPayment,
-                allowDoubleSpan: allowDoubleSpan,
-              ),
-            );
-          }
+          tiles.add(
+            _buildStatTile(
+              context,
+              title: UITextConstants.monthlyGrowth,
+              value: dashboard.formattedMonthlyOrderChangePercentage,
+              icon: Icons.trending_up,
+              color: AppConfig.successColor,
+              subtitle: UITextConstants.orderGrowthThisMonth,
+              allowDoubleSpan: allowDoubleSpan,
+            ),
+          );
+          tiles.add(
+            _buildStatTile(
+              context,
+              title: UITextConstants.pendingBills,
+              value: dashboard.pendingBills.toString(),
+              icon: Icons.receipt_long,
+              color: AppConfig.warningColor,
+              subtitle: UITextConstants.billsAwaitingPayment,
+              allowDoubleSpan: allowDoubleSpan,
+            ),
+          );
         }
 
         void addCommon() {

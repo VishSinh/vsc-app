@@ -11,6 +11,7 @@ class RouteConstants {
   static const String inventory = '/inventory';
   static const String production = '/production';
   static const String administration = '/administration';
+  static const String auditModelLogs = '/administration/model-logs';
   static const String vendors = '/vendors';
   static const String vendorDetail = '/vendors/:id';
   static const String cardDetail = '/cards/:id';
@@ -38,6 +39,7 @@ class RouteConstants {
   static const String inventoryRouteName = 'inventory';
   static const String productionRouteName = 'production';
   static const String administrationRouteName = 'administration';
+  static const String auditModelLogsRouteName = 'audit-model-logs';
   static const String vendorsRouteName = 'vendors';
   static const String vendorDetailRouteName = 'vendor-detail';
 

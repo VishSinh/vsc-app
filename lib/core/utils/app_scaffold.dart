@@ -23,14 +23,14 @@ class AppScaffold extends StatelessWidget {
     return Consumer3<NavigationProvider, PermissionProvider, AuthProvider>(
       builder: (context, navigationProvider, permissionProvider, authProvider, _) {
         final destinations = NavigationItems.getDestinationsForPermissions(
-          canManageOrders: permissionProvider.canManageOrders,
-          canManageInventory: permissionProvider.canManageInventory,
-          canManageProduction: permissionProvider.canManageProduction,
-          canManageVendors: permissionProvider.canManageVendors,
-          canManageSystem: permissionProvider.canManageSystem,
+          canViewOrders: permissionProvider.canManageOrders,
+          canViewInventory: permissionProvider.canManageInventory,
+          canViewProduction: permissionProvider.canManageProduction,
+          canViewVendors: permissionProvider.canManageVendors,
+          canViewSystem: permissionProvider.canManageSystem,
           canViewAuditLogs: permissionProvider.canViewAuditLogs,
-          canManageBilling: permissionProvider.canManageBilling,
-          canManagePayments: permissionProvider.canManagePayments,
+          canViewBilling: permissionProvider.canManageBilling,
+          canViewPayments: permissionProvider.canManagePayments,
         );
 
         final screenWidth = MediaQuery.of(context).size.width;
@@ -143,24 +143,18 @@ class AppScaffold extends StatelessWidget {
       minWidth: 56,
       minExtendedWidth: 200,
       backgroundColor: colorScheme.surface,
-      elevation: 2,
+      elevation: 5.5,
       groupAlignment: 0.0,
       useIndicator: true,
       indicatorColor: Colors.transparent,
       indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       labelType: NavigationRailLabelType.all,
       trailing: Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Divider(height: 16, color: Colors.grey),
-            IconButton(
-              tooltip: 'Logout',
-              icon: Icon(LucideIcons.logOut, color: unselectedColor, size: 24),
-              onPressed: () => _handleLogout(context),
-            ),
-          ],
+        padding: const EdgeInsets.only(top: 80.0),
+        child: IconButton(
+          tooltip: 'Logout',
+          icon: Icon(LucideIcons.logOut, color: AppConfig.snackbarErrorColor, size: 24),
+          onPressed: () => _handleLogout(context),
         ),
       ),
       selectedLabelTextStyle: textTheme.labelMedium?.copyWith(color: selectedColor, fontWeight: FontWeight.w600),
@@ -175,25 +169,6 @@ class AppScaffold extends StatelessWidget {
             ),
           )
           .toList(),
-    );
-  }
-
-  Widget _buildAppBar(BuildContext context) {
-    return Container(
-      height: 64,
-      padding: EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: Border(bottom: BorderSide(color: Theme.of(context).colorScheme.outline.withOpacity(0.2))),
-      ),
-      child: Row(
-        children: [
-          Text(pageTitle ?? AppConfig.appName, style: Theme.of(context).textTheme.headlineSmall),
-          const Spacer(),
-          if (actions != null) ...actions!,
-          IconButton(icon: const Icon(Icons.logout), onPressed: () => _handleLogout(context)),
-        ],
-      ),
     );
   }
 

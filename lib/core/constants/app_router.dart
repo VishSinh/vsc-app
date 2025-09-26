@@ -26,6 +26,8 @@ import 'package:vsc_app/features/home/presentation/pages/low_stock_cards_page.da
 import 'package:vsc_app/features/home/presentation/pages/out_of_stock_cards_page.dart';
 import 'package:vsc_app/features/home/presentation/pages/todays_orders_page.dart';
 import 'package:provider/provider.dart';
+import 'package:vsc_app/features/administration/presentation/providers/audit_logs_provider.dart';
+import 'package:vsc_app/features/administration/presentation/pages/audit_model_logs_page.dart';
 
 class AppRouter {
   static late final GoRouter router;
@@ -68,6 +70,11 @@ class AppRouter {
         ),
         GoRoute(path: RouteConstants.production, name: RouteConstants.productionRouteName, builder: (context, state) => const MainLayout()),
         GoRoute(path: RouteConstants.administration, name: RouteConstants.administrationRouteName, builder: (context, state) => const MainLayout()),
+        GoRoute(
+          path: RouteConstants.auditModelLogs,
+          name: RouteConstants.auditModelLogsRouteName,
+          builder: (context, state) => ChangeNotifierProvider(create: (_) => AuditLogsProvider(), child: const AuditModelLogsPage()),
+        ),
         GoRoute(path: RouteConstants.vendors, name: RouteConstants.vendorsRouteName, builder: (context, state) => const MainLayout()),
         GoRoute(
           path: RouteConstants.vendorDetail,

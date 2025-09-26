@@ -32,6 +32,8 @@ class AppConstants {
   static const String allPermissionsEndpoint = '/permissions/all/';
   // Vendors
   static const String vendorsEndpoint = '/vendors/';
+  // Staff
+  static const String staffEndpoint = '/staff/';
   // Cards
   static const String cardsEndpoint = '/cards/';
   static const String similarCardsEndpoint = '/cards/similar/';
@@ -52,6 +54,8 @@ class AppConstants {
   static const String dashboardEndpoint = '/dashboard/';
   // Analytics
   static const String detailedAnalyticsEndpoint = '/analytics/detail/';
+  // Audit
+  static const String auditModelLogsEndpoint = '/audit/model-logs/';
 
   // ==========================================================================
 

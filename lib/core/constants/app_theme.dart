@@ -2,35 +2,6 @@ import 'package:flutter/material.dart';
 import 'app_config.dart';
 
 class AppTheme {
-  static ThemeData get lightTheme => ThemeData(
-    useMaterial3: true,
-    colorScheme: ColorScheme.fromSeed(seedColor: AppConfig.primaryColor, brightness: Brightness.light),
-    appBarTheme: AppBarTheme(
-      elevation: AppConfig.elevationNone,
-      centerTitle: true,
-      backgroundColor: AppConfig.transparent,
-      foregroundColor: AppConfig.black87,
-    ),
-    cardTheme: CardThemeData(
-      elevation: AppConfig.elevationLow,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        elevation: AppConfig.elevationLow,
-        padding: EdgeInsets.symmetric(horizontal: AppConfig.largePadding, vertical: AppConfig.defaultPadding),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
-      ),
-    ),
-    inputDecorationTheme: InputDecorationTheme(
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
-      contentPadding: EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding, vertical: AppConfig.smallPadding),
-    ),
-    dataTableTheme: DataTableThemeData(
-      headingTextStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: AppConfig.fontSizeMd),
-    ),
-  );
-
   static ThemeData get darkTheme => ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(seedColor: AppConfig.primaryColor, brightness: Brightness.dark),

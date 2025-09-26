@@ -84,13 +84,14 @@ class PermissionProvider extends BaseProvider {
   bool get canManageCustomers => _permissionManager.canManageCustomers;
   bool get canManageSystem => _permissionManager.canManageSystem;
   bool get canViewAuditLogs => _permissionManager.canViewAuditLogs;
+  bool get canViewDashboard => _permissionManager.canReadDashboard();
+  bool get canPurchaseCards => _permissionManager.canPurchaseCards();
 
   // Specific permission checks
   bool get canApproveOrders => _permissionManager.canApproveOrders();
   bool get canCancelOrders => _permissionManager.canCancelOrders();
-  bool get canProcessPayments => _permissionManager.canProcessPayments();
-  bool get canRefundPayments => _permissionManager.canRefundPayments();
-  bool get canPerformInventoryTransactions => _permissionManager.canPerformInventoryTransactions();
+  bool get canReadPayments => _permissionManager.canReadPayments();
+  bool get canCreatePayments => _permissionManager.canCreatePayments();
   bool get canReadAuditLogs => _permissionManager.canReadAuditLogs();
   bool get canExportAuditLogs => _permissionManager.canExportAuditLogs();
   bool get canConfigureSystem => _permissionManager.canConfigureSystem();

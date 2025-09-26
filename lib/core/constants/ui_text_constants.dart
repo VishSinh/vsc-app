@@ -48,6 +48,8 @@ class UITextConstants {
   // Login/Register Forms
   static const String phoneNumber = 'Phone Number';
   static const String password = 'Password';
+  static const String rememberMe = 'Remember me';
+  static const String forgotPassword = 'Forgot password?';
   static const String confirmPassword = 'Confirm Password';
   static const String fullName = 'Full Name';
   static const String role = 'Role';

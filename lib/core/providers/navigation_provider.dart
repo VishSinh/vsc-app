@@ -17,14 +17,14 @@ class NavigationProvider extends ChangeNotifier {
   List<NavigationDestination> _getDestinations(BuildContext context) {
     final permissionProvider = context.read<PermissionProvider>();
     return NavigationItems.getDestinationsForPermissions(
-      canManageOrders: permissionProvider.canManageOrders,
-      canManageInventory: permissionProvider.canManageInventory,
-      canManageProduction: permissionProvider.canManageProduction,
-      canManageVendors: permissionProvider.canManageVendors,
-      canManageSystem: permissionProvider.canManageSystem,
+      canViewOrders: permissionProvider.canManageOrders,
+      canViewInventory: permissionProvider.canManageInventory,
+      canViewProduction: permissionProvider.canManageProduction,
+      canViewVendors: permissionProvider.canManageVendors,
+      canViewSystem: permissionProvider.canManageSystem,
       canViewAuditLogs: permissionProvider.canViewAuditLogs,
-      canManageBilling: permissionProvider.canManageBilling,
-      canManagePayments: permissionProvider.canManagePayments,
+      canViewBilling: permissionProvider.canManageBilling,
+      canViewPayments: permissionProvider.canManagePayments,
     );
   }
 

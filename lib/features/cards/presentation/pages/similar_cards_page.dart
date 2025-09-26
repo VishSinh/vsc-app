@@ -8,6 +8,7 @@ import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/features/cards/presentation/providers/create_card_provider.dart';
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/providers/navigation_provider.dart';
+import 'package:vsc_app/features/home/presentation/providers/permission_provider.dart';
 
 class SimilarCardsPage extends StatefulWidget {
   final CreateCardProvider? cardProvider;
@@ -165,7 +166,14 @@ class _SimilarCardsPageState extends State<SimilarCardsPage> {
             Text('Similarity: ${card.formattedSimilarity}'),
           ],
         ),
-        trailing: ButtonUtils.primaryButton(onPressed: () => _purchaseCard(card), label: 'Purchase'),
+        trailing: Consumer<PermissionProvider>(
+          builder: (context, permissionProvider, _) {
+            if (!permissionProvider.canPurchaseCards) {
+              return const SizedBox.shrink();
+            }
+            return ButtonUtils.primaryButton(onPressed: () => _purchaseCard(card), label: 'Purchase');
+          },
+        ),
       ),
     );
   }

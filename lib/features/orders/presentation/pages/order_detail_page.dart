@@ -16,6 +16,7 @@ import 'package:vsc_app/features/production/presentation/models/printing_job_vie
 import 'package:vsc_app/core/constants/app_config.dart';
 import 'package:vsc_app/core/enums/service_type.dart';
 import 'package:vsc_app/features/orders/presentation/services/order_calculation_service.dart';
+import 'package:vsc_app/features/home/presentation/providers/permission_provider.dart';
 
 class OrderDetailPage extends StatefulWidget {
   final String orderId;
@@ -73,6 +74,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final permissionProvider = context.watch<PermissionProvider>();
     return ChangeNotifierProvider.value(
       value: _orderProvider,
       child: Scaffold(
@@ -80,12 +82,14 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           title: const Text('Order Details'),
           leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.orders)),
           actions: [
-            IconButton(icon: const Icon(Icons.delete_forever), onPressed: _confirmAndDeleteOrder, tooltip: 'Delete Order'),
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () => context.push('${RouteConstants.orders}/${widget.orderId}/edit'),
-              tooltip: 'Edit',
-            ),
+            if (permissionProvider.canDelete('order'))
+              IconButton(icon: const Icon(Icons.delete_forever), onPressed: _confirmAndDeleteOrder, tooltip: 'Delete Order'),
+            if (permissionProvider.canUpdate('order'))
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () => context.push('${RouteConstants.orders}/${widget.orderId}/edit'),
+                tooltip: 'Edit',
+              ),
             IconButton(icon: const Icon(Icons.refresh), onPressed: () => _loadOrderDetails(), tooltip: 'Refresh'),
           ],
         ),
