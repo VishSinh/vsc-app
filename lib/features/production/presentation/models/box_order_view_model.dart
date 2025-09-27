@@ -9,7 +9,7 @@ class BoxOrderViewModel {
   final OrderBoxType boxType;
   final int boxQuantity;
   final String totalBoxCost;
-  final String totalBoxExpense;
+  final String? totalBoxExpense;
   final String boxStatus;
   final DateTime? estimatedCompletion;
 
@@ -21,7 +21,7 @@ class BoxOrderViewModel {
     required this.boxType,
     required this.boxQuantity,
     required this.totalBoxCost,
-    required this.totalBoxExpense,
+    this.totalBoxExpense,
     required this.boxStatus,
     this.estimatedCompletion,
   });
@@ -35,7 +35,7 @@ class BoxOrderViewModel {
       boxType: OrderBoxTypeExtension.fromApiString(response.boxType) ?? OrderBoxType.folding,
       boxQuantity: response.boxQuantity,
       totalBoxCost: response.totalBoxCost,
-      totalBoxExpense: response.totalBoxExpense ?? '0',
+      totalBoxExpense: response.totalBoxExpense,
       boxStatus: response.boxStatus,
       estimatedCompletion: response.estimatedCompletion != null ? DateTime.parse(response.estimatedCompletion!) : null,
     );

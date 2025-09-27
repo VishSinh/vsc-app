@@ -9,8 +9,8 @@ class PrintingJobViewModel {
   final String? tracingStudioName;
   final int printQuantity;
   final String totalPrintingCost;
-  final String totalPrintingExpense;
-  final String totalTracingExpense;
+  final String? totalPrintingExpense;
+  final String? totalTracingExpense;
   final String printingStatus;
   final DateTime? estimatedCompletion;
 
@@ -23,8 +23,8 @@ class PrintingJobViewModel {
     this.tracingStudioName,
     required this.printQuantity,
     required this.totalPrintingCost,
-    required this.totalPrintingExpense,
-    required this.totalTracingExpense,
+    this.totalPrintingExpense,
+    this.totalTracingExpense,
     required this.printingStatus,
     this.estimatedCompletion,
   });
@@ -39,8 +39,8 @@ class PrintingJobViewModel {
       tracingStudioName: response.tracingStudioName,
       printQuantity: response.printQuantity,
       totalPrintingCost: response.totalPrintingCost,
-      totalPrintingExpense: response.totalPrintingExpense ?? '0',
-      totalTracingExpense: response.totalTracingExpense ?? '0',
+      totalPrintingExpense: response.totalPrintingExpense,
+      totalTracingExpense: response.totalTracingExpense,
       printingStatus: response.printingStatus,
       estimatedCompletion: response.estimatedCompletion != null ? DateTime.parse(response.estimatedCompletion!) : null,
     );

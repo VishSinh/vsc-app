@@ -60,7 +60,9 @@ class _OrdersPageState extends State<OrdersPage> {
 
     // Apply status filter
     if (orderProvider.statusFilter != 'all') {
-      orders = orders.where((order) => order.orderStatus.toApiString().toLowerCase() == orderProvider.statusFilter.toLowerCase()).toList();
+      orders = orders
+          .where((order) => order.orderStatus.toApiString().toLowerCase() == orderProvider.statusFilter.toLowerCase())
+          .toList();
     }
 
     return orders;
@@ -188,8 +190,14 @@ class _OrdersPageState extends State<OrdersPage> {
                         '${order.orderItems.length + order.serviceItems.length} item${(order.orderItems.length + order.serviceItems.length) != 1 ? 's' : ''}',
                         style: const TextStyle(color: Colors.grey),
                       ),
-                      if (_hasBoxRequirements(order)) ...[const SizedBox(width: 12), const Icon(Icons.inventory_2, size: 16, color: Colors.blue)],
-                      if (_hasPrintingRequirements(order)) ...[const SizedBox(width: 8), const Icon(Icons.print, size: 16, color: Colors.green)],
+                      if (_hasBoxRequirements(order)) ...[
+                        const SizedBox(width: 12),
+                        const Icon(Icons.inventory_2, size: 16, color: Colors.blue),
+                      ],
+                      if (_hasPrintingRequirements(order)) ...[
+                        const SizedBox(width: 8),
+                        const Icon(Icons.print, size: 16, color: Colors.green),
+                      ],
                       const Spacer(),
                       RichText(
                         text: TextSpan(
@@ -228,9 +236,21 @@ class _OrdersPageState extends State<OrdersPage> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                            child: const Text(
-                              'Box',
-                              style: TextStyle(fontSize: 18, color: Colors.blue, fontWeight: FontWeight.w500),
+                            child: Row(
+                              children: [
+                                const Text(
+                                  'Box',
+                                  style: TextStyle(fontSize: 18, color: Colors.blue, fontWeight: FontWeight.w500),
+                                ),
+                                if (_isAnyBoxExpenseMissing(order)) ...[
+                                  const SizedBox(width: 4),
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
                         if (_hasBoxRequirements(order) && _hasPrintingRequirements(order)) const SizedBox(width: 4),
@@ -238,9 +258,21 @@ class _OrdersPageState extends State<OrdersPage> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                            child: const Text(
-                              'Print',
-                              style: TextStyle(fontSize: 18, color: Colors.green, fontWeight: FontWeight.w500),
+                            child: Row(
+                              children: [
+                                const Text(
+                                  'Print',
+                                  style: TextStyle(fontSize: 18, color: Colors.green, fontWeight: FontWeight.w500),
+                                ),
+                                if (_isAnyPrintingOrTracingExpenseMissing(order)) ...[
+                                  const SizedBox(width: 4),
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
                       ],
@@ -378,13 +410,23 @@ class _OrdersPageState extends State<OrdersPage> {
             Expanded(
               flex: 1,
               child: Center(
-                child: Text(order.customerName, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+                child: Text(
+                  order.customerName,
+                  style: const TextStyle(fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
             Expanded(
               flex: 1,
               child: Center(
-                child: Text(order.staffName, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+                child: Text(
+                  order.staffName,
+                  style: const TextStyle(fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
             Expanded(
@@ -451,10 +493,22 @@ class _OrdersPageState extends State<OrdersPage> {
                         margin: const EdgeInsets.only(bottom: 2),
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(color: Colors.blue.withOpacity(0.2), borderRadius: BorderRadius.circular(8)),
-                        child: const Text(
-                          'Box',
-                          style: TextStyle(fontSize: 10, color: Colors.blue, fontWeight: FontWeight.w500),
-                          textAlign: TextAlign.center,
+                        child: Row(
+                          children: [
+                            const Text(
+                              'Box',
+                              style: TextStyle(fontSize: 10, color: Colors.blue, fontWeight: FontWeight.w500),
+                              textAlign: TextAlign.center,
+                            ),
+                            if (_isAnyBoxExpenseMissing(order)) ...[
+                              const SizedBox(width: 3),
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                     if (_hasBoxRequirements(order) && _hasPrintingRequirements(order)) const SizedBox(width: 4),
@@ -462,10 +516,22 @@ class _OrdersPageState extends State<OrdersPage> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(color: Colors.green.withOpacity(0.2), borderRadius: BorderRadius.circular(8)),
-                        child: const Text(
-                          'Print',
-                          style: TextStyle(fontSize: 10, color: Colors.green, fontWeight: FontWeight.w500),
-                          textAlign: TextAlign.center,
+                        child: Row(
+                          children: [
+                            const Text(
+                              'Print',
+                              style: TextStyle(fontSize: 10, color: Colors.green, fontWeight: FontWeight.w500),
+                              textAlign: TextAlign.center,
+                            ),
+                            if (_isAnyPrintingOrTracingExpenseMissing(order)) ...[
+                              const SizedBox(width: 3),
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                   ],
@@ -518,6 +584,32 @@ class _OrdersPageState extends State<OrdersPage> {
 
   bool _hasPrintingRequirements(OrderViewModel order) {
     return order.orderItems.any((item) => item.requiresPrinting);
+  }
+
+  bool _isAnyBoxExpenseMissing(OrderViewModel order) {
+    for (final item in order.orderItems) {
+      if (item.boxOrders != null) {
+        for (final box in item.boxOrders!) {
+          if (box.totalBoxExpense == null) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  bool _isAnyPrintingOrTracingExpenseMissing(OrderViewModel order) {
+    for (final item in order.orderItems) {
+      if (item.printingJobs != null) {
+        for (final job in item.printingJobs!) {
+          if (job.totalPrintingExpense == null || job.totalTracingExpense == null) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   }
 
   String? _getBoxMakerName(OrderViewModel order) {

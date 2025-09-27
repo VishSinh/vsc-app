@@ -384,7 +384,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                         ),
                       ),
                       // Display card image on the right side for desktop
-                      if (item.card != null && item.card!.image.isNotEmpty) ...[const SizedBox(width: 12), _buildCardImage(item.card!)],
+                      if (item.card != null && item.card!.image.isNotEmpty) ...[
+                        const SizedBox(width: 12),
+                        _buildCardImage(item.card!),
+                      ],
                     ],
                   ),
 
@@ -412,8 +415,14 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                   ),
               ],
             ),
-            if (item.boxOrders != null && item.boxOrders!.isNotEmpty) ...[const SizedBox(height: 16), _buildBoxOrders(item.boxOrders!)],
-            if (item.printingJobs != null && item.printingJobs!.isNotEmpty) ...[const SizedBox(height: 16), _buildPrintingJobs(item.printingJobs!)],
+            if (item.boxOrders != null && item.boxOrders!.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              _buildBoxOrders(item.boxOrders!),
+            ],
+            if (item.printingJobs != null && item.printingJobs!.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              _buildPrintingJobs(item.printingJobs!),
+            ],
           ],
         ),
       ),
@@ -489,7 +498,10 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(color: BoxStatusExtension.getColorFromString(box.boxStatus), borderRadius: BorderRadius.circular(8)),
+                decoration: BoxDecoration(
+                  color: BoxStatusExtension.getColorFromString(box.boxStatus),
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 child: Text(
                   BoxStatusExtension.getDisplayTextFromString(box.boxStatus),
                   style: TextStyle(color: Colors.white, fontSize: AppConfig.fontSizeXs, fontWeight: FontWeight.bold),
@@ -509,6 +521,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           _buildBoxInfoRow('Type', box.boxType.toString().split('.').last.toUpperCase()),
           _buildBoxInfoRow('Quantity', '${box.boxQuantity}'),
           _buildBoxInfoRow('Cost', '₹${box.totalBoxCost}'),
+          _buildBoxInfoRow('Expense', box.totalBoxExpense == null ? 'Not added' : '₹${box.totalBoxExpense}'),
           if (box.boxMakerId != null) _buildBoxInfoRow('Box Maker', box.boxMakerName ?? box.boxMakerId!),
           if (box.estimatedCompletion != null) _buildBoxInfoRow('Est. Completion', _formatDateTime(box.estimatedCompletion!)),
         ],
@@ -574,6 +587,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           SizedBox(height: AppConfig.smallPadding),
           _buildPrintingInfoRow('Quantity', '${job.printQuantity}'),
           _buildPrintingInfoRow('Cost', '₹${job.totalPrintingCost}'),
+          _buildPrintingInfoRow('Printing Expense', job.totalPrintingExpense == null ? 'Not added' : '₹${job.totalPrintingExpense}'),
+          _buildPrintingInfoRow('Tracing Expense', job.totalTracingExpense == null ? 'Not added' : '₹${job.totalTracingExpense}'),
           if (job.printerId != null) _buildPrintingInfoRow('Printer', job.printerName ?? job.printerId!),
           if (job.tracingStudioId != null) _buildPrintingInfoRow('Tracing Studio', job.tracingStudioName ?? job.tracingStudioId!),
           if (job.estimatedCompletion != null) _buildPrintingInfoRow('Est. Completion', _formatDateTime(job.estimatedCompletion!)),
@@ -686,7 +701,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         boxOrderId: box.id,
         currentBoxMakerId: box.boxMakerId ?? '',
         currentTotalBoxCost: box.totalBoxCost,
-        currentTotalBoxExpense: box.totalBoxExpense,
+        currentTotalBoxExpense: box.totalBoxExpense ?? '0.00',
         currentBoxStatus: box.boxStatus,
         currentBoxType: box.boxType.toString().split('.').last,
         currentBoxQuantity: box.boxQuantity,
@@ -706,8 +721,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         currentPrinterId: job.printerId ?? '',
         currentTracingStudioId: job.tracingStudioId ?? '',
         currentTotalPrintingCost: job.totalPrintingCost,
-        currentTotalPrintingExpense: job.totalPrintingExpense,
-        currentTotalTracingExpense: job.totalTracingExpense,
+        currentTotalPrintingExpense: job.totalPrintingExpense ?? '0.00',
+        currentTotalTracingExpense: job.totalTracingExpense ?? '0.00',
         currentPrintingStatus: job.printingStatus,
         currentPrintQuantity: job.printQuantity,
         currentEstimatedCompletion: job.estimatedCompletion?.toIso8601String(),

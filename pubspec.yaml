@@ -80,11 +80,7 @@ dependencies:
   # Barcode Scanner
   mobile_scanner: ^7.0.1
   
-  # Bluetooth Printing Plugins
-  blue_thermal_printer: ^1.2.3
-  print_bluetooth_thermal: ^1.1.6
-  flutter_blue_plus: ^1.35.5
-  flutter_bluetooth_printer: ^2.19.0
+
   
   # Utilities
   barcode: ^2.2.9

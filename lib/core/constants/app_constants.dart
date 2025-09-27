@@ -11,7 +11,7 @@ class AppConstants {
       return isLocal ? 'http://localhost/api/v1' : 'http://15.235.147.1/api/v1';
     } else if (Platform.isAndroid) {
       // Android emulator can reach host via 10.0.2.2
-      return isLocal ? 'http://10.0.2.2:8000/api/v1' : 'http://15.235.147.1/api/v1';
+      return isLocal ? 'http://localhost:8000/api/v1' : 'http://15.235.147.1/api/v1';
     } else {
       // iOS simulator and other platforms
       return isLocal ? 'http://localhost/api/v1' : 'http://15.235.147.1/api/v1';

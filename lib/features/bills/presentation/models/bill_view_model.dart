@@ -50,6 +50,7 @@ class BillOrderViewModel {
   final OrderStatus orderStatus;
   final String specialInstruction;
   final List<BillOrderItemViewModel> orderItems;
+  final List<ServiceItemViewModel> serviceItems;
 
   BillOrderViewModel({
     required this.id,
@@ -63,6 +64,7 @@ class BillOrderViewModel {
     required this.orderStatus,
     required this.specialInstruction,
     required this.orderItems,
+    required this.serviceItems,
   });
 
   factory BillOrderViewModel.fromApiResponse(BillOrderResponse response) {
@@ -78,6 +80,7 @@ class BillOrderViewModel {
       orderStatus: OrderStatusExtension.fromApiString(response.orderStatus) ?? OrderStatus.confirmed,
       specialInstruction: response.specialInstruction,
       orderItems: response.orderItems.map((item) => BillOrderItemViewModel.fromApiResponse(item as BillOrderItemResponse)).toList(),
+      serviceItems: response.serviceItems.map((svc) => ServiceItemViewModel.fromApiResponse(svc)).toList(),
     );
   }
 }
@@ -142,6 +145,8 @@ class CalculatedCostsViewModel {
 }
 
 class BillSummaryViewModel {
+  final double orderItemsSubtotal;
+  final double serviceItemsSubtotal;
   final double itemsSubtotal;
   final double totalBoxCost;
   final double totalPrintingCost;
@@ -152,6 +157,8 @@ class BillSummaryViewModel {
   final double pendingAmount;
 
   BillSummaryViewModel({
+    required this.orderItemsSubtotal,
+    required this.serviceItemsSubtotal,
     required this.itemsSubtotal,
     required this.totalBoxCost,
     required this.totalPrintingCost,
@@ -164,6 +171,8 @@ class BillSummaryViewModel {
 
   factory BillSummaryViewModel.fromApiResponse(BillSummaryResponse response) {
     return BillSummaryViewModel(
+      orderItemsSubtotal: double.tryParse(response.orderItemsSubtotal) ?? 0.0,
+      serviceItemsSubtotal: double.tryParse(response.serviceItemsSubtotal) ?? 0.0,
       itemsSubtotal: double.tryParse(response.itemsSubtotal) ?? 0.0,
       totalBoxCost: double.tryParse(response.totalBoxCost) ?? 0.0,
       totalPrintingCost: double.tryParse(response.totalPrintingCost) ?? 0.0,
@@ -176,6 +185,8 @@ class BillSummaryViewModel {
   }
 
   // Formatted getters for UI
+  String get formattedOrderItemsSubtotal => '₹${orderItemsSubtotal.toStringAsFixed(2)}';
+  String get formattedServiceItemsSubtotal => '₹${serviceItemsSubtotal.toStringAsFixed(2)}';
   String get formattedItemsSubtotal => '₹${itemsSubtotal.toStringAsFixed(2)}';
   String get formattedTotalBoxCost => '₹${totalBoxCost.toStringAsFixed(2)}';
   String get formattedTotalPrintingCost => '₹${totalPrintingCost.toStringAsFixed(2)}';

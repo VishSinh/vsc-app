@@ -1,8 +1,10 @@
 import 'package:vsc_app/core/enums/order_status.dart';
 import 'package:vsc_app/core/enums/order_box_type.dart';
+import 'package:vsc_app/core/enums/service_type.dart';
 import 'package:vsc_app/core/validation/validation_result.dart';
 import 'package:vsc_app/features/orders/data/models/order_requests.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_item_form_model.dart';
+import 'package:vsc_app/features/orders/presentation/models/service_item_form_model.dart';
 
 /// Form model for updating an order
 class OrderUpdateFormModel {
@@ -19,7 +21,26 @@ class OrderUpdateFormModel {
   // Remove items by id
   List<String>? removeItemIds;
 
-  OrderUpdateFormModel({this.orderStatus, this.deliveryDate, this.specialInstruction, this.orderItems, this.addItems, this.removeItemIds});
+  // Update existing service items
+  List<ServiceItemUpdateFormModel>? serviceItems;
+
+  // Add new service items
+  List<ServiceItemCreationFormModel>? addServiceItems;
+
+  // Remove service items by id
+  List<String>? removeServiceItemIds;
+
+  OrderUpdateFormModel({
+    this.orderStatus,
+    this.deliveryDate,
+    this.specialInstruction,
+    this.orderItems,
+    this.addItems,
+    this.removeItemIds,
+    this.serviceItems,
+    this.addServiceItems,
+    this.removeServiceItemIds,
+  });
 
   /// Validates the update form; only validates provided fields
   ValidationResult validate() {
@@ -60,6 +81,39 @@ class OrderUpdateFormModel {
       return itemErrors.isEmpty ? ValidationResult.success() : ValidationResult.failure(itemErrors);
     }
 
+    ValidationResult validateServiceItems() {
+      if (serviceItems == null) return ValidationResult.success();
+      final itemErrors = <ValidationError>[];
+      for (int i = 0; i < serviceItems!.length; i++) {
+        final result = serviceItems![i].validate();
+        if (!result.isValid) {
+          itemErrors.add(ValidationError(field: 'serviceItem_$i', message: result.firstMessage ?? 'Invalid service item update'));
+        }
+      }
+      return itemErrors.isEmpty ? ValidationResult.success() : ValidationResult.failure(itemErrors);
+    }
+
+    ValidationResult validateAddServiceItems() {
+      if (addServiceItems == null) return ValidationResult.success();
+      final itemErrors = <ValidationError>[];
+      for (int i = 0; i < addServiceItems!.length; i++) {
+        final result = addServiceItems![i].validate();
+        if (!result.isValid) {
+          itemErrors.add(ValidationError(field: 'addServiceItem_$i', message: result.firstMessage ?? 'Invalid new service item'));
+        }
+      }
+      return itemErrors.isEmpty ? ValidationResult.success() : ValidationResult.failure(itemErrors);
+    }
+
+    ValidationResult validateRemoveServiceItemIds() {
+      if (removeServiceItemIds == null) return ValidationResult.success();
+      final invalidIndex = removeServiceItemIds!.indexWhere((id) => id.trim().isEmpty);
+      if (invalidIndex >= 0) {
+        return ValidationResult.failureSingle('removeServiceItemIds', 'Remove service item id at index $invalidIndex is empty');
+      }
+      return ValidationResult.success();
+    }
+
     ValidationResult validateRemoveItemIds() {
       if (removeItemIds == null) return ValidationResult.success();
       final invalidIndex = removeItemIds!.indexWhere((id) => id.trim().isEmpty);
@@ -81,6 +135,15 @@ class OrderUpdateFormModel {
     final removeIdsResult = validateRemoveItemIds();
     if (!removeIdsResult.isValid) errors.addAll(removeIdsResult.errors);
 
+    final serviceItemsResult = validateServiceItems();
+    if (!serviceItemsResult.isValid) errors.addAll(serviceItemsResult.errors);
+
+    final addServiceItemsResult = validateAddServiceItems();
+    if (!addServiceItemsResult.isValid) errors.addAll(addServiceItemsResult.errors);
+
+    final removeServiceIdsResult = validateRemoveServiceItemIds();
+    if (!removeServiceIdsResult.isValid) errors.addAll(removeServiceIdsResult.errors);
+
     return errors.isEmpty ? ValidationResult.success() : ValidationResult.failure(errors);
   }
 
@@ -88,6 +151,8 @@ class OrderUpdateFormModel {
   UpdateOrderRequest toApiRequest() {
     final updateItems = orderItems?.map((item) => item.toApiModel()).toList();
     final addItemModels = addItems?.map((item) => _mapCreationToAddApiModel(item)).toList();
+    final updateServiceItems = serviceItems?.map((item) => item.toApiModel()).toList();
+    final addServiceItemModels = addServiceItems?.map((item) => _mapCreationToAddServiceApiModel(item)).toList();
 
     return UpdateOrderRequest(
       orderStatus: orderStatus?.toApiString(),
@@ -96,6 +161,9 @@ class OrderUpdateFormModel {
       orderItems: updateItems,
       addItems: addItemModels,
       removeItemIds: removeItemIds,
+      serviceItems: updateServiceItems,
+      addServiceItems: addServiceItemModels,
+      removeServiceItemIds: removeServiceItemIds,
     );
   }
 
@@ -112,6 +180,16 @@ class OrderUpdateFormModel {
     );
   }
 
+  AddServiceItemAPIModel _mapCreationToAddServiceApiModel(ServiceItemCreationFormModel item) {
+    return AddServiceItemAPIModel(
+      serviceType: item.serviceType?.toApiString() ?? '',
+      quantity: item.quantity,
+      totalCost: item.totalCost,
+      totalExpense: item.totalExpense.isEmpty ? null : item.totalExpense,
+      description: item.description,
+    );
+  }
+
   /// Create a copy with updated values
   OrderUpdateFormModel copyWith({
     OrderStatus? orderStatus,
@@ -120,6 +198,9 @@ class OrderUpdateFormModel {
     List<OrderItemUpdateFormModel>? orderItems,
     List<OrderItemCreationFormModel>? addItems,
     List<String>? removeItemIds,
+    List<ServiceItemUpdateFormModel>? serviceItems,
+    List<ServiceItemCreationFormModel>? addServiceItems,
+    List<String>? removeServiceItemIds,
   }) {
     return OrderUpdateFormModel(
       orderStatus: orderStatus ?? this.orderStatus,
@@ -128,6 +209,9 @@ class OrderUpdateFormModel {
       orderItems: orderItems ?? this.orderItems,
       addItems: addItems ?? this.addItems,
       removeItemIds: removeItemIds ?? this.removeItemIds,
+      serviceItems: serviceItems ?? this.serviceItems,
+      addServiceItems: addServiceItems ?? this.addServiceItems,
+      removeServiceItemIds: removeServiceItemIds ?? this.removeServiceItemIds,
     );
   }
 }
@@ -185,7 +269,9 @@ class OrderItemUpdateFormModel {
     if (requiresPrinting == true) {
       final printingCost = double.tryParse(totalPrintingCost ?? '');
       if (printingCost == null) {
-        errors.add(const ValidationError(field: 'totalPrintingCost', message: 'totalPrintingCost is required when requiresPrinting is true'));
+        errors.add(
+          const ValidationError(field: 'totalPrintingCost', message: 'totalPrintingCost is required when requiresPrinting is true'),
+        );
       }
     }
 

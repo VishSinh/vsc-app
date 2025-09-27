@@ -143,7 +143,7 @@ class ServiceItemResponse {
   @JsonKey(name: 'total_cost')
   final String totalCost;
   @JsonKey(name: 'total_expense')
-  final String totalExpense;
+  final String? totalExpense;
   final String? description;
 
   const ServiceItemResponse({
@@ -154,7 +154,7 @@ class ServiceItemResponse {
     required this.quantity,
     required this.procurementStatus,
     required this.totalCost,
-    required this.totalExpense,
+    this.totalExpense,
     this.description,
   });
 

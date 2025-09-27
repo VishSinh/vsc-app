@@ -17,6 +17,8 @@ import 'package:vsc_app/features/orders/presentation/widgets/order_item_card.dar
 import 'package:vsc_app/features/orders/presentation/widgets/order_item_entry_form.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:vsc_app/core/enums/order_box_type.dart';
+import 'package:vsc_app/core/enums/service_type.dart';
+import 'package:vsc_app/features/orders/presentation/models/service_item_form_model.dart';
 
 class EditOrderPage extends StatefulWidget {
   final String orderId;
@@ -37,7 +39,36 @@ class _EditOrderPageState extends State<EditOrderPage> {
   OrderStatus? _selectedStatus;
 
   // Form state for updates
-  final OrderUpdateFormModel _updateForm = OrderUpdateFormModel(orderItems: [], addItems: [], removeItemIds: []);
+  final OrderUpdateFormModel _updateForm = OrderUpdateFormModel(
+    orderItems: [],
+    addItems: [],
+    removeItemIds: [],
+    serviceItems: [],
+    addServiceItems: [],
+    removeServiceItemIds: [],
+  );
+
+  // Local UI state for service items
+  bool _showServiceForm = false;
+  ServiceType? _serviceType;
+  final TextEditingController _svcQtyController = TextEditingController();
+  final TextEditingController _svcCostController = TextEditingController();
+  final TextEditingController _svcExpenseController = TextEditingController();
+  final TextEditingController _svcDescController = TextEditingController();
+
+  // Controllers for existing service items (persist across rebuilds)
+  final Map<String, TextEditingController> _svcQtyCtrls = {};
+  final Map<String, TextEditingController> _svcCostCtrls = {};
+  final Map<String, TextEditingController> _svcExpenseCtrls = {};
+  final Map<String, TextEditingController> _svcDescCtrls = {};
+
+  TextEditingController _getOrCreateController(Map<String, TextEditingController> map, String id, String initialText) {
+    final existing = map[id];
+    if (existing != null) return existing;
+    final controller = TextEditingController(text: initialText);
+    map[id] = controller;
+    return controller;
+  }
 
   @override
   void initState() {
@@ -55,6 +86,19 @@ class _EditOrderPageState extends State<EditOrderPage> {
     _specialInstructionController.dispose();
     _deliveryDateController.dispose();
     _barcodeController.dispose();
+    _svcQtyController.dispose();
+    _svcCostController.dispose();
+    _svcExpenseController.dispose();
+    _svcDescController.dispose();
+    // Dispose existing service item controllers
+    for (final c in _svcQtyCtrls.values) c.dispose();
+    for (final c in _svcCostCtrls.values) c.dispose();
+    for (final c in _svcExpenseCtrls.values) c.dispose();
+    for (final c in _svcDescCtrls.values) c.dispose();
+    _svcQtyCtrls.clear();
+    _svcCostCtrls.clear();
+    _svcExpenseCtrls.clear();
+    _svcDescCtrls.clear();
     super.dispose();
   }
 
@@ -170,6 +214,8 @@ class _EditOrderPageState extends State<EditOrderPage> {
                         SizedBox(height: AppConfig.largePadding),
                         _buildExistingItemsSection(order),
                         SizedBox(height: AppConfig.largePadding),
+                        _buildExistingServiceItemsSection(order),
+                        SizedBox(height: AppConfig.largePadding),
                         _buildAddItemsSection(),
                         SizedBox(height: AppConfig.largePadding),
                         _buildSubmitButtons(),
@@ -219,7 +265,11 @@ class _EditOrderPageState extends State<EditOrderPage> {
             SizedBox(height: AppConfig.defaultPadding),
             TextFormField(
               controller: _deliveryDateController,
-              decoration: const InputDecoration(labelText: 'Delivery Date (ISO)', hintText: 'YYYY-MM-DDTHH:mm:ssZ', border: OutlineInputBorder()),
+              decoration: const InputDecoration(
+                labelText: 'Delivery Date (ISO)',
+                hintText: 'YYYY-MM-DDTHH:mm:ssZ',
+                border: OutlineInputBorder(),
+              ),
             ),
             SizedBox(height: AppConfig.defaultPadding),
             TextFormField(
@@ -262,7 +312,10 @@ class _EditOrderPageState extends State<EditOrderPage> {
                           Row(
                             children: [
                               Expanded(
-                                child: Text('Item ${index + 1}', style: ResponsiveText.getSubtitle(context).copyWith(fontWeight: FontWeight.bold)),
+                                child: Text(
+                                  'Item ${index + 1}',
+                                  style: ResponsiveText.getSubtitle(context).copyWith(fontWeight: FontWeight.bold),
+                                ),
                               ),
                               TextButton.icon(
                                 onPressed: () => _toggleRemoveExistingItem(existing.id),
@@ -278,7 +331,8 @@ class _EditOrderPageState extends State<EditOrderPage> {
                             ],
                           ),
                           SizedBox(height: AppConfig.smallPadding),
-                          if (card != null) ImageDisplay(imageUrl: card.image, width: context.isMobile ? double.infinity : 180, height: 140),
+                          if (card != null)
+                            ImageDisplay(imageUrl: card.image, width: context.isMobile ? double.infinity : 180, height: 140),
                           SizedBox(height: AppConfig.smallPadding),
                           Row(
                             children: [
@@ -347,7 +401,9 @@ class _EditOrderPageState extends State<EditOrderPage> {
                                       child: DropdownButtonFormField<OrderBoxType?>(
                                         value:
                                             _getPendingBoxType(existing.id) ??
-                                            (existing.boxOrders != null && existing.boxOrders!.isNotEmpty ? existing.boxOrders!.first.boxType : null),
+                                            (existing.boxOrders != null && existing.boxOrders!.isNotEmpty
+                                                ? existing.boxOrders!.first.boxType
+                                                : null),
                                         decoration: const InputDecoration(labelText: 'Box Type', border: OutlineInputBorder()),
                                         items: OrderBoxType.values
                                             .map((t) => DropdownMenuItem<OrderBoxType?>(value: t, child: Text(t.name.toUpperCase())))
@@ -412,7 +468,161 @@ class _EditOrderPageState extends State<EditOrderPage> {
     );
   }
 
-  void _addOrReplaceUpdateItem(String orderItemId, {int? quantity, String? discountAmount, bool? requiresBox, bool? requiresPrinting}) {
+  Widget _buildExistingServiceItemsSection(OrderViewModel order) {
+    return Card(
+      child: Padding(
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Existing Service Items (${order.serviceItems.length})', style: ResponsiveText.getTitle(context)),
+            SizedBox(height: AppConfig.defaultPadding),
+            if (order.serviceItems.isEmpty)
+              const EmptyStateWidget(message: 'No service items', icon: Icons.home_repair_service)
+            else
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: order.serviceItems.length,
+                itemBuilder: (context, index) {
+                  final svc = order.serviceItems[index];
+                  final isRemoved = _updateForm.removeServiceItemIds?.contains(svc.id) == true;
+                  final pendingIdx = _updateForm.serviceItems?.indexWhere((e) => e.serviceOrderItemId == svc.id) ?? -1;
+                  final pending = pendingIdx >= 0 ? _updateForm.serviceItems![pendingIdx] : null;
+
+                  final qtyController = _getOrCreateController(_svcQtyCtrls, svc.id, (pending?.quantity ?? svc.quantity).toString());
+                  final costController = _getOrCreateController(_svcCostCtrls, svc.id, pending?.totalCost ?? svc.totalCost);
+                  final expenseController = _getOrCreateController(
+                    _svcExpenseCtrls,
+                    svc.id,
+                    pending?.totalExpense ?? (svc.totalExpense ?? ''),
+                  );
+                  final descController = _getOrCreateController(
+                    _svcDescCtrls,
+                    svc.id,
+                    pending?.description ?? (svc.description ?? ''),
+                  );
+
+                  return Card(
+                    margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
+                    child: Padding(
+                      padding: EdgeInsets.all(AppConfig.defaultPadding),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  svc.serviceType?.displayText ?? svc.serviceTypeRaw,
+                                  style: ResponsiveText.getSubtitle(context).copyWith(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              TextButton.icon(
+                                onPressed: () => _toggleRemoveExistingServiceItem(svc.id),
+                                icon: Icon(isRemoved ? Icons.undo : Icons.delete, color: AppConfig.errorColor),
+                                label: Text(isRemoved ? 'Undo Remove' : 'Remove', style: TextStyle(color: AppConfig.errorColor)),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: AppConfig.smallPadding),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  controller: qtyController,
+                                  decoration: const InputDecoration(labelText: 'Quantity', border: OutlineInputBorder()),
+                                  keyboardType: TextInputType.number,
+                                  enabled: !isRemoved,
+                                  onChanged: (v) {
+                                    final qty = int.tryParse(v);
+                                    _addOrReplaceServiceUpdateItem(svc.id, quantity: qty);
+                                  },
+                                ),
+                              ),
+                              SizedBox(width: AppConfig.defaultPadding),
+                              Expanded(
+                                child: TextFormField(
+                                  controller: costController,
+                                  decoration: const InputDecoration(labelText: 'Total Cost', border: OutlineInputBorder()),
+                                  keyboardType: TextInputType.number,
+                                  enabled: !isRemoved,
+                                  onChanged: (v) {
+                                    _addOrReplaceServiceUpdateItem(svc.id, totalCost: v);
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: AppConfig.defaultPadding),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  controller: expenseController,
+                                  decoration: const InputDecoration(labelText: 'Total Expense', border: OutlineInputBorder()),
+                                  keyboardType: TextInputType.number,
+                                  enabled: !isRemoved,
+                                  onChanged: (v) {
+                                    _addOrReplaceServiceUpdateItem(svc.id, totalExpense: v.isEmpty ? null : v);
+                                  },
+                                ),
+                              ),
+                              SizedBox(width: AppConfig.defaultPadding),
+                              Expanded(
+                                child: TextFormField(
+                                  controller: descController,
+                                  decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder()),
+                                  enabled: !isRemoved,
+                                  onChanged: (v) {
+                                    _addOrReplaceServiceUpdateItem(svc.id, description: v.isEmpty ? null : v);
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: AppConfig.defaultPadding),
+                          TextFormField(
+                            initialValue: pending?.procurementStatus ?? svc.procurementStatus,
+                            decoration: const InputDecoration(labelText: 'Procurement Status', border: OutlineInputBorder()),
+                            enabled: !isRemoved,
+                            onChanged: (v) {
+                              _addOrReplaceServiceUpdateItem(svc.id, procurementStatus: v.isEmpty ? null : v);
+                            },
+                          ),
+                          if (isRemoved)
+                            Padding(
+                              padding: EdgeInsets.only(top: AppConfig.smallPadding),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.info, size: 16, color: AppConfig.errorColor),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    'Marked for removal',
+                                    style: TextStyle(color: AppConfig.errorColor, fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _addOrReplaceUpdateItem(
+    String orderItemId, {
+    int? quantity,
+    String? discountAmount,
+    bool? requiresBox,
+    bool? requiresPrinting,
+  }) {
     _updateForm.orderItems ??= [];
     final idx = _updateForm.orderItems!.indexWhere((e) => e.orderItemId == orderItemId);
     if (idx >= 0) {
@@ -509,14 +719,20 @@ class _EditOrderPageState extends State<EditOrderPage> {
                 Expanded(
                   child: TextFormField(
                     controller: _barcodeController,
-                    decoration: const InputDecoration(labelText: 'Barcode', hintText: 'Scan or enter barcode', border: OutlineInputBorder()),
+                    decoration: const InputDecoration(
+                      labelText: 'Barcode',
+                      hintText: 'Scan or enter barcode',
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ),
                 SizedBox(width: AppConfig.defaultPadding),
                 ButtonUtils.secondaryButton(onPressed: _showBarcodeScanner, label: 'Scan', icon: Icons.qr_code_scanner),
                 SizedBox(width: AppConfig.defaultPadding),
                 ButtonUtils.primaryButton(
-                  onPressed: _orderProvider.isLoading ? null : () => _orderProvider.searchCardByBarcode(_barcodeController.text.trim()),
+                  onPressed: _orderProvider.isLoading
+                      ? null
+                      : () => _orderProvider.searchCardByBarcode(_barcodeController.text.trim()),
                   label: 'Search',
                   icon: Icons.search,
                 ),
@@ -570,6 +786,38 @@ class _EditOrderPageState extends State<EditOrderPage> {
                   );
                 },
               ),
+            SizedBox(height: AppConfig.largePadding),
+            const Divider(),
+            SizedBox(height: AppConfig.defaultPadding),
+            Row(
+              children: [
+                Expanded(child: Text('Service Items', style: ResponsiveText.getTitle(context))),
+                ButtonUtils.secondaryButton(
+                  onPressed: () => setState(() => _showServiceForm = !_showServiceForm),
+                  label: _showServiceForm ? 'Hide Form' : 'Add Service Item',
+                  icon: _showServiceForm ? Icons.close : Icons.add,
+                ),
+              ],
+            ),
+            SizedBox(height: AppConfig.defaultPadding),
+            if (_showServiceForm) _buildServiceItemEntryForm(),
+            if ((_updateForm.addServiceItems?.isNotEmpty ?? false))
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _updateForm.addServiceItems!.length,
+                itemBuilder: (context, index) {
+                  final svc = _updateForm.addServiceItems![index];
+                  return ListTile(
+                    leading: CircleAvatar(child: Icon(Icons.home_repair_service)),
+                    title: Text(svc.serviceType?.displayText ?? svc.serviceType?.toApiString() ?? 'SERVICE'),
+                    subtitle: Text(
+                      'Qty: ${svc.quantity} • Cost: ₹${svc.totalCost}${svc.totalExpense.isNotEmpty ? ' • Expense: ₹${svc.totalExpense}' : ''}',
+                    ),
+                    trailing: IconButton(icon: const Icon(Icons.delete), onPressed: () => _removeAddServiceItemAt(index)),
+                  );
+                },
+              ),
           ],
         ),
       ),
@@ -584,9 +832,147 @@ class _EditOrderPageState extends State<EditOrderPage> {
         ),
         SizedBox(width: AppConfig.defaultPadding),
         Expanded(
-          child: ButtonUtils.primaryButton(onPressed: _orderProvider.isLoading ? null : _submitUpdate, label: 'Save Changes', icon: Icons.save),
+          child: ButtonUtils.primaryButton(
+            onPressed: _orderProvider.isLoading ? null : _submitUpdate,
+            label: 'Save Changes',
+            icon: Icons.save,
+          ),
         ),
       ],
     );
+  }
+
+  // Service Items helpers and UI
+  void _toggleRemoveExistingServiceItem(String serviceItemId) {
+    _updateForm.removeServiceItemIds ??= [];
+    if (_updateForm.removeServiceItemIds!.contains(serviceItemId)) {
+      _updateForm.removeServiceItemIds!.remove(serviceItemId);
+    } else {
+      _updateForm.removeServiceItemIds!.add(serviceItemId);
+    }
+    setState(() {});
+  }
+
+  void _addOrReplaceServiceUpdateItem(
+    String serviceItemId, {
+    int? quantity,
+    String? procurementStatus,
+    String? totalCost,
+    String? totalExpense,
+    String? description,
+  }) {
+    _updateForm.serviceItems ??= [];
+    final idx = _updateForm.serviceItems!.indexWhere((e) => e.serviceOrderItemId == serviceItemId);
+    if (idx >= 0) {
+      final existing = _updateForm.serviceItems![idx];
+      _updateForm.serviceItems![idx] = existing.copyWith(
+        quantity: quantity ?? existing.quantity,
+        procurementStatus: procurementStatus ?? existing.procurementStatus,
+        totalCost: totalCost ?? existing.totalCost,
+        totalExpense: totalExpense ?? existing.totalExpense,
+        description: description ?? existing.description,
+      );
+    } else {
+      _updateForm.serviceItems!.add(
+        ServiceItemUpdateFormModel(
+          serviceOrderItemId: serviceItemId,
+          quantity: quantity,
+          procurementStatus: procurementStatus,
+          totalCost: totalCost,
+          totalExpense: totalExpense,
+          description: description,
+        ),
+      );
+    }
+    setState(() {});
+  }
+
+  Widget _buildServiceItemEntryForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: DropdownButtonFormField<ServiceType>(
+                value: _serviceType,
+                onChanged: (val) => setState(() => _serviceType = val),
+                decoration: const InputDecoration(labelText: 'Service Type', border: OutlineInputBorder()),
+                items: ServiceType.values.map((t) => DropdownMenuItem(value: t, child: Text(t.displayText))).toList(),
+              ),
+            ),
+            SizedBox(width: AppConfig.defaultPadding),
+            Expanded(
+              child: TextFormField(
+                controller: _svcQtyController,
+                decoration: const InputDecoration(labelText: 'Quantity', border: OutlineInputBorder()),
+                keyboardType: TextInputType.number,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: AppConfig.defaultPadding),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _svcExpenseController,
+                decoration: const InputDecoration(labelText: 'Total Expense', border: OutlineInputBorder()),
+                keyboardType: TextInputType.number,
+              ),
+            ),
+            SizedBox(width: AppConfig.defaultPadding),
+            Expanded(
+              child: TextFormField(
+                controller: _svcCostController,
+                decoration: const InputDecoration(labelText: 'Total Cost', border: OutlineInputBorder()),
+                keyboardType: TextInputType.number,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: AppConfig.defaultPadding),
+        TextFormField(
+          controller: _svcDescController,
+          decoration: const InputDecoration(labelText: 'Description (optional)', border: OutlineInputBorder()),
+          maxLines: 2,
+        ),
+        SizedBox(height: AppConfig.defaultPadding),
+        ButtonUtils.successButton(onPressed: _handleAddServiceItem, label: 'Add Service Item', icon: Icons.add),
+      ],
+    );
+  }
+
+  void _handleAddServiceItem() {
+    final qty = int.tryParse(_svcQtyController.text) ?? 0;
+    final item = ServiceItemCreationFormModel(
+      serviceType: _serviceType,
+      quantity: qty,
+      totalCost: _svcCostController.text,
+      totalExpense: _svcExpenseController.text,
+      description: _svcDescController.text.isEmpty ? null : _svcDescController.text,
+    );
+    final validation = item.validate();
+    if (!validation.isValid) {
+      _orderProvider.setErrorWithSnackBar(validation.firstMessage ?? 'Please check service item details', context);
+      return;
+    }
+    _updateForm.addServiceItems ??= [];
+    _updateForm.addServiceItems!.add(item);
+    setState(() {});
+    _svcQtyController.clear();
+    _svcCostController.clear();
+    _svcExpenseController.clear();
+    _svcDescController.clear();
+    setState(() => _serviceType = null);
+    _orderProvider.setSuccessWithSnackBar('Service item added to be created', context);
+  }
+
+  void _removeAddServiceItemAt(int index) {
+    if (_updateForm.addServiceItems == null) return;
+    if (index >= 0 && index < _updateForm.addServiceItems!.length) {
+      _updateForm.addServiceItems!.removeAt(index);
+      setState(() {});
+    }
   }
 }

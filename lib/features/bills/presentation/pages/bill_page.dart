@@ -13,6 +13,8 @@ import 'package:vsc_app/features/bills/presentation/widgets/payment_create_dialo
 import 'package:vsc_app/core/enums/bill_status.dart';
 import 'package:vsc_app/core/enums/payment_mode.dart';
 import 'package:vsc_app/core/enums/order_status.dart';
+import 'package:vsc_app/core/enums/service_type.dart';
+import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
 
 class BillPage extends StatefulWidget {
   final String billId;
@@ -124,6 +126,7 @@ class _BillPageState extends State<BillPage> {
           _buildPaymentsSection(),
           const SizedBox(height: 24),
           _buildOrderItems(bill),
+          if (bill.order.serviceItems.isNotEmpty) ...[const SizedBox(height: 24), _buildServiceItems(bill)],
           const SizedBox(height: 24),
           _buildSummaryCards(bill),
         ],
@@ -161,7 +164,16 @@ class _BillPageState extends State<BillPage> {
         Expanded(
           flex: 1,
           child: SingleChildScrollView(
-            child: Padding(padding: const EdgeInsets.all(16), child: _buildOrderItems(bill)),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildOrderItems(bill),
+                  if (bill.order.serviceItems.isNotEmpty) ...[const SizedBox(height: 24), _buildServiceItems(bill)],
+                ],
+              ),
+            ),
           ),
         ),
       ],
@@ -304,6 +316,17 @@ class _BillPageState extends State<BillPage> {
     );
   }
 
+  Widget _buildServiceItems(BillViewModel bill) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Service Items', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 16),
+        ...bill.order.serviceItems.map((svc) => _buildServiceItemCard(svc)),
+      ],
+    );
+  }
+
   Widget _buildOrderItemCard(BillOrderItemViewModel item) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -354,7 +377,10 @@ class _BillPageState extends State<BillPage> {
                                 ),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(color: Colors.blue.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                   child: Text(
                                     'Qty: ${item.quantity}',
                                     style: const TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.w500),
@@ -430,6 +456,40 @@ class _BillPageState extends State<BillPage> {
     );
   }
 
+  Widget _buildServiceItemCard(ServiceItemViewModel svc) {
+    final typeText = svc.serviceType?.displayText ?? svc.serviceTypeRaw;
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(typeText, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(color: Colors.teal.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                  child: Text(
+                    'Qty: ${svc.quantity}',
+                    style: const TextStyle(fontSize: 12, color: Colors.teal, fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            _buildItemInfoRow('Total', '₹${svc.totalCost}'),
+            // if (svc.totalExpense != null) _buildItemInfoRow('Expense', '₹${svc.totalExpense}'), // Hidden as per request
+            if (svc.description != null && svc.description!.isNotEmpty) _buildItemInfoRow('Description', svc.description!),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildSummaryCards(BillViewModel bill) {
     return Card(
       child: Padding(
@@ -439,23 +499,54 @@ class _BillPageState extends State<BillPage> {
           children: [
             const Text('Bill Summary', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
-            // First row: Card total, Box cost, Printing cost
+            // First row: Order Items Subtotal, Service Items Subtotal
             Row(
               children: [
-                Expanded(child: _buildSummaryCard('Card total', bill.summary.formattedItemsSubtotal, Colors.grey[600]!)),
+                Expanded(child: _buildSummaryCard('Order Items', bill.summary.formattedOrderItemsSubtotal, Colors.grey[600]!)),
                 const SizedBox(width: 8),
-                Expanded(child: _buildSummaryCard('Box cost', bill.summary.formattedTotalBoxCost, Colors.blue[600]!)),
-                const SizedBox(width: 8),
-                Expanded(child: _buildSummaryCard('Printing cost', bill.summary.formattedTotalPrintingCost, Colors.purple[600]!)),
+                Expanded(child: _buildSummaryCard('Services', bill.summary.formattedServiceItemsSubtotal, Colors.teal[600]!)),
               ],
             ),
             const SizedBox(height: 12),
-            // Second row: Tax and Total
+            // Second row: Items Subtotal, Box Cost
             Row(
               children: [
-                Expanded(child: _buildSummaryCard('Tax', bill.summary.formattedTaxAmount, Colors.orange[600]!)),
+                Expanded(child: _buildSummaryCard('Items Total', bill.summary.formattedItemsSubtotal, Colors.blue[600]!)),
                 const SizedBox(width: 8),
-                Expanded(child: _buildSummaryCard('Total', bill.summary.formattedTotalWithTax, Colors.green[600]!, isHighlighted: true)),
+                Expanded(child: _buildSummaryCard('Box Cost', bill.summary.formattedTotalBoxCost, Colors.purple[600]!)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Third row: Printing Cost, Tax
+            Row(
+              children: [
+                Expanded(child: _buildSummaryCard('Printing Cost', bill.summary.formattedTotalPrintingCost, Colors.orange[600]!)),
+                const SizedBox(width: 8),
+                Expanded(child: _buildSummaryCard('Tax', bill.summary.formattedTaxAmount, Colors.amber[600]!)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Fourth row: Grand Total
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: _buildSummaryCard('Grand Total', bill.summary.formattedGrandTotal, Colors.green[600]!, isHighlighted: true),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Pending Amount
+            Row(
+              children: [
+                Expanded(
+                  child: _buildSummaryCard(
+                    'Pending Amount',
+                    bill.summary.formattedPendingAmount,
+                    Colors.red[600]!,
+                    isHighlighted: true,
+                  ),
+                ),
               ],
             ),
           ],
@@ -470,7 +561,10 @@ class _BillPageState extends State<BillPage> {
       decoration: BoxDecoration(
         color: isHighlighted ? color.withOpacity(0.15) : AppConfig.secondaryColor.withOpacity(0.3),
         borderRadius: BorderRadius.circular(AppConfig.defaultRadius),
-        border: Border.all(color: isHighlighted ? color.withOpacity(0.5) : AppConfig.grey600.withOpacity(0.3), width: isHighlighted ? 2 : 1),
+        border: Border.all(
+          color: isHighlighted ? color.withOpacity(0.5) : AppConfig.grey600.withOpacity(0.3),
+          width: isHighlighted ? 2 : 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -565,7 +659,8 @@ class _BillPageState extends State<BillPage> {
               children: [
                 Text('₹${payment.amount.toStringAsFixed(2)}', style: AppConfig.getResponsiveTitle(context)),
                 Text(payment.paymentMode.name.toUpperCase(), style: AppConfig.getResponsiveCaption(context)),
-                if (payment.transactionRef.isNotEmpty) Text('Ref: ${payment.transactionRef}', style: AppConfig.getResponsiveCaption(context)),
+                if (payment.transactionRef.isNotEmpty)
+                  Text('Ref: ${payment.transactionRef}', style: AppConfig.getResponsiveCaption(context)),
               ],
             ),
           ),

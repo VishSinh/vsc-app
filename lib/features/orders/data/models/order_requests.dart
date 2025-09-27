@@ -103,8 +103,24 @@ class UpdateOrderRequest {
   final List<AddOrderItemAPIModel>? addItems;
   @JsonKey(name: 'remove_item_ids')
   final List<String>? removeItemIds;
+  @JsonKey(name: 'service_items')
+  final List<ServiceItemUpdateAPIModel>? serviceItems;
+  @JsonKey(name: 'add_service_items')
+  final List<AddServiceItemAPIModel>? addServiceItems;
+  @JsonKey(name: 'remove_service_item_ids')
+  final List<String>? removeServiceItemIds;
 
-  const UpdateOrderRequest({this.orderStatus, this.deliveryDate, this.specialInstruction, this.orderItems, this.addItems, this.removeItemIds});
+  const UpdateOrderRequest({
+    this.orderStatus,
+    this.deliveryDate,
+    this.specialInstruction,
+    this.orderItems,
+    this.addItems,
+    this.removeItemIds,
+    this.serviceItems,
+    this.addServiceItems,
+    this.removeServiceItemIds,
+  });
 
   factory UpdateOrderRequest.fromJson(Map<String, dynamic> json) => _$UpdateOrderRequestFromJson(json);
   Map<String, dynamic> toJson() => _$UpdateOrderRequestToJson(this);
@@ -176,4 +192,55 @@ class AddOrderItemAPIModel {
 
   factory AddOrderItemAPIModel.fromJson(Map<String, dynamic> json) => _$AddOrderItemAPIModelFromJson(json);
   Map<String, dynamic> toJson() => _$AddOrderItemAPIModelToJson(this);
+}
+
+/// Nested model for updating existing service items
+@JsonSerializable(includeIfNull: false)
+class ServiceItemUpdateAPIModel {
+  @JsonKey(name: 'service_order_item_id')
+  final String serviceOrderItemId;
+  final int? quantity;
+  @JsonKey(name: 'procurement_status')
+  final String? procurementStatus;
+  @JsonKey(name: 'total_cost')
+  final String? totalCost;
+  @JsonKey(name: 'total_expense')
+  final String? totalExpense;
+  final String? description;
+
+  const ServiceItemUpdateAPIModel({
+    required this.serviceOrderItemId,
+    this.quantity,
+    this.procurementStatus,
+    this.totalCost,
+    this.totalExpense,
+    this.description,
+  });
+
+  factory ServiceItemUpdateAPIModel.fromJson(Map<String, dynamic> json) => _$ServiceItemUpdateAPIModelFromJson(json);
+  Map<String, dynamic> toJson() => _$ServiceItemUpdateAPIModelToJson(this);
+}
+
+/// Nested model for adding new service items during update
+@JsonSerializable(includeIfNull: false)
+class AddServiceItemAPIModel {
+  @JsonKey(name: 'service_type')
+  final String serviceType;
+  final int quantity;
+  @JsonKey(name: 'total_cost')
+  final String totalCost;
+  @JsonKey(name: 'total_expense')
+  final String? totalExpense;
+  final String? description;
+
+  const AddServiceItemAPIModel({
+    required this.serviceType,
+    required this.quantity,
+    required this.totalCost,
+    this.totalExpense,
+    this.description,
+  });
+
+  factory AddServiceItemAPIModel.fromJson(Map<String, dynamic> json) => _$AddServiceItemAPIModelFromJson(json);
+  Map<String, dynamic> toJson() => _$AddServiceItemAPIModelToJson(this);
 }

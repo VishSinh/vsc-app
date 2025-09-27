@@ -55,10 +55,47 @@ class BillOrderResponse extends BaseOrderResponse {
     required super.orderStatus,
     required super.specialInstruction,
     required List<BillOrderItemResponse> orderItems,
-  }) : super(orderItems: orderItems);
+    List<ServiceItemResponse> serviceItems = const [],
+  }) : super(orderItems: orderItems, serviceItems: serviceItems);
 
-  factory BillOrderResponse.fromJson(Map<String, dynamic> json) => _$BillOrderResponseFromJson(json);
-  Map<String, dynamic> toJson() => _$BillOrderResponseToJson(this);
+  factory BillOrderResponse.fromJson(Map<String, dynamic> json) {
+    final orderItemsJson = json['order_items'] as List<dynamic>?;
+    final serviceItemsJson = json['service_items'] as List<dynamic>?;
+
+    final orderItems = orderItemsJson?.map((e) => BillOrderItemResponse.fromJson(e as Map<String, dynamic>)).toList() ?? [];
+
+    final serviceItems = serviceItemsJson?.map((e) => ServiceItemResponse.fromJson(e as Map<String, dynamic>)).toList() ?? [];
+
+    return BillOrderResponse(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      customerId: json['customer_id'] as String,
+      customerName: json['customer_name'] as String,
+      staffId: json['staff_id'] as String,
+      staffName: json['staff_name'] as String,
+      orderDate: json['order_date'] as String,
+      deliveryDate: json['delivery_date'] as String,
+      orderStatus: json['order_status'] as String,
+      specialInstruction: json['special_instruction'] as String,
+      orderItems: orderItems,
+      serviceItems: serviceItems,
+    );
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'id': id,
+    'name': name,
+    'customer_id': customerId,
+    'customer_name': customerName,
+    'staff_id': staffId,
+    'staff_name': staffName,
+    'order_date': orderDate,
+    'delivery_date': deliveryDate,
+    'order_status': orderStatus,
+    'special_instruction': specialInstruction,
+    'order_items': orderItems,
+    'service_items': serviceItems,
+  };
 }
 
 @JsonSerializable()
@@ -88,6 +125,25 @@ class BillOrderItemResponse extends OrderItemResponse {
 }
 
 @JsonSerializable()
+class BillServiceItemResponse extends ServiceItemResponse {
+  const BillServiceItemResponse({
+    required super.id,
+    required super.orderId,
+    required super.orderName,
+    required super.serviceType,
+    required super.quantity,
+    required super.procurementStatus,
+    required super.totalCost,
+    required super.totalExpense,
+    super.description,
+  });
+
+  factory BillServiceItemResponse.fromJson(Map<String, dynamic> json) => _$BillServiceItemResponseFromJson(json);
+  @override
+  Map<String, dynamic> toJson() => _$BillServiceItemResponseToJson(this);
+}
+
+@JsonSerializable()
 class CalculatedCostsResponse {
   @JsonKey(name: 'base_cost')
   final String baseCost;
@@ -109,6 +165,12 @@ class CalculatedCostsResponse {
 
 @JsonSerializable()
 class BillSummaryResponse {
+  @JsonKey(name: 'order_items_subtotal')
+  final String orderItemsSubtotal;
+
+  @JsonKey(name: 'service_items_subtotal')
+  final String serviceItemsSubtotal;
+
   @JsonKey(name: 'items_subtotal')
   final String itemsSubtotal;
 
@@ -134,6 +196,8 @@ class BillSummaryResponse {
   final String? pendingAmount;
 
   const BillSummaryResponse({
+    required this.orderItemsSubtotal,
+    required this.serviceItemsSubtotal,
     required this.itemsSubtotal,
     required this.totalBoxCost,
     required this.totalPrintingCost,

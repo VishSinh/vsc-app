@@ -139,7 +139,11 @@ class _CardDetailPageState extends State<CardDetailPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (canEdit)
-                  IconButton(icon: const Icon(Icons.edit), onPressed: () => _showEditCardDialog(cardProvider, card), tooltip: UITextConstants.edit),
+                  IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: () => _showEditCardDialog(cardProvider, card),
+                    tooltip: UITextConstants.edit,
+                  ),
                 if (canEdit && canDelete) SizedBox(width: AppConfig.smallPadding),
                 if (canDelete)
                   IconButton(
@@ -153,7 +157,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
                   icon: const Icon(Icons.print),
                   tooltip: 'Print Barcode',
                   onPressed: () {
-                    context.go('${RouteConstants.bluetoothPrint}?barcode=${card.barcode}');
+                    context.push('${RouteConstants.bluetoothPrint}?barcode=${card.barcode}');
                   },
                 ),
               ],
@@ -193,7 +197,10 @@ class _CardDetailPageState extends State<CardDetailPage> {
                             height: context.isDesktop
                                 ? context.getResponsiveImageHeight(desktopFraction: 0.4, mobileFraction: 0.8)
                                 : context.getResponsiveImageHeight(desktopFraction: 0.8, mobileFraction: 0.9),
-                            decoration: BoxDecoration(color: AppConfig.grey300, borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
+                            decoration: BoxDecoration(
+                              color: AppConfig.grey300,
+                              borderRadius: BorderRadius.circular(AppConfig.defaultRadius),
+                            ),
                             child: Icon(Icons.image, color: AppConfig.grey600, size: 50),
                           );
                         },
@@ -205,7 +212,10 @@ class _CardDetailPageState extends State<CardDetailPage> {
                         height: context.isDesktop
                             ? context.getResponsiveImageHeight(desktopFraction: 0.4, mobileFraction: 0.8)
                             : context.getResponsiveImageHeight(desktopFraction: 0.8, mobileFraction: 0.9),
-                        decoration: BoxDecoration(color: AppConfig.grey300, borderRadius: BorderRadius.circular(AppConfig.defaultRadius)),
+                        decoration: BoxDecoration(
+                          color: AppConfig.grey300,
+                          borderRadius: BorderRadius.circular(AppConfig.defaultRadius),
+                        ),
                         child: Icon(Icons.image, color: AppConfig.grey600, size: 50),
                       ),
               ),
@@ -291,7 +301,9 @@ class _CardDetailPageState extends State<CardDetailPage> {
           Expanded(
             child: Text(
               value,
-              style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w600, color: valueColor ?? AppConfig.textColorPrimary),
+              style: ResponsiveText.getBody(
+                context,
+              ).copyWith(fontWeight: FontWeight.w600, color: valueColor ?? AppConfig.textColorPrimary),
             ),
           ),
         ],
@@ -306,8 +318,12 @@ class _CardDetailPageState extends State<CardDetailPage> {
 
     showDialog(
       context: context,
-      builder: (context) =>
-          EditCardDialog(card: card, cardProvider: cardProvider, vendorProvider: vendorProvider, onCardUpdated: () => _loadCardDetails()),
+      builder: (context) => EditCardDialog(
+        card: card,
+        cardProvider: cardProvider,
+        vendorProvider: vendorProvider,
+        onCardUpdated: () => _loadCardDetails(),
+      ),
     );
   }
 
