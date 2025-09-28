@@ -209,29 +209,18 @@ class _BillListTile extends StatelessWidget {
       child: ListTile(
         onTap: onTap,
         contentPadding: EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding, vertical: 8),
-        title: Row(
-          children: [
-            Expanded(
-              child: Text(
-                bill.orderName,
-                style: ResponsiveText.getTitle(context).copyWith(fontSize: context.isMobile ? 16 : 18, fontWeight: FontWeight.w600),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: AppConfig.smallPadding, vertical: 4),
-              decoration: BoxDecoration(color: bill.paymentStatus.getStatusColor(), borderRadius: BorderRadius.circular(12)),
-              child: Text(
-                bill.paymentStatus.getDisplayText(),
-                style: ResponsiveText.getCaption(
-                  context,
-                ).copyWith(color: Colors.white, fontWeight: FontWeight.bold, fontSize: context.isMobile ? 10 : 12),
-              ),
-            ),
-          ],
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(color: AppConfig.accentColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+          child: Icon(Icons.receipt_long, size: 20, color: AppConfig.accentColor),
+        ),
+        title: Text(
+          bill.orderName,
+          style: ResponsiveText.getTitle(context).copyWith(fontSize: context.isMobile ? 16 : 18, fontWeight: FontWeight.w600),
+          overflow: TextOverflow.ellipsis,
         ),
         subtitle: Padding(
-          padding: const EdgeInsets.only(top: 6.0),
+          padding: const EdgeInsets.only(top: 4.0),
           child: Row(
             children: [
               Icon(Icons.shopping_cart, size: 16, color: Colors.grey[600]),
@@ -240,24 +229,29 @@ class _BillListTile extends StatelessWidget {
                 'Items: ${bill.order.orderItems.length}',
                 style: ResponsiveText.getBody(context).copyWith(fontSize: context.isMobile ? 12 : 13, color: Colors.grey[400]),
               ),
-              const Spacer(),
-              Text(
-                bill.summary.formattedTotalWithTax,
-                style: ResponsiveText.getSubtitle(context).copyWith(fontWeight: FontWeight.bold, fontSize: context.isMobile ? 14 : 16),
-              ),
             ],
           ),
         ),
-        // trailing: Column(
-        //   mainAxisAlignment: MainAxisAlignment.center,
-        //   crossAxisAlignment: CrossAxisAlignment.end,
-        //   children: [
-        //     Text(
-        //       'Tax: ${bill.summary.formattedTaxPercentage}',
-        //       style: ResponsiveText.getCaption(context).copyWith(fontSize: context.isMobile ? 10 : 11, color: Colors.grey[500]),
-        //     ),
-        //   ],
-        // ),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              bill.summary.formattedTotalWithTax,
+              style: ResponsiveText.getSubtitle(context).copyWith(fontWeight: FontWeight.bold, fontSize: context.isMobile ? 14 : 16),
+            ),
+            const SizedBox(height: 4),
+            Builder(
+              builder: (context) {
+                final color = bill.paymentStatus.getStatusColor();
+                return Text(
+                  bill.paymentStatus.getDisplayText(),
+                  style: ResponsiveText.getCaption(context).copyWith(color: color, fontWeight: FontWeight.w600),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

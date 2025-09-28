@@ -15,6 +15,8 @@ import 'package:vsc_app/core/enums/payment_mode.dart';
 import 'package:vsc_app/core/enums/order_status.dart';
 import 'package:vsc_app/core/enums/service_type.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
+import 'package:vsc_app/core/utils/image_utils.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BillPage extends StatefulWidget {
   final String billId;
@@ -63,7 +65,23 @@ class _BillPageState extends State<BillPage> {
             }
           },
         ),
-        actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: () => _loadBillDetails(), tooltip: 'Refresh')],
+        actions: [
+          IconButton(icon: const Icon(Icons.refresh), onPressed: () => _loadBillDetails(), tooltip: 'Refresh'),
+          Consumer<BillProvider>(
+            builder: (context, billProvider, _) {
+              final bill = billProvider.currentBill;
+              return IconButton(
+                icon: const Icon(Icons.print),
+                tooltip: 'Print',
+                onPressed: bill == null
+                    ? null
+                    : () {
+                        context.pushNamed(RouteConstants.billPrintPreviewRouteName, pathParameters: {'id': widget.billId});
+                      },
+              );
+            },
+          ),
+        ],
       ),
       body: _buildBillDetailContent(),
     );
@@ -274,8 +292,29 @@ class _BillPageState extends State<BillPage> {
                         // fire and forget; UI will rebuild when phone is fetched
                         billProvider.fetchCustomerPhone(bill.order.customerId);
                       }
-                      final display = phone == null ? bill.order.customerName : '${bill.order.customerName} (${phone})';
-                      return Text(display, style: AppConfig.getResponsiveBody(context));
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(bill.order.customerName, style: AppConfig.getResponsiveBody(context)),
+                          if (phone != null) ...[
+                            const SizedBox(height: 4),
+                            InkWell(
+                              onTap: () async {
+                                final url = Uri.parse('tel:$phone');
+                                if (await canLaunchUrl(url)) {
+                                  await launchUrl(url);
+                                }
+                              },
+                              child: Text(
+                                phone,
+                                style: AppConfig.getResponsiveBody(
+                                  context,
+                                ).copyWith(color: Colors.blue, decoration: TextDecoration.underline),
+                              ),
+                            ),
+                          ],
+                        ],
+                      );
                     },
                   ),
                 ),
@@ -309,7 +348,7 @@ class _BillPageState extends State<BillPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Order Items', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text('Card Items', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
         ...bill.order.orderItems.map((item) => _buildOrderItemCard(item)),
       ],
@@ -361,7 +400,7 @@ class _BillPageState extends State<BillPage> {
                       const SizedBox(height: 12),
                       _buildItemInfoRow('Price per Item', '₹${item.pricePerItem}'),
                       _buildItemInfoRow('Discount Amount', '₹${item.discountAmount}'),
-                      _buildItemInfoRow('Line Total', '₹${_calculateLineTotal(item)}'),
+                      _buildItemInfoRow('Card Cost', '₹${_calculateLineTotal(item)}'),
                     ],
                   )
                 : Row(
@@ -391,7 +430,7 @@ class _BillPageState extends State<BillPage> {
                             const SizedBox(height: 12),
                             _buildItemInfoRow('Price per Item', '₹${item.pricePerItem}'),
                             _buildItemInfoRow('Discount Amount', '₹${item.discountAmount}'),
-                            _buildItemInfoRow('Line Total', '₹${_calculateLineTotal(item)}'),
+                            _buildItemInfoRow('Card Total', '₹${_calculateLineTotal(item)}'),
                           ],
                         ),
                       ),
@@ -428,7 +467,7 @@ class _BillPageState extends State<BillPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Total Cost:', style: TextStyle(fontWeight: FontWeight.w500)),
+                const Text('Line Total:', style: TextStyle(fontWeight: FontWeight.w500)),
                 Text(
                   item.calculatedCosts.formattedTotalCost,
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.green),
@@ -502,7 +541,7 @@ class _BillPageState extends State<BillPage> {
             // First row: Order Items Subtotal, Service Items Subtotal
             Row(
               children: [
-                Expanded(child: _buildSummaryCard('Order Items', bill.summary.formattedOrderItemsSubtotal, Colors.grey[600]!)),
+                Expanded(child: _buildSummaryCard('Card Items', bill.summary.formattedOrderItemsSubtotal, Colors.grey[600]!)),
                 const SizedBox(width: 8),
                 Expanded(child: _buildSummaryCard('Services', bill.summary.formattedServiceItemsSubtotal, Colors.teal[600]!)),
               ],
@@ -511,7 +550,8 @@ class _BillPageState extends State<BillPage> {
             // Second row: Items Subtotal, Box Cost
             Row(
               children: [
-                Expanded(child: _buildSummaryCard('Items Total', bill.summary.formattedItemsSubtotal, Colors.blue[600]!)),
+                // Expanded(child: _buildSummaryCard('Items Total', bill.summary.formattedItemsSubtotal, Colors.blue[600]!)),
+                Expanded(child: _buildSummaryCard('Printing Cost', bill.summary.formattedTotalPrintingCost, Colors.orange[600]!)),
                 const SizedBox(width: 8),
                 Expanded(child: _buildSummaryCard('Box Cost', bill.summary.formattedTotalBoxCost, Colors.purple[600]!)),
               ],
@@ -520,8 +560,7 @@ class _BillPageState extends State<BillPage> {
             // Third row: Printing Cost, Tax
             Row(
               children: [
-                Expanded(child: _buildSummaryCard('Printing Cost', bill.summary.formattedTotalPrintingCost, Colors.orange[600]!)),
-                const SizedBox(width: 8),
+                // const SizedBox(width: 8),
                 Expanded(child: _buildSummaryCard('Tax', bill.summary.formattedTaxAmount, Colors.amber[600]!)),
               ],
             ),
@@ -730,13 +769,16 @@ class _BillPageState extends State<BillPage> {
           );
         }
 
-        return Container(
-          width: context.isMobile ? double.infinity : 180,
-          height: context.isMobile ? 200 : 180,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey.withOpacity(0.3)),
-            image: DecorationImage(image: NetworkImage(card.image), fit: BoxFit.contain),
+        return GestureDetector(
+          onTap: () => ImageUtils.showEnlargedImageDialog(context, card.image),
+          child: Container(
+            width: context.isMobile ? double.infinity : 180,
+            height: context.isMobile ? 200 : 180,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.withOpacity(0.3)),
+              image: DecorationImage(image: NetworkImage(card.image), fit: BoxFit.contain),
+            ),
           ),
         );
       },

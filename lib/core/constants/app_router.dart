@@ -26,8 +26,11 @@ import 'package:vsc_app/features/home/presentation/pages/low_stock_cards_page.da
 import 'package:vsc_app/features/home/presentation/pages/out_of_stock_cards_page.dart';
 import 'package:vsc_app/features/home/presentation/pages/todays_orders_page.dart';
 import 'package:provider/provider.dart';
-import 'package:vsc_app/features/administration/presentation/providers/audit_logs_provider.dart';
+import 'package:vsc_app/features/administration/presentation/providers/staff_provider.dart';
 import 'package:vsc_app/features/administration/presentation/pages/audit_model_logs_page.dart';
+import 'package:vsc_app/features/administration/presentation/pages/staff_management_page.dart';
+import 'package:vsc_app/features/administration/presentation/pages/api_logs_page.dart';
+import 'package:vsc_app/features/bills/presentation/pages/bill_print_preview_page.dart';
 
 class AppRouter {
   static late final GoRouter router;
@@ -53,11 +56,23 @@ class AppRouter {
       },
       routes: [
         GoRoute(path: RouteConstants.login, name: RouteConstants.loginRouteName, builder: (context, state) => const LoginPage()),
-        GoRoute(path: RouteConstants.dashboard, name: RouteConstants.dashboardRouteName, builder: (context, state) => const MainLayout()),
+        GoRoute(
+          path: RouteConstants.dashboard,
+          name: RouteConstants.dashboardRouteName,
+          builder: (context, state) => const MainLayout(),
+        ),
         GoRoute(path: RouteConstants.orders, name: RouteConstants.ordersRouteName, builder: (context, state) => const MainLayout()),
         GoRoute(path: RouteConstants.bills, name: RouteConstants.billsRouteName, builder: (context, state) => const MainLayout()),
-        GoRoute(path: RouteConstants.newOrder, name: RouteConstants.newOrderRouteName, builder: (context, state) => const MainLayout()),
-        GoRoute(path: RouteConstants.inventory, name: RouteConstants.inventoryRouteName, builder: (context, state) => const MainLayout()),
+        GoRoute(
+          path: RouteConstants.newOrder,
+          name: RouteConstants.newOrderRouteName,
+          builder: (context, state) => const MainLayout(),
+        ),
+        GoRoute(
+          path: RouteConstants.inventory,
+          name: RouteConstants.inventoryRouteName,
+          builder: (context, state) => const MainLayout(),
+        ),
         GoRoute(
           path: RouteConstants.billDetail,
           name: RouteConstants.billDetailRouteName,
@@ -68,12 +83,38 @@ class AppRouter {
             return BillPage(billId: billId, fromOrderCreation: fromOrderCreation);
           },
         ),
-        GoRoute(path: RouteConstants.production, name: RouteConstants.productionRouteName, builder: (context, state) => const MainLayout()),
-        GoRoute(path: RouteConstants.administration, name: RouteConstants.administrationRouteName, builder: (context, state) => const MainLayout()),
+        GoRoute(
+          path: RouteConstants.billPrintPreview,
+          name: RouteConstants.billPrintPreviewRouteName,
+          builder: (context, state) {
+            final billId = state.pathParameters['id']!;
+            return BillPrintPreviewPage(billId: billId);
+          },
+        ),
+        GoRoute(
+          path: RouteConstants.production,
+          name: RouteConstants.productionRouteName,
+          builder: (context, state) => const MainLayout(),
+        ),
+        GoRoute(
+          path: RouteConstants.administration,
+          name: RouteConstants.administrationRouteName,
+          builder: (context, state) => const MainLayout(),
+        ),
+        GoRoute(
+          path: RouteConstants.staffManagement,
+          name: RouteConstants.staffManagementRouteName,
+          builder: (context, state) => ChangeNotifierProvider(create: (_) => StaffProvider(), child: const StaffManagementPage()),
+        ),
         GoRoute(
           path: RouteConstants.auditModelLogs,
           name: RouteConstants.auditModelLogsRouteName,
-          builder: (context, state) => ChangeNotifierProvider(create: (_) => AuditLogsProvider(), child: const AuditModelLogsPage()),
+          builder: (context, state) => const AuditModelLogsPage(),
+        ),
+        GoRoute(
+          path: RouteConstants.auditApiLogs,
+          name: RouteConstants.auditApiLogsRouteName,
+          builder: (context, state) => const ApiLogsPage(),
         ),
         GoRoute(path: RouteConstants.vendors, name: RouteConstants.vendorsRouteName, builder: (context, state) => const MainLayout()),
         GoRoute(
@@ -141,7 +182,11 @@ class AppRouter {
           name: RouteConstants.customerSearchRouteName,
           builder: (context, state) => const CreateOrderCustomerSearchPage(),
         ),
-        GoRoute(path: RouteConstants.orderItems, name: RouteConstants.orderItemsRouteName, builder: (context, state) => const CreateOrderPage()),
+        GoRoute(
+          path: RouteConstants.orderItems,
+          name: RouteConstants.orderItemsRouteName,
+          builder: (context, state) => const CreateOrderPage(),
+        ),
         GoRoute(
           path: RouteConstants.orderReview,
           name: RouteConstants.orderReviewRouteName,
@@ -167,7 +212,11 @@ class AppRouter {
         ),
 
         // Register route (Admin only)
-        GoRoute(path: RouteConstants.register, name: RouteConstants.registerRouteName, builder: (context, state) => const RegisterPage()),
+        GoRoute(
+          path: RouteConstants.register,
+          name: RouteConstants.registerRouteName,
+          builder: (context, state) => const RegisterPage(),
+        ),
 
         // Analytics routes
         GoRoute(

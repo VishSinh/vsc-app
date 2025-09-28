@@ -5,13 +5,16 @@ class RouteConstants {
   static const String dashboard = '/';
   static const String bills = '/bills';
   static const String billDetail = '/bills/:id';
+  static const String billPrintPreview = '/bills/:id/print';
   static const String orders = '/orders';
   static const String newOrder = '/orders/new';
   static const String editOrder = '/orders/:id/edit';
   static const String inventory = '/inventory';
   static const String production = '/production';
   static const String administration = '/administration';
+  static const String staffManagement = '/administration/staff';
   static const String auditModelLogs = '/administration/model-logs';
+  static const String auditApiLogs = '/administration/api-logs';
   static const String vendors = '/vendors';
   static const String vendorDetail = '/vendors/:id';
   static const String cardDetail = '/cards/:id';
@@ -33,13 +36,16 @@ class RouteConstants {
   static const String dashboardRouteName = 'dashboard';
   static const String billsRouteName = 'bills';
   static const String billDetailRouteName = 'bill-detail';
+  static const String billPrintPreviewRouteName = 'bill-print-preview';
   static const String ordersRouteName = 'orders';
   static const String newOrderRouteName = 'new-order';
   static const String editOrderRouteName = 'edit-order';
   static const String inventoryRouteName = 'inventory';
   static const String productionRouteName = 'production';
   static const String administrationRouteName = 'administration';
+  static const String staffManagementRouteName = 'staff-management';
   static const String auditModelLogsRouteName = 'audit-model-logs';
+  static const String auditApiLogsRouteName = 'audit-api-logs';
   static const String vendorsRouteName = 'vendors';
   static const String vendorDetailRouteName = 'vendor-detail';
 

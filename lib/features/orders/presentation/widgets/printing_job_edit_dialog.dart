@@ -6,6 +6,7 @@ import 'package:vsc_app/features/production/presentation/models/printing_job_upd
 import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
 import 'package:vsc_app/features/orders/presentation/providers/printing_job_edit_form_provider.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
+import 'package:vsc_app/core/utils/responsive_utils.dart';
 
 class PrintingJobEditDialog extends StatelessWidget {
   final String printingJobId;
@@ -62,8 +63,8 @@ class PrintingJobEditDialog extends StatelessWidget {
           return Consumer2<PrintingJobEditFormProvider, OrderListProvider>(
             builder: (context, formProvider, orderProvider, child) => Dialog(
               child: Container(
-                width: 500,
-                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
+                width: context.isDesktop ? 800 : 500,
+                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,17 +91,39 @@ class PrintingJobEditDialog extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildPrinterSection(context, formProvider, orderProvider),
-                                const SizedBox(height: 16),
-                                _buildTracingStudioSection(context, formProvider, orderProvider),
+                                // Pair Printer & Tracing Studio on desktop
+                                if (context.isDesktop)
+                                  Row(
+                                    children: [
+                                      Expanded(child: _buildPrinterSection(context, formProvider, orderProvider)),
+                                      const SizedBox(width: 16),
+                                      Expanded(child: _buildTracingStudioSection(context, formProvider, orderProvider)),
+                                    ],
+                                  )
+                                else ...[
+                                  _buildPrinterSection(context, formProvider, orderProvider),
+                                  const SizedBox(height: 16),
+                                  _buildTracingStudioSection(context, formProvider, orderProvider),
+                                ],
                                 const SizedBox(height: 16),
                                 _buildPrintingStatusSection(context, formProvider),
                                 const SizedBox(height: 16),
                                 _buildTotalPrintingCostSection(context, formProvider),
                                 const SizedBox(height: 16),
-                                _buildTotalPrintingExpenseSection(context, formProvider),
-                                const SizedBox(height: 16),
-                                _buildTotalTracingExpenseSection(context, formProvider),
+                                // Pair Printing Expense & Tracing Expense on desktop
+                                if (context.isDesktop)
+                                  Row(
+                                    children: [
+                                      Expanded(child: _buildTotalPrintingExpenseSection(context, formProvider)),
+                                      const SizedBox(width: 16),
+                                      Expanded(child: _buildTotalTracingExpenseSection(context, formProvider)),
+                                    ],
+                                  )
+                                else ...[
+                                  _buildTotalPrintingExpenseSection(context, formProvider),
+                                  const SizedBox(height: 16),
+                                  _buildTotalTracingExpenseSection(context, formProvider),
+                                ],
                                 const SizedBox(height: 16),
                                 _buildPrintQuantitySection(context, formProvider),
                                 const SizedBox(height: 16),
@@ -136,7 +159,13 @@ class PrintingJobEditDialog extends StatelessWidget {
           children: [
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: 'Printer', border: OutlineInputBorder(), hintText: 'Select a printer'),
+              decoration: InputDecoration(
+                labelText: 'Printer',
+                border: const OutlineInputBorder(),
+                hintText: 'Select a printer',
+                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.green.withOpacity(0.6))),
+                focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.green, width: 2)),
+              ),
               value: formProvider.formModel.currentPrinterId,
               items: [
                 const DropdownMenuItem<String>(value: null, child: Text('--')),
@@ -164,7 +193,13 @@ class PrintingJobEditDialog extends StatelessWidget {
           children: [
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: 'Tracing Studio', border: OutlineInputBorder(), hintText: 'Select a tracing studio'),
+              decoration: InputDecoration(
+                labelText: 'Tracing Studio',
+                border: const OutlineInputBorder(),
+                hintText: 'Select a tracing studio',
+                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.green.withOpacity(0.6))),
+                focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.green, width: 2)),
+              ),
               value: formProvider.formModel.currentTracingStudioId,
               items: [
                 const DropdownMenuItem<String>(value: null, child: Text('--')),
@@ -223,7 +258,12 @@ class PrintingJobEditDialog extends StatelessWidget {
         const SizedBox(height: 8),
         TextFormField(
           controller: formProvider.totalPrintingExpenseController,
-          decoration: const InputDecoration(labelText: 'Total Printing Expense', border: OutlineInputBorder()),
+          decoration: InputDecoration(
+            labelText: 'Total Printing Expense',
+            border: const OutlineInputBorder(),
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.green.withOpacity(0.6))),
+            focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.green, width: 2)),
+          ),
           keyboardType: TextInputType.number,
           onChanged: (value) {
             formProvider.updateTotalPrintingExpense(value);
@@ -240,7 +280,12 @@ class PrintingJobEditDialog extends StatelessWidget {
         const SizedBox(height: 8),
         TextFormField(
           controller: formProvider.totalTracingExpenseController,
-          decoration: const InputDecoration(labelText: 'Total Tracing Expense', border: OutlineInputBorder()),
+          decoration: InputDecoration(
+            labelText: 'Total Tracing Expense',
+            border: const OutlineInputBorder(),
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.green.withOpacity(0.6))),
+            focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.green, width: 2)),
+          ),
           keyboardType: TextInputType.number,
           onChanged: (value) {
             formProvider.updateTotalTracingExpense(value);
@@ -312,7 +357,10 @@ class PrintingJobEditDialog extends StatelessWidget {
         return Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            TextButton(onPressed: provider.isUpdatingPrintingJob ? null : () => Navigator.of(context).pop(), child: const Text('Cancel')),
+            TextButton(
+              onPressed: provider.isUpdatingPrintingJob ? null : () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
             const SizedBox(width: 16),
             ElevatedButton(
               onPressed: provider.isUpdatingPrintingJob ? null : () => _handleSubmit(context, formProvider.formModel),

@@ -17,6 +17,8 @@ import 'package:vsc_app/core/constants/app_config.dart';
 import 'package:vsc_app/core/enums/service_type.dart';
 import 'package:vsc_app/features/orders/presentation/services/order_calculation_service.dart';
 import 'package:vsc_app/features/home/presentation/providers/permission_provider.dart';
+import 'package:vsc_app/core/utils/image_utils.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class OrderDetailPage extends StatefulWidget {
   final String orderId;
@@ -256,10 +258,34 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                       final phone = provider.getCustomerPhone(order.customerId);
                       // Trigger fetch if not present
                       if (phone == null) provider.fetchCustomerPhone(order.customerId);
-                      final display = phone == null ? order.customerName : '${order.customerName} (${phone})';
-                      return Text(
-                        display,
-                        style: TextStyle(fontSize: AppConfig.fontSizeMd, fontWeight: FontWeight.w500),
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            order.customerName,
+                            style: TextStyle(fontSize: AppConfig.fontSizeMd, fontWeight: FontWeight.w500),
+                          ),
+                          if (phone != null) ...[
+                            const SizedBox(height: 4),
+                            InkWell(
+                              onTap: () async {
+                                final url = Uri.parse('tel:$phone');
+                                if (await canLaunchUrl(url)) {
+                                  await launchUrl(url);
+                                }
+                              },
+                              child: Text(
+                                phone,
+                                style: TextStyle(
+                                  fontSize: AppConfig.fontSizeMd,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.blue,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       );
                     },
                   ),
@@ -430,13 +456,16 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   }
 
   Widget _buildCardImage(OrderCardViewModel card) {
-    return Container(
-      width: context.isMobile ? double.infinity : 180,
-      height: context.isMobile ? 200 : 180,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.withOpacity(0.3)),
-        image: DecorationImage(image: NetworkImage(card.image), fit: BoxFit.contain),
+    return GestureDetector(
+      onTap: () => ImageUtils.showEnlargedImageDialog(context, card.image),
+      child: Container(
+        width: context.isMobile ? double.infinity : 180,
+        height: context.isMobile ? 200 : 180,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey.withOpacity(0.3)),
+          image: DecorationImage(image: NetworkImage(card.image), fit: BoxFit.contain),
+        ),
       ),
     );
   }
@@ -701,7 +730,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         boxOrderId: box.id,
         currentBoxMakerId: box.boxMakerId ?? '',
         currentTotalBoxCost: box.totalBoxCost,
-        currentTotalBoxExpense: box.totalBoxExpense ?? '0.00',
+        currentTotalBoxExpense: box.totalBoxExpense ?? '',
         currentBoxStatus: box.boxStatus,
         currentBoxType: box.boxType.toString().split('.').last,
         currentBoxQuantity: box.boxQuantity,
@@ -721,8 +750,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         currentPrinterId: job.printerId ?? '',
         currentTracingStudioId: job.tracingStudioId ?? '',
         currentTotalPrintingCost: job.totalPrintingCost,
-        currentTotalPrintingExpense: job.totalPrintingExpense ?? '0.00',
-        currentTotalTracingExpense: job.totalTracingExpense ?? '0.00',
+        currentTotalPrintingExpense: job.totalPrintingExpense ?? '',
+        currentTotalTracingExpense: job.totalTracingExpense ?? '',
         currentPrintingStatus: job.printingStatus,
         currentPrintQuantity: job.printQuantity,
         currentEstimatedCompletion: job.estimatedCompletion?.toIso8601String(),

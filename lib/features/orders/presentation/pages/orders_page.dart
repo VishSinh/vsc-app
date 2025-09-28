@@ -116,13 +116,21 @@ class _OrdersPageState extends State<OrdersPage> {
       return const Center(child: Text('No orders found'));
     }
 
-    return Stack(
-      alignment: Alignment.bottomCenter,
-      children: [
-        context.isMobile ? _buildMobileList() : _buildDesktopTable(),
-        if (orderProvider.pagination != null) Positioned(bottom: 10, child: _buildPagination(orderProvider)),
-      ],
+    return RefreshIndicator(
+      onRefresh: _refreshOrders,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          context.isMobile ? _buildMobileList() : _buildDesktopTable(),
+          if (orderProvider.pagination != null) Positioned(bottom: 10, child: _buildPagination(orderProvider)),
+        ],
+      ),
     );
+  }
+
+  Future<void> _refreshOrders() async {
+    final orderProvider = context.read<OrderListProvider>();
+    await orderProvider.fetchOrders();
   }
 
   Widget _buildMobileList() {
@@ -290,94 +298,102 @@ class _OrdersPageState extends State<OrdersPage> {
   Widget _buildDesktopTable() {
     const double fixedRowHeight = 70.0; // Fixed height for each row
     const double headerHeight = 50.0; // Height of the header row
+    const double borderRadius = 12.0;
 
-    return SizedBox(
+    return Container(
       height: MediaQuery.of(context).size.height, // Account for header, padding, etc.
-      child: Column(
-        children: [
-          // Header Row
-          Container(
-            height: headerHeight,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[400]!, width: 1),
+        borderRadius: BorderRadius.circular(borderRadius),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Column(
+          children: [
+            // Header Row
+            Container(
+              height: headerHeight,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text('Order Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text('Customer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text('Staff', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text('Order Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text('Box Maker', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text('Printer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text('Tracing Studio', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text('Services', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: Center(
-                    child: Text('Order Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Center(
-                    child: Text('Customer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Center(
-                    child: Text('Staff', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Center(
-                    child: Text('Order Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Center(
-                    child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Center(
-                    child: Text('Box Maker', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Center(
-                    child: Text('Printer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Center(
-                    child: Text('Tracing Studio', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Center(
-                    child: Text('Services', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Center(
-                    child: Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  ),
-                ),
-              ],
+            // Data Rows - Scrollable with fixed height
+            Expanded(
+              child: ListView.builder(
+                itemCount: _filteredOrders.length,
+                itemBuilder: (context, index) {
+                  final order = _filteredOrders[index];
+                  return _buildDesktopRow(order, fixedRowHeight);
+                },
+              ),
             ),
-          ),
-          // Data Rows - Scrollable with fixed height
-          Expanded(
-            child: ListView.builder(
-              itemCount: _filteredOrders.length,
-              itemBuilder: (context, index) {
-                final order = _filteredOrders[index];
-                return _buildDesktopRow(order, fixedRowHeight);
-              },
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -56,6 +56,7 @@ class AppConstants {
   static const String detailedAnalyticsEndpoint = '/analytics/detail/';
   // Audit
   static const String auditModelLogsEndpoint = '/audit/model-logs/';
+  static const String auditApiLogsEndpoint = '/audit/api-logs/';
 
   // ==========================================================================
 

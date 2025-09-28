@@ -7,6 +7,7 @@ import 'package:vsc_app/features/production/presentation/models/box_order_update
 import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
 import 'package:vsc_app/features/orders/presentation/providers/box_order_edit_form_provider.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
+import 'package:vsc_app/core/utils/responsive_utils.dart';
 
 class BoxOrderEditDialog extends StatelessWidget {
   final String boxOrderId;
@@ -60,8 +61,8 @@ class BoxOrderEditDialog extends StatelessWidget {
             builder: (context, formProvider, orderProvider, child) {
               return Dialog(
                 child: Container(
-                  width: 500,
-                  constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
+                  width: context.isDesktop ? 800 : 500,
+                  constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,7 +134,13 @@ class BoxOrderEditDialog extends StatelessWidget {
           children: [
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: 'Box Maker', border: OutlineInputBorder(), hintText: 'Select a box maker'),
+              decoration: InputDecoration(
+                labelText: 'Box Maker',
+                border: const OutlineInputBorder(),
+                hintText: 'Select a box maker',
+                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue.withOpacity(0.6))),
+                focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.blue, width: 2)),
+              ),
               value: formProvider.formModel.currentBoxMakerId,
               items: [
                 const DropdownMenuItem<String>(value: null, child: Text('--')),
@@ -157,7 +164,9 @@ class BoxOrderEditDialog extends StatelessWidget {
         DropdownButtonFormField<BoxStatus>(
           decoration: const InputDecoration(labelText: 'Box Status', border: OutlineInputBorder(), hintText: 'Select status'),
           value: formProvider.formModel.currentBoxStatus,
-          items: BoxStatus.values.map((status) => DropdownMenuItem<BoxStatus>(value: status, child: Text(_formatBoxStatus(status)))).toList(),
+          items: BoxStatus.values
+              .map((status) => DropdownMenuItem<BoxStatus>(value: status, child: Text(_formatBoxStatus(status))))
+              .toList(),
           onChanged: (value) {
             formProvider.updateBoxStatus(value);
           },
@@ -174,7 +183,9 @@ class BoxOrderEditDialog extends StatelessWidget {
         DropdownButtonFormField<OrderBoxType>(
           decoration: const InputDecoration(labelText: 'Box Type', border: OutlineInputBorder(), hintText: 'Select box type'),
           value: formProvider.formModel.currentBoxType,
-          items: OrderBoxType.values.map((type) => DropdownMenuItem<OrderBoxType>(value: type, child: Text(_formatBoxType(type)))).toList(),
+          items: OrderBoxType.values
+              .map((type) => DropdownMenuItem<OrderBoxType>(value: type, child: Text(_formatBoxType(type))))
+              .toList(),
           onChanged: (value) {
             formProvider.updateBoxType(value);
           },
@@ -207,7 +218,12 @@ class BoxOrderEditDialog extends StatelessWidget {
         const SizedBox(height: 8),
         TextFormField(
           controller: formProvider.totalBoxExpenseController,
-          decoration: const InputDecoration(labelText: 'Total Box Expense', border: OutlineInputBorder()),
+          decoration: InputDecoration(
+            labelText: 'Total Box Expense',
+            border: const OutlineInputBorder(),
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue.withOpacity(0.6))),
+            focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.blue, width: 2)),
+          ),
           keyboardType: TextInputType.number,
           onChanged: (value) {
             formProvider.updateTotalBoxExpense(value);

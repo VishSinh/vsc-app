@@ -31,7 +31,7 @@ class _PaymentCreateDialogState extends State<PaymentCreateDialog> {
   @override
   void initState() {
     super.initState();
-    _amountController.text = widget.remainingAmount.toStringAsFixed(2);
+    // Amount field is left empty to avoid pre-populating and potential mistakes
   }
 
   @override

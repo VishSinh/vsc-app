@@ -99,26 +99,34 @@ class _InventoryPageState extends State<InventoryPage> {
           return const LoadingWidget(message: 'Loading cards...');
         }
 
-        return Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            _buildCardsList(),
-            if (cardProvider.pagination != null)
-              Positioned(
-                bottom: 10,
-                child: PaginationWidget(
-                  currentPage: cardProvider.pagination?.currentPage ?? 1,
-                  totalPages: cardProvider.pagination?.totalPages ?? 1,
-                  hasPrevious: cardProvider.pagination?.hasPrevious ?? false,
-                  hasNext: cardProvider.hasMoreCards,
-                  onPreviousPage: cardProvider.pagination?.hasPrevious ?? false ? () => cardProvider.loadPreviousPage() : null,
-                  onNextPage: cardProvider.hasMoreCards ? () => cardProvider.loadNextPage() : null,
+        return RefreshIndicator(
+          onRefresh: _refreshCards,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              _buildCardsList(),
+              if (cardProvider.pagination != null)
+                Positioned(
+                  bottom: 10,
+                  child: PaginationWidget(
+                    currentPage: cardProvider.pagination?.currentPage ?? 1,
+                    totalPages: cardProvider.pagination?.totalPages ?? 1,
+                    hasPrevious: cardProvider.pagination?.hasPrevious ?? false,
+                    hasNext: cardProvider.hasMoreCards,
+                    onPreviousPage: cardProvider.pagination?.hasPrevious ?? false ? () => cardProvider.loadPreviousPage() : null,
+                    onNextPage: cardProvider.hasMoreCards ? () => cardProvider.loadNextPage() : null,
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         );
       },
     );
+  }
+
+  Future<void> _refreshCards() async {
+    final cardProvider = context.read<CardListProvider>();
+    await cardProvider.loadCards();
   }
 
   Widget _buildCardsList() {
@@ -204,7 +212,12 @@ class _InventoryActionButtonsState extends State<InventoryActionButtons> {
       children: [
         _buildActionButton(context, icon: Icons.image_search, color: Colors.blue[600]!, onPressed: () => _onSearchByImage(context)),
         const SizedBox(width: 8),
-        _buildActionButton(context, icon: Icons.qr_code_scanner, color: Colors.green[600]!, onPressed: () => BarcodeDialog.show(context)),
+        _buildActionButton(
+          context,
+          icon: Icons.qr_code_scanner,
+          color: Colors.green[600]!,
+          onPressed: () => BarcodeDialog.show(context),
+        ),
         const SizedBox(width: 8),
         _buildActionButton(context, icon: Icons.filter_list, color: Colors.orange[600]!, onPressed: () => _onFilters(context)),
       ],
@@ -302,7 +315,10 @@ class InventoryCardItem extends StatelessWidget {
           final cardDetailProvider = context.read<CardDetailProvider>();
           context.pushNamed(RouteConstants.cardDetailRouteName, pathParameters: {'id': card.id}, extra: cardDetailProvider);
         },
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildImageSection(context), _buildContentSection(context)]),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [_buildImageSection(context), _buildContentSection(context)],
+        ),
       ),
     );
   }
@@ -393,7 +409,10 @@ class InventoryCardItem extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.all(padding),
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [_buildPriceText(context), _buildStockIndicator(context)]),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [_buildPriceText(context), _buildStockIndicator(context)],
+      ),
     );
   }
 
