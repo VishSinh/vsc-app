@@ -10,10 +10,12 @@ import 'package:vsc_app/features/bills/presentation/models/bill_view_model.dart'
 import 'package:vsc_app/features/bills/presentation/models/payment_view_model.dart';
 import 'package:vsc_app/features/bills/presentation/services/bill_calculation_service.dart';
 import 'package:vsc_app/features/bills/presentation/widgets/payment_create_dialog.dart';
+import 'package:vsc_app/features/bills/presentation/widgets/bill_adjustment_create_dialog.dart';
 import 'package:vsc_app/core/enums/bill_status.dart';
 import 'package:vsc_app/core/enums/payment_mode.dart';
 import 'package:vsc_app/core/enums/order_status.dart';
 import 'package:vsc_app/core/enums/service_type.dart';
+import 'package:vsc_app/core/enums/bill_adjustment_type.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
 import 'package:vsc_app/core/utils/image_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -40,6 +42,7 @@ class _BillPageState extends State<BillPage> {
     billProvider.setContext(context);
     await billProvider.getBillByBillId(billId: widget.billId);
     await billProvider.getPaymentsByBillId(billId: widget.billId);
+    await billProvider.getBillAdjustmentsByBillId(billId: widget.billId);
 
     // Load card images for each order item
     if (billProvider.currentBill != null) {
@@ -137,11 +140,13 @@ class _BillPageState extends State<BillPage> {
         children: [
           _buildBillHeader(bill),
           const SizedBox(height: 24),
-          _buildPaymentButton(),
+          _buildPaymentAndAdjustmentButtons(),
           const SizedBox(height: 24),
           _buildOrderInfo(bill),
           const SizedBox(height: 24),
           _buildPaymentsSection(),
+          const SizedBox(height: 24),
+          _buildAdjustmentsSection(),
           const SizedBox(height: 24),
           _buildOrderItems(bill),
           if (bill.order.serviceItems.isNotEmpty) ...[const SizedBox(height: 24), _buildServiceItems(bill)],
@@ -166,11 +171,13 @@ class _BillPageState extends State<BillPage> {
                 children: [
                   _buildBillHeader(bill),
                   const SizedBox(height: 24),
-                  _buildPaymentButton(),
+                  _buildPaymentAndAdjustmentButtons(),
                   const SizedBox(height: 24),
                   _buildOrderInfo(bill),
                   const SizedBox(height: 24),
                   _buildPaymentsSection(),
+                  const SizedBox(height: 24),
+                  _buildAdjustmentsSection(),
                   const SizedBox(height: 24),
                   _buildSummaryCards(bill),
                 ],
@@ -226,7 +233,7 @@ class _BillPageState extends State<BillPage> {
     );
   }
 
-  Widget _buildPaymentButton() {
+  Widget _buildPaymentAndAdjustmentButtons() {
     return Consumer<BillProvider>(
       builder: (context, billProvider, child) {
         final bill = billProvider.currentBill;
@@ -235,18 +242,34 @@ class _BillPageState extends State<BillPage> {
         // Use API-provided pending amount instead of app-side calculation
         final isFullyPaid = (bill.summary.pendingAmount <= 0.0);
 
-        return SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: isFullyPaid ? null : _showPaymentDialog,
-            icon: const Icon(Icons.payment),
-            label: Text(isFullyPaid ? 'Fully Paid' : 'Make New Payment'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isFullyPaid ? AppConfig.grey600 : AppConfig.successColor,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
+        return Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: isFullyPaid ? null : _showPaymentDialog,
+                icon: const Icon(Icons.payment),
+                label: Text(isFullyPaid ? 'Fully Paid' : 'Make Payment'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isFullyPaid ? AppConfig.grey600 : AppConfig.successColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: isFullyPaid ? null : _showAdjustmentDialog,
+                icon: const Icon(Icons.tune),
+                label: const Text('Bill Adjustment'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isFullyPaid ? AppConfig.grey600 : AppConfig.primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -257,8 +280,8 @@ class _BillPageState extends State<BillPage> {
     final bill = billProvider.currentBill;
     if (bill == null) return;
 
-    // Calculate remaining amount using BillCalculationService
-    final remainingAmount = BillCalculationService.calculateRemainingAmount(bill.summary.totalWithTax, billProvider.payments);
+    // Use remaining amount from API to ensure consistency with adjustments
+    final remainingAmount = bill.summary.pendingAmount;
 
     showDialog(
       context: context,
@@ -266,6 +289,23 @@ class _BillPageState extends State<BillPage> {
     ).then((result) {
       if (result == true) {
         // Payment was created successfully, refresh the data
+        _loadBillDetails();
+      }
+    });
+  }
+
+  void _showAdjustmentDialog() {
+    final billProvider = context.read<BillProvider>();
+    final bill = billProvider.currentBill;
+    if (bill == null) return;
+
+    final remainingAmount = bill.summary.pendingAmount;
+
+    showDialog(
+      context: context,
+      builder: (context) => BillAdjustmentCreateDialog(billId: widget.billId, remainingAmount: remainingAmount),
+    ).then((result) {
+      if (result == true) {
         _loadBillDetails();
       }
     });
@@ -671,6 +711,79 @@ class _BillPageState extends State<BillPage> {
                   )
                 else
                   Column(children: payments.map((payment) => _buildPaymentItem(payment)).toList()),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAdjustmentsSection() {
+    return Consumer<BillProvider>(
+      builder: (context, billProvider, child) {
+        final adjustments = billProvider.adjustments;
+        final bill = billProvider.currentBill;
+
+        if (bill == null) return const SizedBox.shrink();
+
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.tune, color: AppConfig.primaryColor),
+                    const SizedBox(width: 8),
+                    Text('Bill Adjustments', style: AppConfig.getResponsiveTitle(context)),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (adjustments.isEmpty)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text('No bill adjustments yet', style: AppConfig.getResponsiveCaption(context)),
+                    ),
+                  )
+                else
+                  Column(
+                    children: adjustments
+                        .map(
+                          (a) => Container(
+                            width: double.infinity,
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppConfig.secondaryColor,
+                              borderRadius: BorderRadius.circular(AppConfig.defaultRadius),
+                              border: Border.all(color: AppConfig.grey600),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(Icons.tune, color: AppConfig.primaryColor, size: 20),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('₹${a.amount.toStringAsFixed(2)}', style: AppConfig.getResponsiveTitle(context)),
+                                      Text(a.adjustmentType.displayText, style: AppConfig.getResponsiveCaption(context)),
+                                      if (a.reason.isNotEmpty)
+                                        Text('Reason: ${a.reason}', style: AppConfig.getResponsiveCaption(context)),
+                                      Text('By: ${a.staffName}', style: AppConfig.getResponsiveCaption(context)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
               ],
             ),
           ),

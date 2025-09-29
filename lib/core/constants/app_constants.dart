@@ -50,6 +50,7 @@ class AppConstants {
   // Bills
   static const String billsEndpoint = '/bills/';
   static const String paymentsEndpoint = '/payments/';
+  static const String billAdjustmentsEndpoint = '/bill-adjustments/';
   // Dashboard
   static const String dashboardEndpoint = '/dashboard/';
   // Analytics

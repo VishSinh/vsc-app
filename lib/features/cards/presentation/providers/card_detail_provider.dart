@@ -3,6 +3,7 @@ import 'package:vsc_app/core/services/event_bus_service.dart';
 import 'package:vsc_app/features/cards/data/services/card_service.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_update_form_model.dart';
+import 'package:vsc_app/features/cards/presentation/models/card_detail_view_model.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 
 /// Provider for managing card details, barcode generation, and edit/delete operations
@@ -12,9 +13,11 @@ class CardDetailProvider extends BaseProvider {
 
   // Card detail state
   CardViewModel? _currentCard;
+  CardDetailViewModel? _cardDetail;
 
   // Getters for fetched data
   CardViewModel? get currentCard => _currentCard;
+  CardDetailViewModel? get cardDetail => _cardDetail;
 
   /// Get card by ID
   Future<void> getCardById(String id) async {
@@ -26,6 +29,19 @@ class CardDetailProvider extends BaseProvider {
       },
       showSnackbar: false,
       errorMessage: 'Card not found',
+    );
+  }
+
+  /// Get card sales/detail analytics by ID
+  Future<void> getCardDetail(String id) async {
+    await executeApiOperation(
+      apiCall: () => _cardService.getCardDetail(id),
+      onSuccess: (response) {
+        _cardDetail = CardDetailViewModel.fromApiResponse(response.data!);
+        return response.data!;
+      },
+      showSnackbar: false,
+      errorMessage: 'Failed to load card details',
     );
   }
 
@@ -63,6 +79,7 @@ class CardDetailProvider extends BaseProvider {
   /// Clear selected card
   void clearCurrentCard() {
     _currentCard = null;
+    _cardDetail = null;
     notifyListeners();
   }
 
@@ -70,6 +87,7 @@ class CardDetailProvider extends BaseProvider {
   @override
   void reset() {
     _currentCard = null;
+    _cardDetail = null;
     super.reset();
   }
 

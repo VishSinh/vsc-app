@@ -11,6 +11,7 @@ import 'package:vsc_app/features/home/presentation/providers/permission_provider
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_detail_provider.dart';
 import 'package:vsc_app/features/cards/presentation/widgets/edit_card_dialog.dart';
+import 'package:vsc_app/features/cards/presentation/models/card_detail_view_model.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
 
 class CardDetailPage extends StatefulWidget {
@@ -39,6 +40,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
 
   void _loadCardDetails() {
     _cardProvider.getCardById(widget.cardId);
+    _cardProvider.getCardDetail(widget.cardId);
   }
 
   // Printing is handled by BluetoothPrintService
@@ -114,7 +116,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
                   SizedBox(height: context.responsiveSpacing),
 
                   // Card Statistics
-                  // _buildCardStats(),
+                  _buildCardStats(),
                 ],
               ),
             ),
@@ -165,6 +167,107 @@ class _CardDetailPageState extends State<CardDetailPage> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildCardStats() {
+    return Consumer<CardDetailProvider>(
+      builder: (context, cardProvider, child) {
+        final stats = cardProvider.cardDetail;
+        return Card(
+          elevation: AppConfig.elevationLow,
+          child: Padding(
+            padding: context.responsivePadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Sales Summary', style: ResponsiveText.getTitle(context)),
+                SizedBox(height: context.responsiveSpacing),
+                _buildStatsTable(stats),
+                if (stats?.orders.isNotEmpty == true) ...[
+                  SizedBox(height: context.responsiveSpacing),
+                  Text('Recent Orders', style: ResponsiveText.getSubtitle(context)),
+                  SizedBox(height: AppConfig.smallPadding),
+                  ...stats!.orders.map(
+                    (o) => ListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(o.name, style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w600)),
+                      subtitle: Text('Qty: ${o.quantity}'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.push('${RouteConstants.orderDetail}'.replaceFirst(':id', o.orderId)),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildStatsTable(CardDetailViewModel? stats) {
+    final rows = <List<MapEntry<String, String>>>[];
+    final entries = <MapEntry<String, String>>[
+      MapEntry('Orders', (stats?.ordersCount ?? 0).toString()),
+      MapEntry('Units Sold', (stats?.unitsSold ?? 0).toString()),
+      MapEntry('Gross Revenue', stats?.formattedGrossRevenue ?? '₹0.00'),
+      MapEntry('Gross Cost', stats?.formattedGrossCost ?? '₹0.00'),
+      MapEntry('Gross Profit', stats?.formattedGrossProfit ?? '₹0.00'),
+      MapEntry('Avg Selling Price', stats?.formattedAvgSellingPrice ?? '₹0.00'),
+      MapEntry('Avg Discount/Unit', stats?.formattedAvgDiscountPerUnit ?? '₹0.00'),
+      MapEntry('Avg Discount Rate', stats?.formattedAvgDiscountRate ?? '0%'),
+      MapEntry('Distinct Customers', (stats?.distinctCustomers ?? 0).toString()),
+      MapEntry('Returns (Txns)', (stats?.returnsTransactions ?? 0).toString()),
+      MapEntry('Units Returned', (stats?.returnsUnitsReturned ?? 0).toString()),
+      MapEntry('First Sold', stats?.formattedFirstSoldAt ?? 'N/A'),
+      MapEntry('Last Sold', stats?.formattedLastSoldAt ?? 'N/A'),
+    ];
+
+    if (context.isDesktop) {
+      for (int i = 0; i < entries.length; i += 2) {
+        final left = entries[i];
+        final right = i + 1 < entries.length ? entries[i + 1] : null;
+        rows.add([left, if (right != null) right]);
+      }
+    } else {
+      for (final e in entries) {
+        rows.add([e]);
+      }
+    }
+
+    return Table(
+      columnWidths: context.isDesktop
+          ? const {0: FlexColumnWidth(1.2), 1: FlexColumnWidth(1.8), 2: FlexColumnWidth(1.2), 3: FlexColumnWidth(1.8)}
+          : const {0: FlexColumnWidth(1.2), 1: FlexColumnWidth(2.8)},
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      children: [
+        for (final row in rows)
+          TableRow(
+            children: [
+              for (final cell in row) ...[_buildStatCellLabel(cell.key), _buildStatCellValue(cell.value)],
+              if (context.isDesktop && row.length == 1) ...[const SizedBox.shrink(), const SizedBox.shrink()],
+            ],
+          ),
+      ],
+    );
+  }
+
+  Widget _buildStatCellLabel(String label) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: AppConfig.smallPadding, horizontal: AppConfig.smallPadding),
+      child: Text(label, style: ResponsiveText.getCaption(context).copyWith(color: AppConfig.textColorSecondary)),
+    );
+  }
+
+  Widget _buildStatCellValue(String value) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: AppConfig.smallPadding, horizontal: AppConfig.smallPadding),
+      child: Text(
+        value,
+        style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w700, color: AppConfig.textColorPrimary),
+      ),
     );
   }
 

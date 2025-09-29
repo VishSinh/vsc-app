@@ -5,6 +5,8 @@ import 'package:vsc_app/features/bills/presentation/models/bill_card_view_model.
 import 'package:vsc_app/features/bills/presentation/models/bill_view_model.dart';
 import 'package:vsc_app/features/bills/presentation/models/payment_form_model.dart';
 import 'package:vsc_app/features/bills/presentation/models/payment_view_model.dart';
+import 'package:vsc_app/features/bills/presentation/models/bill_adjustment_view_model.dart';
+import 'package:vsc_app/features/bills/presentation/models/bill_adjustment_form_model.dart';
 import 'package:vsc_app/features/cards/data/services/card_service.dart';
 import 'package:vsc_app/features/customers/data/services/customer_service.dart';
 
@@ -70,6 +72,7 @@ class BillProvider extends BaseProvider {
   BillViewModel? get currentBill => _bill;
   List<BillViewModel> get bills => List.unmodifiable(_bills);
   List<PaymentViewModel> get payments => List.unmodifiable(_payments);
+  List<BillAdjustmentViewModel> get adjustments => List.unmodifiable(_adjustments);
   Map<String, BillCardViewModel> get cardImages => Map.unmodifiable(_cardImages);
   PaginationData? get pagination => _pagination;
   bool get hasMoreBills => _pagination?.hasNext ?? false;
@@ -82,6 +85,8 @@ class BillProvider extends BaseProvider {
 
   // Payments Get
   List<PaymentViewModel> _payments = [];
+  // Adjustments Get
+  List<BillAdjustmentViewModel> _adjustments = [];
 
   Future<void> getPaymentsByBillId({required String billId}) async {
     await executeApiOperation(
@@ -93,6 +98,19 @@ class BillProvider extends BaseProvider {
       showLoading: false,
       showSnackbar: false,
       errorMessage: 'Failed to fetch payments',
+    );
+  }
+
+  Future<void> getBillAdjustmentsByBillId({required String billId}) async {
+    await executeApiOperation(
+      apiCall: () => _billService.getBillAdjustmentsByBillId(billId: billId),
+      onSuccess: (response) {
+        setSuccess('Bill adjustments fetched successfully');
+        _adjustments = response.data?.map((item) => BillAdjustmentViewModel.fromApiResponse(item)).toList() ?? [];
+      },
+      showLoading: false,
+      showSnackbar: false,
+      errorMessage: 'Failed to fetch bill adjustments',
     );
   }
 
@@ -152,6 +170,17 @@ class BillProvider extends BaseProvider {
         getPaymentsByBillId(billId: paymentFormModel.billId);
       },
       errorMessage: 'Failed to create payment',
+    );
+  }
+
+  Future<void> createBillAdjustment({required BillAdjustmentFormModel formModel}) async {
+    await executeApiOperation(
+      apiCall: () => _billService.createBillAdjustment(request: formModel.toApiRequest()),
+      onSuccess: (response) {
+        setSuccess('Bill adjustment created successfully');
+        getBillAdjustmentsByBillId(billId: formModel.billId);
+      },
+      errorMessage: 'Failed to create bill adjustment',
     );
   }
 

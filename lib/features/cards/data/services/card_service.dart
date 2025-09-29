@@ -4,6 +4,7 @@ import 'package:vsc_app/core/services/base_service.dart';
 import 'package:vsc_app/features/cards/data/models/card_requests.dart';
 import 'package:vsc_app/features/cards/data/models/card_responses.dart';
 import 'package:vsc_app/core/constants/app_constants.dart';
+import 'package:vsc_app/features/cards/data/models/card_detail_response.dart';
 import 'package:vsc_app/core/utils/file_upload_utils.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vsc_app/features/cards/data/models/card_update_request.dart';
@@ -49,6 +50,14 @@ class CardService extends ApiService {
     return await executeRequest(
       () => get('${AppConstants.cardsEndpoint}$id/'),
       (json) => CardResponse.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  /// Get card sales/detail analytics by ID
+  Future<ApiResponse<CardDetailResponse>> getCardDetail(String id) async {
+    return await executeRequest(
+      () => get('${AppConstants.cardsEndpoint}$id/detail/'),
+      (json) => CardDetailResponse.fromJson(json as Map<String, dynamic>),
     );
   }
 
