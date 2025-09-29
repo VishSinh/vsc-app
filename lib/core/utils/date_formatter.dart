@@ -53,6 +53,14 @@ class DateFormatter {
     }
   }
 
+  /// Format a DateTime to yyyy-MM-dd for API query parameters
+  static String formatDateForApi(DateTime date) {
+    final String y = date.year.toString().padLeft(4, '0');
+    final String m = date.month.toString().padLeft(2, '0');
+    final String d = date.day.toString().padLeft(2, '0');
+    return '$y-$m-$d';
+  }
+
   /// Format a date range (e.g., "Jan 15 - Jan 20, 2023")
   static String formatDateRange(DateTime? startDate, DateTime? endDate) {
     if (startDate == null && endDate == null) return 'N/A';

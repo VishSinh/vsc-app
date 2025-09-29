@@ -25,6 +25,22 @@ class CardListProvider extends BaseProvider {
   bool _showCardsList = false;
   int _selectedIndex = 0;
 
+  // Filters & Sorting state (server-side)
+  // quantity filters
+  int? _filterQuantity;
+  int? _filterQuantityGt;
+  int? _filterQuantityGte;
+  int? _filterQuantityLt;
+  int? _filterQuantityLte;
+  // cost price filters
+  double? _filterCostPrice;
+  double? _filterCostPriceGt;
+  double? _filterCostPriceGte;
+  double? _filterCostPriceLt;
+  double? _filterCostPriceLte;
+  String _sortBy = 'created_at';
+  String _sortOrder = 'desc';
+
   // Getters for fetched data
   List<CardViewModel> get cards => List.unmodifiable(_cards);
   PaginationData? get pagination => _pagination;
@@ -34,6 +50,20 @@ class CardListProvider extends BaseProvider {
   bool get isPageLoading => _isPageLoading;
   bool get showCardsList => _showCardsList;
   int get selectedIndex => _selectedIndex;
+
+  // Getters for filters & sorting
+  int? get filterQuantity => _filterQuantity;
+  int? get filterQuantityGt => _filterQuantityGt;
+  int? get filterQuantityGte => _filterQuantityGte;
+  int? get filterQuantityLt => _filterQuantityLt;
+  int? get filterQuantityLte => _filterQuantityLte;
+  double? get filterCostPrice => _filterCostPrice;
+  double? get filterCostPriceGt => _filterCostPriceGt;
+  double? get filterCostPriceGte => _filterCostPriceGte;
+  double? get filterCostPriceLt => _filterCostPriceLt;
+  double? get filterCostPriceLte => _filterCostPriceLte;
+  String get sortBy => _sortBy;
+  String get sortOrder => _sortOrder;
 
   /// Constructor - sets up event subscriptions
   CardListProvider() {
@@ -83,10 +113,54 @@ class CardListProvider extends BaseProvider {
     // This is efficient and follows lazy loading principles
   }
 
-  /// Load cards with pagination
-  Future<void> loadCards({int page = 1, int pageSize = 24}) async {
+  /// Load cards with pagination + filters/sorting
+  Future<void> loadCards({
+    int page = 1,
+    int pageSize = 24,
+    int? quantity,
+    int? quantityGt,
+    int? quantityGte,
+    int? quantityLt,
+    int? quantityLte,
+    double? costPrice,
+    double? costPriceGt,
+    double? costPriceGte,
+    double? costPriceLt,
+    double? costPriceLte,
+    String? sortBy,
+    String? sortOrder,
+  }) async {
+    // Resolve effective query from provided overrides or stored state
+    final effectiveQuantity = quantity ?? _filterQuantity;
+    final effectiveQuantityGt = quantityGt ?? _filterQuantityGt;
+    final effectiveQuantityGte = quantityGte ?? _filterQuantityGte;
+    final effectiveQuantityLt = quantityLt ?? _filterQuantityLt;
+    final effectiveQuantityLte = quantityLte ?? _filterQuantityLte;
+    final effectiveCostPrice = costPrice ?? _filterCostPrice;
+    final effectiveCostPriceGt = costPriceGt ?? _filterCostPriceGt;
+    final effectiveCostPriceGte = costPriceGte ?? _filterCostPriceGte;
+    final effectiveCostPriceLt = costPriceLt ?? _filterCostPriceLt;
+    final effectiveCostPriceLte = costPriceLte ?? _filterCostPriceLte;
+    final effectiveSortBy = sortBy ?? _sortBy;
+    final effectiveSortOrder = sortOrder ?? _sortOrder;
+
     await executeApiOperation(
-      apiCall: () => _cardService.getCards(page: page, pageSize: pageSize),
+      apiCall: () => _cardService.getCards(
+        page: page,
+        pageSize: pageSize,
+        quantity: effectiveQuantity,
+        quantityGt: effectiveQuantityGt,
+        quantityGte: effectiveQuantityGte,
+        quantityLt: effectiveQuantityLt,
+        quantityLte: effectiveQuantityLte,
+        costPrice: effectiveCostPrice,
+        costPriceGt: effectiveCostPriceGt,
+        costPriceGte: effectiveCostPriceGte,
+        costPriceLt: effectiveCostPriceLt,
+        costPriceLte: effectiveCostPriceLte,
+        sortBy: effectiveSortBy,
+        sortOrder: effectiveSortOrder,
+      ),
       onSuccess: (response) {
         // if (page == 1) {
         //   _cards.clear();
@@ -153,6 +227,18 @@ class CardListProvider extends BaseProvider {
     _isPageLoading = false;
     _showCardsList = false;
     _selectedIndex = 0;
+    _filterQuantity = null;
+    _filterQuantityGt = null;
+    _filterQuantityGte = null;
+    _filterQuantityLt = null;
+    _filterQuantityLte = null;
+    _filterCostPrice = null;
+    _filterCostPriceGt = null;
+    _filterCostPriceGte = null;
+    _filterCostPriceLt = null;
+    _filterCostPriceLte = null;
+    _sortBy = 'created_at';
+    _sortOrder = 'desc';
     super.reset();
   }
 
@@ -177,6 +263,53 @@ class CardListProvider extends BaseProvider {
   /// Set selected index
   void setSelectedIndex(int index) {
     _selectedIndex = index;
+    notifyListeners();
+  }
+
+  /// Update filters and/or sorting.
+  void setServerFilters({
+    int? quantity,
+    int? quantityGt,
+    int? quantityGte,
+    int? quantityLt,
+    int? quantityLte,
+    double? costPrice,
+    double? costPriceGt,
+    double? costPriceGte,
+    double? costPriceLt,
+    double? costPriceLte,
+    String? sortBy,
+    String? sortOrder,
+  }) {
+    _filterQuantity = quantity;
+    _filterQuantityGt = quantityGt;
+    _filterQuantityGte = quantityGte;
+    _filterQuantityLt = quantityLt;
+    _filterQuantityLte = quantityLte;
+    _filterCostPrice = costPrice;
+    _filterCostPriceGt = costPriceGt;
+    _filterCostPriceGte = costPriceGte;
+    _filterCostPriceLt = costPriceLt;
+    _filterCostPriceLte = costPriceLte;
+    if (sortBy != null && sortBy.isNotEmpty) _sortBy = sortBy;
+    if (sortOrder != null && sortOrder.isNotEmpty) _sortOrder = sortOrder;
+    notifyListeners();
+  }
+
+  /// Clear filters and reset sorting to defaults
+  void clearServerFilters() {
+    _filterQuantity = null;
+    _filterQuantityGt = null;
+    _filterQuantityGte = null;
+    _filterQuantityLt = null;
+    _filterQuantityLte = null;
+    _filterCostPrice = null;
+    _filterCostPriceGt = null;
+    _filterCostPriceGte = null;
+    _filterCostPriceLt = null;
+    _filterCostPriceLte = null;
+    _sortBy = 'created_at';
+    _sortOrder = 'desc';
     notifyListeners();
   }
 

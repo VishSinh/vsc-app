@@ -1,6 +1,5 @@
 import 'package:vsc_app/core/models/pagination_data.dart';
 import 'package:vsc_app/core/providers/base_provider.dart';
-import 'package:vsc_app/core/models/api_response.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
 import '../../data/services/order_service.dart';
 import 'package:vsc_app/features/production/data/services/production_service.dart';
@@ -24,6 +23,15 @@ class OrderListProvider extends BaseProvider {
   String _searchQuery = '';
   String _statusFilter = 'all';
   bool _isPageLoading = false;
+
+  // Server-side filters & sorting
+  String? _filterCustomerId;
+  bool? _filterDeliveredOrPaid;
+  DateTime? _filterOrderDate; // exact
+  DateTime? _filterOrderDateGte; // range start
+  DateTime? _filterOrderDateLte; // range end
+  String _sortBy = 'order_date';
+  String _sortOrder = 'desc';
 
   // Production service for box order operations
   // State for box makers
@@ -58,6 +66,13 @@ class OrderListProvider extends BaseProvider {
   String get searchQuery => _searchQuery;
   String get statusFilter => _statusFilter;
   bool get isPageLoading => _isPageLoading;
+  String? get filterCustomerId => _filterCustomerId;
+  bool? get filterDeliveredOrPaid => _filterDeliveredOrPaid;
+  DateTime? get filterOrderDate => _filterOrderDate;
+  DateTime? get filterOrderDateGte => _filterOrderDateGte;
+  DateTime? get filterOrderDateLte => _filterOrderDateLte;
+  String get sortBy => _sortBy;
+  String get sortOrder => _sortOrder;
 
   // Getters for production data
   bool get isLoadingBoxMakers => _isLoadingBoxMakers;
@@ -81,7 +96,17 @@ class OrderListProvider extends BaseProvider {
   // Order fetching methods
   Future<void> fetchOrders({int page = 1, int pageSize = 10}) async {
     await executeApiOperation(
-      apiCall: () => _orderService.getOrders(page: page, pageSize: pageSize),
+      apiCall: () => _orderService.getOrders(
+        page: page,
+        pageSize: pageSize,
+        customerId: _filterCustomerId,
+        deliveredOrPaid: _filterDeliveredOrPaid,
+        orderDate: _filterOrderDate,
+        orderDateGte: _filterOrderDateGte,
+        orderDateLte: _filterOrderDateLte,
+        sortBy: _sortBy,
+        sortOrder: _sortOrder,
+      ),
       onSuccess: (response) {
         _orders.clear();
         // Use the fromApiResponse method to convert OrderResponse to OrderViewModel
@@ -152,6 +177,33 @@ class OrderListProvider extends BaseProvider {
   void clearFilters() {
     _searchQuery = '';
     _statusFilter = 'all';
+    _filterCustomerId = null;
+    _filterDeliveredOrPaid = null;
+    _filterOrderDate = null;
+    _filterOrderDateGte = null;
+    _filterOrderDateLte = null;
+    _sortBy = 'order_date';
+    _sortOrder = 'desc';
+    notifyListeners();
+  }
+
+  // Server-side filters setters
+  void setServerFilters({
+    String? customerId,
+    bool? deliveredOrPaid,
+    DateTime? orderDate,
+    DateTime? orderDateGte,
+    DateTime? orderDateLte,
+    String? sortBy,
+    String? sortOrder,
+  }) {
+    _filterCustomerId = customerId;
+    _filterDeliveredOrPaid = deliveredOrPaid;
+    _filterOrderDate = orderDate;
+    _filterOrderDateGte = orderDateGte;
+    _filterOrderDateLte = orderDateLte;
+    if (sortBy != null && sortBy.isNotEmpty) _sortBy = sortBy;
+    if (sortOrder != null && sortOrder.isNotEmpty) _sortOrder = sortOrder;
     notifyListeners();
   }
 

@@ -6,11 +6,30 @@ import 'package:vsc_app/core/utils/app_logger.dart';
 import 'dart:convert';
 import 'package:vsc_app/core/constants/app_constants.dart';
 import 'package:vsc_app/core/models/message_data.dart';
+import 'package:vsc_app/core/utils/query_params.dart';
 
 class OrderService extends ApiService {
   /// Get orders with pagination
-  Future<ApiResponse<List<OrderResponse>>> getOrders({int page = 1, int pageSize = 10}) async {
-    return await executeRequest(() => get('${AppConstants.ordersEndpoint}?page=$page&page_size=$pageSize'), (json) {
+  Future<ApiResponse<List<OrderResponse>>> getOrders({
+    int page = 1,
+    int pageSize = 10,
+    String? customerId,
+    bool? deliveredOrPaid,
+    DateTime? orderDate,
+    DateTime? orderDateGte,
+    DateTime? orderDateLte,
+    String sortBy = 'order_date',
+    String sortOrder = 'desc',
+  }) async {
+    final params = QueryParamsBuilder()
+        .withPagination(page: page, pageSize: pageSize)
+        .withString('customer_id', customerId)
+        .withBoolAsString('delivered_or_paid', deliveredOrPaid)
+        .withDateFilter('order_date', exact: orderDate, gte: orderDateGte, lte: orderDateLte)
+        .withSort(sortBy: sortBy, sortOrder: sortOrder)
+        .build();
+
+    return await executeRequest(() => get(AppConstants.ordersEndpoint, queryParameters: params), (json) {
       if (json is List<dynamic>) {
         try {
           return json.map((orderJson) {
@@ -38,7 +57,10 @@ class OrderService extends ApiService {
 
   /// Get order by ID
   Future<ApiResponse<OrderResponse>> getOrderById(String orderId) async {
-    return await executeRequest(() => get('${AppConstants.ordersEndpoint}$orderId/'), (json) => OrderResponse.fromJson(json as Map<String, dynamic>));
+    return await executeRequest(
+      () => get('${AppConstants.ordersEndpoint}$orderId/'),
+      (json) => OrderResponse.fromJson(json as Map<String, dynamic>),
+    );
   }
 
   /// Update order by ID (PATCH)

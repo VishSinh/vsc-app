@@ -11,6 +11,7 @@ import 'package:vsc_app/features/orders/presentation/models/order_view_models.da
 import 'package:vsc_app/features/orders/presentation/services/order_calculation_service.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/core/widgets/pagination_widget.dart';
+import 'package:vsc_app/features/orders/presentation/widgets/orders_filter_dialog.dart';
 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
@@ -91,7 +92,15 @@ class _OrdersPageState extends State<OrdersPage> {
           return const LoadingWidget(message: 'Loading orders...');
         }
 
-        return _buildOrdersList(orderProvider);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+            _buildOrdersActionBar(context),
+            const SizedBox(height: 8),
+            Expanded(child: _buildOrdersList(orderProvider)),
+          ],
+        );
       },
     );
   }
@@ -125,6 +134,82 @@ class _OrdersPageState extends State<OrdersPage> {
           if (orderProvider.pagination != null) Positioned(bottom: 10, child: _buildPagination(orderProvider)),
         ],
       ),
+    );
+  }
+
+  Widget _buildOrdersActionBar(BuildContext context) {
+    final orderProvider = context.read<OrderListProvider>();
+    if (context.isMobile) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  onChanged: (val) => orderProvider.setSearchQuery(val),
+                  decoration: const InputDecoration(
+                    hintText: 'Search (id, name, customer, staff)',
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton.icon(
+                onPressed: () => OrdersFilterDialog.show(context),
+                icon: const Icon(Icons.filter_list),
+                label: const Text('Filters'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            readOnly: true,
+            decoration: const InputDecoration(
+              hintText: 'Search by phone (coming soon)',
+              prefixIcon: Icon(Icons.phone),
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            onChanged: (val) => orderProvider.setSearchQuery(val),
+            decoration: const InputDecoration(
+              hintText: 'Search orders (id, name, customer, staff)',
+              prefixIcon: Icon(Icons.search),
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: TextField(
+            readOnly: true,
+            decoration: const InputDecoration(
+              hintText: 'Search by phone (coming soon)',
+              prefixIcon: Icon(Icons.phone),
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        ElevatedButton.icon(
+          onPressed: () => OrdersFilterDialog.show(context),
+          icon: const Icon(Icons.filter_list),
+          label: const Text('Filters'),
+        ),
+      ],
     );
   }
 
@@ -370,7 +455,7 @@ class _OrdersPageState extends State<OrdersPage> {
                   Expanded(
                     flex: 1,
                     child: Center(
-                      child: Text('Services', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      child: Text('Jobs', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                     ),
                   ),
                   Expanded(

@@ -25,6 +25,12 @@ class PaginationWidget extends StatelessWidget {
   /// Callback when next button is pressed
   final VoidCallback? onNextPage;
 
+  /// Whether to show total items count
+  final bool showTotalItems;
+
+  /// Total number of items (only used when showTotalItems is true)
+  final int? totalItems;
+
   const PaginationWidget({
     super.key,
     required this.currentPage,
@@ -33,6 +39,8 @@ class PaginationWidget extends StatelessWidget {
     required this.hasNext,
     this.onPreviousPage,
     this.onNextPage,
+    this.showTotalItems = false,
+    this.totalItems,
   });
 
   @override
@@ -48,6 +56,16 @@ class PaginationWidget extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          if (showTotalItems && totalItems != null) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Text(
+                '$totalItems items',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white70, fontWeight: FontWeight.w500),
+              ),
+            ),
+            Container(height: 16, width: 1, color: Colors.white30),
+          ],
           _buildPaginationButton(context: context, icon: Icons.chevron_left, onPressed: hasPrevious ? onPreviousPage : null),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12),

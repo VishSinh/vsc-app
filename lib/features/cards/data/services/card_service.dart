@@ -7,13 +7,36 @@ import 'package:vsc_app/core/constants/app_constants.dart';
 import 'package:vsc_app/core/utils/file_upload_utils.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vsc_app/features/cards/data/models/card_update_request.dart';
+import 'package:vsc_app/core/utils/query_params.dart';
 
 /// Data layer service for card API communication
 /// Handles all API calls related to cards using DTOs only
 class CardService extends ApiService {
-  /// Get cards with pagination
-  Future<ApiResponse<List<CardResponse>>> getCards({int page = 1, int pageSize = 10}) async {
-    return await executeRequest(() => get('${AppConstants.cardsEndpoint}?page=$page&page_size=$pageSize'), (json) {
+  /// Get cards with pagination, filters and sorting
+  Future<ApiResponse<List<CardResponse>>> getCards({
+    int page = 1,
+    int pageSize = 10,
+    int? quantity,
+    int? quantityGt,
+    int? quantityGte,
+    int? quantityLt,
+    int? quantityLte,
+    double? costPrice,
+    double? costPriceGt,
+    double? costPriceGte,
+    double? costPriceLt,
+    double? costPriceLte,
+    String? sortBy,
+    String? sortOrder,
+  }) async {
+    final params = QueryParamsBuilder()
+        .withPagination(page: page, pageSize: pageSize)
+        .withNumberFilter('quantity', eq: quantity, gt: quantityGt, gte: quantityGte, lt: quantityLt, lte: quantityLte)
+        .withNumberFilter('cost_price', eq: costPrice, gt: costPriceGt, gte: costPriceGte, lt: costPriceLt, lte: costPriceLte)
+        .withSort(sortBy: sortBy, sortOrder: sortOrder)
+        .build();
+
+    return await executeRequest(() => get(AppConstants.cardsEndpoint, queryParameters: params), (json) {
       if (json is List<dynamic>) {
         return json.map((cardJson) => CardResponse.fromJson(cardJson as Map<String, dynamic>)).toList();
       }
@@ -23,7 +46,10 @@ class CardService extends ApiService {
 
   /// Get card by ID
   Future<ApiResponse<CardResponse>> getCardById(String id) async {
-    return await executeRequest(() => get('${AppConstants.cardsEndpoint}$id/'), (json) => CardResponse.fromJson(json as Map<String, dynamic>));
+    return await executeRequest(
+      () => get('${AppConstants.cardsEndpoint}$id/'),
+      (json) => CardResponse.fromJson(json as Map<String, dynamic>),
+    );
   }
 
   /// Get card by barcode

@@ -5,6 +5,7 @@ import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/features/cards/presentation/widgets/barcode_dialog.dart';
+import 'package:vsc_app/features/cards/presentation/widgets/cards_filter_dialog.dart';
 
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/core/widgets/pagination_widget.dart';
@@ -115,6 +116,8 @@ class _InventoryPageState extends State<InventoryPage> {
                     hasNext: cardProvider.hasMoreCards,
                     onPreviousPage: cardProvider.pagination?.hasPrevious ?? false ? () => cardProvider.loadPreviousPage() : null,
                     onNextPage: cardProvider.hasMoreCards ? () => cardProvider.loadNextPage() : null,
+                    showTotalItems: true,
+                    totalItems: cardProvider.pagination?.totalItems,
                   ),
                 ),
             ],
@@ -295,7 +298,7 @@ class _InventoryActionButtonsState extends State<InventoryActionButtons> {
   }
 
   void _onFilters(BuildContext context) {
-    SnackbarUtils.showInfo(context, 'Filters functionality coming soon!');
+    CardsFilterDialog.show(context);
   }
 }
 
