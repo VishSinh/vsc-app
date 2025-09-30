@@ -33,7 +33,8 @@ class _InventoryPageState extends State<InventoryPage> {
   void _initializePage() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        _loadCardsIfNeeded();
+        // _loadCardsIfNeeded();
+        _loadCards();
         _initializePermissions();
       }
     });

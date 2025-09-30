@@ -17,6 +17,7 @@ import 'package:vsc_app/features/orders/presentation/providers/order_list_provid
 import 'package:vsc_app/features/bills/presentation/provider/bill_provider.dart';
 import 'package:vsc_app/core/providers/navigation_provider.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_list_provider.dart';
+import 'package:vsc_app/core/widgets/global_floating_calculator.dart';
 
 /// Configure full screen mode for tablets (immersive experience like games)
 Future<void> _configureFullScreen() async {
@@ -98,6 +99,16 @@ class VSCApp extends StatelessWidget {
             themeMode: ThemeMode.dark,
             routerConfig: AppRouter.router,
             debugShowCheckedModeBanner: false,
+            builder: (context, child) {
+              // Overlay the global floating calculator on top of all routes
+              // Wrap in an Overlay so Draggable has an Overlay ancestor
+              return Stack(
+                children: [
+                  if (child != null) child,
+                  Overlay(initialEntries: [OverlayEntry(builder: (ctx) => const GlobalFloatingCalculator())]),
+                ],
+              );
+            },
           ),
         );
       },

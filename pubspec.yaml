@@ -91,6 +91,9 @@ dependencies:
   url_launcher: ^6.2.6
   pdf: ^3.10.8
   printing: ^5.13.3
+  draggable_float_widget: ^0.1.0
+  flutter_simple_calculator: ^2.4.0
+  syncfusion_flutter_calendar: ^31.1.19
 
 dev_dependencies:
   flutter_test:

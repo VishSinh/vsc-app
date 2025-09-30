@@ -34,9 +34,11 @@ import 'package:vsc_app/features/bills/presentation/pages/bill_print_preview_pag
 
 class AppRouter {
   static late final GoRouter router;
+  static final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
   static void initialize() {
     router = GoRouter(
+      navigatorKey: rootNavigatorKey,
       initialLocation: RouteConstants.login,
       redirect: (context, state) async {
         final authService = AuthService();

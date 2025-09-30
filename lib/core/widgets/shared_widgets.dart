@@ -22,7 +22,7 @@ class LoadingWidget extends StatelessWidget {
           SpinKitDoubleBounce(color: AppConfig.primaryColor, size: size),
           if (message != null) ...[
             SizedBox(height: AppConfig.defaultPadding),
-            Text(message!, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
+            // Text(message!, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
           ],
         ],
       ),
@@ -151,7 +151,9 @@ class ActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
       onPressed: isLoading ? null : onPressed,
-      icon: isLoading ? SpinKitDoubleBounce(color: foregroundColor ?? AppConfig.primaryColor, size: AppConfig.loadingIndicatorSize) : Icon(icon),
+      icon: isLoading
+          ? SpinKitDoubleBounce(color: foregroundColor ?? AppConfig.primaryColor, size: AppConfig.loadingIndicatorSize)
+          : Icon(icon),
       label: Text(label, style: ResponsiveText.getButton(context)),
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,

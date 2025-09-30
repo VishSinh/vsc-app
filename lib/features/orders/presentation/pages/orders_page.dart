@@ -30,7 +30,8 @@ class _OrdersPageState extends State<OrdersPage> {
   void _initializePage() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        _loadOrdersIfNeeded();
+        // _loadOrdersIfNeeded();
+        _loadOrders();
       }
     });
   }
