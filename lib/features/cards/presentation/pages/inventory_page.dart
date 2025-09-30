@@ -40,14 +40,6 @@ class _InventoryPageState extends State<InventoryPage> {
     });
   }
 
-  void _loadCardsIfNeeded() {
-    final cardProvider = context.read<CardListProvider>();
-
-    if (cardProvider.cards.isEmpty) {
-      _loadCards(); // Normal conditional loading
-    }
-  }
-
   void _loadCards() {
     final cardProvider = context.read<CardListProvider>();
     cardProvider.setContext(context);
@@ -212,30 +204,42 @@ class _InventoryActionButtonsState extends State<InventoryActionButtons> {
   }
 
   Widget _buildMobileButtons(BuildContext context) {
+    final cardProvider = Provider.of<CardListProvider>(context);
     return Row(
       children: [
-        _buildActionButton(context, icon: Icons.image_search, color: Colors.blue[600]!, onPressed: () => _onSearchByImage(context)),
+        _buildActionButton(
+          context,
+          icon: Icons.image_search,
+          hasActiveFilters: false, // Never highlight for non-filter buttons
+          onPressed: () => _onSearchByImage(context),
+        ),
         const SizedBox(width: 8),
         _buildActionButton(
           context,
           icon: Icons.qr_code_scanner,
-          color: Colors.green[600]!,
+          hasActiveFilters: false, // Never highlight for non-filter buttons
           onPressed: () => BarcodeDialog.show(context),
         ),
         const SizedBox(width: 8),
-        _buildActionButton(context, icon: Icons.filter_list, color: Colors.orange[600]!, onPressed: () => _onFilters(context)),
+        _buildActionButton(
+          context,
+          icon: Icons.filter_list,
+          hasActiveFilters: cardProvider.hasActiveFilters, // Only highlight filter button
+          onPressed: () => _onFilters(context),
+        ),
       ],
     );
   }
 
   Widget _buildDesktopButtons(BuildContext context) {
+    final cardProvider = Provider.of<CardListProvider>(context);
     return Row(
       children: [
         _buildActionButtonWithText(
           context,
           icon: Icons.image_search,
           label: 'Search by Image',
-          color: Colors.blue[600]!,
+          hasActiveFilters: false, // Never highlight for non-filter buttons
           onPressed: () => _onSearchByImage(context),
         ),
         const SizedBox(width: 8),
@@ -243,7 +247,7 @@ class _InventoryActionButtonsState extends State<InventoryActionButtons> {
           context,
           icon: Icons.qr_code_scanner,
           label: 'Scan Barcode',
-          color: Colors.green[600]!,
+          hasActiveFilters: false, // Never highlight for non-filter buttons
           onPressed: () => BarcodeDialog.show(context),
         ),
         const SizedBox(width: 8),
@@ -251,24 +255,27 @@ class _InventoryActionButtonsState extends State<InventoryActionButtons> {
           context,
           icon: Icons.filter_list,
           label: 'Filters',
-          color: Colors.orange[600]!,
+          hasActiveFilters: cardProvider.hasActiveFilters, // Only highlight filter button
           onPressed: () => _onFilters(context),
         ),
       ],
     );
   }
 
-  Widget _buildActionButton(BuildContext context, {required IconData icon, required Color color, required VoidCallback onPressed}) {
+  Widget _buildActionButton(
+    BuildContext context, {
+    required IconData icon,
+    required bool hasActiveFilters,
+    required VoidCallback onPressed,
+  }) {
     return Expanded(
-      child: ElevatedButton(
+      child: ElevatedButton.icon(
         onPressed: onPressed,
+        icon: Icon(icon, color: hasActiveFilters ? Colors.red : null),
+        label: const Text(''), // Empty label to maintain button structure
         style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          side: BorderSide(color: hasActiveFilters ? Colors.red : Theme.of(context).colorScheme.primary, width: 2),
         ),
-        child: Icon(icon, size: 24),
       ),
     );
   }
@@ -277,18 +284,16 @@ class _InventoryActionButtonsState extends State<InventoryActionButtons> {
     BuildContext context, {
     required IconData icon,
     required String label,
-    required Color color,
+    required bool hasActiveFilters,
     required VoidCallback onPressed,
   }) {
     return Expanded(
       child: ElevatedButton.icon(
         onPressed: onPressed,
-        icon: Icon(icon),
-        label: Text(label),
+        icon: Icon(icon, color: hasActiveFilters ? Colors.red : null),
+        label: Text(label, style: TextStyle(color: hasActiveFilters ? Colors.red : null)),
         style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          side: BorderSide(color: hasActiveFilters ? Colors.red : Theme.of(context).colorScheme.primary, width: 2),
         ),
       ),
     );

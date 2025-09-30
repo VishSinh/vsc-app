@@ -8,8 +8,8 @@ class DashboardViewModel {
   final double monthlyOrderChangePercentage;
   final int pendingOrders;
   final int todaysOrders;
-  final int pendingBills;
   final double monthlyProfit;
+  final double totalSaleCurrentMonth;
   final int ordersPendingExpenseLogging;
   final int pendingPrintingJobs;
   final int pendingBoxJobs;
@@ -21,8 +21,8 @@ class DashboardViewModel {
     required this.monthlyOrderChangePercentage,
     required this.pendingOrders,
     required this.todaysOrders,
-    required this.pendingBills,
     required this.monthlyProfit,
+    required this.totalSaleCurrentMonth,
     required this.ordersPendingExpenseLogging,
     required this.pendingPrintingJobs,
     required this.pendingBoxJobs,
@@ -37,8 +37,8 @@ class DashboardViewModel {
       monthlyOrderChangePercentage: response.monthlyOrderChangePercentage,
       pendingOrders: response.pendingOrders,
       todaysOrders: response.todaysOrders,
-      pendingBills: response.pendingBills,
       monthlyProfit: response.monthlyProfitAsDouble,
+      totalSaleCurrentMonth: response.totalSaleCurrentMonthAsDouble,
       ordersPendingExpenseLogging: response.ordersPendingExpenseLogging,
       pendingPrintingJobs: response.pendingPrintingJobs,
       pendingBoxJobs: response.pendingBoxJobs,
@@ -47,6 +47,9 @@ class DashboardViewModel {
 
   /// Format the monthly profit as a currency string
   String get formattedMonthlyProfit => '₹${_formatIndianCurrency(monthlyProfit)}';
+
+  /// Format the monthly sale as a currency string
+  String get formattedTotalSaleCurrentMonth => '₹${_formatIndianCurrency(totalSaleCurrentMonth)}';
 
   /// Formats a number as Indian currency with commas (e.g., 12,34,567.89)
   String _formatIndianCurrency(double amount) {

@@ -36,13 +36,6 @@ class _OrdersPageState extends State<OrdersPage> {
     });
   }
 
-  void _loadOrdersIfNeeded() {
-    final orderProvider = context.read<OrderListProvider>();
-    if (orderProvider.orders.isEmpty) {
-      _loadOrders();
-    }
-  }
-
   List<OrderViewModel> get _filteredOrders {
     final orderProvider = context.read<OrderListProvider>();
     var orders = orderProvider.orders;
@@ -160,8 +153,15 @@ class _OrdersPageState extends State<OrdersPage> {
               const SizedBox(width: 8),
               ElevatedButton.icon(
                 onPressed: () => OrdersFilterDialog.show(context),
-                icon: const Icon(Icons.filter_list),
-                label: const Text('Filters'),
+                icon: Icon(Icons.filter_list, color: orderProvider.hasActiveFilters ? Colors.red : null),
+                label: Text('Filters', style: TextStyle(color: orderProvider.hasActiveFilters ? Colors.red : null)),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(0, 40),
+                  side: BorderSide(
+                    color: orderProvider.hasActiveFilters ? Colors.red : Theme.of(context).colorScheme.primary,
+                    width: 2,
+                  ),
+                ),
               ),
             ],
           ),
@@ -181,18 +181,18 @@ class _OrdersPageState extends State<OrdersPage> {
 
     return Row(
       children: [
-        Expanded(
-          child: TextField(
-            onChanged: (val) => orderProvider.setSearchQuery(val),
-            decoration: const InputDecoration(
-              hintText: 'Search orders (id, name, customer, staff)',
-              prefixIcon: Icon(Icons.search),
-              border: OutlineInputBorder(),
-              isDense: true,
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
+        // Expanded(
+        //   child: TextField(
+        //     onChanged: (val) => orderProvider.setSearchQuery(val),
+        //     decoration: const InputDecoration(
+        //       hintText: 'Search orders (id, name, customer, staff)',
+        //       prefixIcon: Icon(Icons.search),
+        //       border: OutlineInputBorder(),
+        //       isDense: true,
+        //     ),
+        //   ),
+        // ),
+        // const SizedBox(width: 8),
         Expanded(
           child: TextField(
             readOnly: true,
@@ -207,8 +207,12 @@ class _OrdersPageState extends State<OrdersPage> {
         const SizedBox(width: 8),
         ElevatedButton.icon(
           onPressed: () => OrdersFilterDialog.show(context),
-          icon: const Icon(Icons.filter_list),
-          label: const Text('Filters'),
+          icon: Icon(Icons.filter_list, color: orderProvider.hasActiveFilters ? Colors.red : null),
+          label: Text('Filters', style: TextStyle(color: orderProvider.hasActiveFilters ? Colors.red : null)),
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(0, 40),
+            side: BorderSide(color: orderProvider.hasActiveFilters ? Colors.red : Theme.of(context).colorScheme.primary, width: 2),
+          ),
         ),
       ],
     );

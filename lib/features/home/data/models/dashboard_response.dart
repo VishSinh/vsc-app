@@ -23,11 +23,11 @@ class DashboardResponse {
   @JsonKey(name: 'todays_orders')
   final int todaysOrders;
 
-  @JsonKey(name: 'pending_bills')
-  final int pendingBills;
-
   @JsonKey(name: 'monthly_profit')
   final String monthlyProfit;
+
+  @JsonKey(name: 'total_sale_current_month')
+  final String totalSaleCurrentMonth;
 
   @JsonKey(name: 'orders_pending_expense_logging')
   final int ordersPendingExpenseLogging;
@@ -45,8 +45,8 @@ class DashboardResponse {
     required this.monthlyOrderChangePercentage,
     required this.pendingOrders,
     required this.todaysOrders,
-    required this.pendingBills,
     required this.monthlyProfit,
+    required this.totalSaleCurrentMonth,
     required this.ordersPendingExpenseLogging,
     required this.pendingPrintingJobs,
     required this.pendingBoxJobs,
@@ -57,4 +57,5 @@ class DashboardResponse {
 
   // Helper method to convert string price to double
   double get monthlyProfitAsDouble => double.tryParse(monthlyProfit) ?? 0.0;
+  double get totalSaleCurrentMonthAsDouble => double.tryParse(totalSaleCurrentMonth) ?? 0.0;
 }

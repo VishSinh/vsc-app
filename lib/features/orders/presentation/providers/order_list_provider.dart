@@ -93,6 +93,16 @@ class OrderListProvider extends BaseProvider {
     return _pagination?.hasNext ?? false;
   }
 
+  bool get hasActiveFilters {
+    return _searchQuery.isNotEmpty ||
+        _statusFilter != 'all' ||
+        _filterCustomerId != null ||
+        _filterDeliveredOrPaid != null ||
+        _filterOrderDate != null ||
+        _filterOrderDateGte != null ||
+        _filterOrderDateLte != null;
+  }
+
   // Order fetching methods
   Future<void> fetchOrders({int page = 1, int pageSize = 10}) async {
     await executeApiOperation(

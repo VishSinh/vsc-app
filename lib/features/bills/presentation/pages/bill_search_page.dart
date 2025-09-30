@@ -48,7 +48,7 @@ class _BillSearchPageState extends State<BillSearchPage> {
 
   Widget _buildBillSearchContent(BillProvider provider) {
     return Padding(
-      padding: context.responsivePadding,
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: context.responsiveMaxWidth),
@@ -57,39 +57,32 @@ class _BillSearchPageState extends State<BillSearchPage> {
             children: [
               // Search header with responsive layout
               if (context.isDesktop) _buildDesktopSearchRow() else _buildMobileSearchRow(),
-              SizedBox(height: context.responsiveSpacing),
+              SizedBox(height: AppConfig.smallPadding),
               Expanded(
                 child: provider.isLoading
                     ? const LoadingWidget(message: 'Loading bills...')
                     : provider.bills.isEmpty
                     ? const EmptyStateWidget(message: 'No bills found', icon: Icons.receipt_long)
-                    : Stack(
-                        alignment: Alignment.bottomCenter,
-                        children: [
-                          ListView.separated(
-                            itemCount: provider.bills.length,
-                            separatorBuilder: (_, __) => SizedBox(height: AppConfig.smallPadding),
-                            itemBuilder: (context, index) {
-                              final bill = provider.bills[index];
-                              return _BillListTile(
-                                bill: bill,
-                                onTap: () => context.pushNamed(RouteConstants.billDetailRouteName, pathParameters: {'id': bill.id}),
-                              );
-                            },
-                          ),
-                          if (provider.pagination != null)
-                            Positioned(
-                              bottom: 10,
-                              child: PaginationWidget(
-                                currentPage: provider.pagination?.currentPage ?? 1,
-                                totalPages: provider.pagination?.totalPages ?? 1,
-                                hasPrevious: provider.pagination?.hasPrevious ?? false,
-                                hasNext: provider.hasMoreBills,
-                                onPreviousPage: provider.pagination?.hasPrevious ?? false ? () => provider.loadPreviousPage() : null,
-                                onNextPage: provider.hasMoreBills ? () => provider.loadNextPage() : null,
+                    : RefreshIndicator(
+                        onRefresh: () => provider.getBills(),
+                        child: Stack(
+                          alignment: Alignment.bottomCenter,
+                          children: [
+                            context.isMobile ? _buildMobileList(provider) : _buildDesktopTable(provider),
+                            if (provider.pagination != null)
+                              Positioned(
+                                bottom: 10,
+                                child: PaginationWidget(
+                                  currentPage: provider.pagination?.currentPage ?? 1,
+                                  totalPages: provider.pagination?.totalPages ?? 1,
+                                  hasPrevious: provider.pagination?.hasPrevious ?? false,
+                                  hasNext: provider.hasMoreBills,
+                                  onPreviousPage: provider.pagination?.hasPrevious ?? false ? () => provider.loadPreviousPage() : null,
+                                  onNextPage: provider.hasMoreBills ? () => provider.loadNextPage() : null,
+                                ),
                               ),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
               ),
             ],
@@ -184,6 +177,194 @@ class _BillSearchPageState extends State<BillSearchPage> {
         ),
       ],
     );
+  }
+
+  Widget _buildMobileList(BillProvider provider) {
+    return ListView.separated(
+      itemCount: provider.bills.length,
+      separatorBuilder: (_, __) => SizedBox(height: AppConfig.smallPadding),
+      itemBuilder: (context, index) {
+        final bill = provider.bills[index];
+        return _BillListTile(
+          bill: bill,
+          onTap: () => context.pushNamed(RouteConstants.billDetailRouteName, pathParameters: {'id': bill.id}),
+        );
+      },
+    );
+  }
+
+  Widget _buildDesktopTable(BillProvider provider) {
+    const double fixedRowHeight = 70.0;
+    const double headerHeight = 50.0;
+    const double borderRadius = 12.0;
+
+    return Container(
+      height: MediaQuery.of(context).size.height,
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[400]!, width: 1),
+        borderRadius: BorderRadius.circular(borderRadius),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Column(
+          children: [
+            // Header Row
+            Container(
+              height: headerHeight,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Center(
+                      child: Text('Order Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Center(
+                      child: Text('Customer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text('Staff', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text('Order Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text('Items', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Data Rows
+            Expanded(
+              child: ListView.builder(
+                itemCount: provider.bills.length,
+                itemBuilder: (context, index) {
+                  final bill = provider.bills[index];
+                  return _buildDesktopRow(bill, fixedRowHeight);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDesktopRow(BillViewModel bill, double rowHeight) {
+    return InkWell(
+      onTap: () => context.pushNamed(RouteConstants.billDetailRouteName, pathParameters: {'id': bill.id}),
+      child: Container(
+        height: rowHeight,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: const Color(0xFF4C4B4B))),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Center(
+                child: Text(
+                  bill.orderName,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: Center(
+                child: Text(
+                  bill.order.customerName,
+                  style: const TextStyle(fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Text(
+                  bill.order.staffName,
+                  style: const TextStyle(fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Text(_formatDateTime(bill.order.orderDate), style: const TextStyle(fontSize: 13), textAlign: TextAlign.center),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(color: bill.paymentStatus.getStatusColor(), borderRadius: BorderRadius.circular(12)),
+                  child: Text(
+                    bill.paymentStatus.getDisplayText(),
+                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Text('${bill.order.orderItems.length}', style: const TextStyle(fontSize: 13), textAlign: TextAlign.center),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Text(
+                  bill.summary.formattedTotalWithTax,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 
   @override

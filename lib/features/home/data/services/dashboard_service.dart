@@ -3,13 +3,17 @@ import 'package:vsc_app/core/services/base_service.dart';
 import 'package:vsc_app/core/services/service_utils.dart';
 import 'package:vsc_app/features/home/data/models/dashboard_response.dart';
 import 'package:vsc_app/features/home/data/models/yearly_profit_response.dart';
+import 'package:vsc_app/features/home/data/models/yearly_sale_response.dart';
 import 'package:vsc_app/features/cards/data/models/card_responses.dart';
 import 'package:vsc_app/features/orders/data/models/order_responses.dart';
 import 'package:vsc_app/core/constants/app_constants.dart';
 
 class DashboardService extends ApiService {
   Future<ApiResponse<DashboardResponse>> getDashboardData() async {
-    return executeRequest(() => get(AppConstants.dashboardEndpoint), (json) => ServiceUtils.parseItem(json, DashboardResponse.fromJson));
+    return executeRequest(
+      () => get(AppConstants.dashboardEndpoint),
+      (json) => ServiceUtils.parseItem(json, DashboardResponse.fromJson),
+    );
   }
 
   /// Private generic helper to fetch analytics lists by type with a parser
@@ -26,6 +30,11 @@ class DashboardService extends ApiService {
   /// Yearly profit analytics
   Future<ApiResponse<List<MonthlyProfitAPIModel>>> getYearlyProfitAnalytics() {
     return _fetchAnalyticsList('yearly_profit', MonthlyProfitAPIModel.fromJson);
+  }
+
+  /// Yearly sale analytics
+  Future<ApiResponse<List<MonthlySaleAPIModel>>> getYearlySaleAnalytics() {
+    return _fetchAnalyticsList('yearly_sale', MonthlySaleAPIModel.fromJson);
   }
 
   /// Fetch low stock cards via analytics detail endpoint

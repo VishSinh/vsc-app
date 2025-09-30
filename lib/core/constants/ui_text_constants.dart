@@ -152,7 +152,8 @@ class UITextConstants {
   static const String customerFoundSuccess = 'Customer found successfully!';
   static const String customerCreateFailed = 'Failed to create customer.';
   static const String customerRetrieveFailed = 'Failed to retrieve created customer.';
-  static const String customerNotFoundWithSuggestion = 'Customer not found. You can create a new customer by clicking "Create Customer".';
+  static const String customerNotFoundWithSuggestion =
+      'Customer not found. You can create a new customer by clicking "Create Customer".';
   static const String cardNotFound = 'Card not found';
   static const String orderCreatedSuccessfully = 'Order created successfully';
   static const String noOrderItems = 'No items added to order';
@@ -169,14 +170,14 @@ class UITextConstants {
   static const String pendingOrders = 'Pending Orders';
   static const String productionJobs = 'Production Jobs';
   static const String lowStockItems = 'Low Stock Items';
-  static const String totalRevenue = 'Total Revenue';
+  static const String totalRevenue = 'Total PR';
   static const String activePartners = 'Active Partners';
   static const String todaysOrders = 'Today\'s Orders';
   static const String outOfStock = 'Out of Stock';
   static const String pendingPrintingJobs = 'Pending Printing Jobs';
   static const String pendingBoxJobs = 'Pending Box Jobs';
   static const String monthlyGrowth = 'Monthly Growth';
-  static const String pendingBills = 'Pending Bills';
+  static const String monthlySale = 'Monthly Sale';
   static const String expenseLogging = 'Expense Logging';
 
   // ================================ STATISTICS SUBTITLES ================================
@@ -191,7 +192,7 @@ class UITextConstants {
   static const String jobsInPrintingQueue = 'Jobs in printing queue';
   static const String boxOrdersInQueue = 'Box orders in queue';
   static const String orderGrowthThisMonth = 'Order growth this month';
-  static const String billsAwaitingPayment = 'Bills awaiting payment';
+  static const String monthlySaleThisMonth = 'Monthly sale this month';
   static const String ordersPendingExpenseLogging = 'Orders pending expense logging';
 
   // ================================ WELCOME MESSAGES ================================

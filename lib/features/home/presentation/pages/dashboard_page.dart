@@ -134,7 +134,11 @@ class _DashboardPageState extends State<DashboardPage> {
               onTap: () => context.push(RouteConstants.yearlyProfit),
               doubleSpan: true,
               allowDoubleSpan: allowDoubleSpan,
-              trailing: Lottie.asset('assets/animations/revenue_coins.json', height: isMobile ? 100 : 140, width: isMobile ? 100 : 140),
+              trailing: Lottie.asset(
+                'assets/animations/revenue_coins.json',
+                height: isMobile ? 100 : 140,
+                width: isMobile ? 100 : 140,
+              ),
             ),
           );
         }
@@ -250,11 +254,12 @@ class _DashboardPageState extends State<DashboardPage> {
           tiles.add(
             _buildStatTile(
               context,
-              title: UITextConstants.pendingBills,
-              value: dashboard.pendingBills.toString(),
-              icon: Icons.receipt_long,
-              color: AppConfig.warningColor,
-              subtitle: UITextConstants.billsAwaitingPayment,
+              title: UITextConstants.monthlySale,
+              value: dashboard.formattedTotalSaleCurrentMonth,
+              icon: Icons.attach_money,
+              color: AppConfig.primaryColor,
+              subtitle: UITextConstants.monthlySaleThisMonth,
+              onTap: () => context.push(RouteConstants.yearlySale),
               allowDoubleSpan: allowDoubleSpan,
             ),
           );
@@ -277,19 +282,19 @@ class _DashboardPageState extends State<DashboardPage> {
 
         // Order tiles based on device
         if (isMobile) {
+          addInventoryAlerts();
           addRevenue();
           addOrders();
-          addInventoryAlerts();
           addCommon();
           addProduction();
           addFinance();
         } else {
-          addRevenue();
           addOrders();
-          addProduction();
           addInventoryAlerts();
+          addProduction();
           addCommon();
           addFinance();
+          addRevenue();
         }
 
         return RefreshIndicator(
@@ -367,7 +372,9 @@ class _DashboardPageState extends State<DashboardPage> {
                     SizedBox(height: isMobile ? 4 : AppConfig.smallPadding),
                     Text(
                       title,
-                      style: isMobile ? ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w500) : ResponsiveText.getTitle(context),
+                      style: isMobile
+                          ? ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w500)
+                          : ResponsiveText.getTitle(context),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -416,7 +423,11 @@ class _DashboardPageState extends State<DashboardPage> {
       trailing: trailing,
     ).animate().fadeIn(duration: 250.ms).scale(begin: const Offset(0.98, 0.98), duration: 250.ms);
 
-    return StaggeredGridTile.count(crossAxisCellCount: doubleSpan && allowDoubleSpan ? 2 : 1, mainAxisCellCount: mainAxisCells, child: card);
+    return StaggeredGridTile.count(
+      crossAxisCellCount: doubleSpan && allowDoubleSpan ? 2 : 1,
+      mainAxisCellCount: mainAxisCells,
+      child: card,
+    );
   }
 
   Widget _buildCreateOrderButton(BuildContext context) {
@@ -431,7 +442,13 @@ class _DashboardPageState extends State<DashboardPage> {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(isMobile ? 8 : AppConfig.defaultRadius),
-        boxShadow: [BoxShadow(color: AppConfig.primaryColor.withOpacity(0.3), blurRadius: isMobile ? 6 : 10, offset: Offset(0, isMobile ? 2 : 4))],
+        boxShadow: [
+          BoxShadow(
+            color: AppConfig.primaryColor.withOpacity(0.3),
+            blurRadius: isMobile ? 6 : 10,
+            offset: Offset(0, isMobile ? 2 : 4),
+          ),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -448,7 +465,11 @@ class _DashboardPageState extends State<DashboardPage> {
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(isMobile ? 6 : AppConfig.defaultRadius),
                   ),
-                  child: Icon(Icons.shopping_cart, color: Colors.white, size: isMobile ? AppConfig.iconSizeMedium : AppConfig.iconSizeLarge),
+                  child: Icon(
+                    Icons.shopping_cart,
+                    color: Colors.white,
+                    size: isMobile ? AppConfig.iconSizeMedium : AppConfig.iconSizeLarge,
+                  ),
                 ),
                 SizedBox(width: isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding),
                 Expanded(

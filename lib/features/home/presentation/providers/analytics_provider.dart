@@ -2,6 +2,7 @@ import 'package:vsc_app/core/providers/base_provider.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:vsc_app/features/home/data/services/dashboard_service.dart';
 import 'package:vsc_app/features/home/presentation/models/yearly_profit_view_model.dart';
+import 'package:vsc_app/features/home/presentation/models/yearly_sale_view_model.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
 
@@ -11,12 +12,14 @@ class AnalyticsProvider extends BaseProvider {
 
   // Analytics data
   List<YearlyProfitViewModel>? _yearlyProfitData;
+  List<YearlySaleViewModel>? _yearlySaleData;
   List<CardViewModel>? _lowStockCards;
   List<CardViewModel>? _outOfStockCards;
   List<OrderViewModel>? _todaysOrders;
 
   // Getters
   List<YearlyProfitViewModel>? get yearlyProfitData => _yearlyProfitData;
+  List<YearlySaleViewModel>? get yearlySaleData => _yearlySaleData;
   List<CardViewModel>? get lowStockCards => _lowStockCards;
   List<CardViewModel>? get outOfStockCards => _outOfStockCards;
   List<OrderViewModel>? get todaysOrders => _todaysOrders;
@@ -43,6 +46,26 @@ class AnalyticsProvider extends BaseProvider {
       showSnackbar: showSnackbar,
       showLoading: true,
       errorMessage: 'Failed to load profit data',
+    );
+  }
+
+  /// Fetch yearly sale data from the API
+  Future<void> fetchYearlySaleData({bool showSnackbar = false}) async {
+    AppLogger.service('AnalyticsProvider', 'Fetching yearly sale data');
+
+    await executeApiOperation(
+      apiCall: () => _dashboardService.getYearlySaleAnalytics(),
+      onSuccess: (response) {
+        if (response.data != null) {
+          _yearlySaleData = YearlySaleViewModel.fromAPIModelList(response.data!);
+          AppLogger.service('AnalyticsProvider', 'Yearly sale data loaded: ${_yearlySaleData?.length} months');
+          return _yearlySaleData;
+        }
+        return null;
+      },
+      showSnackbar: showSnackbar,
+      showLoading: true,
+      errorMessage: 'Failed to load sale data',
     );
   }
 
@@ -128,10 +151,32 @@ class AnalyticsProvider extends BaseProvider {
     return _yearlyProfitData!.reduce((a, b) => a.profit < b.profit ? a : b);
   }
 
+  /// Get total yearly sale from the loaded data
+  double getTotalSale() {
+    if (_yearlySaleData == null || _yearlySaleData!.isEmpty) return 0.0;
+
+    return _yearlySaleData!.fold(0.0, (sum, item) => sum + item.sale);
+  }
+
+  /// Get highest sale month from the loaded data
+  YearlySaleViewModel? getHighestSaleMonth() {
+    if (_yearlySaleData == null || _yearlySaleData!.isEmpty) return null;
+
+    return _yearlySaleData!.reduce((a, b) => a.sale > b.sale ? a : b);
+  }
+
+  /// Get lowest sale month from the loaded data
+  YearlySaleViewModel? getLowestSaleMonth() {
+    if (_yearlySaleData == null || _yearlySaleData!.isEmpty) return null;
+
+    return _yearlySaleData!.reduce((a, b) => a.sale < b.sale ? a : b);
+  }
+
   /// Reset provider state
   @override
   void reset() {
     _yearlyProfitData = null;
+    _yearlySaleData = null;
     _lowStockCards = null;
     _outOfStockCards = null;
     _todaysOrders = null;

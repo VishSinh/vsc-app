@@ -27,6 +27,7 @@ class RouteConstants {
   static const String orderDetail = '/orders/:id';
   static const String register = '/register';
   static const String yearlyProfit = '/analytics/yearly-profit';
+  static const String yearlySale = '/analytics/yearly-sale';
   static const String lowStockCards = '/analytics/low-stock-cards';
   static const String outOfStockCards = '/analytics/out-of-stock-cards';
   static const String todaysOrders = '/analytics/todays-orders';
@@ -58,6 +59,7 @@ class RouteConstants {
   static const String orderDetailRouteName = 'order-detail';
   static const String registerRouteName = 'register';
   static const String yearlyProfitRouteName = 'yearly-profit';
+  static const String yearlySaleRouteName = 'yearly-sale';
   static const String lowStockCardsRouteName = 'low-stock-cards';
   static const String outOfStockCardsRouteName = 'out-of-stock-cards';
   static const String todaysOrdersRouteName = 'todays-orders';

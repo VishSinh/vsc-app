@@ -193,6 +193,20 @@ class CardListProvider extends BaseProvider {
     return _pagination?.hasNext ?? false;
   }
 
+  bool get hasActiveFilters {
+    return _searchQuery.isNotEmpty ||
+        _filterQuantity != null ||
+        _filterQuantityGt != null ||
+        _filterQuantityGte != null ||
+        _filterQuantityLt != null ||
+        _filterQuantityLte != null ||
+        _filterCostPrice != null ||
+        _filterCostPriceGt != null ||
+        _filterCostPriceGte != null ||
+        _filterCostPriceLt != null ||
+        _filterCostPriceLte != null;
+  }
+
   /// Get filtered cards
   List<CardViewModel> getFilteredCards(String query) {
     if (query.isEmpty) {
