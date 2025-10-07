@@ -13,6 +13,7 @@ import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
+import 'package:vsc_app/core/enums/card_type.dart';
 
 class CreateCardPage extends StatefulWidget {
   final CreateCardProvider? createCardProvider;
@@ -30,6 +31,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
   final _quantityController = TextEditingController();
   final _maxDiscountController = TextEditingController();
   String? _selectedVendorId;
+  CardType _selectedCardType = CardType.single;
 
   @override
   void initState() {
@@ -242,7 +244,10 @@ class _CreateCardPageState extends State<CreateCardPage> {
                         children: [
                           Icon(Icons.add_photo_alternate, size: AppConfig.iconSizeXLarge, color: AppConfig.grey600),
                           SizedBox(height: AppConfig.spacingSmall),
-                          Text(UITextConstants.tapToUploadImage, style: ResponsiveText.getBody(context).copyWith(color: AppConfig.textColorMuted)),
+                          Text(
+                            UITextConstants.tapToUploadImage,
+                            style: ResponsiveText.getBody(context).copyWith(color: AppConfig.textColorMuted),
+                          ),
                         ],
                       ),
                     ),
@@ -272,6 +277,28 @@ class _CreateCardPageState extends State<CreateCardPage> {
               ],
             ),
             SizedBox(height: AppConfig.defaultPadding),
+
+            // Card Type
+            DropdownButtonFormField<CardType>(
+              value: _selectedCardType,
+              decoration: InputDecoration(
+                labelText: UITextConstants.cardType,
+                border: OutlineInputBorder(),
+                prefixIcon: const Icon(Icons.category),
+                labelStyle: ResponsiveText.getBody(context),
+                hintStyle: ResponsiveText.getCaption(context),
+              ),
+              items: CardType.values
+                  .map(
+                    (ct) => DropdownMenuItem<CardType>(
+                      value: ct,
+                      child: Text(ct.displayText, style: ResponsiveText.getBody(context)),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (val) => setState(() => _selectedCardType = val ?? CardType.single),
+            ),
+            SizedBox(height: context.isMobile ? AppConfig.smallPadding : AppConfig.defaultPadding),
 
             // Cost Price
             TextFormField(
@@ -468,7 +495,9 @@ class _CreateCardPageState extends State<CreateCardPage> {
         cardProvider.uploadImage(image);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to pick image: $e'), backgroundColor: AppConfig.errorColor));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to pick image: $e'), backgroundColor: AppConfig.errorColor));
     }
   }
 
@@ -479,7 +508,9 @@ class _CreateCardPageState extends State<CreateCardPage> {
 
     // Check if image is selected
     if (cardProvider.formModel.image == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please select an image first'), backgroundColor: AppConfig.errorColor));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Please select an image first'), backgroundColor: AppConfig.errorColor));
       return;
     }
 
@@ -490,6 +521,7 @@ class _CreateCardPageState extends State<CreateCardPage> {
       quantity: _quantityController.text,
       maxDiscount: _maxDiscountController.text,
       vendorId: _selectedVendorId!,
+      cardType: _selectedCardType,
     );
 
     // Check for similar cards first
@@ -539,7 +571,9 @@ class _CreateCardPageState extends State<CreateCardPage> {
 
   Future<void> _checkSimilarCards(CreateCardProvider cardProvider) async {
     if (cardProvider.formModel.image == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please upload an image first'), backgroundColor: AppConfig.errorColor));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Please upload an image first'), backgroundColor: AppConfig.errorColor));
       return;
     }
 
@@ -552,7 +586,9 @@ class _CreateCardPageState extends State<CreateCardPage> {
         context.go(RouteConstants.similarCards, extra: cardProvider);
       }
     } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('No similar cards found'), backgroundColor: AppConfig.successColor));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('No similar cards found'), backgroundColor: AppConfig.successColor));
     }
   }
 

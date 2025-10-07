@@ -6,6 +6,7 @@ import 'package:vsc_app/features/cards/data/services/card_service.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_form_models.dart';
 import 'package:vsc_app/features/cards/presentation/services/card_validators.dart';
+import 'package:vsc_app/core/enums/card_type.dart';
 
 /// Provider for managing card creation and similar cards functionality
 class CreateCardProvider extends BaseProvider {
@@ -88,7 +89,15 @@ class CreateCardProvider extends BaseProvider {
   }
 
   /// Update form field
-  void updateFormField({String? costPrice, String? sellPrice, String? quantity, String? maxDiscount, String? vendorId, XFile? image}) {
+  void updateFormField({
+    String? costPrice,
+    String? sellPrice,
+    String? quantity,
+    String? maxDiscount,
+    String? vendorId,
+    XFile? image,
+    CardType? cardType,
+  }) {
     _formModel = _formModel.copyWith(
       costPrice: costPrice,
       sellPrice: sellPrice,
@@ -96,6 +105,7 @@ class CreateCardProvider extends BaseProvider {
       maxDiscount: maxDiscount,
       vendorId: vendorId,
       image: image,
+      cardType: cardType,
     );
     notifyListeners();
   }

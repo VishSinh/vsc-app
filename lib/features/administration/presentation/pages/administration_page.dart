@@ -39,6 +39,7 @@ class AdministrationPage extends StatelessWidget {
                       _buildStaffManagementCard(context),
                       _buildModelLogsCard(context),
                       _buildApiLogsCard(context),
+                      _buildCustomersCard(context),
                     ],
                   ),
                 ),
@@ -91,6 +92,17 @@ class AdministrationPage extends StatelessWidget {
       icon: Icons.api,
       color: Colors.purple,
       onTap: () => context.push(RouteConstants.auditApiLogs),
+    );
+  }
+
+  Widget _buildCustomersCard(BuildContext context) {
+    return _buildAdminCard(
+      context: context,
+      title: 'Customers',
+      description: 'View all customers with pagination',
+      icon: Icons.people_alt,
+      color: Colors.teal,
+      onTap: () => context.push(RouteConstants.customers),
     );
   }
 

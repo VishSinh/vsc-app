@@ -14,6 +14,8 @@ class CreateCardRequest {
   final double maxDiscount;
   @JsonKey(name: 'vendor_id')
   final String vendorId;
+  @JsonKey(name: 'card_type')
+  final String cardType; // Use CardTypeExtension.toApiString()
 
   const CreateCardRequest({
     required this.costPrice,
@@ -21,6 +23,7 @@ class CreateCardRequest {
     required this.quantity,
     required this.maxDiscount,
     required this.vendorId,
+    required this.cardType,
   });
 
   factory CreateCardRequest.fromJson(Map<String, dynamic> json) => _$CreateCardRequestFromJson(json);

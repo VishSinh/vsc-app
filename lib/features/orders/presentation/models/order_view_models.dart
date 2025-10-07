@@ -80,6 +80,7 @@ class OrderCardViewModel {
   final String id;
   final String vendorId;
   final String barcode;
+  final String cardType; // keep simple here for order context
   final String sellPrice;
   final String costPrice;
   final String maxDiscount;
@@ -97,6 +98,7 @@ class OrderCardViewModel {
     required this.id,
     required this.vendorId,
     required this.barcode,
+    required this.cardType,
     required this.sellPrice,
     required this.costPrice,
     required this.maxDiscount,
@@ -119,6 +121,7 @@ class OrderCardViewModel {
       id: (response.id as String?) ?? '',
       vendorId: (response.vendorId as String?) ?? '',
       barcode: (response.barcode as String?) ?? '',
+      cardType: (response.cardType as String?) ?? '',
       sellPrice: sellPriceAsDouble.toStringAsFixed(2),
       costPrice: costPriceAsDouble.toStringAsFixed(2),
       maxDiscount: maxDiscountAsDouble.toStringAsFixed(2),

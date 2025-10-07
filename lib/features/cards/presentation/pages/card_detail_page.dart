@@ -13,6 +13,7 @@ import 'package:vsc_app/features/cards/presentation/providers/card_detail_provid
 import 'package:vsc_app/features/cards/presentation/widgets/edit_card_dialog.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_detail_view_model.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
+import 'package:vsc_app/core/enums/card_type.dart';
 
 class CardDetailPage extends StatefulWidget {
   final String cardId;
@@ -337,6 +338,7 @@ class _CardDetailPageState extends State<CardDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _buildInfoRow('Card Type', card.cardType?.displayText ?? card.cardTypeRaw),
             _buildInfoRow('Barcode', card.barcode),
             _buildInfoRow('Vendor', card.vendorName),
             _buildInfoRow('Sell Price', '₹${card.sellPrice}'),

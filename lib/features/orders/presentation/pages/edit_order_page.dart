@@ -8,6 +8,7 @@ import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/widgets/button_utils.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
+import 'package:vsc_app/core/enums/card_type.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_item_form_model.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_update_form_models.dart';
@@ -766,6 +767,8 @@ class _EditOrderPageState extends State<EditOrderPage> {
                       vendorId: orderCard.vendorId,
                       vendorName: '',
                       barcode: orderCard.barcode,
+                      cardType: CardTypeExtension.fromApiString(orderCard.cardType),
+                      cardTypeRaw: orderCard.cardType,
                       sellPrice: orderCard.sellPrice,
                       costPrice: orderCard.costPrice,
                       maxDiscount: orderCard.maxDiscount,

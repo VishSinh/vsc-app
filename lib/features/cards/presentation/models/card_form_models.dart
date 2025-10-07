@@ -1,4 +1,5 @@
 import 'package:image_picker/image_picker.dart';
+import 'package:vsc_app/core/enums/card_type.dart';
 import 'package:vsc_app/core/validation/validation_result.dart';
 import 'package:vsc_app/features/cards/data/models/card_requests.dart';
 
@@ -10,6 +11,7 @@ class CardFormModel {
   final String maxDiscount;
   final String vendorId;
   final XFile? image;
+  final CardType cardType;
 
   CardFormModel({
     required this.costPrice,
@@ -18,15 +20,24 @@ class CardFormModel {
     required this.maxDiscount,
     required this.vendorId,
     this.image,
+    required this.cardType,
   });
 
   /// Create empty form
   factory CardFormModel.empty() {
-    return CardFormModel(costPrice: '', sellPrice: '', quantity: '', maxDiscount: '', vendorId: '');
+    return CardFormModel(costPrice: '', sellPrice: '', quantity: '', maxDiscount: '', vendorId: '', cardType: CardType.single);
   }
 
   /// Create copy with updated fields
-  CardFormModel copyWith({String? costPrice, String? sellPrice, String? quantity, String? maxDiscount, String? vendorId, XFile? image}) {
+  CardFormModel copyWith({
+    String? costPrice,
+    String? sellPrice,
+    String? quantity,
+    String? maxDiscount,
+    String? vendorId,
+    XFile? image,
+    CardType? cardType,
+  }) {
     return CardFormModel(
       costPrice: costPrice ?? this.costPrice,
       sellPrice: sellPrice ?? this.sellPrice,
@@ -34,6 +45,7 @@ class CardFormModel {
       maxDiscount: maxDiscount ?? this.maxDiscount,
       vendorId: vendorId ?? this.vendorId,
       image: image ?? this.image,
+      cardType: cardType ?? this.cardType,
     );
   }
 
@@ -168,6 +180,7 @@ class CardFormModel {
       quantity: int.parse(quantity),
       maxDiscount: double.parse(maxDiscount),
       vendorId: vendorId,
+      cardType: cardType.toApiString(),
     );
   }
 }

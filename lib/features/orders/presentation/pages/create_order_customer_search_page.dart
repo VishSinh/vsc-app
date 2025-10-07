@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -23,12 +24,25 @@ class _CreateOrderCustomerSearchPageState extends State<CreateOrderCustomerSearc
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
   final _nameController = TextEditingController();
+  final Random _random = Random();
 
   @override
   void dispose() {
     _phoneController.dispose();
     _nameController.dispose();
     super.dispose();
+  }
+
+  String _generateRandomPhone() {
+    // Always starts with '1' followed by 9 random digits (total length 10)
+    final String digits = List.generate(9, (_) => _random.nextInt(10)).join();
+    return '1$digits';
+  }
+
+  String _generateRandomName() {
+    // Always starts with 'Cust' followed by 6 random digits
+    final String suffix = List.generate(6, (_) => _random.nextInt(10)).join();
+    return 'Cust$suffix';
   }
 
   Future<void> _searchCustomer() async {
@@ -118,6 +132,13 @@ class _CreateOrderCustomerSearchPageState extends State<CreateOrderCustomerSearc
                   labelText: UITextConstants.customerPhone,
                   hintText: UITextConstants.customerPhoneHint,
                   border: OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.shuffle),
+                    tooltip: 'Generate',
+                    onPressed: () {
+                      _phoneController.text = _generateRandomPhone();
+                    },
+                  ),
                 ),
                 keyboardType: TextInputType.phone,
                 validator: (value) {
@@ -137,6 +158,13 @@ class _CreateOrderCustomerSearchPageState extends State<CreateOrderCustomerSearc
                     labelText: UITextConstants.customerName,
                     hintText: UITextConstants.customerNameHint,
                     border: OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.shuffle),
+                      tooltip: 'Generate',
+                      onPressed: () {
+                        _nameController.text = _generateRandomName();
+                      },
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {

@@ -94,6 +94,9 @@ dependencies:
   draggable_float_widget: ^0.1.0
   flutter_simple_calculator: ^2.4.0
   syncfusion_flutter_calendar: ^31.1.19
+  google_mlkit_barcode_scanning: ^0.14.1
+  camera: 0.10.6
+  screen_brightness: ^2.1.7
 
 dev_dependencies:
   flutter_test:

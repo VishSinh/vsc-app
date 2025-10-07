@@ -82,7 +82,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Order Details'),
-          leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go(RouteConstants.orders)),
+          leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.pop()),
           actions: [
             if (permissionProvider.canDelete('order'))
               IconButton(icon: const Icon(Icons.delete_forever), onPressed: _confirmAndDeleteOrder, tooltip: 'Delete Order'),

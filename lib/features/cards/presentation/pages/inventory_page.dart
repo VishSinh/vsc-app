@@ -293,6 +293,9 @@ class _InventoryActionButtonsState extends State<InventoryActionButtons> {
         icon: Icon(icon, color: hasActiveFilters ? Colors.red : null),
         label: Text(label, style: TextStyle(color: hasActiveFilters ? Colors.red : null)),
         style: ElevatedButton.styleFrom(
+          minimumSize: const Size(200, 50),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           side: BorderSide(color: hasActiveFilters ? Colors.red : Theme.of(context).colorScheme.primary, width: 2),
         ),
       ),

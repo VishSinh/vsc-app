@@ -63,6 +63,7 @@ class UITextConstants {
   static const String cardImage = 'Card Image';
   static const String cardDetails = 'Card Details';
   static const String cardInformation = 'Card Information';
+  static const String cardType = 'Card Type';
   static const String barcodeScanner = 'Barcode Scanner';
   static const String statistics = 'Statistics';
   static const String customerName = 'Customer Name';

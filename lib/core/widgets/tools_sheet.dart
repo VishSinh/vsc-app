@@ -39,15 +39,11 @@ class _ToolsSheetState extends State<ToolsSheet> {
         length: 2,
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 8, 0),
-              child: Row(
-                children: [
-                  const Text('Tools', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                  const Spacer(),
-                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).maybePop()),
-                ],
-              ),
+            Row(
+              children: [
+                const Spacer(),
+                IconButton(icon: const Icon(Icons.close, size: 34), onPressed: () => Navigator.of(context).maybePop()),
+              ],
             ),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 8),
@@ -59,7 +55,7 @@ class _ToolsSheetState extends State<ToolsSheet> {
                 ],
               ),
             ),
-            const Divider(height: 1),
+
             Expanded(child: TabBarView(children: [_buildCalculator(context, colorScheme), _buildCalendar(context)])),
           ],
         ),
@@ -104,13 +100,14 @@ class _ToolsSheetState extends State<ToolsSheet> {
               },
               theme: CalculatorThemeData(
                 displayColor: Colors.transparent,
-                displayStyle: const TextStyle(fontSize: 1),
+                displayStyle: const TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
                 operatorColor: colorScheme.surfaceVariant,
-                operatorStyle: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14, fontWeight: FontWeight.w600),
+                operatorStyle: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 24, fontWeight: FontWeight.w600),
                 commandColor: colorScheme.surfaceVariant,
-                commandStyle: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12, fontWeight: FontWeight.w600),
+                commandStyle: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 24, fontWeight: FontWeight.w600),
                 numColor: colorScheme.surfaceVariant,
-                numStyle: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14, fontWeight: FontWeight.w600),
+                numStyle: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 24, fontWeight: FontWeight.w600),
+
                 borderColor: Colors.transparent,
                 borderWidth: 4,
                 expressionColor: Colors.transparent,

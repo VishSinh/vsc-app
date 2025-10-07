@@ -11,6 +11,7 @@ import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart
 import 'package:vsc_app/features/cards/presentation/models/card_update_form_model.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_detail_provider.dart';
 import 'package:vsc_app/features/vendors/presentation/providers/vendor_provider.dart';
+import 'package:vsc_app/core/enums/card_type.dart';
 
 /// Dialog for editing card details
 class EditCardDialog extends StatefulWidget {
@@ -19,7 +20,13 @@ class EditCardDialog extends StatefulWidget {
   final CardDetailProvider cardProvider;
   final VendorProvider vendorProvider;
 
-  const EditCardDialog({super.key, required this.card, required this.onCardUpdated, required this.cardProvider, required this.vendorProvider});
+  const EditCardDialog({
+    super.key,
+    required this.card,
+    required this.onCardUpdated,
+    required this.cardProvider,
+    required this.vendorProvider,
+  });
 
   @override
   State<EditCardDialog> createState() => _EditCardDialogState();
@@ -32,6 +39,7 @@ class _EditCardDialogState extends State<EditCardDialog> {
   late final TextEditingController _quantityController;
   late final TextEditingController _maxDiscountController;
   late String? _selectedVendorId;
+  CardType? _selectedCardType;
 
   XFile? _selectedImage;
 
@@ -44,6 +52,7 @@ class _EditCardDialogState extends State<EditCardDialog> {
     _quantityController = TextEditingController(text: widget.card.quantity.toString());
     _maxDiscountController = TextEditingController(text: widget.card.maxDiscount);
     _selectedVendorId = widget.card.vendorId;
+    _selectedCardType = widget.card.cardType ?? CardTypeExtension.fromApiString(widget.card.cardTypeRaw);
   }
 
   @override
@@ -101,6 +110,8 @@ class _EditCardDialogState extends State<EditCardDialog> {
         children: [
           _buildImageSection(),
           SizedBox(height: context.responsiveSpacing),
+          _buildCardTypeDropdown(),
+          SizedBox(height: context.responsiveSpacing),
           _buildPriceFields(),
           SizedBox(height: context.responsiveSpacing),
           _buildInventoryFields(),
@@ -108,6 +119,27 @@ class _EditCardDialogState extends State<EditCardDialog> {
           _buildVendorDropdown(),
         ],
       ),
+    );
+  }
+
+  Widget _buildCardTypeDropdown() {
+    return DropdownButtonFormField<CardType>(
+      value: _selectedCardType,
+      decoration: InputDecoration(
+        labelText: UITextConstants.cardType,
+        hintText: UITextConstants.cardType,
+        border: const OutlineInputBorder(),
+        prefixIcon: const Icon(Icons.category),
+      ),
+      items: CardType.values
+          .map(
+            (ct) => DropdownMenuItem<CardType>(
+              value: ct,
+              child: Text(ct.displayText, style: ResponsiveText.getBody(context)),
+            ),
+          )
+          .toList(),
+      onChanged: (val) => setState(() => _selectedCardType = val),
     );
   }
 
@@ -368,7 +400,9 @@ class _EditCardDialogState extends State<EditCardDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to pick image: $e'), backgroundColor: AppConfig.errorColor));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to pick image: $e'), backgroundColor: AppConfig.errorColor));
       }
     }
   }
@@ -383,11 +417,14 @@ class _EditCardDialogState extends State<EditCardDialog> {
         (_quantityController.text.trim() != widget.card.quantity.toString()) ||
         (_maxDiscountController.text.trim() != widget.card.maxDiscount) ||
         (_selectedVendorId != widget.card.vendorId) ||
+        ((_selectedCardType?.toApiString() ?? widget.card.cardTypeRaw) != widget.card.cardTypeRaw) ||
         (_selectedImage != null);
 
     if (!hasChanges) {
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text('No changes detected'), backgroundColor: AppConfig.warningColor));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: const Text('No changes detected'), backgroundColor: AppConfig.warningColor));
       return;
     }
 
@@ -407,6 +444,7 @@ class _EditCardDialogState extends State<EditCardDialog> {
           : null,
       vendorId: _selectedVendorId != widget.card.vendorId ? _selectedVendorId : null,
       image: _selectedImage,
+      cardType: ((_selectedCardType?.toApiString() ?? widget.card.cardTypeRaw) != widget.card.cardTypeRaw) ? _selectedCardType : null,
     );
 
     final success = await cardProvider.updateCard(widget.card.id, formModel);

@@ -32,6 +32,10 @@ import 'package:vsc_app/features/administration/presentation/pages/audit_model_l
 import 'package:vsc_app/features/administration/presentation/pages/staff_management_page.dart';
 import 'package:vsc_app/features/administration/presentation/pages/api_logs_page.dart';
 import 'package:vsc_app/features/bills/presentation/pages/bill_print_preview_page.dart';
+import 'package:vsc_app/features/customers/presentation/pages/customers_page.dart';
+import 'package:vsc_app/features/customers/presentation/providers/customer_list_provider.dart';
+import 'package:vsc_app/features/customers/presentation/pages/customer_detail_page.dart';
+import 'package:vsc_app/features/customers/presentation/providers/customer_detail_provider.dart';
 
 class AppRouter {
   static late final GoRouter router;
@@ -103,6 +107,22 @@ class AppRouter {
           path: RouteConstants.administration,
           name: RouteConstants.administrationRouteName,
           builder: (context, state) => const MainLayout(),
+        ),
+        GoRoute(
+          path: RouteConstants.customers,
+          name: RouteConstants.customersRouteName,
+          builder: (context, state) => ChangeNotifierProvider(create: (_) => CustomerListProvider(), child: const CustomersPage()),
+        ),
+        GoRoute(
+          path: RouteConstants.customerDetail,
+          name: RouteConstants.customerDetailRouteName,
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return ChangeNotifierProvider(
+              create: (_) => CustomerDetailProvider(),
+              child: CustomerDetailPage(customerId: id),
+            );
+          },
         ),
         GoRoute(
           path: RouteConstants.staffManagement,

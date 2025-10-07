@@ -1,4 +1,5 @@
 import 'package:vsc_app/features/cards/data/models/card_responses.dart';
+import 'package:vsc_app/core/enums/card_type.dart';
 import 'package:vsc_app/features/cards/presentation/services/card_calculation_service.dart';
 
 /// UI model for displaying card information
@@ -8,6 +9,8 @@ class CardViewModel {
   final String vendorId;
   final String vendorName;
   final String barcode;
+  final CardType? cardType;
+  final String cardTypeRaw;
   final String sellPrice;
   final String costPrice;
   final String maxDiscount;
@@ -28,6 +31,8 @@ class CardViewModel {
     required this.vendorId,
     required this.vendorName,
     required this.barcode,
+    required this.cardType,
+    required this.cardTypeRaw,
     required this.sellPrice,
     required this.costPrice,
     required this.maxDiscount,
@@ -57,6 +62,8 @@ class CardViewModel {
       vendorId: response.vendorId,
       vendorName: response.vendorName,
       barcode: response.barcode,
+      cardType: CardTypeExtension.fromApiString(response.cardType),
+      cardTypeRaw: response.cardType,
       sellPrice: sellPriceAsDouble.toString(),
       costPrice: costPriceAsDouble.toString(),
       maxDiscount: maxDiscountAsDouble.toString(),
@@ -88,6 +95,8 @@ class SimilarCardViewModel {
   final String id;
   final String vendorId;
   final String barcode;
+  final CardType? cardType;
+  final String cardTypeRaw;
   final String sellPrice;
   final String costPrice;
   final String maxDiscount;
@@ -108,6 +117,8 @@ class SimilarCardViewModel {
     required this.id,
     required this.vendorId,
     required this.barcode,
+    required this.cardType,
+    required this.cardTypeRaw,
     required this.sellPrice,
     required this.costPrice,
     required this.maxDiscount,
@@ -137,6 +148,8 @@ class SimilarCardViewModel {
       id: response.id,
       vendorId: response.vendorId,
       barcode: response.barcode,
+      cardType: CardTypeExtension.fromApiString(response.cardType),
+      cardTypeRaw: response.cardType,
       sellPrice: sellPriceAsDouble.toString(),
       costPrice: costPriceAsDouble.toString(),
       maxDiscount: maxDiscountAsDouble.toString(),

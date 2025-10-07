@@ -1,5 +1,6 @@
 import 'package:draggable_float_widget/draggable_float_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:vsc_app/core/constants/app_config.dart';
 
 import 'package:vsc_app/core/services/calculator_service.dart';
 
@@ -15,12 +16,12 @@ class GlobalFloatingCalculator extends StatelessWidget {
       config: DraggableFloatWidgetBaseConfig(
         isFullScreen: true,
         initPositionXInLeft: false,
-        initPositionYInTop: false,
-        initPositionYMarginBorder: 100,
+        initPositionYInTop: true,
+        initPositionYMarginBorder: 200,
         borderLeft: 0,
         borderRight: 0,
-        borderTop: 0,
-        borderBottom: 24,
+        borderTop: 24,
+        borderBottom: 0,
         exposedPartWidthWhenHidden: 16,
         borderTopContainTopBar: true,
         animDuration: const Duration(milliseconds: 250),
@@ -34,7 +35,7 @@ class GlobalFloatingCalculator extends StatelessWidget {
         elevation: 6,
         child: Ink(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary,
+            color: AppConfig.successColor,
             shape: BoxShape.circle,
             boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 3))],
           ),

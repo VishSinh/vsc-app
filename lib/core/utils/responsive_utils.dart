@@ -58,9 +58,9 @@ class ResponsiveUtils {
       case ScreenSize.mobile:
         return EdgeInsets.all(AppConfig.defaultPadding);
       case ScreenSize.tablet:
-        return EdgeInsets.all(AppConfig.largePadding);
+        return EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding, vertical: AppConfig.smallPadding);
       case ScreenSize.desktop:
-        return EdgeInsets.all(AppConfig.largePadding * 1.5);
+        return EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding, vertical: AppConfig.smallPadding);
     }
   }
 

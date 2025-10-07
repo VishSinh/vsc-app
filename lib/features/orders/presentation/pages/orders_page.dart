@@ -208,10 +208,13 @@ class _OrdersPageState extends State<OrdersPage> {
         ElevatedButton.icon(
           onPressed: () => OrdersFilterDialog.show(context),
           icon: Icon(Icons.filter_list, color: orderProvider.hasActiveFilters ? Colors.red : null),
-          label: Text('Filters', style: TextStyle(color: orderProvider.hasActiveFilters ? Colors.red : null)),
+          label: Text('Filters', style: TextStyle(color: orderProvider.hasActiveFilters ? Colors.red : null, fontSize: 14)),
           style: ElevatedButton.styleFrom(
-            minimumSize: const Size(0, 40),
+            minimumSize: const Size(200, 50),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             side: BorderSide(color: orderProvider.hasActiveFilters ? Colors.red : Theme.of(context).colorScheme.primary, width: 2),
+            textStyle: const TextStyle(fontSize: 14),
           ),
         ),
       ],
@@ -234,7 +237,7 @@ class _OrdersPageState extends State<OrdersPage> {
             onTap: () {
               final orderDetailProvider = OrderDetailProvider();
               orderDetailProvider.selectOrder(order);
-              context.go(RouteConstants.orderDetail.replaceAll(':id', order.id), extra: orderDetailProvider);
+              context.push(RouteConstants.orderDetail.replaceAll(':id', order.id), extra: orderDetailProvider);
             },
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -493,7 +496,7 @@ class _OrdersPageState extends State<OrdersPage> {
       onTap: () {
         final orderDetailProvider = OrderDetailProvider();
         orderDetailProvider.selectOrder(order);
-        context.go(RouteConstants.orderDetail.replaceAll(':id', order.id), extra: orderDetailProvider);
+        context.push(RouteConstants.orderDetail.replaceAll(':id', order.id), extra: orderDetailProvider);
       },
       child: Container(
         height: rowHeight,

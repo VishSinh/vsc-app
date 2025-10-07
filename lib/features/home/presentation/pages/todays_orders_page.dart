@@ -221,13 +221,23 @@ class _TodaysOrdersPageState extends State<TodaysOrdersPage> {
             Expanded(
               flex: 1,
               child: Center(
-                child: Text(order.customerName, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+                child: Text(
+                  order.customerName,
+                  style: const TextStyle(fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
             Expanded(
               flex: 1,
               child: Center(
-                child: Text(order.staffName, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+                child: Text(
+                  order.staffName,
+                  style: const TextStyle(fontSize: 13),
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
             Expanded(
@@ -392,7 +402,7 @@ class _TodaysOrdersPageState extends State<TodaysOrdersPage> {
   void _openOrderDetail(OrderViewModel order) {
     final orderDetailProvider = OrderDetailProvider();
     orderDetailProvider.selectOrder(order);
-    context.go(RouteConstants.orderDetail.replaceAll(':id', order.id), extra: orderDetailProvider);
+    context.push(RouteConstants.orderDetail.replaceAll(':id', order.id), extra: orderDetailProvider);
   }
 
   String _formatDateTime(DateTime dateTime) {

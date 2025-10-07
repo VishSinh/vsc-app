@@ -12,6 +12,8 @@ class CardResponse {
   @JsonKey(name: 'vendor_name')
   final String vendorName;
   final String barcode;
+  @JsonKey(name: 'card_type')
+  final String cardType;
   @JsonKey(name: 'sell_price')
   final String sellPrice;
   @JsonKey(name: 'cost_price')
@@ -30,6 +32,7 @@ class CardResponse {
     required this.vendorId,
     required this.vendorName,
     required this.barcode,
+    required this.cardType,
     required this.sellPrice,
     required this.costPrice,
     required this.maxDiscount,
@@ -57,6 +60,8 @@ class CreateCardResponse {
   @JsonKey(name: 'vendor_name')
   final String vendorName;
   final String barcode;
+  @JsonKey(name: 'card_type')
+  final String cardType;
   @JsonKey(name: 'sell_price')
   final String sellPrice;
   @JsonKey(name: 'cost_price')
@@ -76,6 +81,7 @@ class CreateCardResponse {
     required this.vendorId,
     required this.vendorName,
     required this.barcode,
+    required this.cardType,
     required this.sellPrice,
     required this.costPrice,
     required this.maxDiscount,
@@ -102,6 +108,8 @@ class SimilarCardResponse {
   @JsonKey(name: 'vendor_id')
   final String vendorId;
   final String barcode;
+  @JsonKey(name: 'card_type')
+  final String cardType;
   @JsonKey(name: 'sell_price')
   final String sellPrice;
   @JsonKey(name: 'cost_price')
@@ -119,6 +127,7 @@ class SimilarCardResponse {
     required this.id,
     required this.vendorId,
     required this.barcode,
+    required this.cardType,
     required this.sellPrice,
     required this.costPrice,
     required this.maxDiscount,

@@ -7,6 +7,7 @@ import 'package:vsc_app/core/models/error_data.dart';
 import 'package:vsc_app/core/models/pagination_data.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:vsc_app/core/services/navigation_service.dart';
 
 /// Base service class that provides common functionality for all API services
 abstract class ApiService {
@@ -61,7 +62,8 @@ abstract class ApiService {
           // Handle 401 Unauthorized globally
           if (error.response?.statusCode == 401) {
             await _clearAuth();
-            throw UnauthorizedException('Session expired. Please log in again.');
+            // Immediately redirect to login
+            NavigationService.navigateToLogin();
           }
           handler.next(error);
         },
@@ -151,13 +153,15 @@ abstract class ApiService {
   }
 
   /// HTTP POST request
-  Future<Response> post(String path, {dynamic data}) => _dio.post(path, data: _filterNullValues(_deepConvert(_convertToJsonForLogging(data))));
+  Future<Response> post(String path, {dynamic data}) =>
+      _dio.post(path, data: _filterNullValues(_deepConvert(_convertToJsonForLogging(data))));
 
   /// HTTP PUT request
   // Future<Response> put(String path, {dynamic data}) => _dio.put(path, data: _filterNullValues(_convertToJsonForLogging(data)));
 
   /// HTTP PATCH request
-  Future<Response> patch(String path, {dynamic data}) => _dio.patch(path, data: _filterNullValues(_deepConvert(_convertToJsonForLogging(data))));
+  Future<Response> patch(String path, {dynamic data}) =>
+      _dio.patch(path, data: _filterNullValues(_deepConvert(_convertToJsonForLogging(data))));
 
   /// HTTP DELETE request
   Future<Response> delete(String path) => _dio.delete(path);

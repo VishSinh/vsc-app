@@ -23,8 +23,8 @@ class NavigationItems {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   SizedBox(
-                    width: 40,
-                    height: 40,
+                    width: 56,
+                    height: 56,
                     child: FloatingActionButton(
                       onPressed: () {
                         final cardProvider = context.read<CardListProvider>();
@@ -32,16 +32,19 @@ class NavigationItems {
                       },
                       backgroundColor: Colors.orange,
                       heroTag: 'reload_inventory',
-                      mini: true,
-                      child: const Icon(Icons.refresh, color: Colors.white, size: 18),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: const BorderSide(color: Colors.white, width: 1.5),
+                      ),
+                      child: const Icon(Icons.refresh, color: Colors.white),
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 28),
                   if (permissionProvider.canCreate('card'))
                     SizedBox(
-                      width: 40,
-                      height: 40,
+                      width: 56,
+                      height: 56,
                       child: FloatingActionButton(
                         onPressed: () {
                           final createCardProvider = CreateCardProvider();
@@ -49,8 +52,11 @@ class NavigationItems {
                         },
                         backgroundColor: AppConfig.primaryColor,
                         heroTag: 'add_card',
-                        mini: true,
-                        child: const Icon(Icons.add, color: Colors.white, size: 18),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: const BorderSide(color: Colors.white, width: 1.5),
+                        ),
+                        child: const Icon(Icons.add, color: Colors.white),
                       ),
                     ),
                 ],
@@ -66,8 +72,8 @@ class NavigationItems {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               SizedBox(
-                width: 40,
-                height: 40,
+                width: 56,
+                height: 56,
                 child: FloatingActionButton(
                   onPressed: () {
                     final orderProvider = context.read<OrderListProvider>();
@@ -75,24 +81,30 @@ class NavigationItems {
                   },
                   backgroundColor: Colors.orange,
                   heroTag: 'reload_orders',
-                  mini: true,
-                  child: const Icon(Icons.refresh, color: Colors.white, size: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: const BorderSide(color: Colors.white, width: 1.5),
+                  ),
+                  child: const Icon(Icons.refresh, color: Colors.white),
                 ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 28),
               Consumer<PermissionProvider>(
                 builder: (context, permissionProvider, _) {
                   if (!permissionProvider.canCreate('order')) return const SizedBox.shrink();
                   return SizedBox(
-                    width: 40,
-                    height: 40,
+                    width: 56,
+                    height: 56,
                     child: FloatingActionButton(
                       onPressed: () => context.go(RouteConstants.customerSearch),
                       backgroundColor: AppConfig.primaryColor,
                       heroTag: 'add_order',
-                      mini: true,
-                      child: const Icon(Icons.add, color: Colors.white, size: 18),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: const BorderSide(color: Colors.white, width: 1.5),
+                      ),
+                      child: const Icon(Icons.add, color: Colors.white),
                     ),
                   );
                 },
@@ -116,7 +128,9 @@ class NavigationItems {
     required bool canViewBilling,
     required bool canViewPayments,
   }) {
-    final destinations = <NavigationDestination>[const NavigationDestination(icon: Icon(Icons.dashboard), label: UITextConstants.dashboard)];
+    final destinations = <NavigationDestination>[
+      const NavigationDestination(icon: Icon(Icons.dashboard), label: UITextConstants.dashboard),
+    ];
 
     if (canViewOrders) {
       destinations.add(const NavigationDestination(icon: Icon(Icons.shopping_cart), label: UITextConstants.orders));

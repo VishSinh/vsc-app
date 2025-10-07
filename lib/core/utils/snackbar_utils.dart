@@ -9,14 +9,14 @@ class SnackbarUtils {
     final screenWidth = MediaQuery.of(context).size.width;
 
     if (screenWidth > AppConfig.tabletBreakpoint) {
-      // For DESKTOP and TABLET: bottom-right alignment
-      // Calculate position to push snackbar to bottom-right
+      // For DESKTOP and TABLET: top-right alignment
+      // Calculate position to push snackbar to top-right
       double snackbarWidth = AppConfig.snackbarMaxWidth;
       double rightMargin = AppConfig.snackbarRightMargin;
-      double bottomMargin = AppConfig.snackbarBottomMargin;
+      double topMargin = AppConfig.snackbarTopMargin;
       final double leftMargin = screenWidth - snackbarWidth - rightMargin;
 
-      return EdgeInsets.only(left: leftMargin > 0 ? leftMargin : 0, right: rightMargin, bottom: bottomMargin);
+      return EdgeInsets.only(left: leftMargin > 0 ? leftMargin : 0, right: rightMargin, top: topMargin);
     } else {
       // For PHONE: bottom-center alignment
       return const EdgeInsets.fromLTRB(

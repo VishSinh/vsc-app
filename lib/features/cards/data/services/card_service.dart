@@ -94,6 +94,7 @@ class CardService extends ApiService {
         'quantity': request.quantity.toString(),
         'max_discount': request.maxDiscount.toString(),
         'vendor_id': request.vendorId,
+        'card_type': request.cardType,
       });
       return post(AppConstants.cardsEndpoint, data: formData);
     }, (json) => CreateCardResponse.fromJson(json as Map<String, dynamic>));
@@ -120,6 +121,7 @@ class CardService extends ApiService {
         if (request.maxDiscount != null) formDataMap['max_discount'] = request.maxDiscount;
         if (request.quantity != null) formDataMap['quantity'] = request.quantity.toString();
         if (request.vendorId != null) formDataMap['vendor_id'] = request.vendorId;
+        if (request.cardType != null) formDataMap['card_type'] = request.cardType;
 
         return patch('${AppConstants.cardsEndpoint}$cardId/', data: FormData.fromMap(formDataMap));
       } else {

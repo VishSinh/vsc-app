@@ -16,12 +16,14 @@ class RouteConstants {
   static const String auditModelLogs = '/administration/model-logs';
   static const String auditApiLogs = '/administration/api-logs';
   static const String vendors = '/vendors';
+  static const String customers = '/customers';
   static const String vendorDetail = '/vendors/:id';
   static const String cardDetail = '/cards/:id';
   static const String createCard = '/cards/create';
   static const String similarCards = '/cards/similar';
   static const String bluetoothPrint = '/cards/bluetooth-print';
   static const String customerSearch = '/orders/new/customer';
+  static const String customerDetail = '/customers/:id';
   static const String orderItems = '/orders/new/items';
   static const String orderReview = '/orders/new/review';
   static const String orderDetail = '/orders/:id';
@@ -48,12 +50,14 @@ class RouteConstants {
   static const String auditModelLogsRouteName = 'audit-model-logs';
   static const String auditApiLogsRouteName = 'audit-api-logs';
   static const String vendorsRouteName = 'vendors';
+  static const String customersRouteName = 'customers';
   static const String vendorDetailRouteName = 'vendor-detail';
 
   static const String cardDetailRouteName = 'card-detail';
   static const String createCardRouteName = 'create-card';
   static const String bluetoothPrintRouteName = 'bluetooth-print';
   static const String customerSearchRouteName = 'customer-search';
+  static const String customerDetailRouteName = 'customer-detail';
   static const String orderItemsRouteName = 'order-items';
   static const String orderReviewRouteName = 'order-review';
   static const String orderDetailRouteName = 'order-detail';

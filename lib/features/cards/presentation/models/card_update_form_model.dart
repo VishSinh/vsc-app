@@ -2,6 +2,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:vsc_app/core/validation/validation_result.dart';
 import 'package:vsc_app/features/cards/data/models/card_update_request.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
+import 'package:vsc_app/core/enums/card_type.dart';
 
 class CardUpdateFormModel {
   final String? costPrice;
@@ -10,8 +11,9 @@ class CardUpdateFormModel {
   final String? maxDiscount;
   final String? vendorId;
   final XFile? image;
+  final CardType? cardType;
 
-  CardUpdateFormModel({this.costPrice, this.sellPrice, this.quantity, this.maxDiscount, this.vendorId, this.image});
+  CardUpdateFormModel({this.costPrice, this.sellPrice, this.quantity, this.maxDiscount, this.vendorId, this.image, this.cardType});
 
   /// Create form model from existing card data
   factory CardUpdateFormModel.fromCard(CardViewModel card) {
@@ -22,11 +24,20 @@ class CardUpdateFormModel {
       maxDiscount: card.maxDiscount,
       vendorId: card.vendorId,
       image: null, // Image will be optional for updates
+      cardType: card.cardType,
     );
   }
 
   /// Create copy with updated fields
-  CardUpdateFormModel copyWith({String? costPrice, String? sellPrice, String? quantity, String? maxDiscount, String? vendorId, XFile? image}) {
+  CardUpdateFormModel copyWith({
+    String? costPrice,
+    String? sellPrice,
+    String? quantity,
+    String? maxDiscount,
+    String? vendorId,
+    XFile? image,
+    CardType? cardType,
+  }) {
     return CardUpdateFormModel(
       costPrice: costPrice ?? this.costPrice,
       sellPrice: sellPrice ?? this.sellPrice,
@@ -34,6 +45,7 @@ class CardUpdateFormModel {
       maxDiscount: maxDiscount ?? this.maxDiscount,
       vendorId: vendorId ?? this.vendorId,
       image: image ?? this.image,
+      cardType: cardType ?? this.cardType,
     );
   }
 
@@ -162,6 +174,7 @@ class CardUpdateFormModel {
       quantity: quantity?.isNotEmpty == true ? int.parse(quantity!) : null,
       maxDiscount: maxDiscount?.isNotEmpty == true ? double.parse(maxDiscount!) : null,
       vendorId: vendorId?.isNotEmpty == true ? vendorId : null,
+      cardType: cardType != null ? cardType!.toApiString() : null,
     );
   }
 }

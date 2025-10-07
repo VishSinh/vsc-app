@@ -21,8 +21,10 @@ class CardUpdateRequest {
   final int? quantity;
   @JsonKey(name: 'vendor_id')
   final String? vendorId;
+  @JsonKey(name: 'card_type')
+  final String? cardType; // Use CardTypeExtension.toApiString()
 
-  const CardUpdateRequest({this.costPrice, this.sellPrice, this.maxDiscount, this.quantity, this.vendorId});
+  const CardUpdateRequest({this.costPrice, this.sellPrice, this.maxDiscount, this.quantity, this.vendorId, this.cardType});
 
   factory CardUpdateRequest.fromJson(Map<String, dynamic> json) => _$CardUpdateRequestFromJson(json);
   Map<String, dynamic> toJson() => _$CardUpdateRequestToJson(this);
