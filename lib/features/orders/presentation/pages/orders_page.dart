@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vsc_app/core/utils/date_formatter.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 
 import 'package:vsc_app/core/constants/route_constants.dart';
@@ -275,13 +276,13 @@ class _OrdersPageState extends State<OrdersPage> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  _buildOrderInfoRow(Icons.calendar_today, 'Ordered:', _formatDateTime(order.orderDate)),
+                  _buildOrderInfoRow(Icons.calendar_today, 'Ordered:', DateFormatter.formatDate(order.orderDate)),
                   const SizedBox(height: 8),
                   _buildOrderInfoRow(Icons.person, 'Customer:', order.customerName),
                   const SizedBox(height: 8),
                   _buildOrderInfoRow(Icons.badge, 'Staff:', order.staffName),
                   const SizedBox(height: 8),
-                  _buildOrderInfoRow(Icons.local_shipping, 'Delivery:', _formatDateTime(order.deliveryDate)),
+                  _buildOrderInfoRow(Icons.local_shipping, 'Delivery:', DateFormatter.formatDate(order.deliveryDate)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -389,7 +390,7 @@ class _OrdersPageState extends State<OrdersPage> {
   }
 
   Widget _buildDesktopTable() {
-    const double fixedRowHeight = 70.0; // Fixed height for each row
+    const double fixedRowHeight = 65.0; // Fixed height for each row
     const double headerHeight = 50.0; // Height of the header row
     const double borderRadius = 12.0;
 
@@ -413,7 +414,7 @@ class _OrdersPageState extends State<OrdersPage> {
               child: Row(
                 children: [
                   Expanded(
-                    flex: 1,
+                    flex: 2,
                     child: Center(
                       child: Text('Order Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                     ),
@@ -507,7 +508,7 @@ class _OrdersPageState extends State<OrdersPage> {
         child: Row(
           children: [
             Expanded(
-              flex: 1,
+              flex: 2,
               child: Center(
                 child: Text(
                   order.name.isNotEmpty ? order.name : 'Order #${order.id.substring(0, 8)}',
@@ -541,7 +542,11 @@ class _OrdersPageState extends State<OrdersPage> {
             Expanded(
               flex: 1,
               child: Center(
-                child: Text(_formatDateTime(order.orderDate), style: const TextStyle(fontSize: 13), textAlign: TextAlign.center),
+                child: Text(
+                  DateFormatter.formatDate(order.orderDate),
+                  style: const TextStyle(fontSize: 13),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
             Expanded(
@@ -679,10 +684,6 @@ class _OrdersPageState extends State<OrdersPage> {
       onPreviousPage: hasPrevious ? () => orderProvider.loadPreviousPage() : null,
       onNextPage: hasNext ? () => orderProvider.loadNextPage() : null,
     );
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 
   // Using OrderStatusExtension.getDisplayTextFromString instead of local formatting method

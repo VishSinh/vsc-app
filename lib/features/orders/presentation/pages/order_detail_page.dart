@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vsc_app/core/utils/date_formatter.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/enums/box_status.dart';
@@ -172,7 +173,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         ),
         const VerticalDivider(width: 1),
         Expanded(
-          flex: 2,
+          flex: 1,
           child: SingleChildScrollView(padding: const EdgeInsets.all(16), child: _buildOrderItems(order)),
         ),
       ],
@@ -293,8 +294,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               ],
             ),
             _buildInfoRow('Staff', order.staffName),
-            _buildInfoRow('Order Date', _formatDateTime(order.orderDate)),
-            _buildInfoRow('Delivery Date', _formatDateTime(order.deliveryDate)),
+            _buildInfoRow('Order Date', DateFormatter.formatDateTime(order.orderDate)),
+            _buildInfoRow('Delivery Date', DateFormatter.formatDateTime(order.deliveryDate)),
             _buildInfoRow('Total Items', '${order.orderItems.length}'),
             _buildInfoRow(
               'Total Amount',
@@ -552,7 +553,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           _buildBoxInfoRow('Cost', '₹${box.totalBoxCost}'),
           _buildBoxInfoRow('Expense', box.totalBoxExpense == null ? 'Not added' : '₹${box.totalBoxExpense}'),
           if (box.boxMakerId != null) _buildBoxInfoRow('Box Maker', box.boxMakerName ?? box.boxMakerId!),
-          if (box.estimatedCompletion != null) _buildBoxInfoRow('Est. Completion', _formatDateTime(box.estimatedCompletion!)),
+          if (box.estimatedCompletion != null)
+            _buildBoxInfoRow('Est. Completion', DateFormatter.formatDateTime(box.estimatedCompletion!)),
         ],
       ),
     );
@@ -620,7 +622,8 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           _buildPrintingInfoRow('Tracing Expense', job.totalTracingExpense == null ? 'Not added' : '₹${job.totalTracingExpense}'),
           if (job.printerId != null) _buildPrintingInfoRow('Printer', job.printerName ?? job.printerId!),
           if (job.tracingStudioId != null) _buildPrintingInfoRow('Tracing Studio', job.tracingStudioName ?? job.tracingStudioId!),
-          if (job.estimatedCompletion != null) _buildPrintingInfoRow('Est. Completion', _formatDateTime(job.estimatedCompletion!)),
+          if (job.estimatedCompletion != null)
+            _buildPrintingInfoRow('Est. Completion', DateFormatter.formatDateTime(job.estimatedCompletion!)),
         ],
       ),
     );
@@ -632,7 +635,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       child: Row(
         children: [
           SizedBox(
-            width: 130,
+            width: 200,
             child: Text(
               label,
               style: TextStyle(fontSize: AppConfig.fontSizeSm, color: AppConfig.textColorSecondary),
@@ -653,7 +656,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
       child: Row(
         children: [
           SizedBox(
-            width: 100,
+            width: 200,
             child: Text(
               label,
               style: TextStyle(fontSize: AppConfig.fontSizeSm, color: AppConfig.textColorSecondary),
@@ -666,10 +669,6 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         ],
       ),
     );
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   // Using OrderStatusExtension.getDisplayTextFromString instead of local formatting method

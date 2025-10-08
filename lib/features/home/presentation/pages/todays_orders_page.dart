@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:vsc_app/core/constants/app_config.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/enums/order_status.dart';
+import 'package:vsc_app/core/utils/date_formatter.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/home/presentation/providers/analytics_provider.dart';
@@ -89,7 +90,7 @@ class _TodaysOrdersPageState extends State<TodaysOrdersPage> {
                   SizedBox(height: 4),
                   Text('Staff: ${order.staffName}', style: TextStyle(color: AppConfig.textColorSecondary)),
                   SizedBox(height: 4),
-                  Text(_formatDateTime(order.orderDate), style: TextStyle(color: AppConfig.textColorSecondary)),
+                  Text(DateFormatter.formatDateTime(order.orderDate), style: TextStyle(color: AppConfig.textColorSecondary)),
                 ],
               ),
             ),
@@ -243,7 +244,11 @@ class _TodaysOrdersPageState extends State<TodaysOrdersPage> {
             Expanded(
               flex: 1,
               child: Center(
-                child: Text(_formatDateTime(order.orderDate), style: const TextStyle(fontSize: 13), textAlign: TextAlign.center),
+                child: Text(
+                  DateFormatter.formatDateTime(order.orderDate),
+                  style: const TextStyle(fontSize: 13),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
             Expanded(
@@ -403,9 +408,5 @@ class _TodaysOrdersPageState extends State<TodaysOrdersPage> {
     final orderDetailProvider = OrderDetailProvider();
     orderDetailProvider.selectOrder(order);
     context.push(RouteConstants.orderDetail.replaceAll(':id', order.id), extra: orderDetailProvider);
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 }

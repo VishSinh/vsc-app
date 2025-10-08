@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/core/constants/app_config.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
+import 'package:vsc_app/core/utils/date_formatter.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
@@ -194,7 +195,7 @@ class _BillSearchPageState extends State<BillSearchPage> {
   }
 
   Widget _buildDesktopTable(BillProvider provider) {
-    const double fixedRowHeight = 70.0;
+    const double fixedRowHeight = 65.0;
     const double headerHeight = 50.0;
     const double borderRadius = 12.0;
 
@@ -232,12 +233,6 @@ class _BillSearchPageState extends State<BillSearchPage> {
                   Expanded(
                     flex: 1,
                     child: Center(
-                      child: Text('Staff', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Center(
                       child: Text('Order Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                     ),
                   ),
@@ -250,13 +245,19 @@ class _BillSearchPageState extends State<BillSearchPage> {
                   Expanded(
                     flex: 1,
                     child: Center(
-                      child: Text('Items', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      child: Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                     ),
                   ),
                   Expanded(
                     flex: 1,
                     child: Center(
-                      child: Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      child: Text('Paid', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text('Pending', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                     ),
                   ),
                 ],
@@ -314,17 +315,10 @@ class _BillSearchPageState extends State<BillSearchPage> {
               flex: 1,
               child: Center(
                 child: Text(
-                  bill.order.staffName,
+                  DateFormatter.formatDate(bill.order.orderDate),
                   style: const TextStyle(fontSize: 13),
-                  overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
                 ),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Center(
-                child: Text(_formatDateTime(bill.order.orderDate), style: const TextStyle(fontSize: 13), textAlign: TextAlign.center),
               ),
             ),
             Expanded(
@@ -344,15 +338,33 @@ class _BillSearchPageState extends State<BillSearchPage> {
             Expanded(
               flex: 1,
               child: Center(
-                child: Text('${bill.order.orderItems.length}', style: const TextStyle(fontSize: 13), textAlign: TextAlign.center),
+                child: Text(
+                  bill.summary.formattedTotalWithTax,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
             Expanded(
               flex: 1,
               child: Center(
                 child: Text(
-                  bill.summary.formattedTotalWithTax,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  '₹${(bill.summary.totalWithTax - bill.summary.pendingAmount).toStringAsFixed(2)}',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.green),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Center(
+                child: Text(
+                  bill.summary.pendingAmount == 0 ? '-' : bill.summary.formattedPendingAmount,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: bill.summary.pendingAmount == 0 ? Colors.white : Colors.red,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -361,10 +373,6 @@ class _BillSearchPageState extends State<BillSearchPage> {
         ),
       ),
     );
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 
   @override

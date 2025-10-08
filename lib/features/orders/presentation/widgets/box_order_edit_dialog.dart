@@ -6,6 +6,7 @@ import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/production/presentation/models/box_order_update_form_model.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_list_provider.dart';
 import 'package:vsc_app/features/orders/presentation/providers/box_order_edit_form_provider.dart';
+import 'package:vsc_app/core/utils/date_formatter.dart';
 import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 
@@ -275,12 +276,12 @@ class BoxOrderEditDialog extends StatelessWidget {
               labelText: 'Estimated Completion',
               border: const OutlineInputBorder(),
               hintText: formProvider.formModel.currentEstimatedCompletion != null
-                  ? '${formProvider.formModel.currentEstimatedCompletion!.day}/${formProvider.formModel.currentEstimatedCompletion!.month}/${formProvider.formModel.currentEstimatedCompletion!.year} ${formProvider.formModel.currentEstimatedCompletion!.hour}:${formProvider.formModel.currentEstimatedCompletion!.minute.toString().padLeft(2, '0')}'
+                  ? DateFormatter.formatDateTime(formProvider.formModel.currentEstimatedCompletion!)
                   : 'Select date and time',
             ),
             child: Text(
               formProvider.formModel.currentEstimatedCompletion != null
-                  ? '${formProvider.formModel.currentEstimatedCompletion!.day}/${formProvider.formModel.currentEstimatedCompletion!.month}/${formProvider.formModel.currentEstimatedCompletion!.year} ${formProvider.formModel.currentEstimatedCompletion!.hour}:${formProvider.formModel.currentEstimatedCompletion!.minute.toString().padLeft(2, '0')}'
+                  ? DateFormatter.formatDateTime(formProvider.formModel.currentEstimatedCompletion!)
                   : 'Select date and time',
             ),
           ),

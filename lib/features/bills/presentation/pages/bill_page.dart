@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/core/constants/app_config.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
+import 'package:vsc_app/core/utils/date_formatter.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/bills/presentation/provider/bill_provider.dart';
@@ -361,8 +362,8 @@ class _BillPageState extends State<BillPage> {
               ],
             ),
             _buildInfoRow('Staff', bill.order.staffName),
-            _buildInfoRow('Order Date', _formatDateTime(bill.order.orderDate)),
-            _buildInfoRow('Delivery Date', _formatDateTime(bill.order.deliveryDate)),
+            _buildInfoRow('Order Date', DateFormatter.formatDateTime(bill.order.orderDate)),
+            _buildInfoRow('Delivery Date', DateFormatter.formatDateTime(bill.order.deliveryDate)),
             _buildInfoRow('Status', bill.order.orderStatus.getDisplayText()),
             if (bill.order.specialInstruction.isNotEmpty) _buildInfoRow('Special Instructions', bill.order.specialInstruction),
           ],
@@ -660,10 +661,6 @@ class _BillPageState extends State<BillPage> {
         ],
       ),
     );
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
   Widget _buildPaymentsSection() {
