@@ -11,6 +11,7 @@ import 'package:vsc_app/core/widgets/pagination_widget.dart';
 import 'package:vsc_app/features/bills/presentation/provider/bill_provider.dart';
 import 'package:vsc_app/features/bills/presentation/models/bill_view_model.dart';
 import 'package:vsc_app/core/enums/bill_status.dart';
+import 'package:vsc_app/features/bills/presentation/widgets/bill_filter_dialog.dart';
 
 class BillSearchPage extends StatefulWidget {
   const BillSearchPage({super.key});
@@ -42,7 +43,8 @@ class _BillSearchPageState extends State<BillSearchPage> {
   Future<void> _search() async {
     final provider = context.read<BillProvider>();
     provider.setContext(context);
-    await provider.getBillByPhone(phone: _phoneController.text.trim());
+    provider.setServerFilters(phone: _phoneController.text.trim());
+    await provider.getBills(page: 1);
   }
 
   // Using BillCalculationService for status colors and text
@@ -57,7 +59,7 @@ class _BillSearchPageState extends State<BillSearchPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Search header with responsive layout
-              if (context.isDesktop) _buildDesktopSearchRow() else _buildMobileSearchRow(),
+              if (context.isDesktop) _buildDesktopSearchRow(provider) else _buildMobileSearchRow(provider),
               SizedBox(height: AppConfig.smallPadding),
               Expanded(
                 child: provider.isLoading
@@ -80,6 +82,8 @@ class _BillSearchPageState extends State<BillSearchPage> {
                                   hasNext: provider.hasMoreBills,
                                   onPreviousPage: provider.pagination?.hasPrevious ?? false ? () => provider.loadPreviousPage() : null,
                                   onNextPage: provider.hasMoreBills ? () => provider.loadNextPage() : null,
+                                  showTotalItems: true,
+                                  totalItems: provider.pagination?.totalItems,
                                 ),
                               ),
                           ],
@@ -93,7 +97,7 @@ class _BillSearchPageState extends State<BillSearchPage> {
     );
   }
 
-  Widget _buildDesktopSearchRow() {
+  Widget _buildDesktopSearchRow(BillProvider provider) {
     return Row(
       children: [
         Expanded(
@@ -120,13 +124,25 @@ class _BillSearchPageState extends State<BillSearchPage> {
             style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 16), minimumSize: Size(120, 56)),
           ),
         ),
+        const SizedBox(width: 8),
+        ElevatedButton.icon(
+          onPressed: () => BillFilterDialog.show(context),
+          icon: Icon(Icons.filter_list, color: provider.hasActiveFilters ? Colors.red : null),
+          label: Text('Filters', style: TextStyle(color: provider.hasActiveFilters ? Colors.red : null)),
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(160, 56),
+            side: BorderSide(color: provider.hasActiveFilters ? Colors.red : Theme.of(context).colorScheme.primary, width: 2),
+          ),
+        ),
         if (_phoneController.text.isNotEmpty) ...[
           SizedBox(width: AppConfig.smallPadding),
           IconButton(
             tooltip: 'Clear',
             onPressed: () {
               _phoneController.clear();
-              context.read<BillProvider>().getBills();
+              final p = context.read<BillProvider>();
+              p.setServerFilters(phone: '');
+              p.getBills(page: 1);
               setState(() {});
             },
             icon: const Icon(Icons.close),
@@ -136,7 +152,7 @@ class _BillSearchPageState extends State<BillSearchPage> {
     );
   }
 
-  Widget _buildMobileSearchRow() {
+  Widget _buildMobileSearchRow(BillProvider provider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -161,7 +177,9 @@ class _BillSearchPageState extends State<BillSearchPage> {
                 tooltip: 'Clear',
                 onPressed: () {
                   _phoneController.clear();
-                  context.read<BillProvider>().getBills();
+                  final p = context.read<BillProvider>();
+                  p.setServerFilters(phone: '');
+                  p.getBills(page: 1);
                   setState(() {});
                 },
                 icon: const Icon(Icons.close),
@@ -170,11 +188,29 @@ class _BillSearchPageState extends State<BillSearchPage> {
           ],
         ),
         SizedBox(height: AppConfig.smallPadding),
-        ElevatedButton.icon(
-          onPressed: _search,
-          icon: const Icon(Icons.search),
-          label: const Text('Search'),
-          style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 12)),
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: _search,
+                icon: const Icon(Icons.search),
+                label: const Text('Search'),
+                style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 12)),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () => BillFilterDialog.show(context),
+                icon: Icon(Icons.filter_list, color: provider.hasActiveFilters ? Colors.red : null),
+                label: Text('Filters', style: TextStyle(color: provider.hasActiveFilters ? Colors.red : null)),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  side: BorderSide(color: provider.hasActiveFilters ? Colors.red : Theme.of(context).colorScheme.primary, width: 2),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );

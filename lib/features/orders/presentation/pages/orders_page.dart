@@ -87,14 +87,17 @@ class _OrdersPageState extends State<OrdersPage> {
           return const LoadingWidget(message: 'Loading orders...');
         }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 8),
-            _buildOrdersActionBar(context),
-            const SizedBox(height: 8),
-            Expanded(child: _buildOrdersList(orderProvider)),
-          ],
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 8),
+              _buildOrdersActionBar(context),
+              const SizedBox(height: 8),
+              Expanded(child: _buildOrdersList(orderProvider)),
+            ],
+          ),
         );
       },
     );
@@ -683,6 +686,8 @@ class _OrdersPageState extends State<OrdersPage> {
       hasNext: hasNext,
       onPreviousPage: hasPrevious ? () => orderProvider.loadPreviousPage() : null,
       onNextPage: hasNext ? () => orderProvider.loadNextPage() : null,
+      showTotalItems: true,
+      totalItems: orderProvider.pagination?.totalItems,
     );
   }
 

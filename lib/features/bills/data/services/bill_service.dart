@@ -8,32 +8,48 @@ import 'package:vsc_app/features/bills/data/models/payment_get_response.dart';
 import 'package:vsc_app/features/bills/data/models/payment_request.dart';
 import 'package:vsc_app/features/bills/data/models/bill_adjustment_get_response.dart';
 import 'package:vsc_app/features/bills/data/models/bill_adjustment_request.dart';
+import 'package:vsc_app/core/utils/query_params.dart';
 
 class BillService extends ApiService {
-  Future<ApiResponse<List<BillGetResponse>>> getBills({int page = 1, int pageSize = AppConstants.defaultPageSize}) async =>
-      await executeRequest(
-        () => get('${AppConstants.billsEndpoint}?page=$page&page_size=$pageSize'),
-        (json) => ServiceUtils.parseList(json, (item) => BillGetResponse.fromJson(item)),
-      );
+  Future<ApiResponse<List<BillGetResponse>>> getBills({
+    int page = 1,
+    int pageSize = AppConstants.defaultPageSize,
+    String? orderId,
+    String? phone,
+    bool? paid,
+    String sortBy = 'created_at',
+    String sortOrder = 'desc',
+  }) async {
+    final params = QueryParamsBuilder()
+        .withPagination(page: page, pageSize: pageSize)
+        .withString('order_id', orderId)
+        .withString('phone', phone)
+        .withBoolAsString('paid', paid)
+        .withSort(sortBy: sortBy, sortOrder: sortOrder)
+        .build();
+
+    return await executeRequest(
+      () => get(AppConstants.billsEndpoint, queryParameters: params),
+      (json) => ServiceUtils.parseList(json, (item) => BillGetResponse.fromJson(item)),
+    );
+  }
 
   Future<ApiResponse<BillGetResponse>> getBillByBillId({required String billId}) async => await executeRequest(
     () => get('${AppConstants.billsEndpoint}$billId/'),
     (json) => ServiceUtils.parseItem(json, BillGetResponse.fromJson),
   );
 
-  Future<ApiResponse<List<BillGetResponse>>> getBillByOrderId({required String orderId}) async => await executeRequest(
-    () => get('${AppConstants.billsEndpoint}?order_id=$orderId'),
-    (json) => ServiceUtils.parseList(json, (item) => BillGetResponse.fromJson(item)),
-  );
+  Future<ApiResponse<List<BillGetResponse>>> getBillByOrderId({required String orderId}) async {
+    return await getBills(orderId: orderId);
+  }
 
   Future<ApiResponse<List<BillGetResponse>>> getBillByPhone({
     required String phone,
     int page = 1,
     int pageSize = AppConstants.defaultPageSize,
-  }) async => await executeRequest(
-    () => get('${AppConstants.billsEndpoint}?phone=$phone&page=$page&page_size=$pageSize'),
-    (json) => ServiceUtils.parseList(json, (item) => BillGetResponse.fromJson(item)),
-  );
+  }) async {
+    return await getBills(page: page, pageSize: pageSize, phone: phone);
+  }
 
   Future<ApiResponse<List<PaymentGetResponse>>> getPaymentsByBillId({required String billId}) async => await executeRequest(
     () => get('${AppConstants.paymentsEndpoint}?bill_id=$billId'),

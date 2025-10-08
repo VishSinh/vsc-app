@@ -19,10 +19,16 @@ class BillProvider extends BaseProvider {
   List<BillViewModel> _bills = [];
   Map<String, BillCardViewModel> _cardImages = {};
   PaginationData? _pagination;
-  String _lastPhoneQuery = '';
 
   // Customer phone cache
   final Map<String, String> _customerPhoneCache = {};
+
+  // Server-side filters & sorting
+  String? _filterOrderId;
+  String? _filterPhone;
+  bool? _filterPaid; // true => only PAID; false => PENDING or PARTIAL; null => any
+  String _sortBy = 'created_at';
+  String _sortOrder = 'desc';
 
   Future<void> getBillByBillId({required String billId}) async {
     await executeApiOperation(
@@ -53,7 +59,7 @@ class BillProvider extends BaseProvider {
   }
 
   Future<void> getBillByPhone({required String phone, int page = 1, int pageSize = 10}) async {
-    _lastPhoneQuery = phone;
+    _filterPhone = phone;
     await executeApiOperation(
       apiCall: () => _billService.getBillByPhone(phone: phone, page: page, pageSize: pageSize),
       onSuccess: (response) {
@@ -77,6 +83,19 @@ class BillProvider extends BaseProvider {
   PaginationData? get pagination => _pagination;
   bool get hasMoreBills => _pagination?.hasNext ?? false;
   String? getCustomerPhone(String customerId) => _customerPhoneCache[customerId];
+
+  // Filters & sorting getters
+  String? get filterOrderId => _filterOrderId;
+  String? get filterPhone => _filterPhone;
+  bool? get filterPaid => _filterPaid;
+  String get sortBy => _sortBy;
+  String get sortOrder => _sortOrder;
+
+  bool get hasActiveFilters {
+    return (_filterOrderId != null && _filterOrderId!.isNotEmpty) ||
+        (_filterPhone != null && _filterPhone!.isNotEmpty) ||
+        _filterPaid != null;
+  }
 
   // Get card image by ID
   BillCardViewModel? getCardImageById(String cardId) {
@@ -125,9 +144,16 @@ class BillProvider extends BaseProvider {
   }
 
   Future<void> getBills({int page = 1, int pageSize = 10}) async {
-    _lastPhoneQuery = '';
     await executeApiOperation(
-      apiCall: () => _billService.getBills(page: page, pageSize: pageSize),
+      apiCall: () => _billService.getBills(
+        page: page,
+        pageSize: pageSize,
+        orderId: _filterOrderId,
+        phone: _filterPhone,
+        paid: _filterPaid,
+        sortBy: _sortBy,
+        sortOrder: _sortOrder,
+      ),
       onSuccess: (response) {
         setSuccess('Bills fetched successfully');
         _bills = response.data?.map((bill) => BillViewModel.fromApiResponse(bill)).toList() ?? [];
@@ -143,22 +169,14 @@ class BillProvider extends BaseProvider {
   Future<void> loadNextPage() async {
     if (_pagination?.hasNext == true) {
       final nextPage = (_pagination?.currentPage ?? 1) + 1;
-      if (_lastPhoneQuery.isNotEmpty) {
-        await getBillByPhone(phone: _lastPhoneQuery, page: nextPage);
-      } else {
-        await getBills(page: nextPage);
-      }
+      await getBills(page: nextPage, pageSize: _pagination?.pageSize ?? 10);
     }
   }
 
   Future<void> loadPreviousPage() async {
     if (_pagination?.hasPrevious == true) {
       final prevPage = (_pagination?.currentPage ?? 1) - 1;
-      if (_lastPhoneQuery.isNotEmpty) {
-        await getBillByPhone(phone: _lastPhoneQuery, page: prevPage);
-      } else {
-        await getBills(page: prevPage);
-      }
+      await getBills(page: prevPage, pageSize: _pagination?.pageSize ?? 10);
     }
   }
 
@@ -190,6 +208,25 @@ class BillProvider extends BaseProvider {
     _payments = [];
     _cardImages = {};
     clearMessages();
+    notifyListeners();
+  }
+
+  // ========================= Server-side filters & sorting =========================
+  void setServerFilters({String? orderId, String? phone, bool? paid, String? sortBy, String? sortOrder}) {
+    _filterOrderId = orderId?.trim().isNotEmpty == true ? orderId!.trim() : null;
+    _filterPhone = phone?.trim().isNotEmpty == true ? phone!.trim() : null;
+    _filterPaid = paid;
+    if (sortBy != null && sortBy.isNotEmpty) _sortBy = sortBy;
+    if (sortOrder != null && sortOrder.isNotEmpty) _sortOrder = sortOrder;
+    notifyListeners();
+  }
+
+  void clearServerFilters() {
+    _filterOrderId = null;
+    _filterPhone = null;
+    _filterPaid = null;
+    _sortBy = 'created_at';
+    _sortOrder = 'desc';
     notifyListeners();
   }
 
