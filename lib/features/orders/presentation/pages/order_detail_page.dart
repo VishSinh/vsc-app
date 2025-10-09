@@ -301,6 +301,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               'Total Amount',
               '₹${OrderCalculationService.calculateOrderTotal(order.orderItems, serviceItems: order.serviceItems).toStringAsFixed(2)}',
             ),
+            _buildInfoRow('Order Profit', (order.orderProfit == null || order.orderProfit!.isEmpty) ? '-' : '₹${order.orderProfit}'),
             const SizedBox(height: 16),
             if (order.billId.isNotEmpty)
               SizedBox(

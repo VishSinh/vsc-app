@@ -48,7 +48,16 @@ class DashboardService extends ApiService {
   }
 
   /// Fetch today's orders via analytics detail endpoint
-  Future<ApiResponse<List<OrderResponse>>> getTodaysOrders() async {
-    return _fetchAnalyticsList('todays_orders', (m) => OrderResponse.fromJson(m));
+  /// days: number of recent days to include (1-5). Default is 1.
+  Future<ApiResponse<List<OrderResponse>>> getTodaysOrders({int days = 1}) async {
+    // Build query params including type and days
+    final Map<String, dynamic> params = {'type': 'todays_orders', 'days': days};
+
+    return executeRequest(() => get(AppConstants.detailedAnalyticsEndpoint, queryParameters: params), (json) {
+      if (json is List<dynamic>) {
+        return json.map((item) => OrderResponse.fromJson(item as Map<String, dynamic>)).toList();
+      }
+      throw Exception('Invalid response format: expected List but got ${json.runtimeType}');
+    });
   }
 }

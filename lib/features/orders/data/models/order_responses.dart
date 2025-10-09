@@ -67,6 +67,9 @@ class OrderResponse extends BaseOrderResponse {
   @JsonKey(name: 'bill_id')
   final String billId;
 
+  @JsonKey(name: 'order_profit')
+  final String? orderProfit;
+
   const OrderResponse({
     required super.id,
     required super.name,
@@ -81,6 +84,7 @@ class OrderResponse extends BaseOrderResponse {
     required super.orderItems,
     super.serviceItems = const [],
     required this.billId,
+    this.orderProfit,
   });
 
   factory OrderResponse.fromJson(Map<String, dynamic> json) => _$OrderResponseFromJson(json);

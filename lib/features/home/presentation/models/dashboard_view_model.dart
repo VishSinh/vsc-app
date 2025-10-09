@@ -68,19 +68,19 @@ class DashboardViewModel {
     final lastThree = integerPart.substring(integerPart.length - 3);
     String rest = integerPart.substring(0, integerPart.length - 3);
 
-    // Add commas after every 2 digits in the rest
-    final buffer = StringBuffer();
+    // Group the rest in 2-digit groups from the right
+    final groups = <String>[];
     while (rest.length > 2) {
-      buffer.write('${rest.substring(rest.length - 2)},');
+      groups.insert(0, rest.substring(rest.length - 2));
       rest = rest.substring(0, rest.length - 2);
     }
     if (rest.isNotEmpty) {
-      buffer.write('$rest,');
+      groups.insert(0, rest);
     }
-    final formattedRest = buffer.toString().split('').reversed.join('');
-    final formatted = '${isNegative ? '-' : ''}${formattedRest.split('').reversed.join()}$lastThree.$decimalPart';
-    // Remove any leading comma if present
-    return formatted.startsWith(',') ? formatted.substring(1) : formatted;
+
+    final head = groups.join(',');
+    final formattedInteger = head.isEmpty ? lastThree : '$head,$lastThree';
+    return '${isNegative ? '-' : ''}$formattedInteger.$decimalPart';
   }
 
   /// Format the monthly order change percentage

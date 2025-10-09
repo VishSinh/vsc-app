@@ -110,11 +110,12 @@ class AnalyticsProvider extends BaseProvider {
   }
 
   /// Fetch today's orders via analytics
-  Future<void> getTodaysOrders({bool showSnackbar = false}) async {
+  /// days: number of recent days to include (1-5). Default is 1.
+  Future<void> getTodaysOrders({bool showSnackbar = false, int days = 1}) async {
     AppLogger.service('AnalyticsProvider', 'Fetching today\'s orders');
 
     await executeApiOperation(
-      apiCall: () => _dashboardService.getTodaysOrders(),
+      apiCall: () => _dashboardService.getTodaysOrders(days: days),
       onSuccess: (response) {
         if (response.data != null) {
           _todaysOrders = response.data!.map((r) => OrderViewModel.fromApiResponse(r)).toList();
