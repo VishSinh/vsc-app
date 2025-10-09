@@ -880,7 +880,7 @@ class _BillPageState extends State<BillPage> {
         }
 
         return GestureDetector(
-          onTap: () => ImageUtils.showEnlargedImageDialog(context, card.image),
+          onTap: () => ImageUtils.showEnlargedImageDialog(context, card.image, cardId: card.id),
           child: Container(
             width: context.isMobile ? double.infinity : 180,
             height: context.isMobile ? 200 : 180,

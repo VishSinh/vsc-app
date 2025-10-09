@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:vsc_app/core/constants/route_constants.dart';
 
 /// Utility functions for image-related operations
 class ImageUtils {
   /// Shows an enlarged image dialog with zoom and pan capabilities
-  static void showEnlargedImageDialog(BuildContext context, String imageUrl) {
+  static void showEnlargedImageDialog(BuildContext context, String imageUrl, {String? cardId}) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -42,6 +44,20 @@ class ImageUtils {
                     ),
                   ),
                 ),
+                if (cardId != null) ...[
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        context.push(RouteConstants.cardDetail.replaceFirst(':id', cardId));
+                      },
+                      icon: const Icon(Icons.info_outline),
+                      label: const Text('Details'),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

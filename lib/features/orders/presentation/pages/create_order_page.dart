@@ -98,6 +98,18 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
       return;
     }
 
+    // Enforce discount amount not exceeding the card's max discount (flat amount per unit)
+    final double maxAllowedDiscountPerUnit = currentCard.maxDiscountAsDouble;
+    final double enteredDiscountPerUnit = double.tryParse(item.discountAmount) ?? -1;
+    if (enteredDiscountPerUnit.isNaN || enteredDiscountPerUnit < 0) {
+      orderProvider.setErrorWithSnackBar(UITextConstants.pleaseEnterValidDiscount, context);
+      return;
+    }
+    if (enteredDiscountPerUnit > maxAllowedDiscountPerUnit) {
+      orderProvider.setErrorWithSnackBar('Discount per item cannot exceed ₹${maxAllowedDiscountPerUnit.toStringAsFixed(2)}', context);
+      return;
+    }
+
     // Enforce stock constraint
     if (item.quantity > currentCard.quantity) {
       orderProvider.setErrorWithSnackBar('Quantity cannot exceed available stock (${currentCard.quantity})', context);
@@ -319,11 +331,19 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
             Row(
               children: [
                 Expanded(
-                  child: ButtonUtils.primaryButton(onPressed: orderProvider.isLoading ? null : _searchCard, label: 'Search Card', icon: Icons.search),
+                  child: ButtonUtils.primaryButton(
+                    onPressed: orderProvider.isLoading ? null : _searchCard,
+                    label: 'Search Card',
+                    icon: Icons.search,
+                  ),
                 ),
                 SizedBox(width: AppConfig.defaultPadding),
                 Expanded(
-                  child: ButtonUtils.secondaryButton(onPressed: () => _showBarcodeScanner(), label: 'Scan Barcode', icon: Icons.qr_code_scanner),
+                  child: ButtonUtils.secondaryButton(
+                    onPressed: () => _showBarcodeScanner(),
+                    label: 'Scan Barcode',
+                    icon: Icons.qr_code_scanner,
+                  ),
                 ),
               ],
             ),
@@ -363,9 +383,6 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Card Image - Full width on mobile
-                  ImageDisplay(imageUrl: card.image, width: double.infinity, height: AppConfig.imageSizeLarge),
-                  SizedBox(height: AppConfig.defaultPadding),
                   // Card Information
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -388,6 +405,9 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                     ],
                   ),
                   SizedBox(height: AppConfig.defaultPadding),
+                  // Card Image - Full width on mobile
+                  ImageDisplay(imageUrl: card.image, width: double.infinity, height: AppConfig.imageSizeLarge),
+                  SizedBox(height: AppConfig.defaultPadding),
                   // Item Details Form for Mobile
                   OrderItemEntryForm(
                     onAddItem: _handleAddOrderItem,
@@ -408,10 +428,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Card Image
-                        ImageDisplay(imageUrl: card.image, width: double.infinity, height: AppConfig.imageSizeXLarge),
-                        SizedBox(height: AppConfig.defaultPadding),
-                        // Card Info below image
+                        // Card Info
                         Row(
                           children: [
                             Expanded(child: _buildInfoRow('Price', '₹${card.sellPrice}', Icons.attach_money)),
@@ -421,6 +438,9 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
                             Expanded(child: _buildInfoRow('Max Discount', '₹${card.maxDiscount}', Icons.discount)),
                           ],
                         ),
+                        SizedBox(height: AppConfig.defaultPadding),
+                        // Card Image
+                        ImageDisplay(imageUrl: card.image, width: double.infinity, height: AppConfig.imageSizeXLarge),
                       ],
                     ),
                   ),
@@ -453,14 +473,18 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Icon(icon, size: 16, color: AppConfig.grey600),
+            Icon(icon, size: 16, color: AppConfig.textColorPrimary),
             SizedBox(width: AppConfig.spacingTiny),
-            Text(label, style: ResponsiveText.getCaption(context).copyWith(color: AppConfig.grey600)),
+            Text(
+              label,
+              style: ResponsiveText.getCaption(context).copyWith(color: AppConfig.textColorPrimary, fontWeight: FontWeight.bold),
+            ),
           ],
         ),
         SizedBox(height: AppConfig.spacingTiny),
-        Text(value, style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w600)),
+        Text(value, style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w400)),
       ],
     );
   }

@@ -182,7 +182,11 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
             SizedBox(height: AppConfig.defaultPadding),
             TextField(
               controller: _orderNameController,
-              decoration: const InputDecoration(labelText: 'Enter order name', hintText: 'e.g., John weds Jane', border: OutlineInputBorder()),
+              decoration: const InputDecoration(
+                labelText: 'Enter order name',
+                hintText: 'e.g., John weds Jane',
+                border: OutlineInputBorder(),
+              ),
               onChanged: (value) => _updateOrderName(),
             ),
           ],
@@ -227,7 +231,9 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
                   Expanded(
                     child: ListTile(
                       title: const Text('Date'),
-                      subtitle: Text(context.read<OrderCreateProvider>().selectedDeliveryDate?.toString().split(' ')[0] ?? 'Not selected'),
+                      subtitle: Text(
+                        context.read<OrderCreateProvider>().selectedDeliveryDate?.toString().split(' ')[0] ?? 'Not selected',
+                      ),
                       trailing: const Icon(Icons.calendar_today),
                       onTap: _selectDate,
                     ),
@@ -272,7 +278,10 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
                   if (card == null) {
                     return Card(
                       margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
-                      child: Padding(padding: EdgeInsets.all(AppConfig.defaultPadding), child: Text('Item ${index + 1} - Card not found')),
+                      child: Padding(
+                        padding: EdgeInsets.all(AppConfig.defaultPadding),
+                        child: Text('Item ${index + 1} - Card not found'),
+                      ),
                     );
                   }
 
@@ -386,7 +395,7 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
           children: [
             Expanded(
               child: ButtonUtils.secondaryButton(
-                onPressed: orderProvider.isLoading ? null : () => context.go(RouteConstants.orderItems),
+                onPressed: orderProvider.isLoading ? null : () => context.pop(),
                 label: UITextConstants.back,
                 icon: Icons.arrow_back,
               ),
