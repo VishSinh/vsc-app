@@ -6,6 +6,7 @@ import 'package:vsc_app/features/home/data/models/yearly_profit_response.dart';
 import 'package:vsc_app/features/home/data/models/yearly_sale_response.dart';
 import 'package:vsc_app/features/cards/data/models/card_responses.dart';
 import 'package:vsc_app/features/orders/data/models/order_responses.dart';
+import 'package:vsc_app/features/bills/data/models/bill_get_response.dart';
 import 'package:vsc_app/core/constants/app_constants.dart';
 
 class DashboardService extends ApiService {
@@ -47,6 +48,11 @@ class DashboardService extends ApiService {
     return _fetchAnalyticsList('out_of_stock_cards', (m) => CardResponse.fromJson(m));
   }
 
+  /// Fetch medium stock cards via analytics detail endpoint
+  Future<ApiResponse<List<CardResponse>>> getMediumStockCards() async {
+    return _fetchAnalyticsList('medium_stock_cards', (m) => CardResponse.fromJson(m));
+  }
+
   /// Fetch today's orders via analytics detail endpoint
   /// days: number of recent days to include (1-5). Default is 1.
   Future<ApiResponse<List<OrderResponse>>> getTodaysOrders({int days = 1}) async {
@@ -59,5 +65,22 @@ class DashboardService extends ApiService {
       }
       throw Exception('Invalid response format: expected List but got ${json.runtimeType}');
     });
+  }
+
+  /// Fetch pending orders via analytics detail endpoint
+  Future<ApiResponse<List<OrderResponse>>> getPendingOrders() async {
+    final Map<String, dynamic> params = {'type': 'pending_orders'};
+
+    return executeRequest(() => get(AppConstants.detailedAnalyticsEndpoint, queryParameters: params), (json) {
+      if (json is List<dynamic>) {
+        return json.map((item) => OrderResponse.fromJson(item as Map<String, dynamic>)).toList();
+      }
+      throw Exception('Invalid response format: expected List but got ${json.runtimeType}');
+    });
+  }
+
+  /// Fetch pending bills via analytics detail endpoint
+  Future<ApiResponse<List<BillGetResponse>>> getPendingBills() async {
+    return _fetchAnalyticsList('pending_bills', (m) => BillGetResponse.fromJson(m));
   }
 }

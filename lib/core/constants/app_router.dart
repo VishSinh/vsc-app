@@ -25,7 +25,10 @@ import 'package:vsc_app/features/home/presentation/pages/yearly_sale_page.dart';
 import 'package:vsc_app/features/home/presentation/providers/analytics_provider.dart';
 import 'package:vsc_app/features/home/presentation/pages/low_stock_cards_page.dart';
 import 'package:vsc_app/features/home/presentation/pages/out_of_stock_cards_page.dart';
+import 'package:vsc_app/features/home/presentation/pages/medium_stock_cards_page.dart';
 import 'package:vsc_app/features/home/presentation/pages/todays_orders_page.dart';
+import 'package:vsc_app/features/home/presentation/pages/pending_orders_page.dart';
+import 'package:vsc_app/features/home/presentation/pages/pending_bills_page.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/features/administration/presentation/providers/staff_provider.dart';
 import 'package:vsc_app/features/administration/presentation/pages/audit_model_logs_page.dart';
@@ -258,6 +261,11 @@ class AppRouter {
           builder: (context, state) => ChangeNotifierProvider(create: (_) => AnalyticsProvider(), child: const LowStockCardsPage()),
         ),
         GoRoute(
+          path: RouteConstants.mediumStockCards,
+          name: RouteConstants.mediumStockCardsRouteName,
+          builder: (context, state) => ChangeNotifierProvider(create: (_) => AnalyticsProvider(), child: const MediumStockCardsPage()),
+        ),
+        GoRoute(
           path: RouteConstants.outOfStockCards,
           name: RouteConstants.outOfStockCardsRouteName,
           builder: (context, state) => ChangeNotifierProvider(create: (_) => AnalyticsProvider(), child: const OutOfStockCardsPage()),
@@ -266,6 +274,16 @@ class AppRouter {
           path: RouteConstants.todaysOrders,
           name: RouteConstants.todaysOrdersRouteName,
           builder: (context, state) => ChangeNotifierProvider(create: (_) => AnalyticsProvider(), child: const TodaysOrdersPage()),
+        ),
+        GoRoute(
+          path: RouteConstants.pendingOrders,
+          name: RouteConstants.pendingOrdersRouteName,
+          builder: (context, state) => ChangeNotifierProvider(create: (_) => AnalyticsProvider(), child: const PendingOrdersPage()),
+        ),
+        GoRoute(
+          path: RouteConstants.pendingBills,
+          name: RouteConstants.pendingBillsRouteName,
+          builder: (context, state) => ChangeNotifierProvider(create: (_) => AnalyticsProvider(), child: const PendingBillsPage()),
         ),
       ],
     );

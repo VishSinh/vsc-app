@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 import 'package:vsc_app/core/constants/app_config.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
-import 'package:vsc_app/core/utils/date_formatter.dart';
 import 'package:vsc_app/core/utils/responsive_utils.dart';
-import 'package:vsc_app/core/utils/responsive_text.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/core/widgets/pagination_widget.dart';
 import 'package:vsc_app/features/bills/presentation/provider/bill_provider.dart';
-import 'package:vsc_app/features/bills/presentation/models/bill_view_model.dart';
-import 'package:vsc_app/core/enums/bill_status.dart';
 import 'package:vsc_app/features/bills/presentation/widgets/bill_filter_dialog.dart';
+import 'package:vsc_app/features/bills/presentation/widgets/shared_bill_mobile_card.dart';
+import 'package:vsc_app/features/bills/presentation/widgets/shared_bills_desktop_table.dart';
 
 class BillSearchPage extends StatefulWidget {
   const BillSearchPage({super.key});
@@ -43,7 +42,12 @@ class _BillSearchPageState extends State<BillSearchPage> {
   Future<void> _search() async {
     final provider = context.read<BillProvider>();
     provider.setContext(context);
-    provider.setServerFilters(phone: _phoneController.text.trim());
+    final phone = _phoneController.text.trim();
+    if (!RegExp(r'^\d{10}?').hasMatch(phone) && !RegExp(r'^\d{10}?$').hasMatch(phone)) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter a valid 10-digit phone number')));
+      return;
+    }
+    provider.setServerFilters(phone: phone);
     await provider.getBills(page: 1);
   }
 
@@ -58,9 +62,10 @@ class _BillSearchPageState extends State<BillSearchPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 8),
               // Search header with responsive layout
               if (context.isDesktop) _buildDesktopSearchRow(provider) else _buildMobileSearchRow(provider),
-              SizedBox(height: AppConfig.smallPadding),
+              const SizedBox(height: 8),
               Expanded(
                 child: provider.isLoading
                     ? const LoadingWidget(message: 'Loading bills...')
@@ -104,24 +109,34 @@ class _BillSearchPageState extends State<BillSearchPage> {
           flex: 3,
           child: TextField(
             controller: _phoneController,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Phone Number',
               hintText: 'Enter customer phone number',
-              border: const OutlineInputBorder(),
-              prefixIcon: const Icon(Icons.phone),
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.phone),
             ),
             keyboardType: TextInputType.phone,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
             onSubmitted: (_) => _search(),
+            onChanged: (_) => setState(() {}),
           ),
         ),
-        SizedBox(width: AppConfig.defaultPadding),
+        const SizedBox(width: 8),
         Expanded(
           flex: 1,
           child: ElevatedButton.icon(
             onPressed: _search,
             icon: const Icon(Icons.search),
             label: const Text('Search'),
-            style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 16), minimumSize: Size(120, 56)),
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(200, 50),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              side: RegExp(r'^\d{10}$').hasMatch(_phoneController.text.trim())
+                  ? BorderSide(color: Theme.of(context).colorScheme.primary, width: 2)
+                  : null,
+              textStyle: const TextStyle(fontSize: 14),
+            ),
           ),
         ),
         const SizedBox(width: 8),
@@ -130,12 +145,15 @@ class _BillSearchPageState extends State<BillSearchPage> {
           icon: Icon(Icons.filter_list, color: provider.hasActiveFilters ? Colors.red : null),
           label: Text('Filters', style: TextStyle(color: provider.hasActiveFilters ? Colors.red : null)),
           style: ElevatedButton.styleFrom(
-            minimumSize: const Size(160, 56),
+            minimumSize: const Size(200, 50),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             side: BorderSide(color: provider.hasActiveFilters ? Colors.red : Theme.of(context).colorScheme.primary, width: 2),
+            textStyle: const TextStyle(fontSize: 14),
           ),
         ),
         if (_phoneController.text.isNotEmpty) ...[
-          SizedBox(width: AppConfig.smallPadding),
+          const SizedBox(width: 8),
           IconButton(
             tooltip: 'Clear',
             onPressed: () {
@@ -161,18 +179,20 @@ class _BillSearchPageState extends State<BillSearchPage> {
             Expanded(
               child: TextField(
                 controller: _phoneController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Phone Number',
                   hintText: 'Enter customer phone number',
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.phone),
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.phone),
                 ),
                 keyboardType: TextInputType.phone,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
                 onSubmitted: (_) => _search(),
+                onChanged: (_) => setState(() {}),
               ),
             ),
             if (_phoneController.text.isNotEmpty) ...[
-              SizedBox(width: AppConfig.smallPadding),
+              const SizedBox(width: 8),
               IconButton(
                 tooltip: 'Clear',
                 onPressed: () {
@@ -187,7 +207,7 @@ class _BillSearchPageState extends State<BillSearchPage> {
             ],
           ],
         ),
-        SizedBox(height: AppConfig.smallPadding),
+        const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
@@ -195,7 +215,12 @@ class _BillSearchPageState extends State<BillSearchPage> {
                 onPressed: _search,
                 icon: const Icon(Icons.search),
                 label: const Text('Search'),
-                style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 12)),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  side: RegExp(r'^\d{10}$').hasMatch(_phoneController.text.trim())
+                      ? BorderSide(color: Theme.of(context).colorScheme.primary, width: 2)
+                      : null,
+                ),
               ),
             ),
             const SizedBox(width: 8),
@@ -205,7 +230,7 @@ class _BillSearchPageState extends State<BillSearchPage> {
                 icon: Icon(Icons.filter_list, color: provider.hasActiveFilters ? Colors.red : null),
                 label: Text('Filters', style: TextStyle(color: provider.hasActiveFilters ? Colors.red : null)),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  minimumSize: const Size(0, 40),
                   side: BorderSide(color: provider.hasActiveFilters ? Colors.red : Theme.of(context).colorScheme.primary, width: 2),
                 ),
               ),
@@ -220,194 +245,17 @@ class _BillSearchPageState extends State<BillSearchPage> {
     return ListView.separated(
       itemCount: provider.bills.length,
       separatorBuilder: (_, __) => SizedBox(height: AppConfig.smallPadding),
-      itemBuilder: (context, index) {
-        final bill = provider.bills[index];
-        return _BillListTile(
-          bill: bill,
-          onTap: () => context.pushNamed(RouteConstants.billDetailRouteName, pathParameters: {'id': bill.id}),
-        );
-      },
+      itemBuilder: (context, index) => SharedBillMobileCard(
+        bill: provider.bills[index],
+        onTap: (bill) => context.pushNamed(RouteConstants.billDetailRouteName, pathParameters: {'id': bill.id}),
+      ),
     );
   }
 
   Widget _buildDesktopTable(BillProvider provider) {
-    const double fixedRowHeight = 65.0;
-    const double headerHeight = 50.0;
-    const double borderRadius = 12.0;
-
-    return Container(
-      height: MediaQuery.of(context).size.height,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[400]!, width: 1),
-        borderRadius: BorderRadius.circular(borderRadius),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: Column(
-          children: [
-            // Header Row
-            Container(
-              height: headerHeight,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Center(
-                      child: Text('Order Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Center(
-                      child: Text('Customer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Center(
-                      child: Text('Order Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Center(
-                      child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Center(
-                      child: Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Center(
-                      child: Text('Paid', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Center(
-                      child: Text('Pending', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Data Rows
-            Expanded(
-              child: ListView.builder(
-                itemCount: provider.bills.length,
-                itemBuilder: (context, index) {
-                  final bill = provider.bills[index];
-                  return _buildDesktopRow(bill, fixedRowHeight);
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDesktopRow(BillViewModel bill, double rowHeight) {
-    return InkWell(
-      onTap: () => context.pushNamed(RouteConstants.billDetailRouteName, pathParameters: {'id': bill.id}),
-      child: Container(
-        height: rowHeight,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: const Color(0xFF4C4B4B))),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Center(
-                child: Text(
-                  bill.orderName,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Center(
-                child: Text(
-                  bill.order.customerName,
-                  style: const TextStyle(fontSize: 13),
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Center(
-                child: Text(
-                  DateFormatter.formatDate(bill.order.orderDate),
-                  style: const TextStyle(fontSize: 13),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(color: bill.paymentStatus.getStatusColor(), borderRadius: BorderRadius.circular(12)),
-                  child: Text(
-                    bill.paymentStatus.getDisplayText(),
-                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Center(
-                child: Text(
-                  bill.summary.formattedTotalWithTax,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Center(
-                child: Text(
-                  '₹${(bill.summary.totalWithTax - bill.summary.pendingAmount).toStringAsFixed(2)}',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.green),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Center(
-                child: Text(
-                  bill.summary.pendingAmount == 0 ? '-' : bill.summary.formattedPendingAmount,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: bill.summary.pendingAmount == 0 ? Colors.white : Colors.red,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return SharedBillsDesktopTable(
+      bills: provider.bills,
+      onTapBill: (bill) => context.pushNamed(RouteConstants.billDetailRouteName, pathParameters: {'id': bill.id}),
     );
   }
 
@@ -421,63 +269,4 @@ class _BillSearchPageState extends State<BillSearchPage> {
   }
 }
 
-class _BillListTile extends StatelessWidget {
-  final BillViewModel bill;
-  final VoidCallback? onTap;
-
-  const _BillListTile({required this.bill, this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      child: ListTile(
-        onTap: onTap,
-        contentPadding: EdgeInsets.symmetric(horizontal: AppConfig.defaultPadding, vertical: 8),
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: AppConfig.accentColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-          child: Icon(Icons.receipt_long, size: 20, color: AppConfig.accentColor),
-        ),
-        title: Text(
-          bill.orderName,
-          style: ResponsiveText.getTitle(context).copyWith(fontSize: context.isMobile ? 16 : 18, fontWeight: FontWeight.w600),
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4.0),
-          child: Row(
-            children: [
-              Icon(Icons.shopping_cart, size: 16, color: Colors.grey[600]),
-              const SizedBox(width: 6),
-              Text(
-                'Items: ${bill.order.orderItems.length}',
-                style: ResponsiveText.getBody(context).copyWith(fontSize: context.isMobile ? 12 : 13, color: Colors.grey[400]),
-              ),
-            ],
-          ),
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              bill.summary.formattedTotalWithTax,
-              style: ResponsiveText.getSubtitle(context).copyWith(fontWeight: FontWeight.bold, fontSize: context.isMobile ? 14 : 16),
-            ),
-            const SizedBox(height: 4),
-            Builder(
-              builder: (context) {
-                final color = bill.paymentStatus.getStatusColor();
-                return Text(
-                  bill.paymentStatus.getDisplayText(),
-                  style: ResponsiveText.getCaption(context).copyWith(color: color, fontWeight: FontWeight.w600),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// Replaced by SharedBillMobileCard

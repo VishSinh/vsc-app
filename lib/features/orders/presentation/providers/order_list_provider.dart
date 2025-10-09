@@ -26,6 +26,7 @@ class OrderListProvider extends BaseProvider {
 
   // Server-side filters & sorting
   String? _filterCustomerId;
+  String? _filterPhone;
   bool? _filterDeliveredOrPaid;
   DateTime? _filterOrderDate; // exact
   DateTime? _filterOrderDateGte; // range start
@@ -67,6 +68,7 @@ class OrderListProvider extends BaseProvider {
   String get statusFilter => _statusFilter;
   bool get isPageLoading => _isPageLoading;
   String? get filterCustomerId => _filterCustomerId;
+  String? get filterPhone => _filterPhone;
   bool? get filterDeliveredOrPaid => _filterDeliveredOrPaid;
   DateTime? get filterOrderDate => _filterOrderDate;
   DateTime? get filterOrderDateGte => _filterOrderDateGte;
@@ -97,6 +99,7 @@ class OrderListProvider extends BaseProvider {
     return _searchQuery.isNotEmpty ||
         _statusFilter != 'all' ||
         _filterCustomerId != null ||
+        _filterPhone != null ||
         _filterDeliveredOrPaid != null ||
         _filterOrderDate != null ||
         _filterOrderDateGte != null ||
@@ -110,6 +113,7 @@ class OrderListProvider extends BaseProvider {
         page: page,
         pageSize: pageSize,
         customerId: _filterCustomerId,
+        phone: _filterPhone,
         deliveredOrPaid: _filterDeliveredOrPaid,
         orderDate: _filterOrderDate,
         orderDateGte: _filterOrderDateGte,
@@ -188,6 +192,7 @@ class OrderListProvider extends BaseProvider {
     _searchQuery = '';
     _statusFilter = 'all';
     _filterCustomerId = null;
+    _filterPhone = null;
     _filterDeliveredOrPaid = null;
     _filterOrderDate = null;
     _filterOrderDateGte = null;
@@ -200,6 +205,7 @@ class OrderListProvider extends BaseProvider {
   // Server-side filters setters
   void setServerFilters({
     String? customerId,
+    String? phone,
     bool? deliveredOrPaid,
     DateTime? orderDate,
     DateTime? orderDateGte,
@@ -208,6 +214,7 @@ class OrderListProvider extends BaseProvider {
     String? sortOrder,
   }) {
     _filterCustomerId = customerId;
+    _filterPhone = phone?.trim().isNotEmpty == true ? phone!.trim() : null;
     _filterDeliveredOrPaid = deliveredOrPaid;
     _filterOrderDate = orderDate;
     _filterOrderDateGte = orderDateGte;

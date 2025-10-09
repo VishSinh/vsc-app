@@ -171,6 +171,7 @@ class UITextConstants {
   static const String pendingOrders = 'Pending Orders';
   static const String productionJobs = 'Production Jobs';
   static const String lowStockItems = 'Low Stock Items';
+  static const String mediumStockItems = 'Medium Stock';
   static const String totalRevenue = 'Total PR';
   static const String activePartners = 'Active Partners';
   static const String todaysOrders = 'Today\'s Orders';
@@ -180,6 +181,7 @@ class UITextConstants {
   static const String monthlyGrowth = 'Monthly Growth';
   static const String monthlySale = 'Monthly Sale';
   static const String expenseLogging = 'Expense Logging';
+  static const String pending = 'Pending';
 
   // ================================ STATISTICS SUBTITLES ================================
   // static const String ordersFromLastMonth = '+12% from last month';

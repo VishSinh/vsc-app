@@ -5,6 +5,7 @@ import 'package:vsc_app/features/home/presentation/models/yearly_profit_view_mod
 import 'package:vsc_app/features/home/presentation/models/yearly_sale_view_model.dart';
 import 'package:vsc_app/features/cards/presentation/models/card_view_models.dart';
 import 'package:vsc_app/features/orders/presentation/models/order_view_models.dart';
+import 'package:vsc_app/features/bills/presentation/models/bill_view_model.dart';
 
 /// Provider for managing analytics data including yearly profit analysis
 class AnalyticsProvider extends BaseProvider {
@@ -14,15 +15,21 @@ class AnalyticsProvider extends BaseProvider {
   List<YearlyProfitViewModel>? _yearlyProfitData;
   List<YearlySaleViewModel>? _yearlySaleData;
   List<CardViewModel>? _lowStockCards;
+  List<CardViewModel>? _mediumStockCards;
   List<CardViewModel>? _outOfStockCards;
   List<OrderViewModel>? _todaysOrders;
+  List<OrderViewModel>? _pendingOrders;
+  List<BillViewModel>? _pendingBills;
 
   // Getters
   List<YearlyProfitViewModel>? get yearlyProfitData => _yearlyProfitData;
   List<YearlySaleViewModel>? get yearlySaleData => _yearlySaleData;
   List<CardViewModel>? get lowStockCards => _lowStockCards;
+  List<CardViewModel>? get mediumStockCards => _mediumStockCards;
   List<CardViewModel>? get outOfStockCards => _outOfStockCards;
   List<OrderViewModel>? get todaysOrders => _todaysOrders;
+  List<OrderViewModel>? get pendingOrders => _pendingOrders;
+  List<BillViewModel>? get pendingBills => _pendingBills;
 
   // Constructor
   AnalyticsProvider({DashboardService? dashboardService}) : _dashboardService = dashboardService ?? DashboardService() {
@@ -109,6 +116,26 @@ class AnalyticsProvider extends BaseProvider {
     );
   }
 
+  Future<void> getMediumStockCards({bool showSnackbar = false}) async {
+    AppLogger.service('AnalyticsProvider', 'Fetching medium stock cards');
+
+    await executeApiOperation(
+      apiCall: () => _dashboardService.getMediumStockCards(),
+      onSuccess: (response) {
+        if (response.data != null) {
+          _mediumStockCards = response.data!.map((r) => CardViewModel.fromApiResponse(r)).toList();
+          AppLogger.service('AnalyticsProvider', 'Medium stock cards loaded: ${_mediumStockCards?.length}');
+          notifyListeners();
+          return _mediumStockCards;
+        }
+        return null;
+      },
+      showSnackbar: showSnackbar,
+      showLoading: true,
+      errorMessage: 'Failed to load medium stock cards',
+    );
+  }
+
   /// Fetch today's orders via analytics
   /// days: number of recent days to include (1-5). Default is 1.
   Future<void> getTodaysOrders({bool showSnackbar = false, int days = 1}) async {
@@ -128,6 +155,48 @@ class AnalyticsProvider extends BaseProvider {
       showSnackbar: showSnackbar,
       showLoading: true,
       errorMessage: "Failed to load today's orders",
+    );
+  }
+
+  /// Fetch pending orders via analytics
+  Future<void> getPendingOrders({bool showSnackbar = false}) async {
+    AppLogger.service('AnalyticsProvider', 'Fetching pending orders');
+
+    await executeApiOperation(
+      apiCall: () => _dashboardService.getPendingOrders(),
+      onSuccess: (response) {
+        if (response.data != null) {
+          _pendingOrders = response.data!.map((r) => OrderViewModel.fromApiResponse(r)).toList();
+          AppLogger.service('AnalyticsProvider', 'Pending orders loaded: ${_pendingOrders?.length}');
+          notifyListeners();
+          return _pendingOrders;
+        }
+        return null;
+      },
+      showSnackbar: showSnackbar,
+      showLoading: true,
+      errorMessage: 'Failed to load pending orders',
+    );
+  }
+
+  /// Fetch pending bills via analytics
+  Future<void> getPendingBills({bool showSnackbar = false}) async {
+    AppLogger.service('AnalyticsProvider', 'Fetching pending bills');
+
+    await executeApiOperation(
+      apiCall: () => _dashboardService.getPendingBills(),
+      onSuccess: (response) {
+        if (response.data != null) {
+          _pendingBills = response.data!.map((r) => BillViewModel.fromApiResponse(r)).toList();
+          AppLogger.service('AnalyticsProvider', 'Pending bills loaded: ${_pendingBills?.length}');
+          notifyListeners();
+          return _pendingBills;
+        }
+        return null;
+      },
+      showSnackbar: showSnackbar,
+      showLoading: true,
+      errorMessage: 'Failed to load pending bills',
     );
   }
 
@@ -179,8 +248,11 @@ class AnalyticsProvider extends BaseProvider {
     _yearlyProfitData = null;
     _yearlySaleData = null;
     _lowStockCards = null;
+    _mediumStockCards = null;
     _outOfStockCards = null;
     _todaysOrders = null;
+    _pendingOrders = null;
+    _pendingBills = null;
     super.reset();
     AppLogger.service('AnalyticsProvider', 'Provider state reset');
   }

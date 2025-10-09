@@ -21,13 +21,14 @@ class TodaysOrdersPage extends StatefulWidget {
 
 class _TodaysOrdersPageState extends State<TodaysOrdersPage> {
   int _selectedDays = 1;
+  late final AnalyticsProvider _analyticsProvider;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = context.read<AnalyticsProvider>();
-      provider.setContext(context);
-      provider.getTodaysOrders(days: _selectedDays);
+      _analyticsProvider = context.read<AnalyticsProvider>();
+      _analyticsProvider.setContext(context);
+      _analyticsProvider.getTodaysOrders(days: _selectedDays);
     });
   }
 
@@ -35,7 +36,7 @@ class _TodaysOrdersPageState extends State<TodaysOrdersPage> {
 
   @override
   void dispose() {
-    context.read<AnalyticsProvider>().clearContext();
+    _analyticsProvider.clearContext();
     super.dispose();
   }
 
@@ -56,18 +57,30 @@ class _TodaysOrdersPageState extends State<TodaysOrdersPage> {
           }
 
           if (provider.errorMessage != null) {
-            return CustomErrorWidget(
-              message: provider.errorMessage!,
-              onRetry: () => provider.getTodaysOrders(days: _selectedDays),
+            return _buildRefreshPlaceholder(
+              onRefresh: () => _analyticsProvider.getTodaysOrders(days: _selectedDays),
+              child: CustomErrorWidget(
+                message: provider.errorMessage!,
+                onRetry: () => _analyticsProvider.getTodaysOrders(days: _selectedDays),
+              ),
             );
           }
 
           final orders = provider.todaysOrders ?? [];
           if (orders.isEmpty) {
-            return const EmptyStateWidget(message: 'No orders created today', icon: Icons.today_outlined);
+            return _buildRefreshPlaceholder(
+              onRefresh: () => _analyticsProvider.getTodaysOrders(days: _selectedDays),
+              child: const EmptyStateWidget(message: 'No orders created today', icon: Icons.today_outlined),
+            );
           }
 
-          return context.isDesktop ? SharedOrdersDesktopTable(orders: orders, onTapOrder: _openOrderDetail) : _buildMobileList(orders);
+          final content = context.isDesktop
+              ? SharedOrdersDesktopTable(orders: orders, onTapOrder: _openOrderDetail)
+              : _buildMobileList(orders);
+          return RefreshIndicator(
+            onRefresh: () => _analyticsProvider.getTodaysOrders(days: _selectedDays),
+            child: content,
+          );
         },
       ),
     );
@@ -130,5 +143,18 @@ class _TodaysOrdersPageState extends State<TodaysOrdersPage> {
     final orderDetailProvider = OrderDetailProvider();
     orderDetailProvider.selectOrder(order);
     context.push(RouteConstants.orderDetail.replaceAll(':id', order.id), extra: orderDetailProvider);
+  }
+
+  Widget _buildRefreshPlaceholder({required Future<void> Function() onRefresh, required Widget child}) {
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+          Center(child: child),
+        ],
+      ),
+    );
   }
 }

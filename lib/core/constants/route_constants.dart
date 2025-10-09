@@ -31,8 +31,11 @@ class RouteConstants {
   static const String yearlyProfit = '/analytics/yearly-profit';
   static const String yearlySale = '/analytics/yearly-sale';
   static const String lowStockCards = '/analytics/low-stock-cards';
+  static const String mediumStockCards = '/analytics/medium-stock-cards';
   static const String outOfStockCards = '/analytics/out-of-stock-cards';
   static const String todaysOrders = '/analytics/todays-orders';
+  static const String pendingOrders = '/analytics/pending-orders';
+  static const String pendingBills = '/analytics/pending-bills';
 
   // ================================ ROUTE NAMES ================================
   static const String loginRouteName = 'login';
@@ -65,6 +68,9 @@ class RouteConstants {
   static const String yearlyProfitRouteName = 'yearly-profit';
   static const String yearlySaleRouteName = 'yearly-sale';
   static const String lowStockCardsRouteName = 'low-stock-cards';
+  static const String mediumStockCardsRouteName = 'medium-stock-cards';
   static const String outOfStockCardsRouteName = 'out-of-stock-cards';
   static const String todaysOrdersRouteName = 'todays-orders';
+  static const String pendingOrdersRouteName = 'pending-orders';
+  static const String pendingBillsRouteName = 'pending-bills';
 }

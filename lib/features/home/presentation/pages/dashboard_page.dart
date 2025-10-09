@@ -165,6 +165,7 @@ class _DashboardPageState extends State<DashboardPage> {
               icon: Icons.pending,
               color: AppConfig.warningColor,
               subtitle: dashboard.pendingOrders > 0 ? UITextConstants.ordersRequireAttention : 'No orders require attention',
+              onTap: () => context.push(RouteConstants.pendingOrders),
               allowDoubleSpan: allowDoubleSpan,
             ),
           );
@@ -188,6 +189,18 @@ class _DashboardPageState extends State<DashboardPage> {
           tiles.add(
             _buildStatTile(
               context,
+              title: UITextConstants.mediumStockItems,
+              value: dashboard.mediumStockItems.toString(),
+              icon: Icons.inventory,
+              color: AppConfig.warningColor,
+              subtitle: 'Moderate stock level',
+              onTap: () => context.push(RouteConstants.mediumStockCards),
+              allowDoubleSpan: allowDoubleSpan,
+            ),
+          );
+          tiles.add(
+            _buildStatTile(
+              context,
               title: UITextConstants.outOfStock,
               value: dashboard.outOfStockItems.toString(),
               icon: Icons.remove_shopping_cart,
@@ -202,17 +215,6 @@ class _DashboardPageState extends State<DashboardPage> {
         }
 
         void addProduction() {
-          tiles.add(
-            _buildStatTile(
-              context,
-              title: UITextConstants.productionJobs,
-              value: (dashboard.pendingPrintingJobs + dashboard.pendingBoxJobs).toString(),
-              icon: Icons.print,
-              color: AppConfig.accentColor,
-              subtitle: UITextConstants.jobsInProgress,
-              allowDoubleSpan: allowDoubleSpan,
-            ),
-          );
           if (isMobile) {
             tiles.add(
               _buildStatTile(

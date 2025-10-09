@@ -357,7 +357,7 @@ class InventoryCardItem extends StatelessWidget {
             ),
           ),
         ),
-        if (card.quantity <= 250 && card.quantity > 50)
+        if (card.quantity <= 100 && card.quantity > 0)
           Positioned(
             top: 8,
             right: 8,
@@ -370,7 +370,7 @@ class InventoryCardItem extends StatelessWidget {
               ),
             ),
           ),
-        if (card.quantity <= 50)
+        if (card.quantity <= 0)
           Positioned(
             top: 8,
             right: 8,
@@ -438,9 +438,9 @@ class InventoryCardItem extends StatelessWidget {
   }
 
   Widget _buildStockIndicator(BuildContext context) {
-    final color = card.quantity > 250
+    final color = card.quantity > 100
         ? Colors.green
-        : card.quantity > 50
+        : card.quantity > 0
         ? Colors.orange
         : Colors.red;
 

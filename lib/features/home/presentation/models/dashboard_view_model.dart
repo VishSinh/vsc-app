@@ -3,6 +3,7 @@ import 'package:vsc_app/features/home/data/models/dashboard_response.dart';
 /// View model for dashboard statistics to be displayed in the UI
 class DashboardViewModel {
   final int lowStockItems;
+  final int mediumStockItems;
   final int outOfStockItems;
   final int totalOrdersCurrentMonth;
   final double monthlyOrderChangePercentage;
@@ -16,6 +17,7 @@ class DashboardViewModel {
 
   const DashboardViewModel({
     required this.lowStockItems,
+    required this.mediumStockItems,
     required this.outOfStockItems,
     required this.totalOrdersCurrentMonth,
     required this.monthlyOrderChangePercentage,
@@ -32,6 +34,7 @@ class DashboardViewModel {
   factory DashboardViewModel.fromResponse(DashboardResponse response) {
     return DashboardViewModel(
       lowStockItems: response.lowStockItems,
+      mediumStockItems: response.mediumStockItems,
       outOfStockItems: response.outOfStockItems,
       totalOrdersCurrentMonth: response.totalOrdersCurrentMonth,
       monthlyOrderChangePercentage: response.monthlyOrderChangePercentage,

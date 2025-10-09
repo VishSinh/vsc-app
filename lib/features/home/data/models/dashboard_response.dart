@@ -8,6 +8,9 @@ class DashboardResponse {
   @JsonKey(name: 'low_stock_items')
   final int lowStockItems;
 
+  @JsonKey(name: 'medium_stock_items')
+  final int mediumStockItems;
+
   @JsonKey(name: 'out_of_stock_items')
   final int outOfStockItems;
 
@@ -40,6 +43,7 @@ class DashboardResponse {
 
   const DashboardResponse({
     required this.lowStockItems,
+    required this.mediumStockItems,
     required this.outOfStockItems,
     required this.totalOrdersCurrentMonth,
     required this.monthlyOrderChangePercentage,

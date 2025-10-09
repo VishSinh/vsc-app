@@ -14,6 +14,7 @@ class OrderService extends ApiService {
     int page = 1,
     int pageSize = 10,
     String? customerId,
+    String? phone,
     bool? deliveredOrPaid,
     DateTime? orderDate,
     DateTime? orderDateGte,
@@ -24,6 +25,7 @@ class OrderService extends ApiService {
     final params = QueryParamsBuilder()
         .withPagination(page: page, pageSize: pageSize)
         .withString('customer_id', customerId)
+        .withString('phone', phone)
         .withBoolAsString('delivered_or_paid', deliveredOrPaid)
         .withDateFilter('order_date', exact: orderDate, gte: orderDateGte, lte: orderDateLte)
         .withSort(sortBy: sortBy, sortOrder: sortOrder)
