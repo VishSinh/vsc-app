@@ -27,6 +27,7 @@ class _BillPrintPreviewPageState extends State<BillPrintPreviewPage> {
     final provider = context.read<BillProvider>();
     await provider.getBillByBillId(billId: widget.billId);
     await provider.getPaymentsByBillId(billId: widget.billId);
+    await provider.getBillAdjustmentsByBillId(billId: widget.billId);
     // Ensure phone is fetched into cache for preview
     final bill = provider.currentBill;
     if (bill != null) {
@@ -46,6 +47,7 @@ class _BillPrintPreviewPageState extends State<BillPrintPreviewPage> {
 
           final bill = billProvider.currentBill!;
           final payments = billProvider.payments;
+          final adjustments = billProvider.adjustments;
           final customerPhone = billProvider.getCustomerPhone(bill.order.customerId);
 
           return PdfPreview(
@@ -56,6 +58,7 @@ class _BillPrintPreviewPageState extends State<BillPrintPreviewPage> {
               final Uint8List bytes = await BillPdfService.buildBillPdf(
                 bill: bill,
                 payments: payments,
+                adjustments: adjustments,
                 cardImages: billProvider.cardImages,
                 customerPhone: customerPhone,
               );

@@ -20,6 +20,11 @@ import 'package:vsc_app/features/orders/presentation/services/order_calculation_
 import 'package:vsc_app/features/home/presentation/providers/permission_provider.dart';
 import 'package:vsc_app/core/utils/image_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart';
+import 'package:android_intent_plus/android_intent.dart';
 
 class OrderDetailPage extends StatefulWidget {
   final String orderId;
@@ -268,22 +273,41 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
                           ),
                           if (phone != null) ...[
                             const SizedBox(height: 4),
-                            InkWell(
-                              onTap: () async {
-                                final url = Uri.parse('tel:$phone');
-                                if (await canLaunchUrl(url)) {
-                                  await launchUrl(url);
-                                }
-                              },
-                              child: Text(
-                                phone,
-                                style: TextStyle(
-                                  fontSize: AppConfig.fontSizeMd,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.blue,
-                                  decoration: TextDecoration.underline,
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                InkWell(
+                                  onTap: () async {
+                                    final url = Uri.parse('tel:$phone');
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url);
+                                    }
+                                  },
+                                  onLongPress: () async {
+                                    await Clipboard.setData(ClipboardData(text: phone));
+                                    if (!mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Phone number copied')));
+                                  },
+                                  child: Text(
+                                    phone,
+                                    style: TextStyle(
+                                      fontSize: AppConfig.fontSizeMd,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.blue,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  visualDensity: VisualDensity.compact,
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                                  tooltip: 'WhatsApp',
+                                  icon: const Icon(LucideIcons.messageCircle, color: Color(0xFF25D366)),
+                                  onPressed: () => _openWhatsApp(phone),
+                                ),
+                              ],
                             ),
                           ],
                         ],
@@ -761,5 +785,64 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         },
       ),
     );
+  }
+
+  Future<void> _openWhatsApp(String phone) async {
+    final normalized = _normalizePhoneForWhatsApp(phone);
+    debugPrint('[WhatsApp] platform: ${kIsWeb ? 'web' : (Platform.isAndroid ? 'android' : (Platform.isIOS ? 'ios' : 'other'))}');
+    debugPrint('[WhatsApp] input: "$phone" -> normalized: "$normalized"');
+
+    // Prefer deep link into app
+    final deepLink = Uri.parse('whatsapp://send?phone=$normalized');
+    final canDeepLink = await canLaunchUrl(deepLink);
+    debugPrint('[WhatsApp] deepLink=$deepLink canLaunch=$canDeepLink');
+    if (canDeepLink) {
+      final ok = await launchUrl(deepLink, mode: LaunchMode.externalNonBrowserApplication);
+      debugPrint('[WhatsApp] deepLink launch result=$ok');
+      if (ok) return;
+    }
+
+    // On Android, try package-targeted intent for better reliability
+    if (!kIsWeb && Platform.isAndroid) {
+      try {
+        final intent = AndroidIntent(action: 'action_view', data: 'https://wa.me/$normalized', package: 'com.whatsapp');
+        await intent.launch();
+        debugPrint('[WhatsApp] launched via Android intent');
+        return;
+      } catch (e) {
+        debugPrint('[WhatsApp] Android intent failed: $e');
+      }
+    }
+
+    // Fallback to web link (opens browser which should handoff to app if available)
+    final webLink = Uri.parse('https://wa.me/$normalized');
+    final canWeb = await canLaunchUrl(webLink);
+    debugPrint('[WhatsApp] webLink=$webLink canLaunch=$canWeb');
+    if (canWeb) {
+      final ok = await launchUrl(webLink, mode: LaunchMode.externalApplication);
+      debugPrint('[WhatsApp] webLink launch result=$ok');
+      if (ok) return;
+    }
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('WhatsApp not available')));
+  }
+
+  String _normalizePhoneForWhatsApp(String phone) {
+    final trimmed = phone.trim();
+    final digitsOnly = trimmed.replaceAll(RegExp(r'[^0-9]'), '');
+
+    // If number is 10 digits, assume India and prefix 91
+    if (digitsOnly.length == 10) {
+      return '91$digitsOnly';
+    }
+
+    // If already starts with 91 and length >= 12 (e.g., 91XXXXXXXXXX), keep as-is
+    if (digitsOnly.startsWith('91')) {
+      return digitsOnly;
+    }
+
+    // Otherwise return digits as-is (caller should ensure correct country code)
+    return digitsOnly;
   }
 }

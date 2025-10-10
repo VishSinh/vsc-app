@@ -46,12 +46,6 @@ class SharedOrdersDesktopTable extends StatelessWidget {
                   Expanded(
                     flex: 1,
                     child: Center(
-                      child: Text('Customer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: Center(
                       child: Text('Staff', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                     ),
                   ),
@@ -65,6 +59,12 @@ class SharedOrdersDesktopTable extends StatelessWidget {
                     flex: 1,
                     child: Center(
                       child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Center(
+                      child: Text('Qty', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                     ),
                   ),
                   Expanded(
@@ -129,17 +129,6 @@ class SharedOrdersDesktopTable extends StatelessWidget {
                             flex: 1,
                             child: Center(
                               child: Text(
-                                order.customerName,
-                                style: const TextStyle(fontSize: 13),
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Center(
-                              child: Text(
                                 order.staffName,
                                 style: const TextStyle(fontSize: 13),
                                 overflow: TextOverflow.ellipsis,
@@ -161,16 +150,58 @@ class SharedOrdersDesktopTable extends StatelessWidget {
                             flex: 1,
                             child: Center(
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: order.orderStatus.getStatusColor(),
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
                                   order.orderStatus.getDisplayText(),
-                                  style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600),
                                   textAlign: TextAlign.center,
                                 ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Center(
+                              child: Builder(
+                                builder: (_) {
+                                  final hasOrderItems = order.orderItems.isNotEmpty;
+                                  final hasServiceItems = order.serviceItems.isNotEmpty;
+
+                                  if (!hasOrderItems && hasServiceItems) {
+                                    return const Text(
+                                      'S',
+                                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.green),
+                                      textAlign: TextAlign.center,
+                                    );
+                                  }
+
+                                  if (hasOrderItems) {
+                                    final firstQty = order.orderItems.first.quantity;
+                                    final restCount = order.orderItems.length - 1;
+                                    if (restCount > 0) {
+                                      return Text.rich(
+                                        TextSpan(
+                                          text: '$firstQty',
+                                          style: const TextStyle(fontSize: 13),
+                                          children: [
+                                            TextSpan(
+                                              text: ' +$restCount',
+                                              style: const TextStyle(fontSize: 13, color: Colors.green, fontWeight: FontWeight.bold),
+                                            ),
+                                          ],
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      );
+                                    }
+                                    return Text('$firstQty', style: const TextStyle(fontSize: 13), textAlign: TextAlign.center);
+                                  }
+
+                                  return const Text('--', style: TextStyle(fontSize: 13), textAlign: TextAlign.center);
+                                },
                               ),
                             ),
                           ),

@@ -6,14 +6,16 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:vsc_app/features/bills/presentation/models/bill_view_model.dart';
 import 'package:vsc_app/features/bills/presentation/models/payment_view_model.dart';
 import 'package:vsc_app/features/bills/presentation/models/bill_card_view_model.dart';
+import 'package:vsc_app/features/bills/presentation/models/bill_adjustment_view_model.dart';
+import 'package:vsc_app/core/enums/bill_adjustment_type.dart';
 import 'package:vsc_app/core/enums/bill_status.dart';
-import 'package:vsc_app/core/enums/order_status.dart';
 import 'package:vsc_app/core/enums/service_type.dart';
 
 class BillPdfService {
   static Future<Uint8List> buildBillPdf({
     required BillViewModel bill,
     required List<PaymentViewModel> payments,
+    required List<BillAdjustmentViewModel> adjustments,
     required Map<String, BillCardViewModel> cardImages,
     String? customerPhone,
   }) async {
@@ -52,7 +54,7 @@ class BillPdfService {
                   pw.Text('VSC', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
                   pw.SizedBox(height: 2),
                   pw.Text('Call: 9334651144', style: pw.TextStyle(fontSize: 9, color: PdfColors.grey800)),
-                  pw.Text('Whatsapp: 9835234204', style: pw.TextStyle(fontSize: 9, color: PdfColors.grey800)),
+                  pw.Text('Whatsapp: 7004369180', style: pw.TextStyle(fontSize: 9, color: PdfColors.grey800)),
                 ],
               ),
               pw.SizedBox(width: 20),
@@ -89,7 +91,7 @@ class BillPdfService {
                 padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: pw.BoxDecoration(color: PdfColors.blue, borderRadius: pw.BorderRadius.circular(10)),
                 child: pw.Text(
-                  _billStatusDisplay(bill.paymentStatus),
+                  bill.paymentStatus.getDisplayText(),
                   style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold, fontSize: 9),
                 ),
               ),
@@ -203,7 +205,7 @@ class BillPdfService {
                     children: [
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(3),
-                        child: pw.Text(_serviceTypeDisplay(svc.serviceType, svc.serviceTypeRaw), style: baseText),
+                        child: pw.Text(svc.serviceType?.displayText ?? svc.serviceTypeRaw, style: baseText),
                       ),
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(3),
@@ -221,45 +223,111 @@ class BillPdfService {
             pw.SizedBox(height: 6),
           ],
 
-          // Payments
-          sectionTitle('Payments'),
-          if (payments.isEmpty)
-            pw.Text('No payments made yet', style: smallMuted)
-          else
-            pw.Table(
-              border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.3),
-              columnWidths: {0: const pw.FlexColumnWidth(5), 1: const pw.FlexColumnWidth(3)},
-              children: [
-                pw.TableRow(
-                  decoration: pw.BoxDecoration(color: PdfColors.grey200),
-                  children: [
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(3),
-                      child: pw.Text('Mode', style: baseText),
+          // Payments + Adjustments (side-by-side when adjustments exist)
+          ...(() {
+            pw.Widget paymentsSection() {
+              return pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  sectionTitle('Payments'),
+                  if (payments.isEmpty)
+                    pw.Text('No payments made yet', style: smallMuted)
+                  else
+                    pw.Table(
+                      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.3),
+                      columnWidths: {0: const pw.FlexColumnWidth(5), 1: const pw.FlexColumnWidth(3)},
+                      children: [
+                        pw.TableRow(
+                          decoration: pw.BoxDecoration(color: PdfColors.grey200),
+                          children: [
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.all(3),
+                              child: pw.Text('Mode', style: baseText),
+                            ),
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.all(3),
+                              child: pw.Text('Amount', style: baseText),
+                            ),
+                          ],
+                        ),
+                        ...payments.map(
+                          (p) => pw.TableRow(
+                            children: [
+                              pw.Padding(
+                                padding: const pw.EdgeInsets.all(3),
+                                child: pw.Text(p.paymentMode.name.toUpperCase(), style: baseText),
+                              ),
+                              pw.Padding(
+                                padding: const pw.EdgeInsets.all(3),
+                                child: pw.Text(currency.format(p.amount), style: baseText),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(3),
-                      child: pw.Text('Amount', style: baseText),
-                    ),
-                  ],
-                ),
-                ...payments.map(
-                  (p) => pw.TableRow(
+                ],
+              );
+            }
+
+            pw.Widget adjustmentsSection() {
+              return pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  sectionTitle('Bill Adjustments'),
+                  pw.Table(
+                    border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.3),
+                    columnWidths: {0: const pw.FlexColumnWidth(5), 1: const pw.FlexColumnWidth(3)},
                     children: [
-                      pw.Padding(
-                        padding: const pw.EdgeInsets.all(3),
-                        child: pw.Text(p.paymentMode.name.toUpperCase(), style: baseText),
+                      pw.TableRow(
+                        decoration: pw.BoxDecoration(color: PdfColors.grey200),
+                        children: [
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.all(3),
+                            child: pw.Text('Type', style: baseText),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.all(3),
+                            child: pw.Text('Amount', style: baseText),
+                          ),
+                        ],
                       ),
-                      pw.Padding(
-                        padding: const pw.EdgeInsets.all(3),
-                        child: pw.Text(currency.format(p.amount), style: baseText),
+                      ...adjustments.map(
+                        (a) => pw.TableRow(
+                          children: [
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.all(3),
+                              child: pw.Text('Discount', style: baseText),
+                            ),
+                            pw.Padding(
+                              padding: const pw.EdgeInsets.all(3),
+                              child: pw.Text(currency.format(a.amount), style: baseText),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
+                ],
+              );
+            }
+
+            if (adjustments.isEmpty) {
+              return [paymentsSection(), pw.SizedBox(height: 6)];
+            } else {
+              return [
+                pw.Row(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Expanded(child: paymentsSection()),
+                    pw.SizedBox(width: 8),
+                    pw.Expanded(child: adjustmentsSection()),
+                  ],
                 ),
-              ],
-            ),
-          pw.SizedBox(height: 6),
+                pw.SizedBox(height: 6),
+              ];
+            }
+          }()),
 
           // Summary
           sectionTitle('Bill Total'),
@@ -278,17 +346,7 @@ class BillPdfService {
     return pdf.save();
   }
 
-  static pw.TableRow _summaryRow(String label, double value, NumberFormat currency) {
-    return pw.TableRow(
-      children: [
-        pw.Padding(padding: const pw.EdgeInsets.all(6), child: pw.Text(label)),
-        pw.Padding(
-          padding: const pw.EdgeInsets.all(6),
-          child: pw.Align(alignment: pw.Alignment.centerRight, child: pw.Text(currency.format(value))),
-        ),
-      ],
-    );
-  }
+  // _summaryRow kept earlier is removed as unused to satisfy lints
 
   static pw.TableRow _summaryRowBold(String label, double value, NumberFormat currency) {
     return pw.TableRow(
@@ -334,47 +392,5 @@ class BillPdfService {
     );
   }
 
-  static String _billStatusDisplay(BillStatus status) {
-    switch (status) {
-      case BillStatus.pending:
-        return 'Pending';
-      case BillStatus.partial:
-        return 'Partial';
-      case BillStatus.paid:
-        return 'Paid';
-    }
-  }
-
-  static String _orderStatusDisplay(OrderStatus status) {
-    switch (status) {
-      case OrderStatus.confirmed:
-        return 'Confirmed';
-      case OrderStatus.inProgress:
-        return 'In Progress';
-      case OrderStatus.ready:
-        return 'Ready';
-      case OrderStatus.delivered:
-        return 'Delivered';
-      case OrderStatus.fullyPaid:
-        return 'Fully Paid';
-    }
-  }
-
-  static String _serviceTypeDisplay(ServiceType? type, String fallback) {
-    if (type == null) return fallback;
-    switch (type) {
-      case ServiceType.digitalCard:
-        return 'Digital Card';
-      case ServiceType.abhinandanPatr:
-        return 'Abhinandan Patr';
-      case ServiceType.carPoster:
-        return 'Car Poster';
-      case ServiceType.digitalVisitingCard:
-        return 'Digital Visiting Card';
-      case ServiceType.printingService:
-        return 'Printing Service';
-      case ServiceType.boxService:
-        return 'Box Service';
-    }
-  }
+  // Removed local enum display helpers in favor of enum extension helpers
 }
