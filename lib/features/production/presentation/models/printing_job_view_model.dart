@@ -8,6 +8,7 @@ class PrintingJobViewModel {
   final String? tracingStudioId;
   final String? tracingStudioName;
   final int printQuantity;
+  final int impressions;
   final String totalPrintingCost;
   final String? totalPrintingExpense;
   final String? totalTracingExpense;
@@ -22,6 +23,7 @@ class PrintingJobViewModel {
     this.tracingStudioId,
     this.tracingStudioName,
     required this.printQuantity,
+    required this.impressions,
     required this.totalPrintingCost,
     this.totalPrintingExpense,
     this.totalTracingExpense,
@@ -38,6 +40,7 @@ class PrintingJobViewModel {
       tracingStudioId: response.tracingStudioId,
       tracingStudioName: response.tracingStudioName,
       printQuantity: response.printQuantity,
+      impressions: response.impressions,
       totalPrintingCost: response.totalPrintingCost,
       totalPrintingExpense: response.totalPrintingExpense,
       totalTracingExpense: response.totalTracingExpense,

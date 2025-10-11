@@ -23,4 +23,13 @@ class PrinterViewModel {
   String toString() {
     return name;
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is PrinterViewModel && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }

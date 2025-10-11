@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:vsc_app/core/constants/app_config.dart';
-import 'package:vsc_app/core/enums/job_status.dart';
-import 'package:vsc_app/core/utils/responsive_utils.dart';
-import 'package:vsc_app/core/utils/responsive_text.dart';
-import 'package:vsc_app/core/constants/ui_text_constants.dart';
-import 'package:vsc_app/core/constants/route_constants.dart';
-import 'package:vsc_app/features/home/presentation/providers/permission_provider.dart';
+import 'package:vsc_app/core/widgets/pagination_widget.dart';
+import 'package:vsc_app/features/production/presentation/providers/production_provider.dart';
+import 'package:vsc_app/features/production/presentation/models/printer_view_model.dart';
+import 'package:vsc_app/features/production/presentation/models/tracing_studio_view_model.dart';
+import 'package:vsc_app/features/production/presentation/models/box_maker_view_model.dart';
 
 class ProductionPage extends StatefulWidget {
   const ProductionPage({super.key});
@@ -18,50 +16,20 @@ class ProductionPage extends StatefulWidget {
 
 class _ProductionPageState extends State<ProductionPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  String _searchQuery = '';
-  String _statusFilter = 'All';
-
-  // Mock production data
-  final List<Map<String, dynamic>> _printingJobs = [
-    {
-      'id': 'PRINT-001',
-      'orderId': 'ORD-001',
-      'customer': 'John Doe',
-      'type': 'Business Cards',
-      'quantity': 1000,
-      'status': JobStatus.pending,
-      'assignedTo': 'Printer-01',
-      'dueDate': '2024-01-20',
-    },
-    {
-      'id': 'PRINT-002',
-      'orderId': 'ORD-002',
-      'customer': 'Jane Smith',
-      'type': 'Flyers',
-      'quantity': 500,
-      'status': JobStatus.inProgress,
-      'assignedTo': 'Printer-02',
-      'dueDate': '2024-01-18',
-    },
-  ];
-
-  final List<Map<String, dynamic>> _boxOrders = [
-    {
-      'id': 'BOX-001',
-      'orderId': 'ORD-001',
-      'customer': 'John Doe',
-      'type': 'Cardboard Box',
-      'quantity': 5,
-      'status': JobStatus.completed,
-      'assignedTo': 'BoxMaker-01',
-      'dueDate': '2024-01-19',
-    },
-  ];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final p = context.read<ProductionProvider>();
+      p.setContext(context);
+      p.resetProduction();
+      p.fetchPrinters(page: 1, pageSize: 50);
+      p.fetchTracingStudios(page: 1, pageSize: 50);
+      p.fetchBoxMakers(page: 1, pageSize: 50);
+    });
   }
 
   @override
@@ -70,218 +38,575 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
     super.dispose();
   }
 
-  List<Map<String, dynamic>> get _filteredPrintingJobs {
-    return _printingJobs.where((job) {
-      final matchesSearch =
-          job['id'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          job['customer'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
-      final matchesStatus = _statusFilter == 'All' || job['status'].value == _statusFilter;
-      return matchesSearch && matchesStatus;
-    }).toList();
-  }
-
-  List<Map<String, dynamic>> get _filteredBoxOrders {
-    return _boxOrders.where((job) {
-      final matchesSearch =
-          job['id'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          job['customer'].toString().toLowerCase().contains(_searchQuery.toLowerCase());
-      final matchesStatus = _statusFilter == 'All' || job['status'].value == _statusFilter;
-      return matchesSearch && matchesStatus;
-    }).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Consumer<PermissionProvider>(
-      builder: (context, permissionProvider, child) {
-        return _buildProductionContent();
-      },
-    );
-  }
-
-  Widget _buildProductionContent() {
-    return Padding(
-      padding: context.responsivePadding,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Text(UITextConstants.production, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
-          // SizedBox(height: AppConfig.largePadding),
-          _buildFilters(),
-          SizedBox(height: AppConfig.defaultPadding),
-          Expanded(
-            child: Column(
-              children: [
-                TabBar(
-                  controller: _tabController,
-                  tabs: [
-                    Tab(text: 'Printing Jobs (${_filteredPrintingJobs.length})'),
-                    Tab(text: 'Box Orders (${_filteredBoxOrders.length})'),
+    return Consumer<ProductionProvider>(
+      builder: (context, p, _) {
+        return Padding(
+          padding: const EdgeInsets.all(AppConfig.defaultPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    TabBar(
+                      controller: _tabController,
+                      tabs: [
+                        Tab(text: 'Printers (${p.printers.length})'),
+                        Tab(text: 'Tracing Studio (${p.tracingStudios.length})'),
+                        Tab(text: 'Box Makers (${p.boxMakers.length})'),
+                      ],
+                    ),
+                    SizedBox(height: AppConfig.defaultPadding),
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [_buildPrintersTab(p), _buildTracingStudiosTab(p), _buildBoxMakersTab(p)],
+                      ),
+                    ),
                   ],
                 ),
-                SizedBox(height: AppConfig.defaultPadding),
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [_buildJobsList(_filteredPrintingJobs, 'Printing'), _buildJobsList(_filteredBoxOrders, 'Box')],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilters() {
-    return Row(
-      children: [
-        Expanded(
-          flex: 2,
-          child: TextField(
-            decoration: const InputDecoration(hintText: 'Search jobs...', prefixIcon: Icon(Icons.search)),
-            onChanged: (value) {
-              setState(() {
-                _searchQuery = value;
-              });
-            },
-          ),
-        ),
-        SizedBox(width: AppConfig.defaultPadding),
-        Expanded(
-          flex: 1,
-          child: DropdownButtonFormField<String>(
-            value: _statusFilter,
-            decoration: const InputDecoration(labelText: 'Status'),
-            items: ['All', ...JobStatus.values.map((s) => s.value)].map((status) => DropdownMenuItem(value: status, child: Text(status))).toList(),
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  _statusFilter = value;
-                });
-              }
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildJobsList(List<Map<String, dynamic>> jobs, String type) {
-    return context.isMobile ? _buildMobileJobsList(jobs, type) : _buildDesktopJobsTable(jobs, type);
-  }
-
-  Widget _buildMobileJobsList(List<Map<String, dynamic>> jobs, String type) {
-    return ListView.builder(
-      itemCount: jobs.length,
-      itemBuilder: (context, index) {
-        final job = jobs[index];
-        return Card(
-          margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
-          child: ListTile(
-            title: Text(job['id'], style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.bold)),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('${job['customer']} • ${job['type']}', style: ResponsiveText.getBody(context)),
-                Text('Qty: ${job['quantity']} • Due: ${job['dueDate']}', style: ResponsiveText.getCaption(context)),
-                if (job['assignedTo'] != null) Text('Assigned to: ${job['assignedTo']}', style: ResponsiveText.getCaption(context)),
-              ],
-            ),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Chip(
-                  label: Text(job['status'].value),
-                  backgroundColor: _getStatusColor(job['status']).withOpacity(0.1),
-                  labelStyle: TextStyle(color: _getStatusColor(job['status'])),
-                ),
-                const SizedBox(height: AppConfig.spacingTiny),
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    // Edit job status
-                  },
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
-  Widget _buildDesktopJobsTable(List<Map<String, dynamic>> jobs, String type) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        columns: [
-          const DataColumn(label: Text('Job ID')),
-          const DataColumn(label: Text('Order ID')),
-          const DataColumn(label: Text('Customer')),
-          const DataColumn(label: Text('Type')),
-          const DataColumn(label: Text('Quantity')),
-          const DataColumn(label: Text('Status')),
-          const DataColumn(label: Text('Assigned To')),
-          const DataColumn(label: Text('Due Date')),
-          const DataColumn(label: Text('Actions')),
-        ],
-        rows: jobs.map((job) {
-          return DataRow(
-            cells: [
-              DataCell(Text(job['id'], style: ResponsiveText.getBody(context))),
-              DataCell(Text(job['orderId'], style: ResponsiveText.getBody(context))),
-              DataCell(Text(job['customer'], style: ResponsiveText.getBody(context))),
-              DataCell(Text(job['type'], style: ResponsiveText.getBody(context))),
-              DataCell(Text(job['quantity'].toString(), style: ResponsiveText.getBody(context))),
-              DataCell(
-                Chip(
-                  label: Text(job['status'].value),
-                  backgroundColor: _getStatusColor(job['status']).withOpacity(0.1),
-                  labelStyle: TextStyle(color: _getStatusColor(job['status'])),
-                ),
-              ),
-              DataCell(Text(job['assignedTo'] ?? 'Unassigned', style: ResponsiveText.getBody(context))),
-              DataCell(Text(job['dueDate'], style: ResponsiveText.getBody(context))),
-              DataCell(
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () {
-                        // Edit job status
+  Widget _buildPrintersTab(ProductionProvider p) {
+    if (p.isLoadingPrinters) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (p.lastPrintersError != null) {
+      return _buildErrorState(p.lastPrintersError!, () => p.fetchPrinters());
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DropdownButtonFormField<PrinterViewModel>(
+          value: p.printers.contains(p.selectedPrinter) ? p.selectedPrinter : null,
+          isExpanded: true,
+          decoration: const InputDecoration(labelText: 'Select Printer'),
+          items: p.printers.map((printer) => DropdownMenuItem<PrinterViewModel>(value: printer, child: Text(printer.name))).toList(),
+          onChanged: (value) {
+            p.setSelectedPrinter(value);
+            p.fetchPrinterItems();
+          },
+        ),
+        SizedBox(height: AppConfig.defaultPadding),
+        Expanded(child: _buildPrinterItemsSection(p)),
+      ],
+    );
+  }
+
+  Widget _buildTracingStudiosTab(ProductionProvider p) {
+    if (p.isLoadingTracingStudios) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (p.lastTracingStudiosError != null) {
+      return _buildErrorState(p.lastTracingStudiosError!, () => p.fetchTracingStudios());
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DropdownButtonFormField<TracingStudioViewModel>(
+          value: p.tracingStudios.contains(p.selectedTracingStudio) ? p.selectedTracingStudio : null,
+          isExpanded: true,
+          decoration: const InputDecoration(labelText: 'Select Tracing Studio'),
+          items: p.tracingStudios.map((t) => DropdownMenuItem<TracingStudioViewModel>(value: t, child: Text(t.name))).toList(),
+          onChanged: (value) {
+            p.setSelectedTracingStudio(value);
+            p.fetchTracingItems();
+          },
+        ),
+        SizedBox(height: AppConfig.defaultPadding),
+        Expanded(child: _buildTracingItemsSection(p)),
+      ],
+    );
+  }
+
+  Widget _buildBoxMakersTab(ProductionProvider p) {
+    if (p.isLoadingBoxMakers) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (p.lastBoxMakersError != null) {
+      return _buildErrorState(p.lastBoxMakersError!, () => p.fetchBoxMakers());
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DropdownButtonFormField<BoxMakerViewModel>(
+          value: p.boxMakers.contains(p.selectedBoxMaker) ? p.selectedBoxMaker : null,
+          isExpanded: true,
+          decoration: const InputDecoration(labelText: 'Select Box Maker'),
+          items: p.boxMakers.map((b) => DropdownMenuItem<BoxMakerViewModel>(value: b, child: Text(b.name))).toList(),
+          onChanged: (value) {
+            p.setSelectedBoxMaker(value);
+            p.fetchBoxOrderItems();
+          },
+        ),
+        SizedBox(height: AppConfig.defaultPadding),
+        Expanded(child: _buildBoxOrderItemsSection(p)),
+      ],
+    );
+  }
+
+  Widget _buildPrinterItemsSection(ProductionProvider p) {
+    if (p.selectedPrinter == null) {
+      return _buildSelectionPlaceholder(title: 'Printer', name: null);
+    }
+    if (p.isLoadingPrinterItems) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (p.lastPrinterItemsError != null) {
+      return _buildErrorState(p.lastPrinterItemsError!, () => p.fetchPrinterItems());
+    }
+    if (p.printerItems.isEmpty) {
+      return const Center(child: Text('No records'));
+    }
+    const double fixedRowHeight = 65.0;
+    const double headerHeight = 50.0;
+    const double borderRadius = 12.0;
+
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        RefreshIndicator(
+          onRefresh: p.refreshPrintersTab,
+          child: Container(
+            height: MediaQuery.of(context).size.height,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey[400]!, width: 1),
+              borderRadius: BorderRadius.circular(borderRadius),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(borderRadius),
+              child: Column(
+                children: [
+                  Container(
+                    height: headerHeight,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+                    ),
+                    child: Row(
+                      children: const [
+                        Expanded(
+                          flex: 2,
+                          child: Center(
+                            child: Text('Order Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Center(
+                            child: Text('Quantity', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Center(
+                            child: Text('Impressions', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Center(
+                            child: Text('Paid', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: p.printerItems.length,
+                      itemBuilder: (context, index) {
+                        final item = p.printerItems[index];
+                        return Container(
+                          height: fixedRowHeight,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: const BoxDecoration(
+                            border: Border(bottom: BorderSide(color: Color(0xFF4C4B4B))),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: Center(
+                                  child: Text(
+                                    item.orderName,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: Center(
+                                  child: Text(
+                                    item.quantity.toString(),
+                                    style: const TextStyle(fontSize: 13),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: Center(
+                                  child: Text(
+                                    item.impressions.toString(),
+                                    style: const TextStyle(fontSize: 13),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: Center(
+                                  child: IconButton(
+                                    icon: Icon(
+                                      item.printerPaid ? Icons.check_circle : Icons.radio_button_unchecked,
+                                      color: item.printerPaid ? Colors.green : Colors.grey,
+                                    ),
+                                    tooltip: 'Toggle paid',
+                                    onPressed: () => p.togglePrinterPaid(item.printingJobId, !item.printerPaid),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
                       },
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.visibility),
-                      onPressed: () {
-                        // View job details
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        if (p.printerItemsPagination != null)
+          Positioned(
+            bottom: 10,
+            child: PaginationWidget(
+              currentPage: p.printerItemsPagination!.currentPage,
+              totalPages: p.printerItemsPagination!.totalPages,
+              hasPrevious: p.printerItemsPagination!.hasPrevious,
+              hasNext: p.printerItemsPagination!.hasNext,
+              onPreviousPage: p.loadPrevPrinterItemsPage,
+              onNextPage: p.loadNextPrinterItemsPage,
+              showTotalItems: true,
+              totalItems: p.printerItemsPagination!.totalItems,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildTracingItemsSection(ProductionProvider p) {
+    if (p.selectedTracingStudio == null) {
+      return _buildSelectionPlaceholder(title: 'Tracing Studio', name: null);
+    }
+    if (p.isLoadingTracingItems) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (p.lastTracingItemsError != null) {
+      return _buildErrorState(p.lastTracingItemsError!, () => p.fetchTracingItems());
+    }
+    if (p.tracingItems.isEmpty) {
+      return const Center(child: Text('No records'));
+    }
+    const double fixedRowHeight = 65.0;
+    const double headerHeight = 50.0;
+    const double borderRadius = 12.0;
+
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        RefreshIndicator(
+          onRefresh: p.refreshTracingTab,
+          child: Container(
+            height: MediaQuery.of(context).size.height,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey[400]!, width: 1),
+              borderRadius: BorderRadius.circular(borderRadius),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(borderRadius),
+              child: Column(
+                children: [
+                  Container(
+                    height: headerHeight,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+                    ),
+                    child: Row(
+                      children: const [
+                        Expanded(
+                          flex: 2,
+                          child: Center(
+                            child: Text('Order Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Center(
+                            child: Text('Quantity', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Center(
+                            child: Text('Paid', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: p.tracingItems.length,
+                      itemBuilder: (context, index) {
+                        final item = p.tracingItems[index];
+                        return Container(
+                          height: fixedRowHeight,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: const BoxDecoration(
+                            border: Border(bottom: BorderSide(color: Color(0xFF4C4B4B))),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: Center(
+                                  child: Text(
+                                    item.orderName,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: Center(
+                                  child: Text(
+                                    item.quantity.toString(),
+                                    style: const TextStyle(fontSize: 13),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: Center(
+                                  child: IconButton(
+                                    icon: Icon(
+                                      item.tracingStudioPaid ? Icons.check_circle : Icons.radio_button_unchecked,
+                                      color: item.tracingStudioPaid ? Colors.green : Colors.grey,
+                                    ),
+                                    tooltip: 'Toggle paid',
+                                    onPressed: () => p.toggleTracingPaid(item.printingJobId, !item.tracingStudioPaid),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
                       },
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          );
-        }).toList(),
+            ),
+          ),
+        ),
+        if (p.tracingItemsPagination != null)
+          Positioned(
+            bottom: 10,
+            child: PaginationWidget(
+              currentPage: p.tracingItemsPagination!.currentPage,
+              totalPages: p.tracingItemsPagination!.totalPages,
+              hasPrevious: p.tracingItemsPagination!.hasPrevious,
+              hasNext: p.tracingItemsPagination!.hasNext,
+              onPreviousPage: p.loadPrevTracingItemsPage,
+              onNextPage: p.loadNextTracingItemsPage,
+              showTotalItems: true,
+              totalItems: p.tracingItemsPagination!.totalItems,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildBoxOrderItemsSection(ProductionProvider p) {
+    if (p.selectedBoxMaker == null) {
+      return _buildSelectionPlaceholder(title: 'Box Maker', name: null);
+    }
+    if (p.isLoadingBoxOrderItems) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (p.lastBoxOrderItemsError != null) {
+      return _buildErrorState(p.lastBoxOrderItemsError!, () => p.fetchBoxOrderItems());
+    }
+    if (p.boxOrderItems.isEmpty) {
+      return const Center(child: Text('No records'));
+    }
+    const double fixedRowHeight = 65.0;
+    const double headerHeight = 50.0;
+    const double borderRadius = 12.0;
+
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        RefreshIndicator(
+          onRefresh: p.refreshBoxMakersTab,
+          child: Container(
+            height: MediaQuery.of(context).size.height,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey[400]!, width: 1),
+              borderRadius: BorderRadius.circular(borderRadius),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(borderRadius),
+              child: Column(
+                children: [
+                  Container(
+                    height: headerHeight,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+                    ),
+                    child: Row(
+                      children: const [
+                        Expanded(
+                          flex: 2,
+                          child: Center(
+                            child: Text('Order Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Center(
+                            child: Text('Quantity', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Center(
+                            child: Text('Paid', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: p.boxOrderItems.length,
+                      itemBuilder: (context, index) {
+                        final item = p.boxOrderItems[index];
+                        return Container(
+                          height: fixedRowHeight,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: const BoxDecoration(
+                            border: Border(bottom: BorderSide(color: Color(0xFF4C4B4B))),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: Center(
+                                  child: Text(
+                                    item.orderName,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: Center(
+                                  child: Text(
+                                    item.quantity.toString(),
+                                    style: const TextStyle(fontSize: 13),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: Center(
+                                  child: IconButton(
+                                    icon: Icon(
+                                      item.boxMakerPaid ? Icons.check_circle : Icons.radio_button_unchecked,
+                                      color: item.boxMakerPaid ? Colors.green : Colors.grey,
+                                    ),
+                                    tooltip: 'Toggle paid',
+                                    onPressed: () => p.toggleBoxMakerPaid(item.boxOrderId, !item.boxMakerPaid),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        if (p.boxOrderItemsPagination != null)
+          Positioned(
+            bottom: 10,
+            child: PaginationWidget(
+              currentPage: p.boxOrderItemsPagination!.currentPage,
+              totalPages: p.boxOrderItemsPagination!.totalPages,
+              hasPrevious: p.boxOrderItemsPagination!.hasPrevious,
+              hasNext: p.boxOrderItemsPagination!.hasNext,
+              onPreviousPage: p.loadPrevBoxOrderItemsPage,
+              onNextPage: p.loadNextBoxOrderItemsPage,
+              showTotalItems: true,
+              totalItems: p.boxOrderItemsPagination!.totalItems,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSelectionPlaceholder({required String title, String? name}) {
+    final hasSelection = name != null && name.isNotEmpty;
+    return Card(
+      child: Center(
+        child: Text(
+          hasSelection
+              ? 'Selected $title: $name\n\nTable placeholder — data API to be wired later.'
+              : 'Select a $title to view its data here',
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }
 
-  Color _getStatusColor(JobStatus status) {
-    switch (status) {
-      case JobStatus.pending:
-        return AppConfig.warningColor;
-      case JobStatus.inProgress:
-        return AppConfig.accentColor;
-      case JobStatus.completed:
-        return AppConfig.successColor;
-      case JobStatus.failed:
-        return AppConfig.errorColor;
-      case JobStatus.cancelled:
-        return AppConfig.grey400;
-    }
+  Widget _buildErrorState(String message, Future<void> Function() onRetry) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(message, textAlign: TextAlign.center),
+          SizedBox(height: AppConfig.smallPadding),
+          ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
+        ],
+      ),
+    );
   }
 }

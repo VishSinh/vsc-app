@@ -143,9 +143,9 @@ class NavigationItems {
       destinations.add(const NavigationDestination(icon: Icon(Icons.inventory), label: UITextConstants.inventory));
     }
 
-    // if (canManageProduction) {
-    //   destinations.add(const NavigationDestination(icon: Icon(Icons.print), label: UITextConstants.production));
-    // }
+    if (canViewProduction) {
+      destinations.add(const NavigationDestination(icon: Icon(Icons.print), label: UITextConstants.production));
+    }
 
     // if (canManageVendors) {
     //   destinations.add(const NavigationDestination(icon: Icon(Icons.people), label: UITextConstants.vendors));

@@ -17,6 +17,7 @@ import 'package:vsc_app/features/orders/presentation/providers/order_list_provid
 import 'package:vsc_app/features/bills/presentation/provider/bill_provider.dart';
 import 'package:vsc_app/core/providers/navigation_provider.dart';
 import 'package:vsc_app/features/cards/presentation/providers/card_list_provider.dart';
+import 'package:vsc_app/features/production/presentation/providers/production_provider.dart';
 import 'package:vsc_app/core/widgets/global_floating_calculator.dart';
 
 /// Configure full screen mode for tablets (immersive experience like games)
@@ -80,6 +81,7 @@ class VSCApp extends StatelessWidget {
       ChangeNotifierProvider(create: (context) => NavigationProvider()),
       ChangeNotifierProvider(create: (context) => OrderListProvider()),
       ChangeNotifierProvider(create: (context) => CardListProvider()),
+      ChangeNotifierProvider(create: (context) => ProductionProvider()),
       ChangeNotifierProvider(create: (context) => OrderCreateProvider()),
     ],
     child: AuthInitializer(child: _buildApp()),

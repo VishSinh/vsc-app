@@ -44,6 +44,8 @@ class AppConstants {
   // Production
   static const String boxOrdersEndpoint = '/box-orders/';
   static const String printingJobsEndpoint = '/printing-jobs/';
+  static const String printingEndpoint = '/printing/';
+  static const String tracingEndpoint = '/tracing/';
   static const String printersEndpoint = '/printers/';
   static const String tracingStudiosEndpoint = '/tracing-studios/';
   static const String boxMakersEndpoint = '/box-makers/';

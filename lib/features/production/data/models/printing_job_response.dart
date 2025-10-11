@@ -17,6 +17,8 @@ class PrintingJobResponse {
   final String? tracingStudioName;
   @JsonKey(name: 'print_quantity')
   final int printQuantity;
+  @JsonKey(name: 'impressions')
+  final int impressions;
   @JsonKey(name: 'total_printing_cost')
   final String totalPrintingCost;
   @JsonKey(name: 'total_printing_expense')
@@ -36,6 +38,7 @@ class PrintingJobResponse {
     this.tracingStudioId,
     this.tracingStudioName,
     required this.printQuantity,
+    required this.impressions,
     required this.totalPrintingCost,
     this.totalPrintingExpense,
     this.totalTracingExpense,

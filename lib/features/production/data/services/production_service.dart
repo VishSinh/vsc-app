@@ -7,6 +7,9 @@ import 'package:vsc_app/features/production/data/models/tracing_studio_response.
 import 'package:vsc_app/features/production/data/models/box_maker_response.dart';
 import 'package:vsc_app/core/services/base_service.dart';
 import 'package:vsc_app/core/constants/app_constants.dart';
+import 'package:vsc_app/features/production/data/models/box_order_table_item.dart';
+import 'package:vsc_app/features/production/data/models/printing_table_item.dart';
+import 'package:vsc_app/features/production/data/models/tracing_table_item.dart';
 
 class ProductionService extends ApiService {
   /// Update box order status and details
@@ -18,7 +21,10 @@ class ProductionService extends ApiService {
   }
 
   /// Update printing job status and details
-  Future<ApiResponse<MessageData>> updatePrintingJob({required String printingJobId, required PrintingJobUpdateRequest request}) async {
+  Future<ApiResponse<MessageData>> updatePrintingJob({
+    required String printingJobId,
+    required PrintingJobUpdateRequest request,
+  }) async {
     return await executeRequest(
       () => patch('${AppConstants.printingJobsEndpoint}$printingJobId/', data: request.toJson()),
       (json) => MessageData.fromJson(json as Map<String, dynamic>),
@@ -83,5 +89,95 @@ class ProductionService extends ApiService {
       }
       throw Exception('Invalid response format: expected List but got ${json.runtimeType}');
     });
+  }
+
+  /// Get printing table items by printer id
+  Future<ApiResponse<List<PrintingTableItem>>> getPrintingItemsByPrinter({
+    required String printerId,
+    int page = 1,
+    int pageSize = 10,
+  }) async {
+    return await executeRequest(
+      () => get(AppConstants.printingEndpoint, queryParameters: {'printer_id': printerId, 'page': page, 'page_size': pageSize}),
+      (json) {
+        if (json is List<dynamic>) {
+          try {
+            return json.map((item) => PrintingTableItem.fromJson(item as Map<String, dynamic>)).toList();
+          } catch (e) {
+            throw Exception('Failed to parse printing items: $e');
+          }
+        }
+        throw Exception('Invalid response format: expected List but got ${json.runtimeType}');
+      },
+    );
+  }
+
+  /// Get tracing table items by tracing studio id
+  Future<ApiResponse<List<TracingTableItem>>> getTracingItemsByStudio({
+    required String tracingStudioId,
+    int page = 1,
+    int pageSize = 10,
+  }) async {
+    return await executeRequest(
+      () => get(
+        AppConstants.tracingEndpoint,
+        queryParameters: {'tracing_studio_id': tracingStudioId, 'page': page, 'page_size': pageSize},
+      ),
+      (json) {
+        if (json is List<dynamic>) {
+          try {
+            return json.map((item) => TracingTableItem.fromJson(item as Map<String, dynamic>)).toList();
+          } catch (e) {
+            throw Exception('Failed to parse tracing items: $e');
+          }
+        }
+        throw Exception('Invalid response format: expected List but got ${json.runtimeType}');
+      },
+    );
+  }
+
+  /// Get box order table items by box maker id
+  Future<ApiResponse<List<BoxOrderTableItem>>> getBoxOrdersByBoxMaker({
+    required String boxMakerId,
+    int page = 1,
+    int pageSize = 10,
+  }) async {
+    return await executeRequest(
+      () => get(AppConstants.boxOrdersEndpoint, queryParameters: {'box_maker_id': boxMakerId, 'page': page, 'page_size': pageSize}),
+      (json) {
+        if (json is List<dynamic>) {
+          try {
+            return json.map((item) => BoxOrderTableItem.fromJson(item as Map<String, dynamic>)).toList();
+          } catch (e) {
+            throw Exception('Failed to parse box orders: $e');
+          }
+        }
+        throw Exception('Invalid response format: expected List but got ${json.runtimeType}');
+      },
+    );
+  }
+
+  /// Toggle paid status for a printing job
+  Future<ApiResponse<MessageData>> togglePrinterPaid({required String printingJobId, required bool paid}) async {
+    return await executeRequest(
+      () => patch('${AppConstants.printingEndpoint}$printingJobId/', data: {'printer_paid': paid}),
+      (json) => MessageData.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  /// Toggle paid status for a tracing studio entry (on printing job)
+  Future<ApiResponse<MessageData>> toggleTracingPaid({required String printingJobId, required bool paid}) async {
+    return await executeRequest(
+      () => patch('${AppConstants.tracingEndpoint}$printingJobId/', data: {'tracing_studio_paid': paid}),
+      (json) => MessageData.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
+  /// Toggle paid status for a box order
+  Future<ApiResponse<MessageData>> toggleBoxMakerPaid({required String boxOrderId, required bool paid}) async {
+    return await executeRequest(
+      () => patch('${AppConstants.boxOrdersEndpoint}$boxOrderId/', data: {'box_maker_paid': paid}),
+      (json) => MessageData.fromJson(json as Map<String, dynamic>),
+    );
   }
 }

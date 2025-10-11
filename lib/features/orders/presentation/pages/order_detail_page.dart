@@ -642,6 +642,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
           ),
           SizedBox(height: AppConfig.smallPadding),
           _buildPrintingInfoRow('Quantity', '${job.printQuantity}'),
+          _buildPrintingInfoRow('Impressions', '${job.impressions}'),
           _buildPrintingInfoRow('Cost', '₹${job.totalPrintingCost}'),
           _buildPrintingInfoRow('Printing Expense', job.totalPrintingExpense == null ? 'Not added' : '₹${job.totalPrintingExpense}'),
           _buildPrintingInfoRow('Tracing Expense', job.totalTracingExpense == null ? 'Not added' : '₹${job.totalTracingExpense}'),
@@ -778,6 +779,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         currentTotalTracingExpense: job.totalTracingExpense ?? '',
         currentPrintingStatus: job.printingStatus,
         currentPrintQuantity: job.printQuantity,
+        currentImpressions: job.impressions,
         currentEstimatedCompletion: job.estimatedCompletion?.toIso8601String(),
         onSuccess: () {
           // Reload order details after successful update

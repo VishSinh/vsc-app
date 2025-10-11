@@ -7,6 +7,7 @@ class PrintingJobEditFormProvider extends ChangeNotifier {
   late PrintingJobUpdateFormModel _formModel;
   final TextEditingController totalPrintingCostController = TextEditingController();
   final TextEditingController printQuantityController = TextEditingController();
+  final TextEditingController impressionsController = TextEditingController();
   final TextEditingController totalPrintingExpenseController = TextEditingController();
   final TextEditingController totalTracingExpenseController = TextEditingController();
 
@@ -20,6 +21,7 @@ class PrintingJobEditFormProvider extends ChangeNotifier {
     required String currentTotalTracingExpense,
     required String currentPrintingStatus,
     required int currentPrintQuantity,
+    required int currentImpressions,
     String? currentEstimatedCompletion,
   }) {
     _formModel = PrintingJobUpdateFormModel.fromCurrentData(
@@ -30,12 +32,14 @@ class PrintingJobEditFormProvider extends ChangeNotifier {
       totalTracingExpense: currentTotalTracingExpense,
       printingStatus: currentPrintingStatus,
       printQuantity: currentPrintQuantity,
+      impressions: currentImpressions,
       estimatedCompletion: currentEstimatedCompletion,
     );
 
     // Set initial text for text controllers
     totalPrintingCostController.text = _formModel.currentTotalPrintingCost ?? '';
     printQuantityController.text = _formModel.currentPrintQuantity?.toString() ?? '';
+    impressionsController.text = _formModel.currentImpressions?.toString() ?? '';
     totalPrintingExpenseController.text = _formModel.currentTotalPrintingExpense ?? '';
     totalTracingExpenseController.text = _formModel.currentTotalTracingExpense ?? '';
   }
@@ -75,6 +79,15 @@ class PrintingJobEditFormProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateImpressions(String value) {
+    final parsed = int.tryParse(value);
+    _formModel.currentImpressions = (parsed == null || parsed < 1) ? 1 : parsed;
+    if (impressionsController.text != _formModel.currentImpressions?.toString()) {
+      impressionsController.text = _formModel.currentImpressions?.toString() ?? '';
+    }
+    notifyListeners();
+  }
+
   void updateEstimatedCompletion(DateTime? date, TimeOfDay? time) {
     if (date != null && time != null) {
       _formModel.currentEstimatedCompletion = DateTime(date.year, date.month, date.day, time.hour, time.minute);
@@ -86,6 +99,7 @@ class PrintingJobEditFormProvider extends ChangeNotifier {
   void dispose() {
     totalPrintingCostController.dispose();
     printQuantityController.dispose();
+    impressionsController.dispose();
     super.dispose();
   }
 }

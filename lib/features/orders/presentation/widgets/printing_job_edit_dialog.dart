@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 import 'package:vsc_app/core/enums/printing_status.dart';
 import 'package:vsc_app/core/widgets/shared_widgets.dart';
 import 'package:vsc_app/features/production/presentation/models/printing_job_update_form_model.dart';
@@ -18,6 +19,7 @@ class PrintingJobEditDialog extends StatelessWidget {
   final String currentTotalTracingExpense;
   final String currentPrintingStatus;
   final int currentPrintQuantity;
+  final int currentImpressions;
   final String? currentEstimatedCompletion;
   final VoidCallback onSuccess;
 
@@ -31,6 +33,7 @@ class PrintingJobEditDialog extends StatelessWidget {
     required this.currentTotalTracingExpense,
     required this.currentPrintingStatus,
     required this.currentPrintQuantity,
+    required this.currentImpressions,
     this.currentEstimatedCompletion,
     required this.onSuccess,
   });
@@ -48,6 +51,7 @@ class PrintingJobEditDialog extends StatelessWidget {
           currentTotalTracingExpense: currentTotalTracingExpense,
           currentPrintingStatus: currentPrintingStatus,
           currentPrintQuantity: currentPrintQuantity,
+          currentImpressions: currentImpressions,
           currentEstimatedCompletion: currentEstimatedCompletion,
         );
         return provider;
@@ -126,7 +130,7 @@ class PrintingJobEditDialog extends StatelessWidget {
                                   _buildTotalTracingExpenseSection(context, formProvider),
                                 ],
                                 const SizedBox(height: 16),
-                                _buildPrintQuantitySection(context, formProvider),
+                                _buildPrintQuantityAndImpressionsRow(context, formProvider),
                                 const SizedBox(height: 16),
                                 _buildEstimatedCompletionSection(context, formProvider),
                                 const SizedBox(height: 24),
@@ -296,18 +300,97 @@ class PrintingJobEditDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildPrintQuantitySection(BuildContext context, PrintingJobEditFormProvider formProvider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildPrintQuantityAndImpressionsRow(BuildContext context, PrintingJobEditFormProvider formProvider) {
+    return Row(
       children: [
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: formProvider.printQuantityController,
-          decoration: const InputDecoration(labelText: 'Print Quantity', border: OutlineInputBorder()),
-          keyboardType: TextInputType.number,
-          onChanged: (value) {
-            formProvider.updatePrintQuantity(value);
-          },
+        Flexible(
+          flex: 6, // ~60%
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: formProvider.printQuantityController,
+                decoration: const InputDecoration(labelText: 'Print Quantity', border: OutlineInputBorder()),
+                keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  formProvider.updatePrintQuantity(value);
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 12),
+        Flexible(
+          flex: 4, // ~40%
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 8),
+              InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Impressions',
+                  border: const OutlineInputBorder(),
+                  enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.green.withOpacity(0.6))),
+                  focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.green, width: 2)),
+                  isDense: true,
+                ),
+                child: SizedBox(
+                  height: 40,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: formProvider.impressionsController,
+                          decoration: const InputDecoration(border: InputBorder.none, isDense: true),
+                          keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          textAlign: TextAlign.center,
+                          onChanged: (value) {
+                            formProvider.updateImpressions(value);
+                          },
+                        ),
+                      ),
+                      Container(
+                        width: 1,
+                        height: double.infinity,
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        color: Colors.grey.withOpacity(0.3),
+                      ),
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                        icon: const Icon(Icons.remove),
+                        onPressed: () {
+                          final current = formProvider.formModel.currentImpressions ?? 1;
+                          final next = current > 1 ? current - 1 : 1;
+                          formProvider.updateImpressions(next.toString());
+                        },
+                      ),
+                      Container(
+                        width: 1,
+                        height: double.infinity,
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        color: Colors.grey.withOpacity(0.3),
+                      ),
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          final current = formProvider.formModel.currentImpressions ?? 1;
+                          final next = current + 1;
+                          formProvider.updateImpressions(next.toString());
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

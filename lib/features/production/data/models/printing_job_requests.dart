@@ -26,6 +26,9 @@ class PrintingJobUpdateRequest {
   @JsonKey(name: 'print_quantity')
   final int? printQuantity;
 
+  @JsonKey(name: 'impressions')
+  final int? impressions;
+
   @JsonKey(name: 'estimated_completion')
   final String? estimatedCompletion;
 
@@ -37,6 +40,7 @@ class PrintingJobUpdateRequest {
     this.totalTracingExpense,
     this.printingStatus,
     this.printQuantity,
+    this.impressions,
     this.estimatedCompletion,
   });
 

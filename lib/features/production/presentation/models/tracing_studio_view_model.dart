@@ -23,4 +23,13 @@ class TracingStudioViewModel {
   String toString() {
     return name;
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is TracingStudioViewModel && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }

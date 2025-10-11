@@ -10,6 +10,7 @@ class PrintingJobUpdateFormModel {
   String? totalTracingExpense;
   PrintingStatus? printingStatus;
   int? printQuantity;
+  int? impressions;
   DateTime? estimatedCompletion;
 
   // Current values
@@ -20,6 +21,7 @@ class PrintingJobUpdateFormModel {
   String? currentTotalTracingExpense;
   PrintingStatus? currentPrintingStatus;
   int? currentPrintQuantity;
+  int? currentImpressions;
   DateTime? currentEstimatedCompletion;
 
   factory PrintingJobUpdateFormModel.fromCurrentData({
@@ -30,6 +32,7 @@ class PrintingJobUpdateFormModel {
     String? totalTracingExpense,
     String? printingStatus,
     int? printQuantity,
+    int? impressions,
     String? estimatedCompletion,
   }) {
     final model = PrintingJobUpdateFormModel._();
@@ -40,6 +43,7 @@ class PrintingJobUpdateFormModel {
     model.totalTracingExpense = totalTracingExpense;
     model.printingStatus = PrintingStatusExtension.fromApiString(printingStatus);
     model.printQuantity = printQuantity;
+    model.impressions = impressions;
     model.estimatedCompletion = estimatedCompletion != null ? DateTime.tryParse(estimatedCompletion) : null;
 
     // Initialize current values with original values
@@ -50,6 +54,7 @@ class PrintingJobUpdateFormModel {
     model.currentTotalTracingExpense = model.totalTracingExpense;
     model.currentPrintingStatus = model.printingStatus;
     model.currentPrintQuantity = model.printQuantity;
+    model.currentImpressions = model.impressions;
     model.currentEstimatedCompletion = model.estimatedCompletion;
 
     return model;
@@ -65,6 +70,7 @@ class PrintingJobUpdateFormModel {
         _isValueChanged(totalTracingExpense, currentTotalTracingExpense) ||
         _isValueChanged(printingStatus, currentPrintingStatus) ||
         _isValueChanged(printQuantity, currentPrintQuantity) ||
+        _isValueChanged(impressions, currentImpressions) ||
         _isValueChanged(estimatedCompletion, currentEstimatedCompletion);
   }
 
@@ -104,6 +110,11 @@ class PrintingJobUpdateFormModel {
 
     if (_isValueChanged(printQuantity, currentPrintQuantity)) {
       request['print_quantity'] = currentPrintQuantity;
+      hasAnyChanges = true;
+    }
+
+    if (_isValueChanged(impressions, currentImpressions)) {
+      request['impressions'] = currentImpressions;
       hasAnyChanges = true;
     }
 
