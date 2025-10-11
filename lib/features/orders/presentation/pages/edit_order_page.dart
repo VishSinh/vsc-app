@@ -35,9 +35,11 @@ class _EditOrderPageState extends State<EditOrderPage> {
   late final OrderDetailProvider _orderProvider;
 
   final TextEditingController _specialInstructionController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _deliveryDateController = TextEditingController();
   final TextEditingController _barcodeController = TextEditingController();
   OrderStatus? _selectedStatus;
+  DateTime? _selectedDeliveryDate;
 
   // Form state for updates
   final OrderUpdateFormModel _updateForm = OrderUpdateFormModel(
@@ -71,6 +73,34 @@ class _EditOrderPageState extends State<EditOrderPage> {
     return controller;
   }
 
+  String _formatDisplayDate(DateTime dateTime) {
+    // Display as YYYY-MM-DD HH:mm
+    final two = (int v) => v.toString().padLeft(2, '0');
+    return '${dateTime.year}-${two(dateTime.month)}-${two(dateTime.day)} ${two(dateTime.hour)}:${two(dateTime.minute)}';
+  }
+
+  Future<void> _pickDeliveryDateTime() async {
+    final now = DateTime.now();
+    final initialDate = _selectedDeliveryDate ?? now;
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(now.year - 2),
+      lastDate: DateTime(now.year + 5),
+    );
+    if (pickedDate == null) return;
+
+    final initialTime = TimeOfDay.fromDateTime(_selectedDeliveryDate ?? now);
+    final pickedTime = await showTimePicker(context: context, initialTime: initialTime);
+    if (pickedTime == null) return;
+
+    final combined = DateTime(pickedDate.year, pickedDate.month, pickedDate.day, pickedTime.hour, pickedTime.minute);
+    setState(() {
+      _selectedDeliveryDate = combined;
+      _deliveryDateController.text = _formatDisplayDate(combined);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -85,6 +115,7 @@ class _EditOrderPageState extends State<EditOrderPage> {
   @override
   void dispose() {
     _specialInstructionController.dispose();
+    _nameController.dispose();
     _deliveryDateController.dispose();
     _barcodeController.dispose();
     _svcQtyController.dispose();
@@ -106,8 +137,10 @@ class _EditOrderPageState extends State<EditOrderPage> {
   void _prefillFromOrder() {
     final order = _orderProvider.currentOrder;
     if (order == null) return;
+    _nameController.text = order.name;
     _specialInstructionController.text = order.specialInstruction;
-    _deliveryDateController.text = order.deliveryDate.toIso8601String();
+    _selectedDeliveryDate = order.deliveryDate;
+    _deliveryDateController.text = _formatDisplayDate(order.deliveryDate);
     _selectedStatus = order.orderStatus;
     setState(() {});
   }
@@ -174,8 +207,9 @@ class _EditOrderPageState extends State<EditOrderPage> {
   }
 
   Future<void> _submitUpdate() async {
+    _updateForm.name = _nameController.text;
     _updateForm.specialInstruction = _specialInstructionController.text;
-    _updateForm.deliveryDate = _deliveryDateController.text.isEmpty ? null : _deliveryDateController.text;
+    _updateForm.deliveryDate = _selectedDeliveryDate?.toIso8601String();
     _updateForm.orderStatus = _selectedStatus;
 
     final validation = _updateForm.validate();
@@ -256,6 +290,11 @@ class _EditOrderPageState extends State<EditOrderPage> {
           children: [
             Text('Order Info', style: ResponsiveText.getTitle(context)),
             SizedBox(height: AppConfig.defaultPadding),
+            TextFormField(
+              controller: _nameController,
+              decoration: const InputDecoration(labelText: 'Order Name', border: OutlineInputBorder()),
+            ),
+            SizedBox(height: AppConfig.defaultPadding),
 
             DropdownButtonFormField<OrderStatus>(
               value: _selectedStatus,
@@ -266,11 +305,28 @@ class _EditOrderPageState extends State<EditOrderPage> {
             SizedBox(height: AppConfig.defaultPadding),
             TextFormField(
               controller: _deliveryDateController,
-              decoration: const InputDecoration(
-                labelText: 'Delivery Date (ISO)',
-                hintText: 'YYYY-MM-DDTHH:mm:ssZ',
-                border: OutlineInputBorder(),
+              readOnly: true,
+              decoration: InputDecoration(
+                labelText: 'Delivery Date',
+                hintText: 'Pick date & time',
+                border: const OutlineInputBorder(),
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_selectedDeliveryDate != null)
+                      IconButton(
+                        tooltip: 'Clear',
+                        icon: const Icon(Icons.clear),
+                        onPressed: () => setState(() {
+                          _selectedDeliveryDate = null;
+                          _deliveryDateController.clear();
+                        }),
+                      ),
+                    IconButton(tooltip: 'Pick Date', icon: const Icon(Icons.calendar_today), onPressed: _pickDeliveryDateTime),
+                  ],
+                ),
               ),
+              onTap: _pickDeliveryDateTime,
             ),
             SizedBox(height: AppConfig.defaultPadding),
             TextFormField(

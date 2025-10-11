@@ -6,3 +6,5 @@ export 'image_display.dart';
 export 'order_item_card.dart';
 export 'order_item_entry_form.dart';
 export 'order_item_list.dart';
+export 'order_items_compact_table.dart';
+export 'service_items_compact_table.dart';

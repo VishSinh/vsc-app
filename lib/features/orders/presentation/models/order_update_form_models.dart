@@ -8,6 +8,7 @@ import 'package:vsc_app/features/orders/presentation/models/service_item_form_mo
 
 /// Form model for updating an order
 class OrderUpdateFormModel {
+  String? name;
   OrderStatus? orderStatus;
   String? deliveryDate; // ISO-8601 string
   String? specialInstruction;
@@ -31,6 +32,7 @@ class OrderUpdateFormModel {
   List<String>? removeServiceItemIds;
 
   OrderUpdateFormModel({
+    this.name,
     this.orderStatus,
     this.deliveryDate,
     this.specialInstruction,
@@ -155,6 +157,7 @@ class OrderUpdateFormModel {
     final addServiceItemModels = addServiceItems?.map((item) => _mapCreationToAddServiceApiModel(item)).toList();
 
     return UpdateOrderRequest(
+      name: name?.trim().isEmpty == true ? null : name,
       orderStatus: orderStatus?.toApiString(),
       deliveryDate: deliveryDate,
       specialInstruction: specialInstruction,
@@ -192,6 +195,7 @@ class OrderUpdateFormModel {
 
   /// Create a copy with updated values
   OrderUpdateFormModel copyWith({
+    String? name,
     OrderStatus? orderStatus,
     String? deliveryDate,
     String? specialInstruction,
@@ -203,6 +207,7 @@ class OrderUpdateFormModel {
     List<String>? removeServiceItemIds,
   }) {
     return OrderUpdateFormModel(
+      name: name ?? this.name,
       orderStatus: orderStatus ?? this.orderStatus,
       deliveryDate: deliveryDate ?? this.deliveryDate,
       specialInstruction: specialInstruction ?? this.specialInstruction,

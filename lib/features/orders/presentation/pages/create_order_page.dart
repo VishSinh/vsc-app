@@ -40,6 +40,10 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
   final TextEditingController _svcExpenseController = TextEditingController();
   final TextEditingController _svcDescController = TextEditingController();
 
+  // Scrolling and focus helpers
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _reviewButtonKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -56,6 +60,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
     _svcCostController.dispose();
     _svcExpenseController.dispose();
     _svcDescController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -116,14 +121,12 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
       return;
     }
 
-    // Check if the item already exists in the order
-    if (orderProvider.orderItems.any((element) => element.cardId == item.cardId)) {
-      orderProvider.setErrorWithSnackBar('Item already exists in the order', context);
-      return;
-    }
-
     orderProvider.addOrderItem(item);
     orderProvider.setSuccessWithSnackBar('Item added to order', context);
+    // After adding, clear the selected card so details are hidden
+    orderProvider.clearCurrentCard();
+    _barcodeController.clear();
+    _scrollToReviewButton();
   }
 
   void _handleAddServiceItem(ServiceItemCreationFormModel item) {
@@ -138,6 +141,9 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
 
     orderProvider.addServiceItem(item);
     orderProvider.setSuccessWithSnackBar('Service item added to order', context);
+    // Hide form and scroll to the review button
+    setState(() => _showServiceForm = false);
+    _scrollToReviewButton();
   }
 
   void _showBarcodeScanner() {
@@ -201,6 +207,27 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
     );
   }
 
+  void _scrollToReviewButton() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final targetContext = _reviewButtonKey.currentContext;
+      if (targetContext != null) {
+        Scrollable.ensureVisible(
+          targetContext,
+          alignment: 1.0,
+          duration: const Duration(milliseconds: 450),
+          curve: Curves.easeOutCubic,
+        );
+      } else if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 450),
+          curve: Curves.easeOutCubic,
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -232,6 +259,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
 
   Widget _buildMobileLayout(OrderCreateProvider orderProvider) {
     return SingleChildScrollView(
+      controller: _scrollController,
       padding: EdgeInsets.all(AppConfig.defaultPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -256,6 +284,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
 
   Widget _buildDesktopLayout(OrderCreateProvider orderProvider) {
     return SingleChildScrollView(
+      controller: _scrollController,
       padding: EdgeInsets.all(AppConfig.largePadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -501,30 +530,10 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
             if (orderProvider.orderItems.isEmpty)
               const EmptyStateWidget(message: UITextConstants.noOrderItems, icon: Icons.shopping_cart_outlined)
             else
-              ListView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: orderProvider.orderItems.length,
-                itemBuilder: (context, index) {
-                  final formItem = orderProvider.orderItems[index];
-                  final card = orderProvider.getCardViewModelById(formItem.cardId);
-
-                  if (card == null) {
-                    return ListTile(
-                      title: Text('Item ${index + 1} - Card not found'),
-                      trailing: IconButton(icon: const Icon(Icons.delete), onPressed: () => _removeOrderItem(index)),
-                    );
-                  }
-
-                  return OrderItemCard(
-                    item: formItem,
-                    card: card,
-                    index: index,
-                    onRemove: () => _removeOrderItem(index),
-                    showRemoveButton: true,
-                    isReviewMode: false,
-                  );
-                },
+              OrderItemsCompactTable(
+                items: orderProvider.orderItems,
+                getCardById: (id) => orderProvider.getCardViewModelById(id),
+                onRemoveItem: (index) => _removeOrderItem(index),
               ),
           ],
         ),
@@ -556,25 +565,9 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
             if (orderProvider.serviceItems.isEmpty)
               const EmptyStateWidget(message: 'No service items added yet', icon: Icons.home_repair_service)
             else
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: orderProvider.serviceItems.length,
-                itemBuilder: (context, index) {
-                  final svc = orderProvider.serviceItems[index];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: (svc.serviceType?.color ?? Colors.teal).withOpacity(0.2),
-                      child: Icon(Icons.home_repair_service, color: svc.serviceType?.color ?? Colors.teal),
-                    ),
-                    title: Text(svc.serviceType?.displayText ?? svc.serviceType?.toApiString() ?? 'SERVICE'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [Text('Qty: ${svc.quantity}'), Text('Expense: ₹${svc.totalExpense}  •  Cost: ₹${svc.totalCost}')],
-                    ),
-                    trailing: IconButton(icon: const Icon(Icons.delete), onPressed: () => orderProvider.removeServiceItem(index)),
-                  );
-                },
+              ServiceItemsCompactTable(
+                items: orderProvider.serviceItems,
+                onRemoveItem: (index) => orderProvider.removeServiceItem(index),
               ),
           ],
         ),
@@ -665,6 +658,7 @@ class _CreateOrderPageState extends State<CreateOrderPage> {
         ),
         SizedBox(width: AppConfig.defaultPadding),
         Expanded(
+          key: _reviewButtonKey,
           child: ButtonUtils.primaryButton(
             onPressed: (orderProvider.orderItems.isNotEmpty || orderProvider.serviceItems.isNotEmpty) ? _proceedToReview : null,
             label: UITextConstants.reviewOrder,

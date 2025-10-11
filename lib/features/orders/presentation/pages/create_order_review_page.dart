@@ -12,7 +12,6 @@ import 'package:vsc_app/core/utils/responsive_utils.dart';
 import 'package:vsc_app/features/orders/presentation/providers/order_create_provider.dart';
 import 'package:vsc_app/core/utils/app_logger.dart';
 import 'package:vsc_app/features/orders/presentation/services/order_calculation_service.dart';
-import 'package:vsc_app/core/enums/service_type.dart';
 
 class CreateOrderReviewPage extends StatefulWidget {
   const CreateOrderReviewPage({super.key});
@@ -23,6 +22,8 @@ class CreateOrderReviewPage extends StatefulWidget {
 
 class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
   final TextEditingController _orderNameController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _submitButtonKey = GlobalKey();
 
   @override
   void initState() {
@@ -37,7 +38,30 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
   @override
   void dispose() {
     _orderNameController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _scrollToSubmitButton() {
+    FocusScope.of(context).unfocus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final targetContext = _submitButtonKey.currentContext;
+      if (targetContext != null) {
+        Scrollable.ensureVisible(
+          targetContext,
+          alignment: 1.0,
+          duration: const Duration(milliseconds: 450),
+          curve: Curves.easeOutCubic,
+        );
+      } else if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 450),
+          curve: Curves.easeOutCubic,
+        );
+      }
+    });
   }
 
   Future<void> _selectDate() async {
@@ -119,22 +143,31 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
   Widget _buildMobileLayout(OrderCreateProvider orderProvider) {
     AppLogger.debug('OrderReviewPage: Building mobile layout');
     return SingleChildScrollView(
+      controller: _scrollController,
       padding: EdgeInsets.all(AppConfig.defaultPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Order Name field
-          _buildOrderNameSection(),
-          SizedBox(height: AppConfig.defaultPadding),
-          // Customer Info and Delivery Date stacked on mobile
-          _buildCustomerInfo(orderProvider),
-          SizedBox(height: AppConfig.defaultPadding),
-          _buildDeliveryDateSection(),
+          // Order Name, Customer Info, Delivery Date in one row
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: _buildOrderNameSection()),
+                SizedBox(width: AppConfig.largePadding),
+                Expanded(child: _buildCustomerInfo(orderProvider)),
+                SizedBox(width: AppConfig.largePadding),
+                Expanded(child: _buildDeliveryDateSection()),
+              ],
+            ),
+          ),
           SizedBox(height: AppConfig.largePadding),
           // Order Items taking full width
           _buildOrderItemsReview(orderProvider),
           SizedBox(height: AppConfig.largePadding),
           _buildServiceItemsReview(orderProvider),
+          SizedBox(height: AppConfig.largePadding),
+          _buildTotalsCard(orderProvider),
           SizedBox(height: AppConfig.largePadding),
           _buildActionButtons(orderProvider),
         ],
@@ -144,26 +177,31 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
 
   Widget _buildDesktopLayout(OrderCreateProvider orderProvider) {
     return SingleChildScrollView(
+      controller: _scrollController,
       padding: EdgeInsets.all(AppConfig.largePadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Order Name field taking full width
-          _buildOrderNameSection(),
-          SizedBox(height: AppConfig.largePadding),
-          // Customer Info and Delivery Date in same row
-          Row(
-            children: [
-              Expanded(child: _buildCustomerInfo(orderProvider)),
-              SizedBox(width: AppConfig.largePadding),
-              Expanded(child: _buildDeliveryDateSection()),
-            ],
+          // Order Name, Customer Info and Delivery Date in same row
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: _buildOrderNameSection()),
+                SizedBox(width: AppConfig.largePadding),
+                Expanded(child: _buildCustomerInfo(orderProvider)),
+                SizedBox(width: AppConfig.largePadding),
+                Expanded(child: _buildDeliveryDateSection()),
+              ],
+            ),
           ),
           SizedBox(height: AppConfig.largePadding),
           // Order Items taking full width
           _buildOrderItemsReview(orderProvider),
           SizedBox(height: AppConfig.largePadding),
           _buildServiceItemsReview(orderProvider),
+          SizedBox(height: AppConfig.largePadding),
+          _buildTotalsCard(orderProvider),
           SizedBox(height: AppConfig.largePadding),
           _buildActionButtons(orderProvider),
         ],
@@ -187,7 +225,10 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
                 hintText: 'e.g., John weds Jane',
                 border: OutlineInputBorder(),
               ),
+              textInputAction: TextInputAction.done,
               onChanged: (value) => _updateOrderName(),
+              onSubmitted: (_) => _scrollToSubmitButton(),
+              onEditingComplete: _scrollToSubmitButton,
             ),
           ],
         ),
@@ -267,26 +308,10 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
             if (orderProvider.orderItems.isEmpty)
               const EmptyStateWidget(message: UITextConstants.noOrderItems, icon: Icons.shopping_cart_outlined)
             else
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: orderProvider.orderItems.length,
-                itemBuilder: (context, index) {
-                  final formItem = orderProvider.orderItems[index];
-                  final card = orderProvider.getCardViewModelById(formItem.cardId);
-
-                  if (card == null) {
-                    return Card(
-                      margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
-                      child: Padding(
-                        padding: EdgeInsets.all(AppConfig.defaultPadding),
-                        child: Text('Item ${index + 1} - Card not found'),
-                      ),
-                    );
-                  }
-
-                  return OrderItemCard(item: formItem, card: card, index: index, showRemoveButton: false, isReviewMode: true);
-                },
+              OrderItemsCompactTable(
+                items: orderProvider.orderItems,
+                getCardById: (id) => orderProvider.getCardViewModelById(id),
+                onRemoveItem: null, // no remove button on review
               ),
           ],
         ),
@@ -295,6 +320,8 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
   }
 
   Widget _buildServiceItemsReview(OrderCreateProvider orderProvider) {
+    if (orderProvider.serviceItems.isEmpty) return const SizedBox.shrink();
+
     return Card(
       child: Padding(
         padding: EdgeInsets.all(AppConfig.defaultPadding),
@@ -303,55 +330,28 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
           children: [
             Text('Service Items (${orderProvider.serviceItems.length})', style: ResponsiveText.getTitle(context)),
             SizedBox(height: AppConfig.defaultPadding),
-            if (orderProvider.serviceItems.isEmpty)
-              const EmptyStateWidget(message: 'No service items added', icon: Icons.home_repair_service)
-            else
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: orderProvider.serviceItems.length,
-                itemBuilder: (context, index) {
-                  final svc = orderProvider.serviceItems[index];
-                  return Card(
-                    margin: EdgeInsets.only(bottom: AppConfig.smallPadding),
-                    child: Padding(
-                      padding: EdgeInsets.all(AppConfig.defaultPadding),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.home_repair_service),
-                          SizedBox(width: AppConfig.defaultPadding),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  svc.serviceType?.displayText ?? svc.serviceType?.toApiString() ?? 'SERVICE',
-                                  style: ResponsiveText.getBody(context).copyWith(fontWeight: FontWeight.w600),
-                                ),
-                                Text('Qty: ${svc.quantity}  •  Expense: ₹${svc.totalExpense}  •  Cost: ₹${svc.totalCost}'),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            SizedBox(height: AppConfig.defaultPadding),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    'Total: ₹${_calculateCreationReviewTotal(orderProvider).toStringAsFixed(2)}',
-                    style: ResponsiveText.getTitle(context).copyWith(color: Colors.green),
-                  ),
-                ],
-              ),
-            ),
+            ServiceItemsCompactTable(items: orderProvider.serviceItems, onRemoveItem: null),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTotalsCard(OrderCreateProvider orderProvider) {
+    return Card(
+      child: Padding(
+        padding: EdgeInsets.all(AppConfig.defaultPadding),
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                'Total: ₹${_calculateCreationReviewTotal(orderProvider).toStringAsFixed(2)}',
+                style: ResponsiveText.getTitle(context).copyWith(color: Colors.green),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -402,6 +402,7 @@ class _CreateOrderReviewPageState extends State<CreateOrderReviewPage> {
             ),
             SizedBox(width: AppConfig.defaultPadding),
             Expanded(
+              key: _submitButtonKey,
               child: ButtonUtils.primaryButton(
                 onPressed: orderProvider.isLoading ? null : _submitOrder,
                 label: orderProvider.isLoading ? 'Processing...' : UITextConstants.submitOrder,

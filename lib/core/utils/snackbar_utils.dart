@@ -2,39 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:vsc_app/core/constants/app_config.dart';
 import 'package:vsc_app/core/constants/snackbar_constants.dart';
+import 'dart:async';
 
 class SnackbarUtils {
-  /// Determines the margin for the snackbar based on screen width.
-  static EdgeInsets _getSnackBarMargin(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+  static OverlayEntry? _currentOverlayEntry;
+  static Timer? _hideTimer;
 
-    if (screenWidth > AppConfig.tabletBreakpoint) {
-      // For DESKTOP and TABLET: top-right alignment
-      // Calculate position to push snackbar to top-right
-      double snackbarWidth = AppConfig.snackbarMaxWidth;
-      double rightMargin = AppConfig.snackbarRightMargin;
-      double topMargin = AppConfig.snackbarTopMargin;
-      final double leftMargin = screenWidth - snackbarWidth - rightMargin;
-
-      return EdgeInsets.only(left: leftMargin > 0 ? leftMargin : 0, right: rightMargin, top: topMargin);
-    } else {
-      // For PHONE: bottom-center alignment
-      return const EdgeInsets.fromLTRB(
-        AppConfig.snackbarLeftMargin,
-        AppConfig.snackbarTopMargin,
-        AppConfig.snackbarLeftMargin,
-        AppConfig.snackbarVerticalMargin,
-      );
-    }
-  }
-
-  /// Sets a max-width constraint on larger screens.
-  static BoxConstraints? _getSnackBarConstraints(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    if (screenWidth > AppConfig.tabletBreakpoint) {
-      return BoxConstraints(maxWidth: AppConfig.snackbarMaxWidth);
-    }
-    return null;
+  static void _removeCurrentOverlay() {
+    _hideTimer?.cancel();
+    _hideTimer = null;
+    _currentOverlayEntry?.remove();
+    _currentOverlayEntry = null;
   }
 
   /// A private, generic method to display any type of snackbar.
@@ -73,48 +51,91 @@ class SnackbarUtils {
         break;
     }
 
-    final snackBar = SnackBar(
-      elevation: AppConfig.snackbarElevation,
-      behavior: SnackBarBehavior.floating,
-      backgroundColor: backgroundColor,
-      margin: _getSnackBarMargin(context),
-      padding: AppConfig.snackbarPadding,
-      content: Container(
-        constraints: _getSnackBarConstraints(context),
-        child: Row(
-          children: [
-            Icon(iconData, color: iconColor, size: AppConfig.snackbarIconSize),
-            SizedBox(width: AppConfig.snackbarIconSpacing),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: AppConfig.snackbarTextColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: AppConfig.snackbarTitleFontSize,
-                    ),
-                  ),
-                  const SizedBox(height: AppConfig.snackbarTextSpacing),
-                  Text(
-                    message,
-                    style: const TextStyle(color: AppConfig.snackbarTextSecondaryColor, fontSize: AppConfig.snackbarMessageFontSize),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    // Clear existing snackbars to avoid them stacking up
+    // Clear existing SnackBars and overlays to avoid stacking
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     scaffoldMessenger.hideCurrentSnackBar();
-    scaffoldMessenger.showSnackBar(snackBar);
+    _removeCurrentOverlay();
+
+    final overlayState = Overlay.of(context, rootOverlay: true);
+
+    final mediaQuery = MediaQuery.of(context);
+    final screenWidth = mediaQuery.size.width;
+    final double rightMargin = AppConfig.snackbarRightMargin;
+    final double topMargin = AppConfig.snackbarTopMargin;
+    final double maxWidth = AppConfig.snackbarMaxWidth;
+    final double minHorizontal = AppConfig.snackbarLeftMargin + rightMargin;
+    final double availableWidth = (screenWidth - minHorizontal).clamp(0.0, double.infinity);
+    final double snackbarWidth = availableWidth < maxWidth ? availableWidth : maxWidth;
+
+    _currentOverlayEntry = OverlayEntry(
+      builder: (context) {
+        return SafeArea(
+          child: Stack(
+            children: [
+              Positioned(
+                top: topMargin,
+                right: rightMargin,
+                child: Material(
+                  color: Colors.transparent,
+                  elevation: AppConfig.snackbarElevation,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: snackbarWidth),
+                    child: Container(
+                      padding: AppConfig.snackbarPadding,
+                      decoration: BoxDecoration(
+                        color: backgroundColor,
+                        borderRadius: BorderRadius.circular(AppConfig.borderRadiusMedium),
+                        boxShadow: const [BoxShadow(color: Color(0x33000000), blurRadius: 8, offset: Offset(0, 2))],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(iconData, color: iconColor, size: AppConfig.snackbarIconSize),
+                          SizedBox(width: AppConfig.snackbarIconSpacing),
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: AppConfig.snackbarTextColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: AppConfig.snackbarTitleFontSize,
+                                  ),
+                                ),
+                                const SizedBox(height: AppConfig.snackbarTextSpacing),
+                                Text(
+                                  message,
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: AppConfig.snackbarTextSecondaryColor,
+                                    fontSize: AppConfig.snackbarMessageFontSize,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    overlayState.insert(_currentOverlayEntry!);
+
+    // Auto-hide after a short duration
+    _hideTimer = Timer(const Duration(seconds: 3), _removeCurrentOverlay);
   }
 
   // Your public methods are now clean, single-line calls to _show()

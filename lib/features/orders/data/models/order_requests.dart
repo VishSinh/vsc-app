@@ -91,6 +91,8 @@ class ServiceItemRequest {
 /// Request model for updating an order
 @JsonSerializable(includeIfNull: false)
 class UpdateOrderRequest {
+  @JsonKey(name: 'name')
+  final String? name;
   @JsonKey(name: 'order_status')
   final String? orderStatus;
   @JsonKey(name: 'delivery_date')
@@ -111,6 +113,7 @@ class UpdateOrderRequest {
   final List<String>? removeServiceItemIds;
 
   const UpdateOrderRequest({
+    this.name,
     this.orderStatus,
     this.deliveryDate,
     this.specialInstruction,

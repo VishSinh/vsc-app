@@ -11,6 +11,7 @@ import 'package:vsc_app/features/home/presentation/providers/permission_provider
 import 'package:vsc_app/core/constants/ui_text_constants.dart';
 import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/utils/responsive_text.dart';
+import 'package:vsc_app/core/utils/snackbar_utils.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lottie/lottie.dart';
@@ -151,9 +152,7 @@ class _DashboardPageState extends State<DashboardPage> {
               value: dashboard.totalOrdersCurrentMonth.toString(),
               icon: Icons.shopping_cart,
               color: AppConfig.primaryColor,
-              subtitle: dashboard.monthlyOrderChangePercentage >= 0
-                  ? '${dashboard.formattedMonthlyOrderChangePercentage} from last month'
-                  : '${dashboard.formattedMonthlyOrderChangePercentage} from last month',
+              subtitle: '${dashboard.formattedMonthlyOrderChangePercentage} from last month',
               allowDoubleSpan: allowDoubleSpan,
             ),
           );
