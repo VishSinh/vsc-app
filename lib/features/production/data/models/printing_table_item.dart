@@ -6,6 +6,8 @@ part 'printing_table_item.g.dart';
 class PrintingTableItem {
   @JsonKey(name: 'printing_job_id')
   final String printingJobId;
+  @JsonKey(name: 'order_id')
+  final String orderId;
   @JsonKey(name: 'order_name')
   final String orderName;
   final int quantity;
@@ -15,6 +17,7 @@ class PrintingTableItem {
 
   const PrintingTableItem({
     required this.printingJobId,
+    required this.orderId,
     required this.orderName,
     required this.quantity,
     required this.printerPaid,
@@ -25,9 +28,17 @@ class PrintingTableItem {
 
   Map<String, dynamic> toJson() => _$PrintingTableItemToJson(this);
 
-  PrintingTableItem copyWith({String? printingJobId, String? orderName, int? quantity, bool? printerPaid, int? impressions}) {
+  PrintingTableItem copyWith({
+    String? printingJobId,
+    String? orderId,
+    String? orderName,
+    int? quantity,
+    bool? printerPaid,
+    int? impressions,
+  }) {
     return PrintingTableItem(
       printingJobId: printingJobId ?? this.printingJobId,
+      orderId: orderId ?? this.orderId,
       orderName: orderName ?? this.orderName,
       quantity: quantity ?? this.quantity,
       printerPaid: printerPaid ?? this.printerPaid,

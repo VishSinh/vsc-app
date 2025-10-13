@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:vsc_app/core/constants/app_config.dart';
+import 'package:vsc_app/core/constants/route_constants.dart';
 import 'package:vsc_app/core/widgets/pagination_widget.dart';
 import 'package:vsc_app/features/production/presentation/providers/production_provider.dart';
 import 'package:vsc_app/features/production/presentation/models/printer_view_model.dart';
@@ -43,7 +45,7 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
     return Consumer<ProductionProvider>(
       builder: (context, p, _) {
         return Padding(
-          padding: const EdgeInsets.all(AppConfig.defaultPadding),
+          padding: const EdgeInsets.only(right: AppConfig.defaultPadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -85,6 +87,7 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SizedBox(height: AppConfig.smallPadding),
         DropdownButtonFormField<PrinterViewModel>(
           value: p.printers.contains(p.selectedPrinter) ? p.selectedPrinter : null,
           isExpanded: true,
@@ -111,6 +114,7 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SizedBox(height: AppConfig.smallPadding),
         DropdownButtonFormField<TracingStudioViewModel>(
           value: p.tracingStudios.contains(p.selectedTracingStudio) ? p.selectedTracingStudio : null,
           isExpanded: true,
@@ -137,6 +141,7 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SizedBox(height: AppConfig.smallPadding),
         DropdownButtonFormField<BoxMakerViewModel>(
           value: p.boxMakers.contains(p.selectedBoxMaker) ? p.selectedBoxMaker : null,
           isExpanded: true,
@@ -237,11 +242,15 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
                               Expanded(
                                 flex: 2,
                                 child: Center(
-                                  child: Text(
-                                    item.orderName,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
+                                  child: InkWell(
+                                    onTap: () =>
+                                        context.pushNamed(RouteConstants.orderDetailRouteName, pathParameters: {'id': item.orderId}),
+                                    child: Text(
+                                      item.orderName,
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -385,11 +394,15 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
                               Expanded(
                                 flex: 2,
                                 child: Center(
-                                  child: Text(
-                                    item.orderName,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
+                                  child: InkWell(
+                                    onTap: () =>
+                                        context.pushNamed(RouteConstants.orderDetailRouteName, pathParameters: {'id': item.orderId}),
+                                    child: Text(
+                                      item.orderName,
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -523,11 +536,15 @@ class _ProductionPageState extends State<ProductionPage> with SingleTickerProvid
                               Expanded(
                                 flex: 2,
                                 child: Center(
-                                  child: Text(
-                                    item.orderName,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
+                                  child: InkWell(
+                                    onTap: () =>
+                                        context.pushNamed(RouteConstants.orderDetailRouteName, pathParameters: {'id': item.orderId}),
+                                    child: Text(
+                                      item.orderName,
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ),
                                 ),
                               ),

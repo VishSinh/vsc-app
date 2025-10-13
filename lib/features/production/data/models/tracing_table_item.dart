@@ -6,6 +6,8 @@ part 'tracing_table_item.g.dart';
 class TracingTableItem {
   @JsonKey(name: 'printing_job_id')
   final String printingJobId;
+  @JsonKey(name: 'order_id')
+  final String orderId;
   @JsonKey(name: 'order_name')
   final String orderName;
   final int quantity;
@@ -14,6 +16,7 @@ class TracingTableItem {
 
   const TracingTableItem({
     required this.printingJobId,
+    required this.orderId,
     required this.orderName,
     required this.quantity,
     required this.tracingStudioPaid,
@@ -23,9 +26,10 @@ class TracingTableItem {
 
   Map<String, dynamic> toJson() => _$TracingTableItemToJson(this);
 
-  TracingTableItem copyWith({String? printingJobId, String? orderName, int? quantity, bool? tracingStudioPaid}) {
+  TracingTableItem copyWith({String? printingJobId, String? orderId, String? orderName, int? quantity, bool? tracingStudioPaid}) {
     return TracingTableItem(
       printingJobId: printingJobId ?? this.printingJobId,
+      orderId: orderId ?? this.orderId,
       orderName: orderName ?? this.orderName,
       quantity: quantity ?? this.quantity,
       tracingStudioPaid: tracingStudioPaid ?? this.tracingStudioPaid,
